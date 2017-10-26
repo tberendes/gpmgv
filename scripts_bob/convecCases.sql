@@ -1,0 +1,1 @@
+select a.radar_id, a.orbit, a.overpass_time, a.pct_overlap*a.pct_overlap_conv/100 as pct_conv, b.pct_overlap_Rain_certain from event_meta_2A23_vw a, event_meta_2A25_vw b where a.event_num = b.event_num and a.pct_overlap > 25 and a.pct_overlap_conv > 5 order by 4 desc;

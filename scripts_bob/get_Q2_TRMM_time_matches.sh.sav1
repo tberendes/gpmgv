@@ -1,0 +1,120 @@
+#!/bin/sh
+###############################################################################
+#
+# get_Q2_TRMM_time_matches.sh    Morris/SAIC/GPM GV    November 2012
+#
+# DESCRIPTION:
+# Determines the closest Q2 times to the TRMM overpasses at the center of each
+# Q2 sector.  Uses the NASA/GSFC/PPS program 'toff' to predict the TRMM orbit
+# overpasses for the upcoming month for each sector, and rounds the overpass
+# times to the nearest 5 minutes.
+#
+# 11/9/2013   Morris      Created.
+#
+###############################################################################
+
+TOFF_BASE=/home/morris/swdev/TRMM_Overflight_Finder/TOFF
+PPSFILES=${TOFF_BASE}/FIL
+TOFF_BIN_DIR=${TOFF_BASE}/toff
+TMP_DIR=/tmp
+TMPFILE1=${TMP_DIR}/raw_overpass_sector.txt
+export TMPFILE2=${TMP_DIR}/Q2_overpass.txt
+
+rm -v $TMPFILE2
+
+# figure out the next month following today's date
+
+today=`date -u +%Y%m%d`
+thisYYYYMM=`echo $today | cut -c 1-6`
+daysInYYYYMM=`monthdays $thisYYYYMM`
+daysLeft=`grgdif $thisYYYYMM$daysInYYYYMM $today`
+#daysNext=`expr $daysLeft + 1`
+nextmonthbeg=`offset_date $today $daysLeft`
+nextYYYYmm=`echo $nextmonthbeg | cut -c 1-6`
+
+# get the beginning and ending dates of the next month in toff's input format
+
+daysInYYYYMM=`monthdays $nextYYYYmm`
+nextmonthend=$nextYYYYmm$daysInYYYYMM
+date1=`echo $nextmonthbeg | awk '{print substr($1,1,4)" "substr($1,5,2)" "substr($1,7,2)" "}'`
+date2=`echo $nextmonthend | awk '{print substr($1,1,4)" "substr($1,5,2)" "substr($1,7,2)" "}'`
+
+# call the 'toff' program to get the month's overpasses at the 'center' lat/lons
+# of each Q2 sector.  Cut out only the orbit numbers and date/times and save to
+# a holding file
+
+cd $TOFF_BIN_DIR
+for lons in -135.0 -105.0 -75.0
+  do
+    ./FindOrbits_exe $date1 $date2 30.5 $lons 780 | grep ending | \
+        cut -c 3-8,49-64 > $TMPFILE1
+    while read line
+      do
+        orbit=`echo $line | cut -f1 -d ' '`
+        # round datetime to nearest 5 minutes (Q2 time stamps)
+        textdate=`echo $line | cut -c 7-22`
+        ticks=`date -d "$textdate" "+%s"`  # date option to convert to ticks
+        a=$(($ticks+150))   # bash arithmetic syntax: $(( some operation ))
+        b=$(($a/300))
+        ticksQ2=$(($b*300))
+        dtimeQ2=`date -d @$ticksQ2 "+%Y-%m-%d %T"`  # option to convert FROM ticks
+        #echo "$lons $line $ticks $dtimeQ2 $ticksQ2" >> $TMPFILE2
+        echo "$lons $orbit $dtimeQ2" >> $TMPFILE2
+    done < $TMPFILE1
+done
+
+#for orbit in `cat $TMPFILE2 | cut -f2-3 -d ' ' | sort -u`
+#  do
+#    echo "Orbit = $orbit"
+#    for lons in -135.0 -105.0 -75.0
+#      do
+#        pattern1="$lons $orbit"
+#        echo "Pattern1 = $pattern1"
+#        echo $pattern1  | grep -f - $TMPFILE2
+        #pattern=`echo $pattern1  | sed 's/\./\\./'`
+        #echo $pattern
+        #grep "$pattern" $TMPFILE2
+#    done
+#done
+
+while read line2
+  do
+#    for lons in -135.0 -105.0 -75.0
+#      do
+     lons="-135.0"
+        pattern1="$lons $line2"
+#        echo "Pattern1 = $pattern1"
+        echo $pattern1  | grep -f - $TMPFILE2 > /dev/null
+     if [ $? = 0 ]
+       then
+         sector='+|'
+       else
+         sector='-|'
+     fi
+     lons="-105.0"
+        pattern1="$lons $line2"
+#        echo "Pattern1 = $pattern1"
+        echo $pattern1  | grep -f - $TMPFILE2 > /dev/null
+     if [ $? = 0 ]
+       then
+         sector=${sector}'+|'
+       else
+         sector=${sector}'-|'
+     fi
+     lons="-75.0"
+        pattern1="$lons $line2"
+#        echo "Pattern1 = $pattern1"
+        echo $pattern1  | grep -f - $TMPFILE2 > /dev/null
+     if [ $? = 0 ]
+       then
+         sector=${sector}'+'
+       else
+         sector=${sector}'-'
+     fi
+     echo $line2 ${sector}
+#    done
+done <<< "`cat $TMPFILE2 | cut -f2-4 -d ' ' | sort -u`"
+    
+# read the holding file and convert the TRMM time to the nearest Q2 time
+
+# output the orbit # and Q2 times to delimited file

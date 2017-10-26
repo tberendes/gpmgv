@@ -1,0 +1,46 @@
+#!/bin/sh
+# yeardays
+# return the number of days in a year
+# usage yeardays yyyy
+
+# if there is no argument on the command line, then assume that a
+# yyyy is being piped in
+
+if [ $# = 0 ]
+then
+read y
+else
+y=$1
+fi
+
+# a year is a leap year if it is even divisible by 4
+# but not evenly divisible by 100
+# unless it is evenly divisible by 400
+
+# if it is evenly divisible by 400 it must be a leap year
+a=`expr $y % 400`
+if [ $a = 0 ]
+then
+echo 366
+exit
+fi
+
+#if it is evenly divisible by 100 it must not be a leap year
+a=`expr $y % 100`
+if [ $a = 0 ]
+then
+echo 365
+exit
+fi
+
+# if it is evenly divisible by 4 it must be a leap year
+a=`expr $y % 4`
+if [ $a = 0 ]
+then
+echo 366
+exit
+fi
+
+# otherwise it is not a leap year
+echo 365
+

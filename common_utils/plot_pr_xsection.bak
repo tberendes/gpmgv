@@ -1,0 +1,131 @@
+pro plot_pr_xsection, scanNumpr, raystartpr, rayendpr, z_data, scale
+
+xsect2d = z_data[scanNumpr, raystartpr:rayendpr, *]
+idxclutter = WHERE( xsect2d LT 0.0, nclutr )
+IF ( nclutr GT 0 ) THEN xsect2d[idxclutter] = 0.0
+xsect2d = xsect2d/scale  ; unscale PR dbz
+; get rid of 3rd dimension of size 1, and flip vertically to account for
+; bin order (surface bin = 80)
+xsect2d = REVERSE( REFORM( xsect2d ), 2 )
+arsize = SIZE( xsect2d )
+;print, arsize
+nrays = arsize[1] & nbins = arsize[2]
+ysize = (320/nbins)*nbins & xsize = (ysize/nrays)*nrays
+xwinsize = xsize + 50
+image2render = BYTARR(xwinsize,ysize)  ; hold x-sect image plus color bar
+print, 'xsize, ysize: ', xsize, ysize
+
+; set up the 16-level color table from the PPI as the bottom half of color table
+; -- set values 122-127 as white, for labels and such
+tvlct, rr,gg,bb,/get
+rr[122:127] = 255
+gg[122:127] = 255
+bb[122:127] = 255
+tvlct, rr,gg,bb
+
+dbzstep = 5  ; from one 'base' color to next -- 'split' each base color into
+             ; this many shades
+incolors = 17    ; number of 'base' colors in LUT
+nsteps = 17 ;*dbzstep  ; number of colors for our image
+ystep = ysize/nsteps
+ybarsize = ystep * nsteps
+colorbar = BYTARR(15,ybarsize)
+colorbar_y = (ysize-ybarsize)/2  ; y position of bottom of colorbar in image
+; fill color bar values
+FOR i = 0, nsteps-1 DO BEGIN
+   colorbar[*,ystep*i:ystep*(i+1)-1] = i
+ENDFOR
+
+; put a white boundary around color bar
+colorbar[*,0]=122 & colorbar[*,ybarsize-1]=122
+colorbar[0,*]=122 & colorbar[14,*]=122
+
+; burn color bar into image
+image2render[xsize+10:xsize+10+15-1,colorbar_y:colorbar_y+ybarsize-1] = colorbar
+
+; build the x-section as an image array --
+; see geo_match/loadcolortable.pro for the dbz mapping to colors used below
+xsectimg = BYTE( REBIN( xsect2d, xsize, ysize, /SAMPLE )/5 +2 )
+WINDOW, 3, xsize=xwinsize, ysize=ysize
+image2render[0,0] = xsectimg
+TV, image2render
+;TV, xsectimg
+labels = ['<0','0','5','10','15','20','25','30','35','40','45','50','55','60','65','70']
+FOR i = 0, nsteps-1 DO BEGIN
+   IF i LT nsteps-1 THEN BEGIN
+      XYOUTS, xsize+30, colorbar_y+ystep*(i+1)-4, labels[i], COLOR=122, /DEVICE
+   ENDIF
+ENDFOR
+XYOUTS, 5, ysize/2, COLOR=122, 'A', /DEVICE, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, xsize-10, ysize/2, COLOR=122, 'B', /DEVICE, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, 5, ysize-20, COLOR=122, 'Original PR gates with PPI color scale', $
+        /DEVICE ;, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, 5, ysize-30, COLOR=122, '(5 dBZ steps)', /DEVICE
+
+; do another x-section, using more colors and more resolution of dBZ values
+; -- render in image values 128-255, using another color table
+image2render[*,*] = 0B
+ybarsize=249
+colorbar = BYTARR(15,ybarsize)
+colorbar_y = (ysize-ybarsize)/2  ; y position of bottom of colorbar in image
+; fill color bar values
+for i = 0, ybarsize-1 do colorbar[*,i] = i/2 + 128
+image2render[xsize+10:xsize+10+15-1,colorbar_y:colorbar_y+ybarsize-1] = colorbar
+
+; put a white boundary around color bar
+colorbar[*,0]=122 & colorbar[*,ybarsize-1]=122
+colorbar[0,*]=122 & colorbar[14,*]=122
+
+; load compressed color table 33 into LUT values 128-255
+loadct, 33
+tvlct, rrhi, gghi, bbhi, /get
+FOR j = 1,127 DO BEGIN
+   rr[j+128] = rrhi[j*2]
+   gg[j+128] = gghi[j*2]
+   bb[j+128] = bbhi[j*2]
+ENDFOR
+tvlct, rr,gg,bb
+
+xsectimghi = BYTE( REBIN((xsect2d*2+128.0)<256., xsize, ysize, /SAMPLE ) )
+
+;tvlct, rr,gg,bb,/get
+;rrhi=rr
+;gghi=gg
+;bbhi=bb
+;for incol=0,16 DO BEGIN
+;   gchange = 25 & rchange = 25 & bchange = 25
+;   if ( incol LT 2 ) THEN BEGIN
+;     ; don't split 1st & 2nd colors into shades, are 'reserved' colors
+;      rchange = 0 & gchange = 0 & bchange = 0
+;   endif
+;   for incr = 0,2 DO BEGIN
+;      rrhi[incol*3 + incr] = (rr[incol] - (rchange*(2-incr))) > 0
+;      gghi[incol*3 + incr] = (gg[incol] - (gchange*(2-incr))) > 0
+;      bbhi[incol*3 + incr] = (bb[incol] - (bchange*(2-incr))) > 0
+;   endfor
+;endfor
+;print, rrhi[0:80]
+;tvlct, rrhi, gghi, bbhi
+
+;loadct, 33
+;tvlct, rr,gg,bb,/get
+;rr[250:255] = 255
+;gg[250:255] = 255
+;bb[250:255] = 255
+;rr[0] = 80
+;gg[0] = rr[0]
+;bb[0] = rr[0]
+;tvlct, rr,gg,bb
+WINDOW, 4, xsize=xwinsize, ysize=ysize
+;TV, xsectimghi*4
+;TV, xsectimghi + 2*incr
+; color scale starts at 15 dBZ, at image count of dbstep (first step is the
+; reserved value for < 0, 2nd step is for < 15 dBZ)
+image2render[0,0] = xsectimghi ;+ BYTE(dbzstep)
+TV, image2render
+XYOUTS, 5, ysize/2, COLOR=122, 'A', /DEVICE, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, xsize-10, ysize/2, COLOR=122, 'B', /DEVICE, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, 5, ysize-20, COLOR=122, 'Original PR gates, with 1 dBZ resolution', $
+        /DEVICE ;, CHARSIZE=1.5, CHARTHICK=2
+
+end

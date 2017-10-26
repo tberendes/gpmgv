@@ -1,0 +1,5 @@
+select a.event_num, a.orbit, a.overpass_time, c.filename, b.value from  overpass_event a join orbit_subset_product c on a.orbit=c.orbit and c.product_type='2A23' and a.radar_id='KWAJ' and c.subset='KWAJ' left join event_meta_numeric b on  a.event_num=b.event_num and b.metadata_id = 250999 order by orbit desc limit 10;
+
+select a.event_num, a.orbit, a.overpass_time, c.filename, count(b.value) from  overpass_event a join orbit_subset_product c on a.orbit=c.orbit and c.product_type='2A23' and a.radar_id='KWAJ' and c.subset='KWAJ' left join event_meta_numeric b on  a.event_num=b.event_num group by a.event_num, a.orbit, a.overpass_time, c.filename order by orbit desc limit 10;
+
+select a.event_num, a.orbit, a.overpass_time, c.filename, count(b.value) from  overpass_event a join orbit_subset_product c on a.orbit=c.orbit and c.product_type='2A23' and a.radar_id='KAMX' and c.subset='sub-GPMGV1' left join event_meta_numeric b on  a.event_num=b.event_num group by a.event_num, a.orbit, a.overpass_time, c.filename order by orbit desc limit 10;

@@ -1,0 +1,45 @@
+Variables extracted/derived from the matching 2AKu file:
+
+ray_2aku - Ray number in 2AKu file of ray at (latitude_2aku,longitude_2aku)
+scan_2aku - Ditto, but scan number
+latitude_2aku - Latitude of user-selected DPR footprint, deg. N
+longitude_2aku - Longitude of user-selected DPR footprint, deg. E
+file_2aku - Pathname of matching 2AKu file selected by user
+stormTop_2aku - Storm top of 2AKu ray, meters.
+Zmeas250_2aku - Measured Z profile of 2AKu ray reduced to 250-m resolution, dBZ
+maxZmeas250_2aku - Maximum value of 250-m Z above clutter region, dBZ
+binClutterFree250_2aku - Lowest clutter free bin of Zmeas250_2aku
+Zmeas125_2aku - Measured Z profile of 2AKu ray at original 125-m resolution, dBZ
+scanAngle_2aku - localZenithAngle value for 2AKu ray, degrees from nadir
+
+Variables extracted/derived from the GRtoDPRGMI volume-match file:
+
+gr_z_volmatch2b - GR reflectivity, volume matched to DPRGMI, dBZ
+cmb_z_volmatch2b - DPRGMI corrected reflectivity, volume matched to GR, dBZ
+cmb_z_pctabvthresh_volmatch2b - Percent of DPRGMI Z gates in sample volume above
+                                the specified threshold for the volume match
+cmb_z_threshold - Threshold used in evaluating DPRGMI Z percent above threshold
+gr_z_pctabvthresh_volmatch2b - Percent of GR Z gates in sample volume above
+                               the specified threshold for the volume match
+gr_z_threshold - Threshold used in evaluating GR Z percent above threshold
+gr_dm_volmatch2b -  GR Dm or D0, volume matched to DPRGMI (mm)
+gr_dm_type - Either 'DM' or 'D0' depending on GR_DM_FIELD input parameter,
+             defaults to 'DM' if not specified.
+cmb_dm_volmatch2b -  DPRGMI Dm, volume matched to GR (mm)
+gr_nw_volmatch2b -  GR Nw, volume matched to DPRGMI, log10(Nw)
+gr_nw_type - Either 'NW' or 'N2' depending on GR_NW_FIELD input parameter,
+             defaults to 'NW' if not specified.
+cmb_nw_volmatch2b - DPRGMI Nw, volume matched to GR, converted to log10(Nw)
+raintype_volmatch2b - DPRGMI rain type, volume matched to GR
+                      (replicated at each level)
+bb_proximity_volmatch2b - Proximity of each volume-match sample to the mean BB height:
+                          1 = Below bright band (sample top 750m or more below BB)
+                          2 = Within bright band, neither 1 nor 3
+                          3 = Above bright band (sample bottom 750m or more above BB)
+top_hgt_volmatch2b - Height above surface of each volume-match sample top, km
+bottom_hgt_volmatch2b - Height above surface of each volume-match sample bottom, km
+cmb_rainrate_volmatch2b - DPRGMI 3-D rain rate, volume matched to GR, mm/h
+gr_rainrate_volmatch2b - GR 3-D rain rate, volume matched to DPRGMI, mm/h
+gr_rainrate_type - Source algorithm of GR rainrate: 'RR' (DROPS), 'RC' (Cifelli),
+                   'RP' (polarimetric Z-R, or Bringi), or 'Z-R' (WSR-88D default
+                   Z-R relationship: a=300.0, b=1.4)

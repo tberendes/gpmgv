@@ -1,0 +1,60 @@
+<html>
+<head>
+<title>Installing RSL in IDL</title>
+</head>
+<body>
+
+<h2>Installing RSL in IDL</h2>
+<pre>
+Untar the package:
+
+  tar xf rsl_in_idl-v1.7.tar
+
+cd to the package directory and run the script 'rslinstall':
+
+  cd rsl_in_idl-v1.7
+  rslinstall
+
+This installs rsl_in_idl library in $HOME/idl/rsl_in_id/.  If you want to
+install in a different directory, give the full path name as an argument to
+rslinstall.  For example:
+
+  rslinstall $HOME/thisdir
+
+If the target directory already exits, rslinstall will prompt you for
+permission to overwrite it.  If you don't want to be prompted, use the '-f'
+option.  The following installs rsl_in_idl in the target directory while
+silently overwriting existing files with the same names.
+
+  rslinstall -f 
+
+
+To complete installation, add the rsl_in_idl directory to IDL's search path.
+
+One way to do this is to set the IDL_PATH preference within IDL:
+
+  pref_set, 'IDL_PATH', '&lt;IDL_DEFAULT&gt;:/home/yourid/idl/rsl_in_idl', /commit
+
+You need only do this once as IDL Preferences are retained between sessions.
+
+Note that '&lt;IDL_DEFAULT&gt;' is a symbolic name for the IDL distribution
+directories, and should always be included when setting IDL_PATH.
+
+Another way to set IDL_PATH is via the environment variable of the
+same name.  You can do this in your shell initialization file
+(.bashrc, .tcshrc, etc.) using one of the following commands, depending on
+your shell:
+
+# bash or ksh:
+  export IDL_PATH='&lt;IDL_DEFAULT&gt;:/home/yourid/idl/rsl_in_idl'
+
+# tcsh or csh:
+  setenv IDL_PATH '&lt;IDL_DEFAULT&gt;:/home/yourid/idl/rsl_in_idl'
+
+
+Send questions or comments to gsfc-rsl-help@lists.nasa.gov.
+</pre>
+<p>
+Back to <a href="RSL_in_IDL.html">RSL_in_IDL</a>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Sweep Header Structure</title>
+</head>
+<body>
+
+<h2>Sweep Header Structure</h2>
+
+<table cellpadding="0" cellspacing="2" border="0" width="100%">
+<tr align=left valign=top>
+  <th align=left width=20%>Member</th>
+  <th align=left width=15%>Type</th>
+  <th align=left width=65%>Description</th>
+</tr>
+<tr align=left valign=top>
+  <td>field_type</td>
+  <td>string</td>
+  <td>A string of two characters identifying the type of radar data
+      collected in this sweep, for example,
+      <a href="volume_header.html#field_types">'DZ'</a>.
+  </td>
+</tr>
+<tr align=left valign=top>
+  <td>sweep_num</td>
+  <td>int</td>
+  <td>Number of sweep within volume scan (1 to nsweeps).</td>
+</tr>
+<tr align=left valign=top>
+  <td>fixed_angle</td>
+  <td>float</td>
+  <td>Fixed angle of antenna in degrees. This is the nominal elevation angle
+      for PPI, azimuth angle for RHI.</td>
+</tr>
+<tr align=left valign=top>
+  <td>beam_width</td>
+  <td>float</td>
+  <td>Ray beam width in degrees.</td>
+</tr>
+<tr align=left valign=top>
+  <td>vert_half_bw</td>
+  <td>float</td>
+  <td>Vertical half beam width.</td>
+</tr>
+<tr align=left valign=top>
+  <td>horz_half_bw</td>
+  <td>float</td>
+  <td>Horizontal half beam width.</td>
+</tr>
+<tr align=left valign=top>
+  <td>nrays</td>
+  <td>int</td>
+  <td>Number of rays in sweep.</td>
+</tr>
+</table>
+
+</body>
+</html>

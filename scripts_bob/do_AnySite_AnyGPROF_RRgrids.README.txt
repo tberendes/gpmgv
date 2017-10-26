@@ -1,0 +1,94 @@
+The script /home/morris/swdev/scripts/do_AnySite_AnyGPROF_RRgrids.sh is the
+main script that drives the creation of radar-site-centered GPROF rainrate 
+grids.  By default, it computes GPROF grids for GPM GMI, for PPS version 
+V04A, for the radar site KWAJ.
+
+The default satellite and instrument (GPM and GMI) can be overridden by 
+specifying the -s and -i options to the script.  For example:
+
+do_AnySite_AnyGPROF_RRgrids.sh -s GCOMW1 -i AMSR2
+
+The default PPS version (V04A) of the data to process can be overridden using 
+the -v option:
+
+do_AnySite_AnyGPROF_RRgrids.sh -v ITE110
+
+The script knows to look for ITE data under the top directory /data/emdata, 
+and to look for operational (e.g. V04A) data under /data/gpmgv.
+
+The default ground radar site KWAJ can be overridden by the -g option, e.g.:
+
+do_AnySite_AnyGPROF_RRgrids.sh -g PAIH
+
+The range of dates to process is hard coded in the script by the variables
+dateStart and dateEnd.  Their values need to be edited in the script to change
+the range of dates to run.
+
+Using the above parameters, the 'gpmgv' database is queried to build the list
+of 2AGPROF products matching these parameters, AND that correspond to events
+where rain was detected at the ground radar site at the time of the satellite
+overpass (GPM or TRMM only, other satellites have no coincident rain event
+information in the database at this time, since it is based in the PR/DPR).
+Only users on ds1-gpmgv who have a defined "Role" in PostgreSQL can run the
+script successfully, since otherwise the query steps will fail.  Both
+'morris' and 'root' (e.g., Makofski) can add Roles to the database for other
+user IDs.
+ 
+For each 2AGPROF product with rain at the GR site, a satellite-specific line 
+is formatted for a plain-text control file that will drive the grid 
+computations in IDL.  Each line contains three fields separated by '|' 
+delimiters:
+
+2AGPROF_Full_Pathname|orbit_number|Number_of_GR_sites_to_follow
+
+Each satellite-specific line is followed by a GR-site-specific line that
+contains four fields separate by the same delimiter:
+
+event_number|radar_id|radar_latitude|radar_longitude
+
+Normally a control file contains multiple GR-site-specific lines following
+each satellite-specific line, where the Number_of_GR_sites_to_follow field
+indicates how many GR lines need to be read before the next satellite line
+is encountered.  For instance, for a CONUS orbit there may be several 
+overpassed GR sites where rain is occurring, so several grids might have to be
+computed for the same 2AGPROF file.  However, this script limits the 
+processing to only one GR site at a time, so Number_of_GR_sites_to_follow is
+always 1, and only one radar-specific line follows each satellite-specific
+line in the control file.
+
+The number of satellite/radar-specific line pairs in the control file depends
+on the number of rainy events at the site in the time period defined by the
+start and end dates in the script.  A single control file is produced for a
+given run of the do_AnySite_AnyGPROF_RRgrids.sh script.  Its pathname is
+/data/tmp/file2AGPROFsites.MsgMta.txt on ds1-gpmgv, and it is overwritten
+each time the script runs.
+
+Once the control file of data to be processed has been created, the child
+script get2AGPROF_RRgrids4date.sh is called, which in turn launches IDL with
+an IDL batch file that runs the grid analysis procedure.  The IDL batch
+file is named grid_2AGPROF_rain.bat, and is located in the directory
+/home/morris/swdev/idl/dev/gridgen on ds1-gpmgv.  The batch file defines
+mandatory and keyword options to be used in the creation of grids by the
+IDL procedure in the file grid_2agprof_driver.pro, and compiles and calls
+grid_2agprof_driver to run the grids.  The grid_2agprof_driver procedure
+calls the IDL function grid_2agprof_fields (in grid_2agprof_fields.pro) to do
+the actual gridding.  Both .pro files are located in the same directory as
+the grid_2AGPROF_rain.bat file.
+
+The grid_2AGPROF_rain.bat file performs four main tasks:
+
+1) grab the path to the IDL code from the environment variable IDL_PRO_DIR,
+   and make that the working directory.
+2) grab the pathname of the control file from the environment variable
+   GETMYMETA so that this can be passed to grid_2agprof_driver
+3) define the value of any optional parameters to grid_2agprof_driver to
+   control the location of the output SAVE files and characteristics of the
+   gridding process (size, resolution, type of analysis).  All parameters
+   other than the pathname 'control_file' are optional and have defaults in
+   the procedure grid_2agprof_driver.  If a directory path for the output
+   files is not specified by the positional parameter 'outdir', the procedure
+   will write the Save files to the directory where the control file is
+   located.
+4) compiles and runs grid_2agprof_driver
+
+

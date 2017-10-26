@@ -1,0 +1,3 @@
+select distinct a.filedate from orbit_subset_product a, orbit_subset_product b where a.orbit=b.orbit and a.subset=b.subset and a.version=b.version and a.version=6 and a.product_type='1C21' and b.product_type = '2A25' AND A.ORBIT>63029 order by filedate limit 10;
+
+select distinct a.filedate from orbit_subset_product a, orbit_subset_product b, overpass_event c where a.orbit=b.orbit and b.orbit = c.orbit and a.subset=b.subset and a.version=b.version and a.version=6 and a.product_type='1C21' and b.product_type = '2A25' AND A.ORBIT>76415 and 3 > (select count(*) from event_meta_numeric where event_num=c.event_num and metadata_id>500000) order by filedate limit 10;

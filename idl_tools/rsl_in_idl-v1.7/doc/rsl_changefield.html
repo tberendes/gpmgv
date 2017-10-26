@@ -1,0 +1,71 @@
+<html>
+<head>
+<title>rsl_changefield</title>
+</head>
+<body>
+
+<h2>rsl_changefield</h2>
+This program changes the field type string that identifies a volume.  The
+field type is changed in the volume header and in all sweep headers in that
+volume.
+<h3>Syntax</h3>
+<table>
+<tr valign="top">
+  <td>rsl_changefield,</td>
+  <td><i>radar</i>, <i>from_field</i>, <i>to_field</i></td>
+</tr>
+<tr valign="top">
+  <td>rsl_changefield,</td>
+  <td><i>radar</i>, FROM=<i>from_field</i>, TO=<i>to_field</i></td>
+</tr>
+<tr valign="top">
+  <td>rsl_changefield,</td>
+  <td><i>volume</i>, [TO=] <i>to_field</i></td>
+</tr>
+</table>
+<h3>Arguments</h3>
+<table>
+<tr valign="top">
+  <td width="140">radar</td>
+  <td>Radar structure, used in the first two calling forms above.</td>
+</tr>
+<tr valign="top">
+  <td width="140">from_field</td>
+  <td>String specifying the field to be changed. This value may also be
+      given using the FROM keyword.
+  </td>
+</tr>
+<tr valign="top">
+  <td width="140">to_field</td>
+  <td>The new field string. This value may also be specified using the TO
+      keyword.
+  </td>
+</tr>
+<tr valign="top">
+  <td width="140">volume</td>
+  <td>A volume structure, used in the third calling form above.</td>
+</tr>
+</table>
+<h3>Keywords</h3>
+<table>
+<tr valign="top">
+  <td width="140">FROM</td>
+  <td>The field to be changed.</td>
+</tr>
+<tr valign="top">
+  <td width="140">TO</td>
+  <td>The new field string.</td>
+</tr>
+</table>
+
+<h3>Examples</h3>
+Change ZD to DR:
+<p>
+<code>rsl_changefield, radar, 'zd', 'dr'</code>
+<p>
+Do the same using keywords:
+<p>
+<code>rsl_changefield, radar, from='zd', to='dr'</code>
+
+</body>
+</html>

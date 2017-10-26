@@ -1,0 +1,118 @@
+-- (For NPOL_MD, see the SQL commands in scripts/load_coincidences_via_track.sql, and skip to
+--  the get_coincidence_via_track.pro step.  See common_utils/get_NPOL_MD_overpasses.bat)
+
+-- Get lat/lon bounds of Brisbane (CP2) orbit subset for use in requesting 'Brisbane' orbit
+--   subset products via STORM (storm.pps.eosdis.nasa.gov/storm) for a range of dates:
+
+-- echo "select latitude+2.25, latitude-2.25, longitude+2.25, longitude-2.25 from \
+--       fixed_instrument_location where instrument_id='CP2';" | psql gpmgv
+
+-- Request the orbit subset products (e.g., 2ADPR) from STORM for the lat/lon geographic box
+--   defined by these numbers, and name the area "Brisbane'.
+
+-- Download and edit ftp command file from STORM e-mail, e.g. ftp_url_004_201507221504.txt
+-- Copy/create the ftp_url file under /data/tmp/PPS_CS, and cd to /data/tmp/PPS_CS
+-- Do the ftp download of the Brisbane subset products, e.g.: "ftp -n ftp_url_004_201507221504.txt"
+
+-- Run extract_PPS_orbit_startend.sh applied to 'ls' of Brisbane orbit subset products that have
+--   been ftp'ed from STORM but before they've been moved into their baseline subdirs, e.g.:
+-- cd /data/tmp/PPS_CS
+-- ls 2A-CS-Brisbane.GPM.DPR.* > /tmp/BrisbaneOrbits.txt
+-- extract_PPS_orbit_startend.sh > /tmp/BrisbaneOrbitStartEnd.txt
+
+-- In IDL, generate CP2 overpass information for our desired range of dates e.g.:
+-- IDL> result=get_coincidence_via_track('/data/tmp/daily_predict', '20150201', '20150601', $
+--                                       'CP2', -27.6667, 152.858, 250., '/tmp')
+
+-- Find/Replace in the resulting file to add a bogus orbit number between the sat_id and the radar_id, 
+-- e.g., GPM|NPOL_MD -> GPM|0|NPOL_MD
+
+--------------------------------------------------------------------------------------------------------
+
+-- queries to process and load the CP2 overpass_event data (For NPOL_MD, see the SQL commands in
+-- scripts/load_coincidences_via_track.sql)
+
+-- load partial (missing orbit #) CP2 overpass metadata generated from IDL to temp table 'overp2load':
+
+select sat_id, orbit, radar_id, overpass_time, nearest_distance into temp overp2load from overpass_event limit 1;
+delete from overp2load;
+\copy overp2load from /tmp/CP2_Predict.txt with delimiter '|'
+
+-- load output from extract_PPS_orbit_startend.sh to a temp table 'brisorb'
+
+select orbit, overpass_time as start, overpass_time as end into temp brisorb from overpass_event limit 1;
+delete from brisorb ;
+\copy brisorb from /tmp/BrisbaneOrbitStartEnd.txt with delimiter '|'
+
+-- join tables to get orbit number for CP2 overpasses -- test it before loading
+
+select a.sat_id,b.orbit,a.radar_id, a.overpass_time,a.nearest_distance from overp2load a, brisorb b where a.overpass_time between b.start and b.end;
+
+-- if the above output is OK, load the CP2 overpass metadata to baseline table 'overpass_event'
+
+insert into overpass_event(sat_id, orbit, radar_id, overpass_time, nearest_distance) select a.sat_id,b.orbit,a.radar_id, a.overpass_time,a.nearest_distance from overp2load a, brisorb b where a.overpass_time between b.start and b.end;
+
+--------------------------------------------------------------------------------------------------------
+
+-- Run catalog_Brisbane_CS.sh to catalog the downloaded Brisbane subset data to the baseline files
+-- Run do_Missing_DPR_MetadataCP2.sh for the type of DPR 2A files downloaded (2ADPR or 2AKu)
+
+--------------------------------------------------------------------------------------------------------
+
+-- Run the query in rainCases100kmAddNewEvents.sql (content follows) to determine any new CP2 rain events:
+
+-- fill a temp table with all rainy overpass info
+
+select a.sat_id, a.radar_id, a.orbit, a.event_num, a.overpass_time, b.value/19.61 as pct_overlap, (c.value/b.value)*100 as pct_overlap_conv, (d.value/b.value)*100 as pct_overlap_strat, e.value as num_overlap_Rain_certain into temp rainy100by100temp
+from overpass_event a
+    JOIN event_meta_numeric b ON a.event_num = b.event_num AND b.metadata_id = 250199
+    JOIN event_meta_numeric c ON a.event_num = c.event_num AND c.metadata_id = 230102
+    JOIN event_meta_numeric d ON a.event_num = d.event_num AND d.metadata_id = 230101
+    JOIN event_meta_numeric e ON a.event_num = e.event_num AND e.metadata_id = 251105 and e.value >= 100 order by 4;
+
+-- select all cases that aren't already in the permanent table, save in 2nd temp table:
+
+select * into temp rain100new_temp from rainy100by100temp where not exists (select * from rainy100inside100 where rainy100by100temp.event_num=rainy100inside100.event_num) order by 4;
+
+-- load the new cases into the permanent table
+
+insert into rainy100inside100 select * from rain100new_temp;
+
+--------------------------------------------------------------------------------------------------------
+
+-- determine the datetimes of the new (i.e., after some orbit number) CP2 rain events as defined by the DPR:
+
+gpmgv=> select overpass_time at time zone 'UTC' from rainy100inside100 where sat_id='GPM' and radar_id='CP2' and orbit>5290 order by orbit;
+      timezone       
+---------------------
+ 2015-02-10 14:27:56
+ 2015-02-18 12:12:11
+ 2015-03-09 06:40:07
+ 2015-03-25 11:56:18
+ 2015-04-02 09:41:09
+ 2015-04-04 22:52:32
+ 2015-04-28 15:58:19
+ 2015-05-01 01:32:14
+bye
+(8 rows)
+
+-- Use these CP2 rain event datetimes to determine the time-matched CP2 UF files out on trmm-fc:
+
+-- cd /data/gpmgv/gv_radar/finalQC_in/CP2/1CUF/2015
+mkdir 0210
+mkdir 0218
+mkdir 0309
+mkdir 0325
+mkdir 0402
+mkdir 0404
+mkdir 0428
+mkdir 0501
+cd 0210
+
+ftp trmm-fc.gsfc.nasa.gov
+cd vftp/tier1/CPOL/UF
+dir *150210*
+get XXXXXX
+bye
+
+cd ../0218

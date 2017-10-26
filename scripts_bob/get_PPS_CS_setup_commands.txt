@@ -1,0 +1,15 @@
+data
+mkdir orbit_subset
+cd tmp
+mkdir PPS_CS
+get_PPS_CS_data.sh
+cd PPS_CS/
+ls -al
+cd ../../orbit_subset
+mkdir GPM
+cd GPM
+mkdir GMI
+mkdir DPR
+mkdir Ka
+mkdir Ku
+mkdir DPRGMI

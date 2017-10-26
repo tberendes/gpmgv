@@ -1,0 +1,89 @@
+FUNCTION extract_2aku_profile, file_2aku, latitude, longitude
+
+; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
+@dpr_params.inc
+
+; check for file existence
+IF FILE_TEST(file_2aku) NE 1 THEN message, "FATAL: 2AKu file not found: "+file_2aku
+
+; is it a 2A-Ku file?
+idxKU = WHERE(STRMATCH(file_2aku,'*2A*.GPM.Ku*', /FOLD_CASE) EQ 1, countKU)
+if countKU NE 1 THEN message, "File "+file_2aku+'not a 2AKU file.'
+
+; set up contants
+RAYSPERSCAN = RAYSPERSCAN_NS
+GATE_SPACE = BIN_SPACE_NS_MS
+ELLIPSOID_BIN_DPR = ELLIPSOID_BIN_NS_MS
+
+; read the file and get the NS swath structure
+
+dpr_data = read_2akaku_hdf5(file_2aku, SCAN='NS')
+ptr_swath = dpr_data.NS
+
+; grab the footprint latitude and longitude fields
+IF PTR_VALID(ptr_swath.PTR_DATASETS) THEN BEGIN
+   dprlons = (*ptr_swath.PTR_DATASETS).LONGITUDE
+   dprlats = (*ptr_swath.PTR_DATASETS).LATITUDE
+   ptr_free, ptr_swath.PTR_DATASETS
+ENDIF ELSE message, "Invalid pointer to PTR_DATASETS."
+
+; find the nearest footprint to input latitude and longitude
+; and check that its distance is within 1 km, otherwise consider the
+; situation is a mismatch between products.
+minLLdiff = MIN( (ABS(dprlats-latitude) + ABS(dprlons-longitude)), idxmin )
+; rough distance calculation based on 111.1 km/deg
+latDist = 111.1 * (dprlats[idxmin]-latitude)
+lonDist = 111.1 * COS(latitude * !DTOR) * (dprlons[idxmin]-longitude)
+dDist = SQRT(latDist^2 + lonDist^2)
+IF dDist GT 3.0 THEN message, "Footprint distance from lat/lon too far: " $
+                             + STRING(dDist,FORMAT='(F0.1)')
+
+; get the scan and ray number of the location of the matching footprint
+rayscan = ARRAY_INDICES( dprlats, idxmin )
+rayDPR = rayscan[0]
+scanDPR = rayscan[1]
+
+; get other variables needed to compute the 250-m averaged-down Zm and the
+; storm top height
+IF PTR_VALID(ptr_swath.PTR_PRE) THEN BEGIN
+   dbz_meas = (*ptr_swath.PTR_PRE).ZFACTORMEASURED
+;   binRealSurface = (*ptr_swath.PTR_PRE).BINREALSURFACE
+;   binRealSurface[*,*] = ELLIPSOID_BIN_DPR   ; reset to fixed bin of MSL surface
+   binClutterFreeBottom = (*ptr_swath.PTR_PRE).binClutterFreeBottom
+   localZenithAngle = (*ptr_swath.PTR_PRE).localZenithAngle
+   heightStormTop = (*ptr_swath.PTR_PRE).heightStormTop
+ENDIF ELSE message, "Invalid pointer to PTR_PRE."
+
+; average the 125m Z data down to 250m data as done in 2B-CMB algorithm, for
+; the single footprint only, and also compute max Z in columns for Zmeas
+maxZmeas250 = FLOAT_RANGE_EDGE
+dbz_meas_2B = dpr_125m_to_250m(dbz_meas, rayDPR, scanDPR, $
+                               binClutterFreeBottom, ELLIPSOID_BIN_DPR, $
+                               MAXZ250=maxZmeas250)
+
+; dpr_125m_to_250m returns a 3-D array over ALL footprints, but only populates
+; the column indicated by rayDPR and scanDPR, so extract this ray's data
+dbz_meas_2B = REFORM( dbz_meas_2B[*, rayDPR, scanDPR] )
+; grab the original profile for the heck of it
+dbz_meas_2A = REFORM( dbz_meas[*, rayDPR, scanDPR] )
+
+; compute the binClutterFreeBottom location of the 250-m profile
+binClutterFree250 = (binClutterFreeBottom[rayDPR, scanDPR]-2)/2
+
+; grab the heightStormTop value for this footprint
+stormTop2AKu = heightStormTop[rayDPR, scanDPR]
+
+; put return values in a structure
+data250 = {          Zmeas250 : dbz_meas_2B, $
+                  maxZmeas250 : maxZmeas250, $
+            binClutterFree250 : binClutterFree250, $
+                     Zmeas125 : dbz_meas_2A, $
+                 stormTop2AKu : stormTop2AKu, $
+                     ray_2aku : rayDPR, $
+                    scan_2aku : scanDPR, $
+                latitude_2aku : dprlats[idxmin], $
+               longitude_2aku : dprlons[idxmin], $
+                    file_2aku : file_2aku }
+
+return, data250
+end

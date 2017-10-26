@@ -1,0 +1,182 @@
+#!/bin/sh
+#
+################################################################################
+#
+#  catalog_PPS_CS_data.sh     Morris/SAIC/GPM GV     March 2014
+#
+#  DESCRIPTION
+#    Catalogs previously downloaded coincidence subset (CS) satellite files 
+#    listed in daily manifest files retrieved from the PPS.  Filters out CS
+#    file types not of interest to the GPM Validation Network.  The manifest
+#    files to be stepped through are determined by the YYMMDD entries in the
+#    file $FILES2DO, normally populated by the prior run of get_PPS_CS_data.sh.
+#
+#  ROUTINES CALLED
+#
+#  FILES
+#
+#  DATABASE
+#    disabled.
+#
+#  LOGS
+#    Output for day's script run logged to daily log file
+#    catalog_PPS_CS_data.YYYYMMDD.log in data/logs subdirectory.
+#
+#  CONSTRAINTS
+#    - User must have write privileges in CS_BASE and its subdirectories,
+#      TMP_CS_DATA, and LOG_DIR.  This is why we had to write this in the
+#      first place.
+#    - List of YYMMDD dates of manifest files to process must be in existing
+#      file $FILES2DO.
+#
+#  HISTORY
+#    March 2014    - Morris - Created
+#    August 2014   - Morris/SAIC/GPM GV - Changed LOG_DIR to /data/logs and
+#                    TMP_CS_DATA to /data/tmp/PPS_CS
+#    11/16/16      - Morris - Added GPM and constellation subset BrazilRadars.
+#
+################################################################################
+
+GV_BASE_DIR=/home/morris
+DATA_DIR=/data/emdata
+export DATA_DIR
+echo "DATA_DIR: $DATA_DIR"
+CS_BASE=${DATA_DIR}/orbit_subset
+export CS_BASE
+BIN_DIR=${GV_BASE_DIR}/scripts
+LOG_DIR=/data/logs
+rundate=`date -u +%y%m%d`
+LOG_FILE=${LOG_DIR}/catalog_PPS_CS_data_existing.${rundate}.log
+export LOG_FILE
+PATH=${PATH}:${BIN_DIR}
+ZZZ=1800
+
+umask 0002
+
+# temp file listing pathnames of data files to be processed for an iteration of
+#   satellite/subset/productType, used in catalogCStypes4date()
+SATSUBTYPE_TEMP=/tmp/SatSubsetSubtype2do
+export SATSUBTYPE_TEMP
+rm -f $SATSUBTYPE_TEMP
+
+#
+# The directory structure into which the downloaded products exist is:
+#
+# satellite/             (GPM, TRMM, F16, etc.)
+#   instrument/          (DPR, GMI, SSMIS, etc.)
+#     algorithm/         (2AGPROF, 2BDPRGMI, 2A25, 2AKa, 2Aku, etc.), 
+#       version/         (V00A, V00B, V01, V07, etc.)
+#         subset/        (CONUS, KWAJ, KORA, etc.)
+#           year/        (2014, 2015,…)
+#             month/     (01, 02, …, 12)
+#               day/     (01, 02, …, 28, 29, 30, 31)
+#                 (data files)
+#
+# under the common directory defined by $CS_BASE.
+#
+# The database table "orbit_subset_product: where the downloaded files are
+# cataloged has the schema:
+#
+#     Column    |          Type          |     Modifiers      
+# --------------+------------------------+--------------------
+#  sat_id       | character varying(15)  | not null
+#  orbit        | integer                | not null
+#  product_type | character varying(15)  | not null
+#  filedate     | date                   | 
+#  filename     | character varying(120) | 
+#  subset       | character varying(15)  | not null
+#  version      | character varying(5)   | not null default 6
+#
+
+cd $CS_BASE/GPM/DPRGMI/2BDPRGMI/V4ITE
+
+      filelist=/tmp/ITE052.listing.txt
+      ls */*/*/*/*.ITE052.HDF5 > $filelist
+      if [ $? != 0 ]
+        then
+           echo "Failed to get file listing."\
+                | tee -a $LOG_FILE
+           exit 1
+        else
+           echo "Have manifest file $filelist" | tee -a $LOG_FILE
+           ls -al $filelist
+      fi
+
+ # walk through the manifest and identify instruments/products/subsets of interest
+     satellite='GPM'
+     subsets='AKradars BrazilRadars CONUS DARW KORA KOREA KWAJ'
+     datatypes='1C 2A 2B'
+         # walk through the subsets and product types, and retrieve qualifying data files
+         for subset in `echo $subsets`
+           do
+             for datatype in `echo $datatypes`
+               do
+                 echo "" | tee -a $LOG_FILE
+                 echo "Getting ${datatype} files for ${satellite} for ${subset} subset:" | tee -a $LOG_FILE
+                 echo "" | tee -a $LOG_FILE
+                 # build the filebasename pattern for this combination
+                 filepre=${datatype}-CS-${subset}.${satellite}
+                 # identify any matching files from manifest, store list in temp file
+                 grep $filepre $filelist | grep -v XCAL | grep -v 'TRMM.PR.2A21' \
+                  | tee $SATSUBTYPE_TEMP | tee $LOG_FILE
+                 if [ -s $SATSUBTYPE_TEMP ]
+                   then
+                     for thisPPSfilepath in `cat  $SATSUBTYPE_TEMP` #`head $SATSUBTYPE_TEMP`
+                       do
+                         # extract the file basename and dirname from thisPPSfilepath
+                         thisPPSfile=${thisPPSfilepath##*/}
+                         thisPPSdir=${thisPPSfilepath%/*}
+                             echo "Catalog $thisPPSfile" | tee -a $LOG_FILE
+                             # get info needed to catalog and move the file to baseline tree
+                             # extract the YYYY/MM/DD directory specification for the file
+                             YMDdir=`echo $thisPPSdir | cut -f 2-4 -d '/'`
+                             # extract the version specification from the ftp filepath
+                             Version=V4ITE
+                             # extract the orbit, instrument and algorithm names from the file basename
+                             Orbit=`echo $thisPPSfile | cut -f 6 -d '.'`
+                             Instrument=`echo $thisPPSfile | cut -f 3 -d '.'`
+                             AlgoLong=`echo $thisPPSfile | cut -f 4 -d '.'`
+                             # format the product_type column value for the database based on rules
+                             echo $AlgoLong | grep GPROF > /dev/null
+                             if [ $? = 0 ]
+                               then
+                                 # just use '2AGPROF' as algorithm name
+                                 Algo=2AGPROF
+                               else
+                                 # apply special cases for TRMM and GPM non-GPROF
+                                 case $satellite in
+                                   TRMM ) Algo=$AlgoLong    # just use what's given, e.g., '2A25'
+                                          if [ "$Version" = "7" ]
+                                            then
+                                              Version="V0"$Version  # convert to naming standard
+                                          fi
+                                          ;;
+                                    GPM ) prodTypeLong=`echo $thisPPSfile | cut -f 1 -d '.'`
+                                          # see if we have '-' in 1st file subfield, e.g. '2A-CS-KWAJ'
+                                          echo $prodTypeLong | grep '-' > /dev/null
+                                          if [ $? = 0 ]
+                                            then
+                                              # have a compound product type/subset field, cut out type
+                                              prodType=`echo $prodTypeLong | cut -f1 -d '-'`
+                                            else
+                                              # have a simple type indicator, use as-is
+                                              prodType=$prodTypeLong
+                                          fi
+                                          # concatenate type and Instrument
+                                          Algo=${prodType}${Instrument}  # e.g., '2AKu'
+                                          ;;
+                                 esac
+                             fi
+	                         echo "INSERT INTO orbit_subset_product VALUES \
+('${satellite}',${Orbit},'${Algo}','${YMDdir}','${thisPPSfile}','${subset}','${Version}');" | psql -a -d gpmgv  >> $LOG_FILE 2>&1
+                     done
+                   else
+                     echo "No matching files for pattern: $filepre" | tee -a $LOG_FILE
+                 fi
+             done
+         done
+
+echo "================== END OF RUN =====================" | tee -a $LOG_FILE
+echo "" | tee -a $LOG_FILE
+
+exit

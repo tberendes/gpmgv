@@ -1,0 +1,386 @@
+Index: render_rr_or_z_plots.pro
+===================================================================
+--- render_rr_or_z_plots.pro	(revision 555)
++++ render_rr_or_z_plots.pro	(working copy)
+@@ -107,8 +107,16 @@
+ ; - Added DECLUTTER parameter to support filtering of clutter-affected samples. 
+ ; 10/13/15  Morris/GPM GV/SAIC
+ ; - Minor tweak for labeling of Z-R rainrate type on PPI plot.
++; 12/9/2015 Morris, GPM GV, SAIC
++; - Added MAX_BLOCKAGE optional parameter to limit samples included in the
++;   statistics by maximum allowed GR beam blockage. Only applies to matchup file
++;   version 1.21 or later with computed beam blockage.
++; - Added Z_BLOCKAGE_THRESH optional parameter to limit samples included in the
++;   comparisons by beam blockage, as implied by a Z dropoff between the second
++;   and first sweeps that exceeds the value of this parameter. Is only used if
++;   MAX_BLOCKAGE is unspecified, or where no blockage information is contained
++;   in the matchup file.
+ ;
+-;
+ ; EMAIL QUESTIONS OR COMMENTS TO:
+ ;       <Bob Morris> kenneth.r.morris@nasa.gov
+ ;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+@@ -121,8 +129,9 @@
+                                gvconvective, gvstratiform, hideTotals, hide_rntype, $
+                                hidePPIs, pr_or_dpr, data_struct, PS_DIR=ps_dir, $
+                                B_W=b_w, S2KU=s2ku_in, ZR=zr_force, BATCH=batch, $
+-                               MAX_RANGE=max_range, STEP_MANUAL=step_manual, $
+-                               DECLUTTER=declutter_in
++                               MAX_RANGE=max_range, MAX_BLOCKAGE=max_blockage, $
++                               Z_BLOCKAGE_THRESH=z_blockage_thresh, $
++                               STEP_MANUAL=step_manual, DECLUTTER=declutter_in
+ 
+ 
+ ; "include" file for PR data constants
+@@ -159,7 +168,19 @@
+ haveZdr = data_struct.haveFlags.haveZdr
+ haveKdp = data_struct.haveFlags.haveKdp
+ haveRHOhv = data_struct.haveFlags.haveRHOhv
++; and set flag to try to filter by GR blockage if blockage data are present
++do_GR_blockage = data_struct.haveFlags.have_GR_blockage
+ 
++; reset do_GR_blockage flag if set but no MAX_BLOCKAGE value is given
++IF do_GR_blockage EQ 1 AND N_ELEMENTS(max_blockage) NE 1 $
++   THEN do_GR_blockage = 0
++
++; if do_GR_blockage flag is not set, account for the presence of the
++; Z_BLOCKAGE_THRESH value and set it to the alternate method if indicated
++;z_blockage_thresh=3  ; uncomment for testing
++IF do_GR_blockage EQ 0 AND N_ELEMENTS(z_blockage_thresh) EQ 1 $
++   THEN do_GR_blockage = 2
++
+ gvz = data_struct.gvz
+ gvz_in = gvz                   ; for plotting as PPI
+ zraw = data_struct.zraw
+@@ -175,6 +196,7 @@
+ Zdr = data_struct.Zdr
+ Kdp = data_struct.Kdp
+ RHOhv = data_struct.RHOhv
++IF do_GR_blockage EQ 1 THEN GR_blockage = data_struct.GR_blockage
+ top = data_struct.top
+ botm = data_struct.botm
+ lat = data_struct.lat
+@@ -273,8 +295,61 @@
+ hide_rntype = KEYWORD_SET( hide_rntype )
+ IF hide_rntype THEN rnType4ppi[*] = 3
+ 
+-; - - - - - - - - - - - - - - - - - - - - - - - -
++;-------------------------------------------------
+ 
++; identify and filter out GR-beam-blocked samples if a method is active
++
++IF do_GR_blockage NE 0 THEN BEGIN
++   idxchk = WHERE(gvz[*,0] GT 0.0 and gvz[*,1] GT 0.0, countchk)
++   if countchk gt 0 then begin
++      CASE do_GR_blockage OF
++         1 : BEGIN
++             print, '' & print, "FILTERING BY ACTUAL BLOCKAGE"
++             idxblok = WHERE(GR_blockage[idxchk,0] GT max_blockage, countblok)
++             END
++         2 : BEGIN
++             ; check the difference between the two lowest sweep Z values for
++             ; a drop-off in the lowest sweep that indicates beam blockage
++             print, ''
++             print, "FILTERING BY BLOCKAGE FROM Z DROPOFF >", z_blockage_thresh
++             idxblok = WHERE(gvz[idxchk,1]-gvz[idxchk,0] GT z_blockage_thresh, $
++                             countblok)
++             END
++         ELSE : message, "Undefined or illegal do_GR_blockage value."
++      ENDCASE
++      IF countblok GT 0 THEN BEGIN
++       ; compute the sample ranges and azimuths and report on blockages found
++       ; (DIAGNOSTIC ONLY, COMMENTING OUT FOR BASELINE)
++         xcenter=MEAN(xCorner, DIM=1)
++         ycenter=MEAN(yCorner, DIM=1)
++         rangectr = SQRT(xcenter*xcenter+ycenter*ycenter)
++         azctr = (atan(ycenter, xcenter)/!DTOR+360.) mod 360.
++         print, "Ranges: ", rangectr[idxchk[idxblok],0]
++         print, "Azimuths: ", azctr[idxchk[idxblok],0]
++         print, "Diffs 2-1: ", gvz[idxchk[idxblok],1]-gvz[idxchk[idxblok],0]
++        ; set the z columns and GR percentgood values to "MISSING" for all
++        ; columns where lowest sweep shows blockage, and set the plottable Z
++        ; values to 59.99 dBZ so they stand out
++         gvz[idxchk[idxblok],*] = -11.
++         zcor[idxchk[idxblok],*] = -11.
++         gvz_in[idxchk[idxblok],*] = 59.99
++         zcor_in[idxchk[idxblok],*] = 59.99
++         if have_gvrr AND xxx EQ 'RR' then begin
++            pctgoodrrgv[idxchk[idxblok],*] = -11.
++         endif else begin
++            pctgoodgv[idxchk[idxblok],*] = -11.
++         endelse
++;         print, "Diffs 3-2: ", gvz[idxchk[idxblok],2]-gvz[idxchk[idxblok],1]
++;         gvz[idxchk[idxblok],0] = 59.99
++      ENDIF
++      print, 'Columns excluded based on blockage: ', countblok, ' of ', countchk
++   endif
++ENDIF ELSE BEGIN
++   print, ''
++   print, 'No filtering by GR blockage.'
++ENDELSE
++;-------------------------------------------------
++
+ ; optional data *clipping* based on percent completeness of the volume averages:
+ ; Decide which PR and GR points to include, based on percent of expected points
+ ; in bin-averaged results that were above dBZ thresholds set when the matchups
+Index: geo_match_3d_rr_or_z_comparisons.pro
+===================================================================
+--- geo_match_3d_rr_or_z_comparisons.pro	(revision 555)
++++ geo_match_3d_rr_or_z_comparisons.pro	(working copy)
+@@ -141,6 +141,16 @@
+ ; 07/16/15 Morris, GPM GV, SAIC
+ ; - Added DECLUTTER keyword option to filter out samples identified as ground
+ ;   clutter affected.
++; 12/9/2015 Morris, GPM GV, SAIC
++; - Added FORCEBB parameter to override the DPR mean BB height with the value
++;   provided by ALT_BB_HEIGHT.
++; - Added MAX_BLOCKAGE optional parameter to limit samples included in the
++;   statistics by maximum allowed GR beam blockage.
++; - Added GR_blockage and have_GR_blockage tag/value pairs to passed structures.
++; - Added Z_BLOCKAGE_THRESH optional parameter to limit samples included in the
++;   comparisons by beam blockage, as implied by a Z dropoff between the second
++;   and first sweeps. Is ignored in the presence of valid MAX_BLOCKAGE value and
++;   presence of GR_blockage data.
+ ;
+ ;
+ ; EMAIL QUESTIONS OR COMMENTS TO:
+@@ -192,13 +202,14 @@
+                               PPIorient, windowsize, pctabvthresh, PPIbyThresh, $
+                               gvconvective, gvstratiform, hideTotals, $
+                               hide_rntype, hidePPIs, pr_or_dpr, PS_DIR=ps_dir, $
+-                              B_W=b_w, S2KU=s2ku, ZR=zr_force, $
++                              B_W=b_w, S2KU=s2ku, ZR=zr_force, BATCH=batch, $
+                               ALT_BB_HGT=alt_bb_hgt, GR_RR_FIELD=gr_rr_field, $
+-                              BATCH=batch, MAX_RANGE=max_range, $
++                              MAX_RANGE=max_range, MAX_BLOCKAGE=max_blockage, $
++                              Z_BLOCKAGE_THRESH=z_blockage_thresh, $
+                               SUBSET_METHOD=submeth, MIN_FOR_SUBSET=subthresh, $
+                               SAVE_DIR=save_dir, STEP_MANUAL=step_manual, $
+                               SWATH=swath_in, KUKA=KuKa_in, $
+-                              DECLUTTER=declutter_in
++                              DECLUTTER=declutter_in, FORCEBB=forcebb_in
+ 
+ ; "include" file for read_geo_match_netcdf() structs returned
+ @geo_match_nc_structs.inc
+@@ -208,6 +219,7 @@
+ 
+ declutter=KEYWORD_SET(declutter_in)
+ IF (pr_or_dpr NE 'DPR') THEN declutter=0     ; override unless processing DPR
++forcebb=KEYWORD_SET(forcebb_in)
+ 
+ bname = file_basename( ncfilepr )
+ pctString = STRTRIM(STRING(FIX(pctabvthresh)),2)
+@@ -291,6 +303,9 @@
+    ptr_rnFlag=ptr_new(/allocate_heap)
+ ;   ptr_pia=ptr_new(/allocate_heap)
+ ENDIF
++
++IF pr_or_dpr EQ 'DPR' THEN ptr_GR_blockage=ptr_new(/allocate_heap)
++
+ ptr_top=ptr_new(/allocate_heap)
+ ptr_botm=ptr_new(/allocate_heap)
+ ptr_lat=ptr_new(/allocate_heap)
+@@ -348,6 +363,7 @@
+     PTRGVRCMEAN=ptr_gvrc, PTRGVRPMEAN=ptr_gvrp, PTRGVRRMEAN=ptr_gvrr, $
+     PTRGVMODEHID=ptr_BestHID, PTRGVDZEROMEAN=ptr_GR_DP_Dzero, $
+     PTRGVZDRMEAN=ptr_GR_DP_Zdr, PTRGVKDPMEAN=ptr_GR_DP_Kdp, PTRGVRHOHVMEAN=ptr_GR_DP_RHOhv, $
++    PTRGVBLOCKAGE=ptr_GR_blockage, $
+     PTRtop=ptr_top, PTRbotm=ptr_botm, PTRlat=ptr_lat, PTRlon=ptr_lon, PTRpia=ptr_pia, $
+     PTRsfcrainpr=ptr_nearSurfRain, PTRsfcraincomb=ptr_nearSurfRain_Comb, $
+     PTRrainflag_int=ptr_rnFlag, PTRraintype_int=ptr_rnType, $
+@@ -356,7 +372,8 @@
+     PTRpctgoodpr=ptr_pctgoodpr, PTRpctgoodgv=ptr_pctgoodgv, $
+     PTRpctgoodrain=ptr_pctgoodrain, PTRpctgoodrcgv=ptr_pctgoodrcgv, $
+     PTRpctgoodrpgv=ptr_pctgoodrpgv, PTRpctgoodrrgv=ptr_pctgoodrrgv, $
+-    PTRclutterStatus=ptr_clutterStatus, BBPARMS=BBparms, ALT_BB_HGT=alt_bb_hgt )
++    PTRclutterStatus=ptr_clutterStatus, BBPARMS=BBparms, $
++    ALT_BB_HGT=alt_bb_hgt, FORCEBB=forcebb )
+    END
+   'DPRGMI' : BEGIN
+     PRINT, "READING MATCHUP FILE TYPE: ", pr_or_dpr
+@@ -388,8 +405,12 @@
+    ENDIF ELSE GOTO, errorExit             ; bail out if other file/data errors
+ ENDIF
+ 
+-; create local data field arrays/structures needed here, and free pointers we no longer need
+-; to free the memory held by these pointer variables
++; create local data field arrays/structures needed here, and free pointers we
++; no longer need to free the memory held by these pointer variables
++; - Yes, we blindly assume most of these pointers and their data are defined
++;   and valid, unless there is logic to test them (variables added in later
++;   matchup file versions).
++
+   mygeometa=*ptr_geometa
+     ptr_free,ptr_geometa
+ ;HELP, MYGEOMETA, /struct
+@@ -504,6 +525,13 @@
+      ptr_free,ptr_GR_DP_RHOhv
+   ENDIF ELSE RHOhv=-1
+ 
++  have_GR_blockage = 0
++  IF pr_or_dpr EQ 'DPR' AND ptr_valid(ptr_GR_blockage) THEN BEGIN
++     have_GR_blockage=myflags.have_GR_blockage   ; should just be 0 for version<1.21
++     GR_blockage=*ptr_GR_blockage
++     ptr_free, ptr_GR_blockage
++  ENDIF ELSE GR_blockage = -1
++
+   top=*ptr_top
+   botm=*ptr_botm
+   lat=*ptr_lat
+@@ -552,7 +580,8 @@
+            haveZdr : haveZdr, $
+            haveKdp : haveKdp, $
+            haveRHOhv : haveRHOhv, $
+-           have_pia : have_pia }
++           have_pia : have_pia, $
++           have_GR_blockage : have_GR_blockage }
+ 
+ dataStruc = { haveFlags : haveIt, $
+               mygeometa : mygeometa, $
+@@ -569,6 +598,7 @@
+               Zdr : Zdr, $
+               Kdp : Kdp, $
+               RHOhv : RHOhv, $
++              GR_blockage : GR_blockage, $
+               top : top, $
+               botm : botm, $
+               lat : lat, $
+@@ -622,6 +652,8 @@
+                                        hide_rntype, hidePPIs, pr_or_dpr, dataStrucTrimmed, $
+                                        PS_DIR=ps_dir, B_W=b_w, S2KU=s2ku, ZR=zr_force, $
+                                        BATCH=batch, MAX_RANGE=max_range, $
++                                       MAX_BLOCKAGE=max_blockage, $
++                                       Z_BLOCKAGE_THRESH=z_blockage_thresh, $
+                                        STEP_MANUAL=step_manual, DECLUTTER=declutter )
+          wdelete, 1
+          saveIt=0
+@@ -674,8 +706,9 @@
+                                  gvconvective, gvstratiform, hideTotals, hide_rntype, $
+                                  hidePPIs, pr_or_dpr, dataStruc, PS_DIR=ps_dir, $
+                                  B_W=b_w, S2KU=s2ku, ZR=zr_force, BATCH=batch, $
+-                                 MAX_RANGE=max_range, STEP_MANUAL=step_manual, $
+-                                 DECLUTTER=declutter )
++                                 MAX_RANGE=max_range, MAX_BLOCKAGE=max_blockage, $
++                                 Z_BLOCKAGE_THRESH=z_blockage_thresh, $
++                                 STEP_MANUAL=step_manual, DECLUTTER=declutter )
+ ENDELSE
+ 
+ errorExit:
+@@ -709,7 +742,7 @@
+ ; KuKa_cmb     - designates which DPR instrument's data to analyze for the
+ ;                DPRGMI matchup type.  Allowable values are 'Ku' and 'Ka'  If
+ ;                swath_cmb is 'NS' then KuKa_cmb must be 'Ku'.  If unspecified
+-;                or if in conflict with swath_cmb then the value will be
++;                or if in conflict with with swath_cmb then the value will be
+ ;                assigned to 'Ku' by default.
+ ;
+ ; looprate     - initial animation rate for the PPI animation loop on startup.
+@@ -754,6 +787,15 @@
+ ;                included in the mean difference calculations.  Defaults to 100
+ ;                if not specified.
+ ;
++; max_blockage_in - Maximum fractional GR beam blockage to allow in samples to
++;                   be included in the mean difference calculations.  If value
++;                   is between 0.0 and 1.0 it is treated as the fraction of
++;                   blockage.  If value is greater than 1 and <= 100, it is
++;                   treated as percent blockage and is converted to a fractional
++;                   amount.  Disables beam blockage checking if not specified,
++;                   if resulting fractional amount is 1.0 (100%), or if matchup
++;                   file does not contain the GR_blockage variable.
++;
+ ; show_thresh_ppi - Binary parameter, controls whether to create and display a
+ ;                   2nd set of PPIs plotting only those PR and GR points meeting
+ ;                   the pctAbvThresh constraint.  If set to On, then ppi_vertical
+@@ -864,10 +906,13 @@
+                                       PPI_SIZE=ppi_size, $
+                                       PCT_ABV_THRESH=pctAbvThresh, $
+                                       MAX_RANGE=max_range_in, $
++                                      MAX_BLOCKAGE=max_blockage_in, $
++                                      Z_BLOCKAGE_THRESH=z_blockage_thresh_in, $
+                                       SHOW_THRESH_PPI=show_thresh_ppi, $
+                                       GV_CONVECTIVE=gv_convective, $
+                                       GV_STRATIFORM=gv_stratiform, $
+                                       ALT_BB_HGT=alt_bb_hgt, $
++                                      FORCEBB=forcebb, $
+                                       HIDE_TOTALS=hide_totals, $
+                                       HIDE_RNTYPE=hide_rntype, $
+                                       HIDE_PPIS=hide_ppis, $
+@@ -1084,7 +1129,38 @@
+       pctAbvThresh = 0.0
+    ENDIF
+ END      
+-   
++
++IF N_ELEMENTS(max_blockage_in) EQ 1 THEN BEGIN
++   IF is_a_number(max_blockage_in) THEN BEGIN
++      IF max_blockage_in LT 0 OR max_blockage_in GT 100 THEN BEGIN
++         message, "Illegal MAX_BLOCKAGE value, must be between 0 and 100."
++      ENDIF ELSE BEGIN
++         IF max_blockage_in GT 1 THEN BEGIN
++            max_blockage = max_blockage_in/100.
++            print, "Converted MAX_BLOCKAGE percent to fractional amount: ", $
++                   STRING(max_blockage, FORMAT='(F0.2)')
++         ENDIF ELSE max_blockage = FLOAT(max_blockage_in)
++      ENDELSE
++    ENDIF ELSE BEGIN
++         message, "Illegal MAX_BLOCKAGE, must be a number between 0 and 100."
++    ENDELSE
++ENDIF
++
++IF N_ELEMENTS(z_blockage_thresh_in) EQ 1 THEN BEGIN
++   IF is_a_number(z_blockage_thresh_in) THEN BEGIN
++      z_blockage_f = FLOAT(z_blockage_thresh_in)
++      IF z_blockage_f LT 0.5 OR z_blockage_f GT 3.0 THEN BEGIN
++         help, z_blockage_thresh_in
++         message, "Out of range Z_BLOCKAGE_THRESH value, " + $
++                  "must be between 0.5 and 3.0 (dBZ)"
++      ENDIF ELSE z_blockage_thresh = z_blockage_f
++   ENDIF ELSE BEGIN
++      help, z_blockage_thresh_in
++      message, "Illegal Z_BLOCKAGE_THRESH type, " + $
++               "must be a number between 0.5 and 3.0"
++   ENDELSE
++ENDIF
++
+ ; Set up for the PR-GR rain type matching based on GR reflectivity
+ 
+ IF ( N_ELEMENTS(gv_Convective) NE 1 ) THEN BEGIN
+@@ -1181,10 +1257,12 @@
+                                       hideRntype, hidePPIs, pr_or_dpr, ALT_BB_HGT=alt_bb_hgt, $
+                                       PS_DIR=ps_dir, B_W=b_w, S2KU=s2ku, ZR=zr_force, $
+                                       GR_RR_FIELD=gr_rr_field, BATCH=do_batch, $
+-                                      MAX_RANGE=max_range_in, SUBSET_METHOD=submeth, $
+-                                      MIN_FOR_SUBSET=subthresh, SAVE_DIR=real_save_dir, $
+-                                      STEP_MANUAL=step_manual, SWATH=swath, KUKA=KuKa, $
+-                                      DECLUTTER=declutter )
++                                      MAX_RANGE=max_range_in, MAX_BLOCKAGE=max_blockage, $
++                                      Z_BLOCKAGE_THRESH=z_blockage_thresh, $
++                                      SUBSET_METHOD=submeth, MIN_FOR_SUBSET=subthresh, $
++                                      SAVE_DIR=real_save_dir, STEP_MANUAL=step_manual, $
++                                      SWATH=swath, KUKA=KuKa, DECLUTTER=declutter, $
++                                      FORCEBB=forcebb )
+ 
+          if (action EQ 2) then break    ; manual request to quit
+       endfor
+@@ -1199,10 +1277,12 @@
+                                  hideRntype, hidePPIs, pr_or_dpr, ALT_BB_HGT=alt_bb_hgt, $
+                                  PS_DIR=ps_dir, B_W=b_w, S2KU=s2ku, ZR=zr_force, $
+                                  GR_RR_FIELD=gr_rr_field, BATCH=do_batch, $
+-                                 MAX_RANGE=max_range_in, SUBSET_METHOD=submeth, $
+-                                 MIN_FOR_SUBSET=subthresh, SAVE_DIR=real_save_dir, $
+-                                 STEP_MANUAL=step_manual, SWATH=swath, KUKA=KuKa, $
+-                                 DECLUTTER=declutter )
++                                 MAX_RANGE=max_range_in, MAX_BLOCKAGE=max_blockage, $
++                                 Z_BLOCKAGE_THRESH=z_blockage_thresh, $
++                                 SUBSET_METHOD=submeth, MIN_FOR_SUBSET=subthresh, $
++                                 SAVE_DIR=real_save_dir, STEP_MANUAL=step_manual, $
++                                 SWATH=swath, KUKA=KuKa, DECLUTTER=declutter, $
++                                 FORCEBB=forcebb )
+ 
+       if (action EQ 2) then break         ; manual request to quit
+ 
+@@ -1219,3 +1299,4 @@
+ 
+ print, "" & print, "Done!"
+ END
++

@@ -1,0 +1,32 @@
+#!/bin/sh
+# grgdif
+# calculates the days difference between two dates and reports 
+# the number days as grg1 - grg2 
+# usage grgdif grg1 grg2
+# where gregorian date is in the form yyyymmdd
+
+usage () {
+echo "Usage:"
+echo " grgdif grg1 grg2"
+echo ""
+echo " Calculate day difference between"
+echo " two gregorian dates (grg1 - grg2)"
+echo " where a gregorian date is in the form of yyyymmdd."
+	}
+
+if [ $# != 2 ]
+then
+usage
+exit
+fi
+# convert each date to julian
+grg1=$1
+grg2=$2
+jul1=`ymd2yd $grg1`
+jul2=`ymd2yd $grg2`
+
+# calculate the answer using juldif
+res=`juldif $jul1 $jul2`
+
+# and output the results
+echo $res

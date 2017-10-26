@@ -1,0 +1,99 @@
+pro plot_geo_match_xsections, gvz, zcor, top, botm, meanbb, nsweeps, $
+                              idxscan, idxmin, idxmax
+
+; set up the image size and the width of each ray in pixels
+
+nrays = ABS(idxmax-idxmin)+1
+ysize = 320   ; for now -- should be input parm.
+xraywidth = ysize/nrays
+xsize = xraywidth*nrays
+print, 'xsize, ysize: ', xsize, ysize
+imagepr = BYTARR(xsize,ysize)
+imagepr[*,*] = 128B
+imagegv = imagepr
+img_sweep_sep = imagepr  ; use this to locate the between-sweep bounds
+ascend = 1
+if (idxmax LT idxmin) THEN ascend = 0
+WINDOW, 5, xsize=xsize, ysize=ysize*2
+!P.Multi = [0, 1, 2]
+
+for iframe = 0, nsweeps-1  do begin
+  ; get this sweep's subarray
+   gvsweep = gvz[*,iframe]
+   prsweep = zcor[*,iframe]
+   prsweep = prsweep > 0.0  ; get rid of negative values
+   gvsweep = gvsweep > 0.0
+   prsweep = prsweep < 63.0  ; allow for scaling to dBZ*2, within half byte
+   gvsweep = gvsweep < 63.0
+   topsweep = top[*,iframe]
+   botmsweep = botm[*,iframe]
+  ; get our PR scan's points from the sweep
+   gvscan = BYTE( gvsweep[idxscan]*2+128.0 )  ; convert to byte and scale up
+   prscan = BYTE( prsweep[idxscan]*2+128.0 )  ; convert to byte and scale up
+   topscan = topsweep[idxscan]
+   botmscan = botmsweep[idxscan]
+  ; compute image y-locations of sample volume's top and bottom,
+  ;   based on 4 pixels per .25 km
+   kmperpix = 0.25/4.0
+   topscan = FIX(topscan/kmperpix)
+   botmscan = FIX(botmscan/kmperpix)
+  ; fill the image array with dbz values based on pixel bounds of each volume
+   nraysgeo = N_ELEMENTS(gvscan)
+   IF ( nrays NE nraysgeo ) THEN BEGIN
+      print, 'Oh, *%&^$!, do not have matching number of rays in geo_match!'
+      goto, errorExit
+   ENDIF
+
+  ; plot left-to-right in ascending ray number order; use idxmin and idxmax to
+  ; determine whether points are in ascending or descending ray order.  For now
+  ; we'll assume that the data we extract for the scan are in sequential ray
+  ; order, either ascending or descending, and don't need sorting.
+
+   IF ( ascend EQ 1 ) THEN BEGIN
+      istart=0  &  iend=nraysgeo-1  &  istep=1
+   ENDIF ELSE BEGIN
+      istart=nraysgeo-1  &  iend=0  &  istep=-1
+   ENDELSE
+
+   xleft = 0
+   for iray = istart, iend, istep  do begin
+      xright = xleft+xraywidth-1
+      IF ( botmscan[iray] GE 0 AND topscan[iray] GT 0 ) THEN BEGIN
+         imagepr[xleft:xright,botmscan[iray]:topscan[iray]] = prscan[iray]
+         imagegv[xleft:xright,botmscan[iray]:topscan[iray]] = gvscan[iray]
+        ; set up a delimiter for embedding if volume is deep enough
+         IF ( topscan[iray]-botmscan[iray] GT 2 ) THEN $
+            img_sweep_sep[xleft:xright,botmscan[iray]:botmscan[iray]] = 100B
+      ENDIF
+      xleft = xright+1
+   endfor
+
+endfor  ; iframe loop
+
+; blank out a pixel at the between-sweep bounds
+ixdswpsep = WHERE( img_sweep_sep EQ 100B, countsep )
+IF ( countsep GT 0 ) THEN BEGIN
+   imagepr[ixdswpsep] = 128B
+   imagegv[ixdswpsep] = 128B
+ENDIF
+
+; insert a separator at the top of the GV image
+imagegv[*,ysize-1] = 122B
+
+TV, imagepr, 0, ysize
+TV, imagegv, 0, 0
+;TV, img_sweep_sep, 0, 0
+XYOUTS, 5, ysize/2, COLOR=122, 'A', /DEVICE, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, xsize-10, ysize/2, COLOR=122, 'B', /DEVICE, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, 5, ysize-20, COLOR=122, $
+    'Volume-matching GV samples, 1 dBZ resolution', $
+    /DEVICE ;, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, 5, (3*ysize)/2, COLOR=122, 'A', /DEVICE, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, xsize-10, (3*ysize)/2, COLOR=122, 'B', /DEVICE, CHARSIZE=1.5, CHARTHICK=2
+XYOUTS, 5, ysize*2-20, COLOR=122, $
+    'Volume-matching PR samples, 1 dBZ resolution', $
+    /DEVICE ;, CHARSIZE=1.5, CHARTHICK=2
+
+errorExit:
+END
+

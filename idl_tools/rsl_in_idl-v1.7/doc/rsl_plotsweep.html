@@ -1,0 +1,100 @@
+<html>
+<head>
+<title>rsl_plotsweep</title>
+</head>
+<body>
+<h2>rsl_plotsweep</h2>
+This procedure plots the radar image for a sweep.
+<h3>Syntax</h3>
+<table>
+<tr valign=top>
+<td>rsl_plotsweep,</td>
+<td>
+  <i>sweep</i>, <i>radar_header</i>
+    [,&nbsp;MAXRANGE=<i>value</i>]
+    [,&nbsp;/NEW_WINDOW]
+    [,&nbsp;TITLE=<i>string</i>]
+    [,&nbsp;WINDOWSIZE=<i>value</i>]
+    [,&nbsp;LIKE_FIELD=<i>string</i>]
+    [,&nbsp;ABOUT_FIELD=<i>string</i>]
+    [,&nbsp;/ADVANCE]
+    [,&nbsp;AZIM_SPOKES=<i>value</i>]
+    [,&nbsp;RANGE_AZIM_SPOKES=<i>value</i>]
+    [,&nbsp;RANGE_RING_INTERVAL=<i>value</i>]
+    [,&nbsp;CHARSIZE=<i>value</i>]
+    [,&nbsp;/BGWHITE]
+</td>
+</tr>
+</table>
+<h3>Arguments</h3>
+<dl>
+<dt>sweep
+<dd>A sweep structure.
+<p>
+<dt>radar_header
+<dd>Radar header structure. Provides time stamp and radar location.
+</dl>
+<h3>Keywords</h3>
+<dl>
+<dt>ABOUT_FIELD
+<dd>A string containing information about the field which will appear in TITLE.
+This replaces the default field information, which is simply the field type
+(DZ, VR, . . .).
+<p>
+<dt>LIKE_FIELD
+<dd>A string naming the field type whose color table and value scaling is to be
+used to plot this data. This keyword is needed only if the field
+type is not one of those recognized by rsl_plotsweep.
+Recognized field types are DZ, CZ, ZT, VR, SW, DR, ZD, KD, PH, and RH.
+<p>
+<dt>MAXRANGE
+<dd>Maximum range to be plotted, in kilometers.  Default is 220 km
+unless the radar site is Kwajalein, in which case it is 200.
+<p>
+<dt>NEW_WINDOW
+<dd>Set this to open a new plot window.
+<p>
+<dt>TITLE
+<dd>Title to appear above plot.  Default is the site name followed
+by date and time of scan, the field type, and the elevation
+angle in degrees.
+<p>
+<dt>WINDOWSIZE
+<dd>Window size in pixels.  WINDOWSIZE may be scalar or a 2 element array.
+If scalar, it specifies both width and height of the window.  If an array,
+the first element is width and the second is height.
+<p>
+<dt>ADVANCE
+<dd>This keyword is passed to IDL's MAP_SET procedure.  When set,
+and !P.MULTI is set, IDL advances to the next plot position
+in a multiple plots window.
+<p>
+<dt>AZIM_SPOKES
+<dd>The interval in degrees between azimuth spokes.
+The default is 30 degrees. To prevent display of azimuth spokes, set
+AZIM_SPOKES to zero.
+<p>
+<dt>RANGE_AZIM_SPOKES
+<dd>Range in kilometers for azimuth spokes, i.e., the range at which each
+spoke ends.  Default is the range of the outermost range ring.
+<p>
+<dt>RANGE_RING_INTERVAL
+<dd>The interval between range rings, in kilometers. Default is
+50 km. Set this keyword to zero to turn off range ring display.
+<p>
+<dt>CHARSIZE
+<dd>IDL graphics keyword used to set the character size for axes titles and
+annotations.  Normal size is 1.0, which is the default.
+<p>
+<dt>BGWHITE
+<dd>Set this for white background.  Default is black.
+</dl>
+<h3>Examples</h3>
+Plot the first sweep of the second field in the radar structure, using a white
+background for the image.
+<p>
+<code>rsl_plotsweep, radar.volume[1].sweep[0], radar.h, /bgwhite</code>
+<h3>See Also</h3>
+<a href="rsl_plotsweep_from_radar.html">rsl_plotsweep_from_radar</a>
+</body>
+</html>

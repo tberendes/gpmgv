@@ -1,0 +1,1 @@
+select a.event_num, a.radar_id, a.orbit, a.overpass_time, a.nearest_distance, a.pct_overlap, a.pct_overlap_conv, a.pct_overlap_strat, b.pct_overlap_Rain_certain into km_le_100_w_rain10 from event_meta_2A23_vw a, event_meta_2A25_vw b where a.event_num = b.event_num and a.nearest_distance <= 100 and b.pct_overlap_Rain_certain >= 10 order by 9 desc;

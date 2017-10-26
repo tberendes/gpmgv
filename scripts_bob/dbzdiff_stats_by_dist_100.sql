@@ -1,0 +1,6 @@
+--KILLER QUERY, DO NOT EXECUTE
+
+select a.radar_id, round((sum(a.meandiff*a.numpts)/sum(a.numpts))*100)/100 as meandiff25km, sum(a.numpts) as total25km, round((sum(b.meandiff*b.numpts)/sum(b.numpts))*100)/100 as meandiff75km, sum(b.numpts) as total75km, round((sum(c.meandiff*c.numpts)/sum(c.numpts))*100)/100 as meandiff125km, sum(c.numpts) as total125km from dbzdiff_stats_by_dist a, dbzdiff_stats_by_dist b, dbzdiff_stats_by_dist c where a.regime='S_above' and a.regime=c.regime and a.regime=b.regime and a.numpts>5  and b.numpts>5 and c.numpts>5 and a.gvtype='2A55' and a.gvtype=b.gvtype and b.gvtype=c.gvtype and a.radar_id=b.radar_id and b.radar_id = c.radar_id and a.height=b.height and b.height=c.height and a.rangecat=0 and b.rangecat=1 and c.rangecat=2 group by 1 order by 1;
+
+-- START FROM HERE AND USE TEMP TABLES INSTEAD
+select a.radar_id, round((sum(a.meandiff*a.numpts)/sum(a.numpts))*100)/100 as meandiff25km, sum(a.numpts) as total25km from dbzdiff_stats_by_dist a where a.regime='S_above'  and a.numpts>5 and a.gvtype='2A55' and a.rangecat=0 and a.radar_id ='KAMX' group by 1 order by 1;

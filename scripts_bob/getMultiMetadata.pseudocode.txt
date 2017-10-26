@@ -1,0 +1,84 @@
+for each satellite/subset  (TRMM, GPM), (CONUS, AKradars, KWAJ)
+   get the last event_num with full metadata for this sat/subset's station(s)
+========= TOO DAMN SLOW A QUERY ===========
+      drop table satsubmaxevent;
+      select COALESCE(max(c.event_num),0) as maxevent into satsubmaxevent
+        from event_meta_numeric super, overpass_event c, siteproductsubset d
+       where c.radar_id=d.radar_id and c.sat_id=d.sat_id and c.sat_id='PR' and d.subset='CONUS'
+         and super.event_num=c.event_num and 18 =
+             (select count(*) from event_meta_numeric sub where super.event_num = sub.event_num);
+
+select max(a.event_num) as maxevent, b.radar_id, c.subset into temp maxeventok from event_meta_numeric a, overpass_event b, siteproductsubset c where a.event_num=b.event_num and b.radar_id=c.radar_id and b.sat_id=c.sat_id and c.sat_id='PR' and c.subset='CONUS' and 18 = (select count(*) from event_meta_numeric sub where sub.event_num=a.event_num) group by 2,3 order by 2,1;
+
+   get distinct orbits and matched 2A23 and 2A25 orbit_subset_products for overpass events > last event_num
+
+     echo "\t \a \f '|' \o $outfile1 \\\ select distinct a.orbit, a.filename, b.filename, count(c.event_num)
+     from orbit_subset_product a, orbit_subset_product b,
+          overpass_event c, siteproductsubset d
+     where a.orbit = b.orbit and a.product_type = '2A23' 
+       and b.orbit = c.orbit and b.product_type = '2A25' 
+       and a.version=b.version
+       and a.subset = b.subset and a.subset = d.subset
+       and c.radar_id = d.radar_id
+       and d.sat_id='PR' and d.subset='CONUS'
+       and c.event_num > (select maxevent from maxeventok where maxevent.radar_id = d.radar_id)
+     GROUP BY b.filename, a.filename, a.orbit; | psql gpmgv  >> $LOG_FILE 2>&1
+
+      define control file for orbits/sat/subset
+      get orbit, count of site overpasses, and paths of matched 2A23 and 2A25 orbit_subset_products
+      where orbits > last orbit and date=date
+      for each orbit found
+         get list of event nums, radar_IDs, and lat/lons for orbit/subset
+
+        SELECT a.event_num, a.radar_id, b.latitude, b.longitude 
+          FROM overpass_event a, fixed_instrument_location b, 
+               orbit_subset_product c, siteproductsubset d 
+         WHERE a.radar_id = b.instrument_id and a.radar_id = d.radar_id 
+           AND a.orbit = c.orbit and c.subset = d.subset and d.sat_id='PR' 
+           and a.event_num > (select maxevent from satsubmaxevent)
+           AND c.filename='2A-CS-CONUS.TRMM.PR.2A23.20140313-S023322-E040545.092974.7.HDF';
+
+         build control file for orbit
+         append to control file for date/sat/subset
+      endfor
+      call get 2A23Meta.sh and get2A25Meta.sh with control file as argument
+   endfor
+endfor
+
+
+select min(a.orbit) from overpass_event a, siteproductsubset c
+where a.radar_id=c.radar_id and a.sat_id='PR' and c.sat_id='TRMM'
+and c.subset='CONUS' 
+and a.event_num > (select max(event_num) from event_meta_numeric super where 18 = (select count(*) from event_meta_numeric sub where super.event_num = sub.event_num));
+
+-- select the latest event with complete metadata for a given sat/subset's set of site overpasses
+select max(c.event_num) from event_meta_numeric super, overpass_event c, siteproductsubset d
+ where c.radar_id=d.radar_id and c.sat_id=d.sat_id and c.sat_id='PR' and d.subset='CONUS'
+   and super.event_num=c.event_num and 18 =
+           (select count(*) from event_meta_numeric sub where super.event_num = sub.event_num);
+
+-- select all orbits with matching overpass events, 2A23, and 2A25 but no metadata yet
+select distinct a.orbit, a.filename, b.filename
+     from orbit_subset_product a, orbit_subset_product b,
+          overpass_event c, siteproductsubset d
+     where a.orbit = b.orbit and a.product_type = '2A23' 
+       and b.orbit = c.orbit and b.product_type = '2A25' 
+       and a.version=b.version
+       and a.subset = b.subset and a.subset = d.subset
+       and c.radar_id = d.radar_id
+       and d.sat_id='PR' and d.subset='CONUS'
+       and c.event_num > (select max(event_num) from event_meta_numeric super where 18 =
+           (select count(*) from event_meta_numeric sub where super.event_num = sub.event_num));
+
+select b.orbit, a.subset, min(a.version) as version
+     from orbit_subset_product a, orbit_subset_product b,
+          overpass_event c, siteproductsubset d
+     where a.orbit = b.orbit and a.product_type = '2A23' 
+       and b.orbit = c.orbit and b.product_type = '2A25' 
+       and a.version=b.version
+       and a.subset = b.subset and a.subset = d.subset
+       and c.radar_id = d.radar_id and d.sat_id='PR' and a.orbit > 78800 
+       and 18 > (select count(*) from event_meta_numeric 
+       where event_num=c.event_num) 
+     group by b.orbit, a.subset 
+     order by b.orbit;

@@ -1,0 +1,1 @@
+select orbit, overpass_time at time zone 'UTC' as overpass_time_utc, round(pct_overlap*10)/10 as pct_overlap, round(pct_overlap_conv*10)/10 as pct_overlap_conv, round(pct_overlap_strat*10)/10 as pct_overlap_strat, num_overlap_rain_certain as n_rain from rainy100inside100 where radar_id='KWAJ' and sat_id='GPM';

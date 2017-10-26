@@ -1,0 +1,29 @@
+-- set up temp tables with same format as geo_match_product
+
+select * into temp geo_match_product_temp from geo_match_product limit 1;
+delete from geo_match_product_temp;
+
+-- load the 'new' rows from loadfile into temp table
+\copy geo_match_product_temp FROM '/data/tmp/catalogGeoMatchProducts.unl' WITH DELIMITER '|'
+
+-- look for duplicate entries between temp table and permanent table based on primary key attributes
+select b.* into temp geo_match_product_dups from geo_match_product a join geo_match_product_temp b USING (radar_id, orbit, instrument_id, sat_id, scan_type, pps_version, parameter_set, geo_match_version);
+
+select 'Key Dups', * from geo_match_product_dups;
+
+delete from geo_match_product_temp where pathname in (select pathname from geo_match_product_dups);
+
+-- look for duplicate entries between temp table and permanent table based on file pathnames
+
+select b.* into temp geo_match_product_dups2 from geo_match_product a, geo_match_product_temp b where a.pathname=b.pathname;
+
+select 'File pathname Dups', * from geo_match_product_dups2;
+
+delete from geo_match_product_temp where pathname in (select pathname from geo_match_product_dups2);
+
+-- dump the rows to be inserted into a scratch file
+\copy geo_match_product_temp TO '/data/tmp/catalogGeoMatchProducts2insert.unl' WITH DELIMITER '|'
+
+-- insert remaining non-duplicate rows into permanent table
+insert into geo_match_product select * from geo_match_product_temp;
+

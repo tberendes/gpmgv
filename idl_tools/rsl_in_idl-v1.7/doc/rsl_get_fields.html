@@ -1,0 +1,32 @@
+<html>
+<head>
+<title>rsl_get_fields</title>
+</head>
+<body>
+<h2>rsl_get_fields</h2>
+This function returns a string array containing the field type for
+each volume in the radar structure.  The array subscript for each field type
+matches the corresponding subscript in <b>radar.volume</b>.
+Field types are in uppercase.
+
+<h3>Syntax</h3>
+<i>fields</i> = <b>rsl_get_fields(</b><i>radar</i><b>)</b>
+
+<h3>Inputs</h3>
+<table width=100%>
+<tr align=left valign=top>
+  <td width=15%><b>radar</b></td>
+  <td>a radar structure.</td>
+</tr>
+</table>
+
+<h3>Example</h3>
+Get the volume for reflectivity.<br>
+<pre>
+    fields = rsl_get_fieldtypes(radar)
+    idz = where(fields eq 'DZ')
+    if idz gt -1 then v = radar.volume[idz]
+</pre>
+
+</body>
+</html>

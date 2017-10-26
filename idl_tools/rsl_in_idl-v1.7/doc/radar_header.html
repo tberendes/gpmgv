@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Radar Header Structure</title>
+</head>
+ <body>
+   
+<h2>Radar Header Structure</h2>
+
+<table cellpadding="0" cellspacing="2" border="0" width="100%">
+<tr align=left valign=top>
+    <th align=left width=20%>Member</th>
+    <th align=left width=15%>Type</th>
+    <th align=left>Description</th>
+</tr>
+<tr align=left valign=top>
+  <td>month</td>
+  <td>int</td>
+  <td>Month at beginning of data (1-12). (Date and time are in UTC.)</td>
+</tr>
+<tr align=left valign=top>
+  <td>day</td>
+  <td>int</td>
+  <td>Day of month.</td>
+</tr>
+<tr align=left valign=top>
+  <td>year</td>
+  <td>int</td>
+  <td>Year (YYYY).</td>
+</tr>
+<tr align=left valign=top>
+  <td>hour</td>
+  <td>int</td>
+  <td>Hour.</td>
+</tr>
+<tr align=left valign=top>
+  <td>minute</td>
+  <td>int</td>
+  <td>Minute.</td>
+</tr>
+<tr align=left valign=top>
+  <td>sec</td>
+  <td>float</td>
+  <td>Seconds.</td>
+</tr>
+<tr align=left valign=top>
+  <td>radar_type</td>
+  <td>string</td>
+  <td>Type of radar.</td>
+</tr>
+<tr align=left valign=top>
+  <td>nvolumes</td>
+  <td>int</td>
+  <td>Number of volumes (fields or data types).</td>
+</tr>
+<tr align=left valign=top>
+  <td>number</td>
+  <td>int</td>
+  <td>Arbitrary number of this radar site.</td>
+</tr>
+<tr align=left valign=top>
+  <td>name</td>
+  <td>string</td>
+  <td>NEXRAD site name.</td>
+</tr>
+<tr align=left valign=top>
+  <td>radar_name</td>
+  <td>string</td>
+  <td>Radar name.</td>
+</tr>
+<tr align=left valign=top>
+  <td>project</td>
+  <td>string</td>
+  <td>Project assocated with data.</td>
+</tr>
+<tr align=left valign=top>
+  <td>city</td>
+  <td>string</td>
+  <td>City nearest to radar location.</td>
+</tr>
+<tr align=left valign=top>
+  <td>state</td>
+  <td>string</td>
+  <td>State where radar is located.</td>
+</tr>
+<tr align=left valign=top>
+  <td>country</td>
+  <td>string</td>
+  <td>Country where radar is located.</td>
+</tr>
+<tr align=left valign=top>
+  <td>latd</td>
+  <td>int</td>
+  <td>Radar latitude, degrees.</td>
+</tr>
+<tr align=left valign=top>
+  <td>latm</td>
+  <td>int</td>
+  <td>Radar latitude, minutes.</td>
+</tr>
+<tr align=left valign=top>
+  <td>lats</td>
+  <td>int</td>
+  <td>Radar latitude, seconds.</td>
+</tr>
+<tr align=left valign=top>
+  <td>lond</td>
+  <td>int</td>
+  <td>Radar longitude, degrees.</td>
+</tr>
+<tr align=left valign=top>
+  <td>lonm</td>
+  <td>int</td>
+  <td>Radar longitude, minutes.</td>
+</tr>
+<tr align=left valign=top>
+  <td>lons</td>
+  <td>int</td>
+  <td>Radar longitude, seconds.</td>
+</tr>
+<tr align=left valign=top>
+  <td>height</td>
+  <td>int</td>
+  <td>Height of radar above sea level, in meters.</td>
+</tr>
+<tr align=left valign=top>
+  <td>spulse</td>
+  <td>int</td>
+  <td>Short pulse length, nanoseconds.</td>
+</tr>
+<tr align=left valign=top>
+  <td>lpulse</td>
+  <td>int</td>
+  <td>Long pulse length, nanoseconds.</td>
+</tr>
+<tr align=left valign=top>
+  <td>scan_mode</td>
+  <td>string</td>
+  <td>'PPI', 'RHI', or 'Manual'</td>
+</tr>
+<tr align=left valign=top>
+  <td>vcp</td>
+  <td>int</td>
+  <td>Volume Coverage Pattern (WSR-88D only).</td>
+</tr>
+<tr align=left valign=top>
+  <td>sched_sweeps</td>
+  <td>int</td>
+  <td>Number of scheduled sweeps (Sigmet/IRIS Raw Product only).</td>
+</tr>
+</table>
+
+</body>
+</html>

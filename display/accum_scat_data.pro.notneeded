@@ -1,0 +1,74 @@
+; accum_scat_data.pro        Morris/GPM GV/SAIC        July 2016
+
+PRO accumw_scat_data, scat_X, scat_Y, binmin1, binmin2, binmax1, binmax2, $
+                     BINSPAN1, BINSPAN2, ptrData_array, have_Hist, plotTypes, $
+                     plotIndex, raintypeBBidx
+
+; position indices/definitions of the 3 flags in the arrays in the structure
+; - must be as initially defined in z_rain_dsd_profile_scatter_all.pro
+haveVar = 0   ; do we have data for the variable
+have1D  = 1   ; does the accumulating 2-D histogram for the variable exist yet?
+have2D  = 2   ; does the accumulating 1-D histogram for the variable exist yet?
+
+; get a short version of the array pointer being worked
+aptr = (ptrData_array)[plotIndex,raintypeBBidx]
+
+;         PRINT, '******************************************************'
+;         print, "Getting "+plotTypes[plotIndex]+' SAMPLES FOR HISTOGRAM.'
+;         PRINT, '******************************************************'
+         zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
+                            MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
+                            BIN1=BINSPAN1, BIN2=BINSPAN2 )
+         minprz = MIN(scat_Y)
+         numpts = TOTAL(zhist2d)
+         IF have_hist.(plotIndex)[have2d,raintypeBBidx] EQ 1 THEN BEGIN
+           ; add to existing 2D hist arrays
+            (*aptr).zhist2d = (*aptr).zhist2d + zhist2d
+            (*aptr).minprz = MIN(scat_Y) < (*aptr).minprz
+            (*aptr).numpts = (*aptr).numpts + numpts
+         ENDIF ELSE BEGIN
+            have_hist.(plotIndex)[have2d,raintypeBBidx] = 1
+           ; create this part of the I/O structure to assign to the pointer
+            iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts }
+         ENDELSE
+        ; compute the mean GR Z for the samples in each DPR histogram bin
+         zhist1dpr=HISTOGRAM(scat_Y, MIN=binmin2, MAX=binmax2, BINSIZE=BINSPAN2, $
+                             LOCATIONS=Zstarts, REVERSE_INDICES=RIdpr)
+         ndprbins=N_ELEMENTS(Zstarts)
+         gvzmeanByBin=FLTARR(ndprbins)
+         przmeanByBin = gvzmeanByBin
+         MAEbyBin = gvzmeanByBin
+         nbybin = lonarr(ndprbins)
+         for ibin = 0, ndprbins-1 do begin
+            IF RIdpr[ibin] NE RIdpr[ibin+1] THEN BEGIN
+               gvzmeanByBin[ibin] = MEAN( scat_X[ RIdpr[RIdpr[ibin] : RIdpr[ibin+1]-1] ] )
+               przmeanByBin[ibin] = MEAN( scat_Y[ RIdpr[RIdpr[ibin] : RIdpr[ibin+1]-1] ] )
+               MAEbyBin[ibin] = ABS(gvzmeanByBin[ibin]-przmeanByBin[ibin])
+               nbybin[ibin] = RIdpr[ibin+1]-RIdpr[ibin]
+            ENDIF
+         endfor
+ ;        print, "locations: ", Zstarts
+ ;        print, "gvzmeanByBin: ", gvzmeanByBin
+ ;        print, "przmeanByBin: ", przmeanByBin
+         IF have_hist.(plotIndex)[have1d,raintypeBBidx] EQ 1 THEN BEGIN
+            (*aptr).gvzmeanaccum = (*aptr).gvzmeanaccum + gvzmeanByBin*nbybin
+            (*aptr).przmeanaccum = (*aptr).przmeanaccum + przmeanByBin*nbybin
+            (*aptr).MAEaccum = (*aptr).MAEaccum + MAEbyBin*nbybin
+            (*aptr).nbybinaccum = (*aptr).nbybinaccum + nbybin
+         ENDIF ELSE BEGIN
+            gvzmeanaccum = gvzmeanByBin*nbybin
+            przmeanaccum = przmeanByBin*nbybin
+            MAEaccum = MAEbyBin*nbybin
+            nbybinaccum = nbybin
+            have_hist.(plotIndex)[have1d,raintypeBBidx] = 1
+           ; append this part of the I/O structure and assign to the pointer
+            iostruct = CREATE_STRUCT( iostruct2, $
+                                      'gvzmeanaccum', gvzmeanaccum, $
+                                      'przmeanaccum', przmeanaccum, $
+                                      'MAEaccum', MAEaccum, $
+                                      'nbybinaccum', nbybinaccum, $
+                                      'Zstarts', Zstarts )
+            *ptrData_array[plotIndex,raintypeBBidx] = iostruct
+         ENDELSE
+
+end
