@@ -1,0 +1,12 @@
+package=ppsftpurlfiles
+        comment=Get ftp_url listings files for GPM GV from the PPS
+        site=arthurhou.pps.eosdis.nasa.gov
+        remote_dir=./gpmuser/gpmgv/scripts
+        local_dir=/data/tmp/PPS_CS
+        remote_user=user_name
+        remote_password=password
+        passive_ftp=true
+        flags_recursive=-lRatL
+        update_log=./pps_ftp_lists.log
+        do_deletes=false
+        get_patt=^ftp_url*
