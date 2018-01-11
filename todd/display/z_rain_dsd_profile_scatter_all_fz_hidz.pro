@@ -694,7 +694,9 @@ ENDELSE
 ; Decide which PR and GV points to include, based on percent of expected points
 ; in bin-averaged results that were above dBZ thresholds set when the matchups
 ; were done.  If unspecified, set to 100% of bins required (as before this code
-; change).  If set to zero, include all points regardless of 'completeness' of ; the volume averages.  
+; change).  If set to zero, include all points regardless of 'completeness' of
+; the volume averages.
+
 IF ( N_ELEMENTS(pctAbvThresh) NE 1 ) THEN BEGIN
    print, "Defaulting to 100 for PERCENT BINS ABOVE THRESHOLD."
    pctAbvThresh = 100
@@ -3594,6 +3596,11 @@ if (ptr_valid(ptr_pctgoodpr) eq 1) then ptr_free,ptr_pctgoodpr
 if (ptr_valid(ptr_pctgoodgv) eq 1) then ptr_free,ptr_pctgoodgv
 if (ptr_valid(ptr_pctgoodrain) eq 1) then ptr_free,ptr_pctgoodrain
 if (ptr_valid(ptr_GR_blockage) eq 1) then ptr_free, ptr_GR_blockage
+
+if (ptr_valid(ptr_BestHID) eq 1) then ptr_free,ptr_BestHID
+if (ptr_valid(ptr_HID) eq 1) then ptr_free,ptr_HID
+if (ptr_valid(ptr_bbHeight) eq 1) then ptr_free,ptr_bbHeight
+
 ; help, /memory
 
 print, ''
