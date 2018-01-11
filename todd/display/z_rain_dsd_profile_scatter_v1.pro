@@ -502,7 +502,7 @@ PRO z_rain_dsd_profile_scatter_v1, INSTRUMENT=instrument,         $
 
 IF FLOAT(!version.release) lt 8.1 THEN message, "Requires IDL 8.1 or later."
 ; TAB 12/4/17 make this a parameter if we want to be permanent
-do_RR_DM_curve_fit = 1
+do_RR_DM_curve_fit = 0
 ; 0= st below bb, 1=conv below bb, 2=all below bb 
 RR_DM_curve_fit_bb_type = 0
 
