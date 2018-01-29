@@ -2099,6 +2099,7 @@ endif
                   0 : BEGIN
                       ; accumulate stratiform rain type above the BB
                       idxabv = WHERE( BBprox EQ 2 AND rntype EQ RainType_stratiform, countabv )
+                      if countabv eq 0 then print, 'ZM Strat Above zero points **'
                       END
                  ENDCASE
                  BREAK
