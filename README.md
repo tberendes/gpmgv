@@ -1,7 +1,7 @@
 # gpmgv
-GPM Validation Network
+GPM Ground Validation Network
 
-This repository contains the source code for the GPM Validation Network (VN).  The GPM VN performs geometric volume matching of GPM satellite data with ground radar data.  
+This repository contains the source code for the GPM Ground Validation Network (VN).  The VN performs geometric volume matching of GPM satellite data with ground radar data.  
 
 gvoper - Operational scripts and idl programs to run the VN 
 
