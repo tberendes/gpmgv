@@ -855,7 +855,8 @@ ENDCASE
    IF pr_or_dpr EQ 'DPRGMI' THEN zraw=*ptr_zcor ELSE zraw=temporary(*ptr_zraw)
    zcor=temporary(*ptr_zcor)
    rain3=temporary(*ptr_rain3)
-   echoTops=temporary(*ptr_stmTopHgt)
+   ; TAB 2/22/18 added
+   IF pr_or_dpr EQ 'DPR' THEN echoTops=temporary(*ptr_stmTopHgt)
    nearSurfRain=temporary(*ptr_nearSurfRain)
    nearSurfRain_2b31=temporary(*ptr_nearSurfRain_2b31)
 ;   rnflag=temporary(*ptr_rnFlag)
