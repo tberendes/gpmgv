@@ -931,7 +931,9 @@ ENDCASE
           gvzmax = gvzmax[idxgoodenuff]
           gvzstddev = gvzstddev[idxgoodenuff]
 ;          rnFlag = rnFlag[idxgoodenuff]
-          echoTops = echoTops[idxgoodenuff]
+ ;  TAB 2/22/18 added check for DPR
+          IF pr_or_dpr EQ 'DPR' THEN echoTops = echoTops[idxgoodenuff]
+ ;         echoTops = echoTops[idxgoodenuff]
           rnType = rnType[idxgoodenuff]
           dist = dist[idxgoodenuff]
           bbProx = bbProx[idxgoodenuff]
