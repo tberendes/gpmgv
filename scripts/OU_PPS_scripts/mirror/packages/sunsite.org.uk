@@ -1,0 +1,8 @@
+package=mirror
+	comment=The Mirror Package
+	site=sunsite.org.uk
+	remote_dir=packages/mirror
+	# This setting of local_dir is suitable for Un*x
+	local_dir=/var/tmp/mirror
+	# If you are under Wind*ws then use a line like this instead:
+	#	local_dir=c:\tmp\mirror

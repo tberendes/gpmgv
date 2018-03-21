@@ -1,5 +1,5 @@
 ;+
-;  z_rain_dsd_profile_scatter_all.pro     Morris/SAIC/GPM_GV   July 2016
+;  z_rain_dsd_profile_scatter_v2.pro     Morris/SAIC/GPM_GV   July 2016
 ;
 ; DESCRIPTION
 ; -----------
@@ -30,7 +30,9 @@
 ;'NWGZMXP': GR Nw vs. DPR Max(measured Z)  (DPR column max Zm)
 ;   'EPSI': DPR (original 2A product values if available, derived if not)
 ;           epsilon vs. GR derived epsilon
-;'MRMSDSR': MRMS surface RR vs. DPR near sfc RR
+;'MRMSDSR': MRMS surface RR vs. DPR near sfc RR (x vs y)
+;'GRRMRMS': GR sfc RR (2nd lowest level) vs MRMS surface RR 
+; 'GRRDSR': GR sfc RR (2nd lowest level) vs DPR near sfc RR 
 ;
 ; If an alternate field is specified in the ALTFIELD parameter (values as
 ; defined by the IDs in quotes, above), then scatter plots will be created for
@@ -342,7 +344,8 @@
 ; 07/25/17 Berendes, GPM GV, UAH
 ;  - Added Z_FILTER_MIN and Z_FILTER_MAX parameters to provide filtering using
 ;    Zm or Zc ranges. 
-;
+; 03/02/18 Berendes, GPM GV, UAH
+;  - Merged compatibility for additional MRMS fields
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -455,7 +458,13 @@ end
 ; MODULE 1 (Main Module)
 ;===============================================================================
 
-PRO z_rain_dsd_profile_scatter_all_fz_mrms, INSTRUMENT=instrument,         $
+FUNCTION RR_DM_funct, X, A
+; First, define a return function for LMFIT:
+   ; function is A[0]*X^A[1]
+   RETURN,[ A[0]*X^A[1], X^A[1], alog(X)*A[0]*X^A[1] ]
+END
+
+PRO z_rain_dsd_profile_scatter_v2, INSTRUMENT=instrument,         $
                                     KUKA=KuKa, SCANTYPE=swath,     $
                                     PCT_ABV_THRESH=pctAbvThresh,   $
                                     GV_CONVECTIVE=gv_convective,   $
@@ -480,6 +489,7 @@ PRO z_rain_dsd_profile_scatter_all_fz_mrms, INSTRUMENT=instrument,         $
                                     MAX_BLOCKAGE=max_blockage_in,  $
                                     Z_BLOCKAGE_THRESH=z_blockage_thresh_in, $
                                     DPR_DM_THRESH=dpr_dm_thresh_in,$
+                                    DPR_DM_CUTOFF=dpr_dm_cutoff_in,$
                                     VERSION2MATCH=version2match,   $
                                     BATCH_SAVE=batch_save,         $
                                     DPR_Z_ADJUST=dpr_z_adjust,     $
@@ -495,6 +505,16 @@ PRO z_rain_dsd_profile_scatter_all_fz_mrms, INSTRUMENT=instrument,         $
 @pr_params.inc
 
 IF FLOAT(!version.release) lt 8.1 THEN message, "Requires IDL 8.1 or later."
+; TAB 12/4/17 make this a parameter if we want to be permanent
+do_RR_DM_curve_fit = 0
+; 0= st below bb, 1=conv below bb, 2=all below bb 
+RR_DM_curve_fit_bb_type = 0
+
+if do_RR_DM_curve_fit eq 1 then begin
+
+    rr_dm_x = []
+    rr_dm_y = []
+endif
 
 ; this is really just a QC step right now on the altfield value, except for
 ; setting use_zraw flag for ZM case
@@ -521,9 +541,10 @@ IF N_ELEMENTS(altfield) EQ 1 THEN BEGIN
    'NWGZMXP': z2do = 'NwGZmxP'    ; GR Nw vs. DPR ZmMax
     'PIADMP': z2do = 'PIADmP'
       'EPSI': z2do = 'EPSI'
+       'HID': z2do = 'HID'
        ELSE : message, "Invalid ALTFIELD value, must be one of: " + $
               "ZC, ZM, D0, DM, NW, N2, RR, RC, RP, ZCNWG, NWDMG, ZCNWP" + $
-              ", NWDMP, DMRRG, RRNWG, DMRRP, RRNWP, NWGZMXP, EPSI"
+              ", NWDMP, DMRRG, RRNWG, DMRRP, RRNWP, NWGZMXP, EPSI, HID"
    ENDCASE
 ENDIF ELSE z2do = 'Zc'
 
@@ -588,9 +609,21 @@ IF N_ELEMENTS(ray_range) EQ 2 THEN BEGIN
       filtertitlestring = filtertitlestring + 'Outer ' + STRING(ray_range[1],ray_range[0],format='(I0,"-",I0)')
    ENDELSE
 ENDIF
+
+; TAB 11/14/17 added accumulator for HID
+; indexed by raintypeBBidx and 11 categories 
+;  HID_categories = [ 'MIS','DZ','RN','CR','DS','WS','VI','LDG','HDG','HA','BD','HR' ]
+;  HID_categories = [ 'MIS','DZ','RN','CR','DS','WS','VI','LDG','HDG','HA','BD','HR' ]
+  HID_categories = [ 'MIS','DZ','RN','CR','DS','WS','VI','LDG','HDG','HA','BD','HR','AHA' ]
+;  HID_histogram = INTARR(4,15)
+;  HID_histogram1 = LONARR(4,12)
+  HID_histogram1 = LONARR(4,13)
+  HID_histogram2= LONARR(4,13)
+
 ;TAB 8/12/17
 ; LUN for writing anomaly info to file
 openw, anom_LUN, outpath + '/anomaly.txt', /GET_LUN
+openw, hail_LUN, outpath + '/hail.txt', /GET_LUN
 
 ; determine whether to display the scatter plot objects or just create them
 ; in a buffer for saving in batch mode
@@ -599,28 +632,32 @@ IF KEYWORD_SET(batch_save) THEN buffer=1 ELSE buffer=0
 ; set up plot-specific flags for presence of data and 1-D and 2-D Histograms
 ; of the data.  First triplet of values are for stratiform/aboveBB, 2nd triplet
 ; is convective/belowBB, 3rd is Any/All
-have_Hist = {    ZM : [[0,0,0],[0,0,0],[0,0,0]], $
-            MRMSDSR : [[0,0,0],[0,0,0],[0,0,0]], $
-                 ZC : [[0,0,0],[0,0,0],[0,0,0]], $
-                 D0 : [[0,0,0],[0,0,0],[0,0,0]], $
-                 DM : [[0,0,0],[0,0,0],[0,0,0]], $
-;              DMANY : [[0,0,0],[0,0,0],[0,0,0]], $
-                 NW : [[0,0,0],[0,0,0],[0,0,0]], $
-                 N2 : [[0,0,0],[0,0,0],[0,0,0]], $
-                 RR : [[0,0,0],[0,0,0],[0,0,0]], $
-                 RC : [[0,0,0],[0,0,0],[0,0,0]], $
-                 RP : [[0,0,0],[0,0,0],[0,0,0]], $
-              ZCNWG : [[0,0,0],[0,0,0],[0,0,0]], $
-              NWDMG : [[0,0,0],[0,0,0],[0,0,0]], $
-              ZCNWP : [[0,0,0],[0,0,0],[0,0,0]], $
-              NWDMP : [[0,0,0],[0,0,0],[0,0,0]], $
-              DMRRG : [[0,0,0],[0,0,0],[0,0,0]], $
-              RRNWG : [[0,0,0],[0,0,0],[0,0,0]], $
-              DMRRP : [[0,0,0],[0,0,0],[0,0,0]], $
-              RRNWP : [[0,0,0],[0,0,0],[0,0,0]], $
-            NWGZMXP : [[0,0,0],[0,0,0],[0,0,0]], $
-             PIADMP : [[0,0,0],[0,0,0],[0,0,0]], $
-               EPSI : [[0,0,0],[0,0,0],[0,0,0]] }
+; TAB 11/13/17 added fourth dimension for above BB convective
+have_Hist = {   HID : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+            MRMSDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+            GRRMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+             GRRDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 ZM : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              DMRRG : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 ZC : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 D0 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 DM : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+;              DMANY : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 NW : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 N2 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 RR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 RC : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+                 RP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              ZCNWG : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              NWDMG : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              ZCNWP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              NWDMP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              RRNWG : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              DMRRP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              RRNWP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+            NWGZMXP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+             PIADMP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
 
 ; position indices/definitions of the 3 flags in the array triplets in the structure
 ; - must be identically defined in accum_scat_data.pro
@@ -639,12 +676,16 @@ nPlots = N_ELEMENTS(PlotTypes)
 PlotHash = HASH(PlotTypes, INDGEN(nPlots))  ;, /FOLD_CASE)
 
 ; define strings to indicate rain type in saved file names
-rntypeLabels = ['Stratiform', 'Convective', 'AllTypes']
+;rntypeLabels = ['Stratiform', 'Convective', 'AllTypes']
+rntypeLabels = ['Stratiform', 'Convective', 'AllTypes', 'Convective']
 
 ; define a 2-D array of pointers to data accumulations, histograms, etc., in a
 ; structure created in call to accum_scat_data().  2nd dimension is data subset
 ; being accumulated (0 = ConvectiveAboveBB, 1 = StratiformBelowBB, 2 = Any/All)
-plotDataPtrs = PTRARR(nPlots, 3, /ALLOCATE_HEAP)
+;plotDataPtrs = PTRARR(nPlots, 3, /ALLOCATE_HEAP)
+; TAB 11/13/17 changed this to add new fourth category, convective above BB
+; being accumulated (0 = ConvectiveBelowBB, 1 = StratiformBelowBB, 2 = Any/All, 3=ConvectiveAboveBB)
+plotDataPtrs = PTRARR(nPlots, 4, /ALLOCATE_HEAP)
 
 IF ( N_ELEMENTS(instrument) NE 1 ) THEN BEGIN
    print, "Defaulting to DPR for instrument type."
@@ -678,7 +719,9 @@ ENDELSE
 ; Decide which PR and GV points to include, based on percent of expected points
 ; in bin-averaged results that were above dBZ thresholds set when the matchups
 ; were done.  If unspecified, set to 100% of bins required (as before this code
-; change).  If set to zero, include all points regardless of 'completeness' of ; the volume averages.  
+; change).  If set to zero, include all points regardless of 'completeness' of
+; the volume averages.
+
 IF ( N_ELEMENTS(pctAbvThresh) NE 1 ) THEN BEGIN
    print, "Defaulting to 100 for PERCENT BINS ABOVE THRESHOLD."
    pctAbvThresh = 100
@@ -742,6 +785,26 @@ IF N_ELEMENTS(dpr_dm_thresh_in) EQ 1 THEN BEGIN
    ENDIF ELSE BEGIN
       help, dpr_dm_thresh_in
       message, "Illegal dpr_dm_thresh type, " + $
+               "must be a number between 0.5 and 5.0"
+   ENDELSE
+ENDIF
+
+; set some conservative allowed range for dpr_dm_cutoff, if specified
+do_dm_cutoff = 0
+IF N_ELEMENTS(dpr_dm_cutoff_in) EQ 1 THEN BEGIN
+   IF is_a_number(dpr_dm_cutoff_in) THEN BEGIN
+      dpr_dm_cutoff_f = FLOAT(dpr_dm_cutoff_in)
+      IF dpr_dm_cutoff_f LT 0.5 OR dpr_dm_cutoff_f GT 5.0 THEN BEGIN
+         help, dpr_dm_cutoff_in
+         message, "Out of range dpr_dm_cutoff value, " + $
+                  "must be between 0.5 and 5.0 (mm)"
+      ENDIF ELSE BEGIN
+         dpr_dm_cutoff = dpr_dm_cutoff_f
+         do_dm_cutoff = 1
+      ENDELSE
+   ENDIF ELSE BEGIN
+      help, dpr_dm_cutoff_in
+      message, "Illegal dpr_dm_cutoff type, " + $
                "must be a number between 0.5 and 5.0"
    ENDELSE
 ENDIF
@@ -825,6 +888,43 @@ IF N_ELEMENTS(alt_bb_file) EQ 1 THEN addme = addme+'_AltBB'
 IF do_dm_thresh EQ 1 THEN addme = addme+'_Dm_GE_'+ $
                                   STRING(dpr_dm_thresh, FORMAT='(F3.1)')
 
+IF do_dm_cutoff EQ 1 THEN addme = addme+'_Dm_LE_'+ $
+                                  STRING(dpr_dm_cutoff, FORMAT='(F3.1)')
+
+IF do_dm_cutoff EQ 1 AND do_dm_thresh EQ 1 THEN BEGIN
+   message, "Error:  cannot do both dpr_dm_thresh and dpr_dm_cutoff filtering." $
+            +"  Quitting.", /INFO
+   GOTO, cleanUp
+ENDIF
+s2ku = KEYWORD_SET( s2ku )
+
+IF N_ELEMENTS(outpath) NE 1 THEN BEGIN
+   outpath='/data/tmp'
+   PRINT, "Assigning default output file path: ", outpath
+ENDIF
+
+outpath_sav = outpath  ; default path for any SAVE files to be written
+
+; Set up for the PR-GV rain type matching based on GV reflectivity
+
+IF ( N_ELEMENTS(gv_Convective) NE 1 ) THEN BEGIN
+   print, "Defaulting to 35.0 dBZ for GV Convective floor threshold."
+   gvConvective = 35.0
+ENDIF ELSE BEGIN
+   gvConvective = FLOAT(gv_Convective)
+ENDELSE
+
+IF ( N_ELEMENTS(gv_Stratiform) NE 1 ) THEN BEGIN
+   print, "Defaulting to 25.0 dBZ for GV Stratiform ceiling threshold."
+   gvStratiform = 25.0
+ENDIF ELSE BEGIN
+   gvStratiform = FLOAT(gv_Stratiform)
+ENDELSE
+
+;  - No more default assignment of NCSITEPATH if not specified, launch the File
+;    Selector to specify the location in this case, starting from the default
+;    location /data/gpmgv/netcdf/geo_match/SAT, where SAT is defined by the
+;    value of INSTRUMENT (SAT=GPM for DPR, SAT=TRMM for PR).
 s2ku = KEYWORD_SET( s2ku )
 
 IF N_ELEMENTS(outpath) NE 1 THEN BEGIN
@@ -879,6 +979,8 @@ ENDIF
 ;help, nf, prfiles
 
 ; set up pointers for each field to be returned from fprep_geo_match_profiles()
+ptr_BestHID=ptr_new(/allocate_heap)
+ptr_HID=ptr_new(/allocate_heap)
 ptr_geometa=ptr_new(/allocate_heap)
 ptr_sweepmeta=ptr_new(/allocate_heap)
 ptr_sitemeta=ptr_new(/allocate_heap)
@@ -902,6 +1004,7 @@ ptr_rnType=ptr_new(/allocate_heap)
 IF pr_or_dpr EQ 'DPR' THEN ptr_stmTopHgt=ptr_new(/allocate_heap)
 ptr_pia=ptr_new(/allocate_heap)
 ptr_bbProx=ptr_new(/allocate_heap)
+ptr_bbHeight=ptr_new(/allocate_heap)
 ptr_hgtcat=ptr_new(/allocate_heap)
 ptr_dist=ptr_new(/allocate_heap)
 ptr_pctgoodpr=ptr_new(/allocate_heap)
@@ -1129,7 +1232,7 @@ CASE pr_or_dpr OF
        PTRGVRRMEAN=ptr_gvrr, PTRGVRRMAX=ptr_gvrrmax, PTRGVRRSTDDEV=ptr_gvrrstddev,$
        PTRGVRCMEAN=ptr_gvrc, PTRGVRCMAX=ptr_gvrcmax, PTRGVRCSTDDEV=ptr_gvrcstddev, $
        PTRGVRPMEAN=ptr_gvrp, PTRGVRPMAX=ptr_gvrpmax, PTRGVRPSTDDEV=ptr_gvrpstddev, $
-       PTRGVMODEHID=ptr_BestHID, $
+       PTRGVMODEHID=ptr_BestHID, PTRGVHID=ptr_HID, $
        PTRGVZDRMEAN=ptr_GR_DP_Zdr, PTRGVZDRMAX=ptr_GR_DP_Zdrmax,$
        PTRGVZDRSTDDEV=ptr_GR_DP_Zdrstddev, $
        PTRGVKDPMEAN=ptr_GR_DP_Kdp, PTRGVKDPMAX=ptr_GR_DP_Kdpmax, $
@@ -1146,7 +1249,7 @@ CASE pr_or_dpr OF
        PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
 
        PTRrainflag_int=ptr_rnFlag, PTRraintype_int=ptr_rnType, PTRbbProx=ptr_bbProx, $
-       PTRhgtcat=ptr_hgtcat, PTRdist=ptr_dist,  $
+       PTRhgtcat=ptr_hgtcat, PTRdist=ptr_dist,PTRbbHgt=ptr_bbHeight,  $
        PTRpctgoodpr=ptr_pctgoodpr, PTRpctgoodrain=ptr_pctgoodrain, $
        PTRpctgood250pr=ptr_pctgood250pr, PTRpctgood250rawpr=ptr_pctgood250rawpr, $
        PTRpctgoodDprDm=ptr_pctgoodDprDm, PTRpctgoodDprNw=ptr_pctgoodDprNw, $
@@ -1181,7 +1284,7 @@ CASE pr_or_dpr OF
        PTRGVRCMEAN=ptr_gvrc, PTRGVRCMAX=ptr_gvrcmax, PTRGVRCSTDDEV=ptr_gvrcstddev, $
        PTRGVRPMEAN=ptr_gvrp, PTRGVRPMAX=ptr_gvrpmax, PTRGVRPSTDDEV=ptr_gvrpstddev, $
        PTRGVBLOCKAGE=ptr_GR_blockage, $
-       PTRtop=ptr_top, PTRbotm=ptr_botm, $
+       PTRtop=ptr_top, PTRbotm=ptr_botm, PTRbbHgt=ptr_bbHeight, $
        PTRsfcrainpr=ptr_nearSurfRain, PTRraintype_int=ptr_rnType, $
        PTRxCorners=ptr_xCorner, PTRyCorners=ptr_yCorner, PTRbbProx=ptr_bbProx, $
        PTRhgtcat=ptr_hgtcat, PTRdist=ptr_dist, PTRpridx_long=ptr_pr_index, $
@@ -1192,6 +1295,7 @@ CASE pr_or_dpr OF
        PTRpctgooddzerogv=ptr_pctgooddzerogv, PTRpctgoodnwgv=ptr_pctgoodnwgv, $
        PTRpctgooddmgv=ptr_pctgooddmgv, PTRpctgoodn2gv=ptr_pctgoodn2gv, $
        BBPARMS=BBparms, BB_RELATIVE=bb_relative, ALT_BB_HGT=alt_bb_file, $
+       PTRGVMODEHID=ptr_BestHID, PTRGVHID=ptr_HID, $
        FORCEBB=forcebb, RAY_RANGE=ray_range )
 
        have_SAT_DSD = 1   ; we always have DPRGMI DSD parameters
@@ -1210,6 +1314,8 @@ ENDIF
 ; memory-pass pointer variables to "normal-named" data field arrays/structures
 ; -- this is so we can use existing code without the need to use pointer
 ;    dereferencing syntax
+   besthid=temporary(*ptr_BestHID)
+   hid=temporary(*ptr_HID)
    mygeometa=temporary(*ptr_geometa)
    mysite=temporary(*ptr_sitemeta)
    mysweeps=temporary(*ptr_sweepmeta)
@@ -1233,6 +1339,7 @@ ENDIF
 ;   rnflag=temporary(*ptr_rnFlag)
    rntype=temporary(*ptr_rnType)
    bbProx=temporary(*ptr_bbProx)
+   bbHeight=temporary(*ptr_bbHeight)
    hgtcat=temporary(*ptr_hgtcat)
    dist=temporary(*ptr_dist)
    pctgoodpr=temporary(*ptr_pctgoodpr)
@@ -1256,11 +1363,18 @@ IF have_SAT_DSD EQ 1 THEN BEGIN
    pctgoodDPR_Dm=temporary(*ptr_pctgoodDprDm)
    DPR_Nw=temporary(*ptr_DprNw/NW_SCALE)      ; dBNw -> log10(Nw)
    pctgoodDPR_NW=temporary(*ptr_pctgoodDprNw )
-ENDIF ELSE BEGIN IF do_dm_thresh EQ 1 THEN BEGIN
+ENDIF ELSE BEGIN
+   IF do_dm_thresh EQ 1 THEN BEGIN
       message, "No DPR Dm present, but dpr_dm_thresh filtering requested." $
                +"  Quitting.", /INFO
       GOTO, cleanUp
    ENDIF
+   IF do_dm_cutoff EQ 1 THEN BEGIN
+      message, "No DPR Dm present, but dpr_dm_cutoff filtering requested." $
+               +"  Quitting.", /INFO
+      GOTO, cleanUp
+   ENDIF
+
 ENDELSE
 
 IF ptr_valid(ptr_dprEpsilon) AND ptr_valid(ptr_pctgooddprEpsilon) THEN BEGIN
@@ -1371,8 +1485,12 @@ ENDIF ELSE have_RP = 0
 ; set up the data presence flags for the two-parameter plots
 
 ; TAB 9/29/17  Hardcode for now, check presence later
-
+;******************^^^^^^^^^^^^^^^***************&^^^^^^^^^^^^^^^*^*^
+; fix this !!!!!!!!!!!!!
 have_hist.MRMSDSR[haveVar,*] = 1
+have_hist.GRRMRMS[haveVar,*] = 1
+have_hist.GRRDSR[haveVar,*] = 1
+;have_hist.MRMSDSR[haveVar,*] = 0
 
 IF have_NW THEN BEGIN
   have_hist.ZcNwG[haveVar,*] = 1
@@ -1446,10 +1564,9 @@ blockfilter = 'C'    ; initialize blockage filter to "by Column"
 ;-------------------------------------------------
 ; TAB 7/27/17 added Z thresholding check
 ; Define and/or reset filter flag variables if doing blockage, Dm, Z, or ET thresholding
-IF do_GR_blockage NE 0 OR do_dm_thresh EQ 1 $
+IF do_GR_blockage NE 0 OR do_dm_thresh EQ 1 OR do_dm_cutoff EQ 1  $
    OR N_ELEMENTS( et_range_m ) EQ 2 OR zfilter_type NE 'none' THEN BEGIN
       flag2filter = INTARR( SIZE(gvz, /DIMENSIONS) )
-     ; flag2filter2D = INTARR( SIZE(nearSurfRain, /DIMENSIONS) )
       filterText=''
 ENDIF
 
@@ -1588,6 +1705,17 @@ help, dpr_dm_thresh, ndmdprgt25
 ENDIF
 ;********* end original code ************
 
+IF do_dm_cutoff EQ 1 THEN BEGIN
+   ; find all samples with DPR Dm > dpr_dm_cutoff
+   idxdmTooHigh= WHERE(DPR_Dm GT dpr_dm_cutoff , ndmdprgtcutoff)
+help, dpr_dm_cutoff, ndmdprgtcutoff 
+   IF N_ELEMENTS(idxdmTooHigh) NE 0 THEN BEGIN
+       flag2filter[idxDmTooHigh] = 1
+            filterText=filterText+' DPR_Dm le ' + STRING(dpr_dm_cutoff, FORMAT='(F3.1)')
+            dmTitleText=' DPR Dm le ' + STRING(dpr_dm_cutoff, FORMAT='(F3.1)')
+   ENDIF
+ENDIF
+
 ;-------------------------------------------------
 
 ; Optional data clipping based on echo top height (stormTopHeight) range:
@@ -1645,6 +1773,32 @@ IF zfilter_type NE 'none' THEN BEGIN
    ENDIF
    filterText = filterText + filtertitlestring 
 ENDIF
+;; TAB 8/21/17
+;; Find anomalous samples using unfiltered variables
+;;anomaly = where ( DPR_RR GT 40 AND PIA > 3, num_anomalies)
+;anomaly = where ( DPR_RR GT 40 AND DPR_Nw LT 3.5 , num_anomalies)
+;if num_anomalies GT 0 then begin
+;   printf, anom_LUN, "Anomaly (DPR_RR GT 40 AND DPR_Nw LT 3.5): ", ncfilepr
+;   print, "Anomaly (DPR_RR GT 40 AND DPR_Nw LT 3.5): ", ncfilepr
+;endif
+;; accumulate convective rain type below the BB at/below 3 km
+;;idxabv = WHERE( BBprox EQ 0 AND rntype EQ RainType_convective $
+;;                AND hgtcat LE 1, countabv )
+;
+;anomaly = where ( zcor GT 54 AND BBprox EQ 0 AND rntype EQ RainType_convective $
+;                 AND hgtcat LE 1, num_anomalies)
+;if num_anomalies GT 0 then begin
+;   printf, anom_LUN, "Anomaly (Zcor GT 54 AND convective below BB at/below 3 km) : ", ncfilepr
+;   print, "Anomaly (Zcor GT 54 AND convective below BB at/below 3 km) : ", ncfilepr
+;endif
+;;anomaly = where ( DPR_Dm GE 3.0 AND DPR_Dm LE 3.1 AND DPR_RR GT 40 , num_anomalies)
+;anomaly = where ( DPR_Dm GE 3.0 AND DPR_RR GT 40 , num_anomalies)
+;if num_anomalies GT 0 then begin
+;   printf, anom_LUN, "Anomaly (DPR_Dm GE 3.0 AND DPR_RR GT 40): ", ncfilepr
+;   print, "Anomaly (DPR_Dm GE 3.0 AND DPR_RR GT 40): ", ncfilepr
+;endif
+;-------------------------------------------------
+
    IF ( N_ELEMENTS(flag2filter) NE 0) THEN BEGIN
      ; define an array that flags samples that passed filtering tests
       unfiltered = pctgoodpr < pctgoodgv ;minpctcombined
@@ -1692,6 +1846,21 @@ print, ''
           dist = dist[idxgoodenuff]
           bbProx = bbProx[idxgoodenuff]
           hgtcat = hgtcat[idxgoodenuff]
+; TAB 12/01/17 added HID variables, any new variables must be filtered here
+ ;         hid = hid[*,idxgoodenuff]
+;  cant figure out how to reindex the Hid arrays, so for now just use besthid
+;          sz = size(hid)
+;         hid_new = lonarr(sz[1],N_ELEMENTS(idxgoodenuff))
+;          print, 'size(hid) ',size(hid) 
+;          print, 'size idxgoodenuff ', N_ELEMENTS(idxgoodenuff)
+;          for i=0,sz[1]-1 do begin
+;             for j=0,N_ELEMENTS(idxgoodenuff)-1 do begin
+;                 hid_new[i,j] = hid[i,idxgoodenuff[j]]
+;             endfor
+;          endfor
+;          hid = hid_new
+          besthid = besthid[idxgoodenuff]
+ 
           IF have_DprEpsilon EQ 1 THEN BEGIN
              dprEpsilon = dprEpsilon[idxgoodenuff]
              pctgoodDPR_Epsilon = pctgoodDPR_Epsilon[idxgoodenuff]
@@ -1845,6 +2014,15 @@ if have_Dm then begin
       print, "Anomaly (DPR_Dm GE 3.0 AND DPR_RR GT 40): ", ncfilepr
    endif
 endif
+; TAB  11/28/17 Added for Patrick Gatlin
+; output filename for possible hail samples
+hail = where ( gvzmax GT 65 AND rntype EQ RainType_convective $
+                 AND hgtcat GE 2, num_hail)
+if num_hail GT 0 then begin
+   printf, hail_LUN, num_hail,ncfilepr,format='(%"%d\,%s")'
+;   printf, hail_LUN, num_hail, " possible hail samples in ", ncfilepr
+   print, num_hail,ncfilepr,format='(%"%d possible hail samples in %s")'
+endif
 
 ;-------------------------------------------------------------
 
@@ -1902,16 +2080,48 @@ endif
    endfor
 
   ;# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-;
+
    IF do_scatr EQ 1 THEN BEGIN
    FOR iplot = 0, nPlots-1 DO BEGIN
    trim = 1   ; flag whether to suppress low percentage bins in plots
-   for raintypeBBidx = 0, 2 do begin
+;   for raintypeBBidx = 0, 2 do begin
+; TAB 11/10/17 added fourth raintypeBBidx for convective above BB within 3 height bins for Z plots only 
+   for raintypeBBidx = 0, 3 do begin
      ; set up the indices of the samples to include in the scatter plots
+      skip_plot = 0
       SWITCH PlotTypes(iplot) OF
+       'HID' : BEGIN ; only do for convective above BB
+                 CASE raintypeBBidx OF
+                  3 : BEGIN
+                      ; use four layers above highest layer affected by BB
+                      idxabv1 = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
+                      idxabv2 = WHERE( hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
        'ZM' : 
        'ZC' : BEGIN
                  CASE raintypeBBidx OF
+                  3 : BEGIN
+                      ; TAB 11/10/17 accumulate convectve rain types above the BB within 3 height levels 
+;BBparms = {meanBB : -99.99, BB_HgtLo : -99, BB_HgtHi : -99}
+                     ; idxabv = WHERE( BBprox EQ 2 AND rntype EQ RainType_convective, countabv )
+                      
+; use three layers above highest layer affected by BB
+                     ; idxabv = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      ;idxabv = WHERE( hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+; use four layers above highest layer affected by BB
+                      idxabv = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                     ; go extra layer above BB
+                     ; idxabv = WHERE( BBprox EQ 2 AND hgtcat GT (BBparms.BB_HgtHi+1) AND hgtcat LE (BBparms.BB_HgtHi + 4) $ 
+                     ;                 AND rntype EQ RainType_convective, countabv )
+                     ;idxabv = WHERE(  hgtcat GT (BBparms.BB_HgtHi+2) AND rntype EQ RainType_convective, countabv )
+                     ; print,'layer hgtcat', hgtcat, ' hgthi ', BBparms.BB_HgtHi, ' hgtlo ', BBparms.BB_HgtLo, ' count ', countabv
+                      END
                   2 : BEGIN
                       ; accumulate any/all rain types above the BB
                       idxabv = WHERE( BBprox EQ 2, countabv )
@@ -1923,6 +2133,7 @@ endif
                   0 : BEGIN
                       ; accumulate stratiform rain type above the BB
                       idxabv = WHERE( BBprox EQ 2 AND rntype EQ RainType_stratiform, countabv )
+                      if countabv eq 0 then print, 'ZM Strat Above zero points **'
                       END
                  ENDCASE
                  BREAK
@@ -1941,6 +2152,10 @@ endif
        ELSE : BEGIN
                 ; accumulate 2-D histograms of below-BB Dm/D0/Nw/N2/Rx at/below 3 km
                  CASE raintypeBBidx OF
+                  3 : BEGIN
+                      ; if plot type is 3 and not a Z plot, skip plot 
+                      skip_plot = 1
+                      END
                   2 : BEGIN
                       ; accumulate any/all rain types below the BB at/below 3 km
                       idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1, countabv )
@@ -1968,6 +2183,7 @@ endif
               END
       ENDSWITCH
 
+     if skip_plot eq 1 then goto, plot_skipped
      ; set up histogram parameters by plot type
       SWITCH PlotTypes(iplot) OF
 ;       'DMANY' :
@@ -2123,6 +2339,8 @@ endif
                  ENDELSE
                  BREAK
               END
+  'GRRMRMS' :
+  'GRRDSR' :
   'MRMSDSR' : BEGIN
 ;                 binmin1 = 0.0  & binmin2 = 0.0
 ;                 binmax1 = 60.0 & binmax2 = 60.0
@@ -2271,6 +2489,18 @@ endif
                     ;scat_X = GR_RR[idxabv]
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Dm[idxabv]
+		            if do_RR_DM_curve_fit eq 1 and RR_DM_curve_fit_bb_type eq raintypeBBidx then begin
+                         idx_ok = where(GR_RR ge 0 and GR_Dm ge 0)
+                         ; subset every 4 samples to accumulate fit function points
+                         num_pts = N_ELEMENTS(idx_ok)
+                         subset = idx_ok[0:num_pts-1:4]
+                         ;subset = idxabv 
+                         if num_pts GT 0 then begin
+                            rr_dm_x = [ temporary(rr_dm_x), GR_Dm[subset] ]     
+                            ;rr_dm_y = [ temporary(rr_dm_y),(10^(zcor[subset]/10))/GR_RR[subset] ]     
+                            rr_dm_y = [ temporary(rr_dm_y), GR_RR[subset] ]     
+                         endif
+                    endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2279,6 +2509,7 @@ endif
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
               END
+
     'RRNWG' : BEGIN
                 ; accumulate 2-D histogram of Dm vs. Nw
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
@@ -2433,6 +2664,57 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF
               END
+      'HID' : BEGIN
+                  if raintypeBBidx EQ 3 then begin
+; skip first array index (missing)  
+                  hc1 = besthid[idxabv1] 
+              ;    print, 'HID ', hc1 
+                  nelem = N_ELEMENTS(hc1)
+              ;    print, 'nelem ', nelem
+                  for i=0, nelem-1 do begin
+                      if hc1[i] gt 0 then HID_histogram1[raintypeBBidx, hc1[i]]++
+  ;HID_categories = [ 'MIS','DZ','RN','CR','DS','WS','VI','LDG','HDG','HA','BD','HR','AHA' ]
+                      if hc1[i] eq 2 or hc1[i] eq 8 or hc1[i] eq 9 then HID_histogram1[raintypeBBidx, 12]++ 
+                  endfor 
+
+                  hc2 = besthid[idxabv2] 
+              ;    print, 'HID ', hc2 
+                  nelem = N_ELEMENTS(hc2)
+              ;    print, 'nelem ', nelem
+                  for i=0, nelem-1 do begin
+                      if hc2[i] gt 0 then HID_histogram2[raintypeBBidx, hc2[i]]++
+                      if hc2[i] eq 2 or hc2[i] eq 8 or hc2[i] eq 9 then HID_histogram2[raintypeBBidx, 12]++ 
+                  endfor 
+                  endif
+
+; can't figure out how to correctly reindex hid histograms, so for now use besthid
+;                  print, 'size hid ', size(hid)
+;                  sz = size(hid)
+;                  num_bins = sz[1]
+;                  ;num_hist = N_ELEMENTS(hist_hid)
+;;                  print, 'size hist_hid ', size(hist_hid)
+;                  ;num_hist = sz[1]
+;                  num_hist = N_ELEMENTS(hist_hid)
+;                  if num_bins gt 0 then begin
+;                       print, 'num_bins ', num_bins
+;;                       for i=1, num_bins-1 do BEGIN ; histogram bins
+;                       for i=1, 11 do BEGIN ; histogram bins
+;                            sum = 0
+;                            histcnts = hid[i,idxabv]
+;                            n_gr_pts = N_ELEMENTS(histcnts)
+;                            print, 'n_gr_pts ', n_gr_pts
+;                            for j=0,n_gr_pts-1 do begin
+;;                                 if hid[i,idxabv[j]] GT 0 then sum += hid[i,idxabv[j]]   
+;                                 if histcnts[j] GT 0 then sum += histcnts[j]   
+;                            endfor 
+;                            print, 'sum ', sum
+;                            HID_histogram[raintypeBBidx, i] += sum 
+;                       ENDFOR
+;                  endif
+                  ;foreach hid, scat_x do BEGIN
+                  ;    if hid gt 0 then HID_histogram[raintypeBBidx, hid]++
+                  ;ENDFOREACH
+              END
   'MRMSDSR' : BEGIN
                     idxnonzero=WHERE(nearSurfRain GT 0.0 and mrmsrrveryhigh GT 0.0,count )
                     if count gt 0 then begin 
@@ -2446,8 +2728,35 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                                      iPlot, raintypeBBidx
                     endif
               END
+  'GRRMRMS' : BEGIN
+  					near_sfc_gr_rr = GR_RR[*,1] ; choose second scan above surface
+                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrmsrrveryhigh GT 0.0,count )
+                    if count gt 0 then begin 
+                       scat_X = near_sfc_gr_rr[idxabv]
+                       scat_Y = mrmsrrveryhigh[idxnonzero]
+                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx
+                    endif
+              END
+  'GRRDSR' : BEGIN
+   					near_sfc_gr_rr = GR_RR[*,1] ; choose second scan above surface
+                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and nearSurfRain GT 0.0,count )
+                    if count gt 0 then begin 
+                       scat_X = near_sfc_gr_rr[idxnonzero]
+                       scat_Y = nearSurfRain[idxnonzero]
+                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx
+                    endif
+              END
       ENDCASE
    endfor
+
+   plot_skipped:
+
    ENDFOR
    ENDIF
 
@@ -2476,8 +2785,28 @@ IF N_ELEMENTS(altfield) EQ 1 THEN BEGIN
    ENDIF ELSE print, "Doing " + PlotTypes(idx2do) + " plots."
 ENDIF
 
-FOR raintypeBBidx = 0, 2 do begin
+; TAB 11/10/17 added fourth raintype for convective above BB within 3 height bins for Z plots only 
+;FOR raintypeBBidx = 0, 2 do begin
+FOR raintypeBBidx = 0, 3 do begin
 
+   if raintypeBBidx eq 3 then begin
+
+      SWITCH PlotTypes(idx2do) OF
+         'HID': BEGIN
+                print, 'creating HID plot conv above BB'     
+                break
+                END
+         'ZM' :
+         'ZC' : BEGIN
+                print, 'creating Z plot conv above BB'     
+                break
+                END
+         ELSE : BEGIN
+                print, 'skipping plot conv above BB'     
+                goto, plot_skipped1      
+                END
+      ENDSWITCH
+   endif
 trim = 1   ; flag whether to suppress low percentage bins in plots
 do_normBias = 0    ; flag whether to include normalized bias on plot
 
@@ -2485,12 +2814,14 @@ ptr2do = plotDataPtrs[idx2do, raintypeBBidx]
 BB_string = '_BelowBB'
 ; Have to check both that data were read for the variable(s), and that
 ; histogram data were accumulated for this instance before attempting the plot
-IF have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL THEN BEGIN
+; TAB 11/14/17 changed conditon to allow the HID histogram without checking have_hist structure
+;IF have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL THEN BEGIN
+IF PlotTypes(idx2do) EQ 'HID' OR (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL) THEN BEGIN
   ; CREATE THE SCATTER PLOT OBJECT FROM THE BINNED DATA
    do_MAE_1_1 = 1    ; flag to include/suppress MAE and the 1:1 line on plots
    bustOut=0
 
-   do_plot = 1
+   do_mrms_plot = 1
    SWITCH PlotTypes(idx2do) OF
     'D0' : 
     'DM' : BEGIN
@@ -2728,8 +3059,10 @@ IF have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL THE
 	      xticknames = yticknames
 	      yticknames = temptick
               xmajor=N_ELEMENTS(xticknames) & ymajor=N_ELEMENTS(yticknames)
-              titleLine1 = "GR Dm vs. RR Scatter"
-              pngpre="GR_Dm_vs_RR_Scatter"
+              titleLine1 = "GR RR vs. Dm Scatter"
+              pngpre="GR_RR_vs_Dm_Scatter"
+             ; titleLine1 = "GR Dm vs. RR Scatter"
+             ; pngpre="GR_Dm_vs_RR_Scatter"
 ; TAB 8/8/17 
               ;xunits='(mm/h)'
               ;yunits='mm'
@@ -2739,8 +3072,23 @@ IF have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL THE
               xunits='mm'
               ytitle=  'GR RR '+ yunits
               xtitle=  'GR Dm (' + xunits + ')'
+              if do_RR_DM_curve_fit eq 1 and RR_DM_curve_fit_bb_type eq raintypeBBidx then begin
+  ;                 measure_errors = 0.05 * rr_dm_y 
+                   ; Provide an initial guess for the function's parameters:
+                   ;A = [1, 5.0]
+                   A = [500, 3.0]
+                   fita = [1,1]
+                 ;  print, 'rr_dm_x ', rr_dm_x
+                 ;  print, 'rr_dm_y ', rr_dm_y
+                   ;coefs = LMFIT(rr_dm_x, rr_dm_y, A, MEASURE_ERRORS=measure_errors, /DOUBLE, $
+                   coefs = LMFIT(rr_dm_x, rr_dm_y, A, /DOUBLE, $
+                       FITA = fita, FUNCTION_NAME = 'RR_DM_funct')
+                   print, 'RR vs Dm LMFIT coeffients ', A 
+
+              endif
               BREAK
            END
+
  'RRNWG' : BEGIN
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
@@ -2998,9 +3346,20 @@ IF have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL THE
               ytitle= pr_or_dpr +' $\epsilon$'
               BREAK
            END
+   'HID' : BEGIN
+              do_MAE_1_1 = 0
+              if raintypeBBidx eq 3 then BEGIN
+                   SCAT_DATA = "Convective Samples, Above Bright Band (3 lyrs)"
+                   BB_string = '_AboveBB_3lyrs'
+                   print, 'HID rain type 3'
+              ENDIF ELSE BEGIN
+                   goto, plot_skipped1
+              ENDELSE
+              BREAK
+           END
     'MRMSDSR' : BEGIN
 print, "mrms plot...."
-
+              do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Footprints"
@@ -3008,24 +3367,82 @@ print, "mrms plot...."
                    xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    END
                ELSE : BEGIN
-                   do_plot = 0
+                   do_mrms_plot = 0
                    END
               ENDCASE
-              if do_plot NE 1 then break
+              if do_mrms_plot NE 1 then break
 
               yticknames=xticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
               titleLine1 = satprodtype+' '+version+"MRMS RR vs. DPR Sfc RR "+PlotTypes(idx2do)+ $
-                           " Scatter, Mean MRMS-DPR Bias: "
-              pngpre=pr_or_dpr+'_'+version+"_SFCRR_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
+                           " Scatter"
+              pngpre=pr_or_dpr+'_'+version+"_MRMSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
               units='(mm/h)'
-              xtitle= 'DPR '+units
+              xtitle= 'MRMS '+ units
+              ytitle= 'DPR '+units
+              BREAK
+           END
+   'GRRMRMS' :BEGIN
+print, "GRRMRMS plot...."
+
+              do_MAE_1_1 = 0
+              CASE raintypeBBidx OF
+               2 : BEGIN
+                   SCAT_DATA = "Any/All Footprints"
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   END
+               ELSE : BEGIN
+                   do_mrms_plot = 0
+                   END
+              ENDCASE
+              if do_mrms_plot NE 1 then break
+
+              yticknames=xticknames
+              xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
+              titleLine1 = satprodtype+' '+version+"GR RR vs. MRMS RR "+PlotTypes(idx2do)+ $
+                           " Scatter"
+              pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
+              units='(mm/h)'
+              xtitle= 'GR '+units
               ytitle= 'MRMS '+ units
               BREAK
            END
- 
+  'GRRDSR' :BEGIN
+print, "GRRDSR plot...."
+
+              do_MAE_1_1 = 0
+              CASE raintypeBBidx OF
+               2 : BEGIN
+                   SCAT_DATA = "Any/All Footprints"
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   END
+               ELSE : BEGIN
+                   do_mrms_plot = 0
+                   END
+              ENDCASE
+              if do_mrms_plot NE 1 then break
+
+              yticknames=xticknames
+              xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
+              titleLine1 = satprodtype+' '+version+"GR RR vs. DPR Sfc RR "+PlotTypes(idx2do)+ $
+                           " Scatter "
+              pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
+              units='(mm/h)'
+              xtitle= 'GR '+units
+              ytitle= 'DPR '+ units
+              BREAK
+           END
+    ; Z cases
     ELSE : BEGIN
               CASE raintypeBBidx OF
+ ;  TAB 11/10/17 added convective samples above BB
+               3 : BEGIN
+                   SCAT_DATA = "Convective Samples, Above Bright Band (3 lyrs)"
+                   xticknames=['20','25','30','35','40','45','50','55','60','65']
+                   BB_string = '_AboveBB_3lyrs'
+                   END
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Above Bright Band"
                    xticknames=['20','25','30','35','40','45','50','55','60','65']
@@ -3067,8 +3484,91 @@ print, "mrms plot...."
               ytitle= pr_or_dpr + ' Reflectivity ('+units+')'
            END
       ENDSWITCH
+      
+      ; only do plot for MRMS raintypeBBidx 2
+      if do_mrms_plot NE 1 then continue
+      
+;  TAB 11/14/17  only set this up for non-interactive for the time being
+   if PlotTypes(idx2do) EQ 'HID' AND raintypeBBidx EQ 3 then begin
+        PRINT, ''
+        PRINT, '' 
+        PRINT, "PLOTTING: ", PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
+        PRINT, '' 
+        titleLine1 = "Precip category counts "+satprodtype+" for " $
+                              + pr_or_dpr+' '+version
+        imTITLE = titleLine1+"!C" + $
+                   pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
 
-      if do_plot NE 1 then continue
+        IF do_dm_thresh EQ 1 THEN BEGIN
+             imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
+        ENDIF ELSE BEGIN 
+             imTITLE = imTITLE + " " + filtertitlestring
+        ENDELSE
+        ;bar = barplot(HID_histogram[raintypeBBidx,*],ytitle='Count', xtitle='Precp category' $
+        ;              , title=imTITLE, /BUFFER)
+
+        hist1_total=total(HID_histogram1[raintypeBBidx,1:11], /double)
+        hist2_total=total(HID_histogram2[raintypeBBidx,1:11], /double)
+        hist1=100.0 * (HID_histogram1[raintypeBBidx,*]/hist1_total)
+        hist2=100.0 * (HID_histogram2[raintypeBBidx,*]/hist2_total)
+        print, 'hist1_total ', hist1_total
+        print, 'hist2_total ', hist2_total
+        print, 'hist1 ', hist1
+        print, 'hist2 ', hist2
+        m1 = max(hist1)
+        m2 = max(hist2)
+        y1 = max(m1, m2) / 10.0
+;        y1 = MAX(HID_histogram1[raintypeBBidx,*])/10
+
+;        bar = barplot(HID_histogram1[raintypeBBidx,*],ytitle='Count', xtitle='Precip category' $
+;        bar = barplot(hist1,ytitle='% Samples', xtitle='Precip category', margin=[0.1, 0.3, 0.1, 0.1] $
+        bar = barplot(hist1,ytitle='% Samples', xtitle='Precip category' $
+                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=2, FILL_COLOR='blue')
+;        bar = barplot(HID_histogram2[raintypeBBidx,*],ytitle='Count', xtitle='Precip category' $
+        bar = barplot(hist2,ytitle='% Samples', xtitle='Precip category' $
+                      , title=imTITLE, /BUFFER, INDEX=1, NBARS=2, FILL_COLOR='green', /OVERPLOT)
+;        text1 = TEXT(0, 9.5*y1, 'Four levels above BB', /CURRENT, $ 
+        text1 = TEXT(6, 9.5*y1, 'Four levels above BB', /CURRENT, $ 
+                COLOR='blue', /DATA)
+;        text2 = TEXT(0, 9*y1, 'Three levels starting two above BB', /CURRENT, $ 
+        text2 = TEXT(6, 9*y1, 'Three levels starting two above BB', /CURRENT, $ 
+                COLOR='green', /DATA)
+
+        ax = bar.AXES
+        ax[0].HIDE = 1 
+        width = 1.0 
+      ;  increment=width/13.0
+        increment=width/14.0
+        pt=.02 + increment/2
+        foreach cat, HID_categories do begin
+            tx = TEXT(pt,-0.05,cat, target=bar, /relative)
+            pt = pt + increment
+        endforeach
+        pngfile = outpath_sav + '/GR_precip_cat_'+ rntypeLabels[raintypeBBidx] + $
+             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
+             addme + filteraddstring + '.png'
+        print, "PNGFILE: ",pngfile
+        bar.save, pngfile, RESOLUTION=300
+        bar.close
+
+;        mydevice = !D.NAME
+;        ; Set plotting to PostScript:
+;        SET_PLOT, 'PS'
+;        ; Use DEVICE to set some PostScript device options:
+;        psfile = outpath_sav + '/precip_cat_'+ rntypeLabels[raintypeBBidx] + $
+;             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
+;             addme + filteraddstring + '.ps'
+;        DEVICE, FILENAME=psfile,xsize=7, ysize=5,xoffset=0.5, yoffset=0.5, /inches, /color
+;        bar_plot, HID_histogram[raintypeBBidx,*],barnames=HID_categories, ytitle='Count', xtitle='Precp category' $
+;                      , title=imTITLE
+;        ; Close the PostScript file:
+;        DEVICE, /CLOSE
+;        ; Return plotting to the original device:
+;        SET_PLOT, mydevice
+
+   	goto, plot_skipped1
+   endif
+
 
    PRINT, ''
    PRINT, '' 
@@ -3114,7 +3614,7 @@ print, "mrms plot...."
       zhist2d = (zhist2d/DOUBLE(nSamp))*100.0D
    ;   IF trim EQ 1 THEN pct2blank = 0.1 ELSE pct2blank = 0.025
       IF trim EQ 1 THEN pct2blank = 0.05 ELSE pct2blank = 0.025
-; remove this @@@@@@@@@@@@@@@@@@@@
+; TAB 4/12/17, set pct2blank to zero if you want to include all small values (requested by Bill Olson)
 ;  pct2blank = 0.0
 
      ; set values below pct2blank to 0%
@@ -3146,6 +3646,21 @@ print, "mrms plot...."
 ;   rgb=COLORTABLE(33)     ; not available for IDL 8.1, use LOADCT calls
    LOADCT, 33, RGB=rgb, /SILENT   ; gets the values w/o loading the color table
    LOADCT, 33, /SILENT            ; - so call again to load the color table
+;  TAB 4/11/17
+;  adjust color table gamma to shift to more variation at lower values
+;  found this on Coyote's guide to IDL Programming   
+; *******
+;   gamma = 0.35
+;   index = Findgen(256)
+;   distribution = index^gamma > 1e-6
+;   colorindex = Round(distribution*255 / (Max(distribution) > 1e-6))
+;   redscl = rgb[colorindex,0]
+;   greenscl = rgb[colorindex,1]
+;   bluescl = rgb[colorindex,2]
+;   rgb[*,0] = redscl
+;   rgb[*,1] = greenscl
+;   rgb[*,2] = bluescl
+; *******
    rgb[0,*]=255   ; set zero count color to White background
    IF do_MAE_1_1 THEN BEGIN
             imTITLE = titleLine1+bias_str+" "+units+n_str+"!C"+SCAT_DATA+", "+ $
@@ -3155,7 +3670,7 @@ print, "mrms plot...."
             pctabvstr+" Above Thresh."
    ENDELSE
 ;  TAB 7/26/17
-   IF do_dm_thresh EQ 1 THEN BEGIN
+   IF do_dm_thresh EQ 1 OR do_dm_cutoff EQ 1 THEN BEGIN
       imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
    ENDIF ELSE BEGIN 
       imTITLE = imTITLE + " " + filtertitlestring
@@ -3170,6 +3685,21 @@ print, "mrms plot...."
    im.xtitle= xtitle
    im.ytitle= ytitle
    im.Title.Font_Size = 10
+    
+   ; TAB 12/08/17
+   if PlotTypes(idx2do) eq 'DMRRG' then BEGIN
+       if do_RR_DM_curve_fit eq 1 and RR_DM_curve_fit_bb_type eq raintypeBBidx then begin
+           minx = MIN(rr_dm_x) 
+           miny = MIN(rr_dm_y) 
+           maxx = MAX(rr_dm_x) 
+           maxy = MAX(rr_dm_x) 
+           X = (rr_dm_x - minx) * (winsiz[0]-1) / (maxx-minx) 
+           Y = (rr_dm_y - miny) * (winsiz[1]-1) / (maxy-miny) 
+           line_fit = PLOT(X,Y, /OVERPLOT, color='black' )
+           
+       endif
+   
+   endif
 
    IF do_MAE_1_1 THEN BEGIN
      ; add the 1:1 line to the plot, with white blanking above/below to stand out
@@ -3239,6 +3769,8 @@ print, "mrms plot...."
 
 ENDIF ELSE print, "No data for " + PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
 
+plot_skipped1:
+
 ENDFOR
 if bustOut then BREAK
 endfor
@@ -3247,6 +3779,8 @@ noScatterPlots:
 
 close, anom_LUN
 FREE_LUN, anom_LUN
+close, hail_LUN
+FREE_LUN, hail_LUN
 
 IF N_ELEMENTS(profile_save) NE 0 AND bustOut NE 1 THEN BEGIN
    ; Compute ensemble mean and StdDev of dBZ at each level from grouped data
@@ -3396,6 +3930,21 @@ if (ptr_valid(ptr_pctgoodpr) eq 1) then ptr_free,ptr_pctgoodpr
 if (ptr_valid(ptr_pctgoodgv) eq 1) then ptr_free,ptr_pctgoodgv
 if (ptr_valid(ptr_pctgoodrain) eq 1) then ptr_free,ptr_pctgoodrain
 if (ptr_valid(ptr_GR_blockage) eq 1) then ptr_free, ptr_GR_blockage
+
+if (ptr_valid(ptr_BestHID) eq 1) then ptr_free,ptr_BestHID
+if (ptr_valid(ptr_HID) eq 1) then ptr_free,ptr_HID
+if (ptr_valid(ptr_bbHeight) eq 1) then ptr_free,ptr_bbHeight
+
+if (ptr_valid(ptr_mrmsrrlow) eq 1) then ptr_free,ptr_mrmsrrlow
+if (ptr_valid(ptr_mrmsrrmed) eq 1) then ptr_free,ptr_mrmsrrmed
+if (ptr_valid(ptr_mrmsrrhigh) eq 1) then ptr_free,ptr_mrmsrrhigh
+if (ptr_valid(ptr_mrmsrrveryhigh) eq 1) then ptr_free,ptr_mrmsrrveryhigh
+
+ptr_mrmsrrmed=ptr_new(/allocate_heap)
+ptr_mrmsrrhigh=ptr_new(/allocate_heap)
+ptr_mrmsrrveryhigh=ptr_new(/allocate_heap)
+
+
 ; help, /memory
 
 print, ''
