@@ -339,6 +339,10 @@
 ;  - Modified to call rewritten function read_dpr_geo_match_netcdf() with new
 ;    DIMS_ONLY option for 1st call to get array dimensions and matchup version.
 ;  - Added reading and processing of previously overlooked qualityData variable.
+; 08/16/17 - Morris/NASA/GSFC (SAIC), GPM GV
+; - Added GPM parameter to instruct the get_mean_bb_height function to use the
+;   GPM 2ADPR/Ka/Ku qualityBB flag definitions rather than the default TRMM 2A23
+;   BBstatus flag definitions.
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -860,10 +864,12 @@ IF ( countBB GT 0 ) THEN BEGIN
      ; try to get mean BB using BBstatus of 'good' or 'fair'
       bbstatusstrat = bbStatusCode[idxbbdef]
       meanbb_MSL = get_mean_bb_height( bb2hist, bbstatusstrat, BS=bs, $
-                                       HIST_WINDOW=hist_window )
+                                       HIST_WINDOW=hist_window, /GPM )
    ENDIF ELSE BEGIN
-     ; use histogram analysis of BB heights to get mean height
-      meanbb_MSL = get_mean_bb_height( bb2hist, BS=bs, HIST_WINDOW=hist_window )
+     ; use histogram analysis of BB heights to get mean height (/GPM parameter
+     ; is superfluous in this case)
+      meanbb_MSL = get_mean_bb_height( bb2hist, BS=bs, $
+                                       HIST_WINDOW=hist_window, /GPM )
    ENDELSE
 ENDIF
 
