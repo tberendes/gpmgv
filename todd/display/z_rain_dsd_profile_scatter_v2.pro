@@ -1455,6 +1455,7 @@ IF myflags.have_GR_RR_rainrate EQ 1 THEN BEGIN
               have_RR = 1
               have_hist.RR[haveVar,*] = 1
               GR_RR=temporary(*ptr_gvrr)
+              GR_RR_orig=temporary(*ptr_gvrr)
 ;              GR_RRmax=temporary(*ptr_gvrrmax)
 ;              GR_RRstddev=temporary(*ptr_gvrrstddev)
               pctgoodGR_RR=temporary(*ptr_pctgoodrrgv)
@@ -2729,10 +2730,10 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                     endif
               END
   'GRRMRMS' : BEGIN
-  					near_sfc_gr_rr = GR_RR[*,1] ; choose second scan above surface
+  					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
                     idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrmsrrveryhigh GT 0.0,count )
                     if count gt 0 then begin 
-                       scat_X = near_sfc_gr_rr[idxabv]
+                       scat_X = near_sfc_gr_rr[idxnonzero]
                        scat_Y = mrmsrrveryhigh[idxnonzero]
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
@@ -2741,7 +2742,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                     endif
               END
   'GRRDSR' : BEGIN
-   					near_sfc_gr_rr = GR_RR[*,1] ; choose second scan above surface
+   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
                     idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and nearSurfRain GT 0.0,count )
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rr[idxnonzero]
