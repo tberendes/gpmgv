@@ -1455,7 +1455,7 @@ IF myflags.have_GR_RR_rainrate EQ 1 THEN BEGIN
               have_RR = 1
               have_hist.RR[haveVar,*] = 1
               GR_RR=temporary(*ptr_gvrr)
-              GR_RR_orig=temporary(*ptr_gvrr)
+              GR_RR_orig=GR_RR
 ;              GR_RRmax=temporary(*ptr_gvrrmax)
 ;              GR_RRstddev=temporary(*ptr_gvrrstddev)
               pctgoodGR_RR=temporary(*ptr_pctgoodrrgv)
