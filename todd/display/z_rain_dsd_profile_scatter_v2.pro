@@ -999,6 +999,12 @@ ptr_mrmsrrlow=ptr_new(/allocate_heap)
 ptr_mrmsrrmed=ptr_new(/allocate_heap)
 ptr_mrmsrrhigh=ptr_new(/allocate_heap)
 ptr_mrmsrrveryhigh=ptr_new(/allocate_heap)
+
+ptr_mrmsrqiplow=ptr_new(/allocate_heap)
+ptr_mrmsrqipmed=ptr_new(/allocate_heap)
+ptr_mrmsrqiphigh=ptr_new(/allocate_heap)
+ptr_mrmsrqipveryhigh=ptr_new(/allocate_heap)
+
 ;ptr_rnFlag=ptr_new(/allocate_heap)
 ptr_rnType=ptr_new(/allocate_heap)
 IF pr_or_dpr EQ 'DPR' THEN ptr_stmTopHgt=ptr_new(/allocate_heap)
@@ -1248,6 +1254,11 @@ CASE pr_or_dpr OF
        PTRmrmsrrhigh=ptr_mrmsrrhigh, $
        PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
 
+       PTRmrmsrqiplow=ptr_mrmsrqiplow, $
+       PTRmrmsrqipmed=ptr_mrmsrqipmed, $
+       PTRmrmsrqiphigh=ptr_mrmsrqiphigh, $
+       PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
+
        PTRrainflag_int=ptr_rnFlag, PTRraintype_int=ptr_rnType, PTRbbProx=ptr_bbProx, $
        PTRhgtcat=ptr_hgtcat, PTRdist=ptr_dist,PTRbbHgt=ptr_bbHeight,  $
        PTRpctgoodpr=ptr_pctgoodpr, PTRpctgoodrain=ptr_pctgoodrain, $
@@ -1334,6 +1345,11 @@ ENDIF
    mrmsrrmed=temporary(*ptr_mrmsrrmed)
    mrmsrrhigh=temporary(*ptr_mrmsrrhigh)
    mrmsrrveryhigh=temporary(*ptr_mrmsrrveryhigh)
+
+   mrmsrqiplow=temporary(*ptr_mrmsrqiplow)
+   mrmsrqipmed=temporary(*ptr_mrmsrqipmed)
+   mrmsrqiphigh=temporary(*ptr_mrmsrqiphigh)
+   mrmsrqipveryhigh=temporary(*ptr_mrmsrqipveryhigh)
 
    nearSurfRain_2b31=temporary(*ptr_nearSurfRain_2b31)
 ;   rnflag=temporary(*ptr_rnFlag)
@@ -1485,13 +1501,18 @@ ENDIF ELSE have_RP = 0
 
 ; set up the data presence flags for the two-parameter plots
 
+IF myflags.have_mrms EQ 1 THEN have_mrms = 1 ELSE have_mrms = 0
+
+
 ; TAB 9/29/17  Hardcode for now, check presence later
 ;******************^^^^^^^^^^^^^^^***************&^^^^^^^^^^^^^^^*^*^
 ; fix this !!!!!!!!!!!!!
-have_hist.MRMSDSR[haveVar,*] = 1
-have_hist.GRRMRMS[haveVar,*] = 1
-have_hist.GRRDSR[haveVar,*] = 1
-;have_hist.MRMSDSR[haveVar,*] = 0
+IF have_mrms EQ 1 THEN BEGIN
+	have_hist.MRMSDSR[haveVar,*] = 1
+	have_hist.GRRMRMS[haveVar,*] = 1
+	have_hist.GRRDSR[haveVar,*] = 1
+	;have_hist.MRMSDSR[haveVar,*] = 0
+ENDIF
 
 IF have_NW THEN BEGIN
   have_hist.ZcNwG[haveVar,*] = 1
@@ -2717,36 +2738,50 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                   ;ENDFOREACH
               END
   'MRMSDSR' : BEGIN
-                    idxnonzero=WHERE(nearSurfRain GT 0.0 and mrmsrrveryhigh GT 0.0,count )
+  				IF have_mrms EQ 1 THEN BEGIN
+  				    rqi = mrmsrqipveryhigh[*,0]
+  					ns_rr = nearSurfRain[*,0]
+  					mrms_rr = mrmsrrveryhigh[*,0]
+                    idxnonzero=WHERE(ns_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
                     if count gt 0 then begin 
 ;                       scat_X = nearSurfRain[idxnonzero]
 ;                       scat_Y = mrmsrrveryhigh[idxnonzero]
-                       scat_X = mrmsrrveryhigh[idxnonzero]
-                       scat_Y = nearSurfRain[idxnonzero]
+                       scat_X = mrms_rr[idxnonzero]
+                       scat_Y = ns_rr[idxnonzero]
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
                                      iPlot, raintypeBBidx
                     endif
+                 ENDIF
               END
   'GRRMRMS' : BEGIN
-  					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
-                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrmsrrveryhigh GT 0.0,count )
+   				IF have_mrms EQ 1 THEN BEGIN
+;   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
+  				    rqi = mrmsrqipveryhigh[*,0]
+  					near_sfc_gr_rr = GR_RR_orig[*,0] ; choose lowest scan above surface
+  					mrms_rr = mrmsrrveryhigh[*,0]
+                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rr[idxnonzero]
-                       scat_Y = mrmsrrveryhigh[idxnonzero]
+                       scat_Y = mrms_rr[idxnonzero]
+ ;                      scat_Y = mrmsrrveryhigh[idxnonzero]
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
                                      iPlot, raintypeBBidx
                     endif
+                 ENDIF
               END
   'GRRDSR' : BEGIN
-   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
-                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and nearSurfRain GT 0.0,count )
+;   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
+   					near_sfc_gr_rr = GR_RR_orig[*,0] ; choose lowest scan above surface
+  					ns_rr = nearSurfRain[*,0]
+                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and ns_rr GT 0.0,count )
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rr[idxnonzero]
-                       scat_Y = nearSurfRain[idxnonzero]
+                       scat_Y = ns_rr[idxnonzero]
+;                       scat_Y = nearSurfRain[idxnonzero]
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2789,7 +2824,6 @@ ENDIF
 ; TAB 11/10/17 added fourth raintype for convective above BB within 3 height bins for Z plots only 
 ;FOR raintypeBBidx = 0, 2 do begin
 FOR raintypeBBidx = 0, 3 do begin
-
    if raintypeBBidx eq 3 then begin
 
       SWITCH PlotTypes(idx2do) OF
@@ -2822,7 +2856,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 
    do_MAE_1_1 = 1    ; flag to include/suppress MAE and the 1:1 line on plots
    bustOut=0
 
-   do_mrms_plot = 1
+   
+   do_plot = 1
    SWITCH PlotTypes(idx2do) OF
     'D0' : 
     'DM' : BEGIN
@@ -3359,8 +3394,9 @@ IF PlotTypes(idx2do) EQ 'HID' OR (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 
               BREAK
            END
     'MRMSDSR' : BEGIN
+    		  if have_mrms NE 1 then break
 print, "mrms plot...."
-              do_MAE_1_1 = 0
+              do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Footprints"
@@ -3368,15 +3404,16 @@ print, "mrms plot...."
                    xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    END
                ELSE : BEGIN
-                   do_mrms_plot = 0
+                   do_plot = 0
                    END
               ENDCASE
-              if do_mrms_plot NE 1 then break
+              if do_plot NE 1 then break
 
               yticknames=xticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
               titleLine1 = satprodtype+' '+version+" MRMS RR vs. DPR Sfc RR "+PlotTypes(idx2do)+ $
-                           " Scatter"
+                            " Scatter, Mean MRMS-DPR RR Bias: "
+ ;                          " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_MRMSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
               units='(mm/h)'
               xtitle= 'MRMS '+ units
@@ -3386,7 +3423,8 @@ print, "mrms plot...."
    'GRRMRMS' :BEGIN
 print, "GRRMRMS plot...."
 
-              do_MAE_1_1 = 0
+			  if have_mrms NE 1 then break
+              do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Footprints"
@@ -3394,15 +3432,16 @@ print, "GRRMRMS plot...."
                    xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    END
                ELSE : BEGIN
-                   do_mrms_plot = 0
+                   do_plot = 0
                    END
               ENDCASE
-              if do_mrms_plot NE 1 then break
+              if do_plot NE 1 then break
 
               yticknames=xticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
               titleLine1 = satprodtype+' '+version+" GR RR vs. MRMS RR "+PlotTypes(idx2do)+ $
-                           " Scatter"
+                           " Scatter, Mean GR-MRMS RR Bias: "
+;                           " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
               units='(mm/h)'
               xtitle= 'GR '+units
@@ -3412,7 +3451,7 @@ print, "GRRMRMS plot...."
   'GRRDSR' :BEGIN
 print, "GRRDSR plot...."
 
-              do_MAE_1_1 = 0
+              do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Footprints"
@@ -3420,15 +3459,16 @@ print, "GRRDSR plot...."
                    xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    END
                ELSE : BEGIN
-                   do_mrms_plot = 0
+                   do_plot = 0
                    END
               ENDCASE
-              if do_mrms_plot NE 1 then break
+              if do_plot NE 1 then break
 
               yticknames=xticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
               titleLine1 = satprodtype+' '+version+" GR RR vs. DPR Sfc RR "+PlotTypes(idx2do)+ $
-                           " Scatter "
+                           " Scatter, Mean GR-DPR RR Bias: "
+;                           " Scatter "
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
               units='(mm/h)'
               xtitle= 'GR '+units
@@ -3487,7 +3527,7 @@ print, "GRRDSR plot...."
       ENDSWITCH
       
       ; only do plot for MRMS raintypeBBidx 2
-      if do_mrms_plot NE 1 then continue
+      if do_plot NE 1 then continue
       
 ;  TAB 11/14/17  only set this up for non-interactive for the time being
    if PlotTypes(idx2do) EQ 'HID' AND raintypeBBidx EQ 3 then begin
@@ -3941,10 +3981,10 @@ if (ptr_valid(ptr_mrmsrrmed) eq 1) then ptr_free,ptr_mrmsrrmed
 if (ptr_valid(ptr_mrmsrrhigh) eq 1) then ptr_free,ptr_mrmsrrhigh
 if (ptr_valid(ptr_mrmsrrveryhigh) eq 1) then ptr_free,ptr_mrmsrrveryhigh
 
-ptr_mrmsrrmed=ptr_new(/allocate_heap)
-ptr_mrmsrrhigh=ptr_new(/allocate_heap)
-ptr_mrmsrrveryhigh=ptr_new(/allocate_heap)
-
+if (ptr_valid(ptr_mrmsrqiplow) eq 1) then ptr_free,ptr_mrmsrqiplow
+if (ptr_valid(ptr_mrmsrqipmed) eq 1) then ptr_free,ptr_mrmsrqipmed
+if (ptr_valid(ptr_mrmsrqiphigh) eq 1) then ptr_free,ptr_mrmsrqiphigh
+if (ptr_valid(ptr_mrmsrqipveryhigh) eq 1) then ptr_free,ptr_mrmsrqipveryhigh
 
 ; help, /memory
 

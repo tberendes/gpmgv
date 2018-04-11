@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; get_dpr_geo_match_nc_struct.pro        Morris/SAIC/GPM_GV    July 2013
+; get_dpr_geo_match_nc_struct_mrms.pro        Morris/SAIC/GPM_GV    July 2013
 ;
 ; DESCRIPTION
 ; -----------
@@ -27,10 +27,10 @@
 ;-
 ;===============================================================================
 
-FUNCTION get_dpr_geo_match_nc_struct, typename
+FUNCTION get_dpr_geo_match_nc_struct_mrms, typename
 
 ; "include" file for structure definitions
-  @dpr_geo_match_nc_structs.inc
+  @dpr_geo_match_nc_structs_mrms.inc
 
   IF N_PARAMS() EQ 1 THEN BEGIN
      CASE typename OF

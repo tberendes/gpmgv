@@ -360,6 +360,11 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     mrmsptmed=mrmsptmed, $
     mrmspthigh=mrmspthigh, $
     mrmsptveryhigh=mrmsptveryhigh, $
+   ; MRMS RQI percent variables
+    mrmsrqilow=mrmsrqilow, $
+    mrmsrqimed=mrmsrqimed, $
+    mrmsrqihigh=mrmsrqihigh, $
+    mrmsrqiveryhigh=mrmsrqiveryhigh, $
 
    ; DPR science values at earth surface level, or as ray summaries:
     sfcraindpr=PrecipRateSurface, sfcraincomb=SurfPrecipRate, bbhgt=BBheight, $
@@ -764,6 +769,8 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                 STRUCT=fieldFlags )
       'have_TypePrecip' : status=PREPARE_NCVAR( ncid1, thisncvar, have_TypePrecip, $
                                                 STRUCT=fieldFlags )
+      'have_mrms' : status=PREPARE_NCVAR( ncid1, thisncvar, have_mrms, $
+                                              STRUCT=fieldFlags )
       'n_gr_expected' : status=PREPARE_NCVAR( ncid1, thisncvar, gvexpect, $
                                               DIM2SORT=2, IDXSORT=idxsort )
       'n_gr_z_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gvreject, $
@@ -946,6 +953,10 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'MaskMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsptmed )
       'MaskHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmspthigh )
       'MaskVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsptveryhigh )
+      'RqiPercentLow' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqiplow )
+      'RqiPercentMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipmed )
+      'RqiPercentHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqiphigh )
+      'RqiPercentVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipveryhigh )
 
        ELSE : BEGIN
                  message, "Unknown GRtoDPR netCDF variable '"+thisncvar+"'", /INFO
