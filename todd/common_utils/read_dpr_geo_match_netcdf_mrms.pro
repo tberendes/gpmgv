@@ -361,10 +361,10 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     mrmspthigh=mrmspthigh, $
     mrmsptveryhigh=mrmsptveryhigh, $
    ; MRMS RQI percent variables
-    mrmsrqilow=mrmsrqilow, $
-    mrmsrqimed=mrmsrqimed, $
-    mrmsrqihigh=mrmsrqihigh, $
-    mrmsrqiveryhigh=mrmsrqiveryhigh, $
+    mrmsrqiplow=mrmsrqiplow, $
+    mrmsrqipmed=mrmsrqipmed, $
+    mrmsrqiphigh=mrmsrqiphigh, $
+    mrmsrqipveryhigh=mrmsrqipveryhigh, $
 
    ; DPR science values at earth surface level, or as ray summaries:
     sfcraindpr=PrecipRateSurface, sfcraincomb=SurfPrecipRate, bbhgt=BBheight, $
