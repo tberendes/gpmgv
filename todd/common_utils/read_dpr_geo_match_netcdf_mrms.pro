@@ -636,9 +636,9 @@ FOR ncattnum = 0, N_ELEMENTS(parsed)-1 DO BEGIN
 ; not currently using these, for now don't bother reading
 ; if we do decide to use, need to add in dpr_geo_match_nc_structs.inc and set up like the field variables 
 ; not the file variables
-;      'MRMS_Mask_categories' : status=PREPARE_NCVAR( ncid1, thisncatt, mrms_mask_categories, $
-;                                        STRUCT=filesmeta, $
-;                                       /GLOBAL_ATTRIBUTE, /BYTE )
+      'MRMS_Mask_categories' : status=PREPARE_NCVAR( ncid1, thisncatt, mrms_mask_categories, $
+                                        STRUCT=matchupmeta, $
+                                       /GLOBAL_ATTRIBUTE, /BYTE )
       ELSE : BEGIN
                message, "Unknown GRtoDPR netCDF global attribute '"+thisncatt+"'", /INFO
 ; TAB 9/20/17 figure out what to do about this, unused variables
@@ -769,7 +769,7 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                 STRUCT=fieldFlags )
       'have_TypePrecip' : status=PREPARE_NCVAR( ncid1, thisncvar, have_TypePrecip, $
                                                 STRUCT=fieldFlags )
-      'have_mrms' : status=PREPARE_NCVAR( ncid1, thisncvar, have_mrms, $
+      'have_MRMS' : status=PREPARE_NCVAR( ncid1, thisncvar, have_mrms, $
                                               STRUCT=fieldFlags )
       'n_gr_expected' : status=PREPARE_NCVAR( ncid1, thisncvar, gvexpect, $
                                               DIM2SORT=2, IDXSORT=idxsort )

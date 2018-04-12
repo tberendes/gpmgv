@@ -119,7 +119,8 @@ matchup_meta = { dpr_geo_match_meta,                           $
                  DPR_decluttered:       0,                     $
                  DPR_Version:           '',                    $
                  GMI_Version:           '',                    $
-                 nc_file_version:       0.0                    $
+                 nc_file_version:       0.0,                   $
+                 MRMS_Mask_categories:       ''                    $
                }
 
 ;swath_match_meta = { dpr_gmi_match_meta,                           $
