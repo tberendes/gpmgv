@@ -1722,7 +1722,8 @@ IF PTR_VALID(ptr_mrmsrqipmed) THEN *ptr_mrmsrqipmed = mrmsrqipmed
 IF PTR_VALID(ptr_mrmsrqiphigh) THEN *ptr_mrmsrqiphigh = mrmsrqiphigh
 IF PTR_VALID(ptr_mrmsrqipveryhigh) THEN *ptr_mrmsrqipveryhigh = mrmsrqipveryhigh
 
-IF PTR_VALID(ptr_MRMS_HID) THEN *ptr_MRMS_HID = MRMS_HID
+IF PTR_VALID(ptr_MRMS_HID) AND mygeometa.num_MRMS_categories GT 0 THEN $
+   *ptr_MRMS_HID = MRMS_HID
 
 IF PTR_VALID(ptr_nearSurfRain_Comb) THEN $
     *ptr_nearSurfRain_Comb = nearSurfRain_Comb
