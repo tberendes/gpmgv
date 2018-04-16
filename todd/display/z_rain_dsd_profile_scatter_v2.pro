@@ -1005,6 +1005,8 @@ ptr_mrmsrqipmed=ptr_new(/allocate_heap)
 ptr_mrmsrqiphigh=ptr_new(/allocate_heap)
 ptr_mrmsrqipveryhigh=ptr_new(/allocate_heap)
 
+ptr_MRMS_HID=ptr_new(/allocate_heap)
+
 ;ptr_rnFlag=ptr_new(/allocate_heap)
 ptr_rnType=ptr_new(/allocate_heap)
 IF pr_or_dpr EQ 'DPR' THEN ptr_stmTopHgt=ptr_new(/allocate_heap)
@@ -1258,6 +1260,7 @@ CASE pr_or_dpr OF
        PTRmrmsrqipmed=ptr_mrmsrqipmed, $
        PTRmrmsrqiphigh=ptr_mrmsrqiphigh, $
        PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
+       PTRMRMSHID=ptr_MRMS_HID, $
 
        PTRrainflag_int=ptr_rnFlag, PTRraintype_int=ptr_rnType, PTRbbProx=ptr_bbProx, $
        PTRhgtcat=ptr_hgtcat, PTRdist=ptr_dist,PTRbbHgt=ptr_bbHeight,  $
@@ -1350,6 +1353,8 @@ ENDIF
    mrmsrqipmed=temporary(*ptr_mrmsrqipmed)
    mrmsrqiphigh=temporary(*ptr_mrmsrqiphigh)
    mrmsrqipveryhigh=temporary(*ptr_mrmsrqipveryhigh)
+
+   mrmshid=temporary(*ptr_MRMS_HID)
 
    nearSurfRain_2b31=temporary(*ptr_nearSurfRain_2b31)
 ;   rnflag=temporary(*ptr_rnFlag)
@@ -3985,6 +3990,8 @@ if (ptr_valid(ptr_mrmsrqiplow) eq 1) then ptr_free,ptr_mrmsrqiplow
 if (ptr_valid(ptr_mrmsrqipmed) eq 1) then ptr_free,ptr_mrmsrqipmed
 if (ptr_valid(ptr_mrmsrqiphigh) eq 1) then ptr_free,ptr_mrmsrqiphigh
 if (ptr_valid(ptr_mrmsrqipveryhigh) eq 1) then ptr_free,ptr_mrmsrqipveryhigh
+
+if (ptr_valid(ptr_MRMS_HID) eq 1) then ptr_free,ptr_MRMS_HID
 
 ; help, /memory
 

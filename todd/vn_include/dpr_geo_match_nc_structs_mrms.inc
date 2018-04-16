@@ -120,6 +120,7 @@ matchup_meta = { dpr_geo_match_meta,                           $
                  DPR_Version:           '',                    $
                  GMI_Version:           '',                    $
                  nc_file_version:       0.0,                   $
+                 num_MRMS_categories:    0,                     $
                  MRMS_Mask_categories:       ''                    $
                }
 

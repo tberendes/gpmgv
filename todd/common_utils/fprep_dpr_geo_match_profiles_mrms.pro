@@ -406,6 +406,8 @@ FUNCTION fprep_dpr_geo_match_profiles_mrms, ncfilepr, heights_in, $
     PTRmrmsrqipmed=ptr_mrmsrqipmed, $
     PTRmrmsrqiphigh=ptr_mrmsrqiphigh, $
     PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
+    
+    PTRMRMSHID=ptr_MRMS_HID, $
 
    ; derived/computed variables
     PTRtop=ptr_top, PTRbotm=ptr_botm, PTRlat=ptr_lat, PTRlon=ptr_lon, $
@@ -669,7 +671,9 @@ if (cpstatus eq 'OK') then begin
   mrmsrqipmed=fltarr(nfp)
   mrmsrqiphigh=fltarr(nfp)
   mrmsrqipveryhigh=fltarr(nfp)
-  
+
+  if mygeometa.num_MRMS_categories GT 0 then  MRMS_HID=intarr(nfp, mygeometa.num_MRMS_categories)
+ 
   nearSurfRain_Comb=fltarr(nfp)
   rnflag=intarr(nfp)
   rntype=intarr(nfp)
@@ -752,6 +756,8 @@ if (cpstatus eq 'OK') then begin
     mrmsrqipmed=mrmsrqipmed, $
     mrmsrqiphigh=mrmsrqiphigh, $
     mrmsrqipveryhigh=mrmsrqipveryhigh, $
+    
+    hidmrms=MRMS_HID, $
 
    ; surface-level DPR rainrate variables and misc. footprint characteristics:
     sfcraindpr=nearSurfRain, sfcraincomb=nearSurfRain_Comb, bbhgt=BBHeight,    $
@@ -1715,6 +1721,9 @@ IF PTR_VALID(ptr_mrmsrqiplow) THEN *ptr_mrmsrqiplow = mrmsrqiplow
 IF PTR_VALID(ptr_mrmsrqipmed) THEN *ptr_mrmsrqipmed = mrmsrqipmed
 IF PTR_VALID(ptr_mrmsrqiphigh) THEN *ptr_mrmsrqiphigh = mrmsrqiphigh
 IF PTR_VALID(ptr_mrmsrqipveryhigh) THEN *ptr_mrmsrqipveryhigh = mrmsrqipveryhigh
+
+IF PTR_VALID(ptr_MRMS_HID) THEN *ptr_MRMS_HID = MRMS_HID
+
 IF PTR_VALID(ptr_nearSurfRain_Comb) THEN $
     *ptr_nearSurfRain_Comb = nearSurfRain_Comb
 IF PTR_VALID(ptr_rnFlag) THEN *ptr_rnFlag = rnFlag

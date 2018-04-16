@@ -365,6 +365,9 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     mrmsrqipmed=mrmsrqipmed, $
     mrmsrqiphigh=mrmsrqiphigh, $
     mrmsrqipveryhigh=mrmsrqipveryhigh, $
+    
+   ; horizontally summarized GR Hydromet Identifier category at elevs.:
+    hidmrms=mrmshid,                                                             $
 
    ; DPR science values at earth surface level, or as ray summaries:
     sfcraindpr=PrecipRateSurface, sfcraincomb=SurfPrecipRate, bbhgt=BBheight, $
@@ -491,6 +494,13 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.num_HID_categories = nhidcats
      NCDF_VARGET, ncid1, versid, ncversion  ; get/assign this variable again later
      matchupmeta.nc_file_version = ncversion
+     ; MRMS categories
+     MRMS_dimid = NCDF_DIMID(ncid1, 'mrms_mask')
+     if MRMS_dimid ne -1 then begin
+     	NCDF_DIMINQ, ncid1, MRMS_dimid, MRMSDIMNAME, mrmscats
+     	matchupmeta.num_MRMS_categories = mrmscats
+     endif
+
 ENDIF
 
 ; skip the rest of the variable/attribute reading and assignment if caller only
@@ -957,6 +967,7 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'RqiPercentMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipmed )
       'RqiPercentHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqiphigh )
       'RqiPercentVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipveryhigh )
+      'MRMS_HID' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmshid)
 
        ELSE : BEGIN
                  message, "Unknown GRtoDPR netCDF variable '"+thisncvar+"'", /INFO
