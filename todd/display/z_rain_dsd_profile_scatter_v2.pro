@@ -1694,7 +1694,9 @@ IF do_dm_thresh EQ 1 THEN BEGIN
    ; layer at/under 3.0 km
 ; TAB try this, originally commented out...
    idxdmdprgt25= WHERE(DPR_Dm GE dpr_dm_thresh AND BBprox EQ 0 $
-                   AND hgtcat LE 1, ndmdprgt25)
+                   , ndmdprgt25)
+;   idxdmdprgt25= WHERE(DPR_Dm GE dpr_dm_thresh AND BBprox EQ 0 $
+;                   AND hgtcat LE 1, ndmdprgt25)
 ;   idxdmdprgt25= WHERE(DPR_Dm GE dpr_dm_thresh , ndmdprgt25)
 
 help, dpr_dm_thresh, ndmdprgt25
