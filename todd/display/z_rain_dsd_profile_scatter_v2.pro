@@ -1379,6 +1379,12 @@ ENDIF
 have_altfield=1   ; initialize as if we have an alternate field to process
 ;    ELSE : have_altfield=0   ; only doing boring old Z
 
+; build an array of BB proximity: 0 if below, 1 if within, 2 if above
+;#######################################################################################
+; NOTE THESE CATEGORY NUMBERS ARE ONE LOWER THAN THOSE IN FPREP_GEO_MATCH_PROFILES() !!
+;#######################################################################################
+   BBprox = BBprox - 1
+
 IF have_SAT_DSD EQ 1 THEN BEGIN
    DPR_Dm=temporary(*ptr_DprDm)
    pctgoodDPR_Dm=temporary(*ptr_pctgoodDprDm)
@@ -1693,10 +1699,8 @@ IF do_dm_thresh EQ 1 THEN BEGIN
    ; find all samples with maximum DPR Dm >= dpr_dm_thresh in the below-BB
    ; layer at/under 3.0 km
 ; TAB try this, originally commented out...
-   idxdmdprgt25= WHERE(DPR_Dm GE dpr_dm_thresh AND BBprox EQ 0 $
-                   , ndmdprgt25)
-;   idxdmdprgt25= WHERE(DPR_Dm GE dpr_dm_thresh AND BBprox EQ 0 $
-;                   AND hgtcat LE 1, ndmdprgt25)
+    idxdmdprgt25= WHERE(DPR_Dm GE dpr_dm_thresh AND BBprox EQ 0 $
+                   AND hgtcat LE 1, ndmdprgt25)
 ;   idxdmdprgt25= WHERE(DPR_Dm GE dpr_dm_thresh , ndmdprgt25)
 
 help, dpr_dm_thresh, ndmdprgt25
@@ -2056,13 +2060,6 @@ if num_hail GT 0 then begin
 endif
 
 ;-------------------------------------------------------------
-
-
-; build an array of BB proximity: 0 if below, 1 if within, 2 if above
-;#######################################################################################
-; NOTE THESE CATEGORY NUMBERS ARE ONE LOWER THAN THOSE IN FPREP_GEO_MATCH_PROFILES() !!
-;#######################################################################################
-   BBprox = BBprox - 1
 
   ; compute mean bias stratiform/aboveBB weighted by # samples
    IF do_scatr THEN BEGIN
