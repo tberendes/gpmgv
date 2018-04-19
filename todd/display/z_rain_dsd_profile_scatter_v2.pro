@@ -3655,6 +3655,8 @@ print, "GRRDSR plot...."
 			      ; use any/all rain types below the BB at/below 3 km
 				  minstddev=MIN(GRZSH_below)
 				  maxstddev=MAX(GRZSH_below)
+				  print,"minstdev ", minstddev
+				  print,"maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev)      
 			      END
 			   3 : BEGIN
