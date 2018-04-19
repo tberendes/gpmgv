@@ -492,7 +492,7 @@ PRO z_rain_dsd_profile_scatter_v2, INSTRUMENT=instrument,         $
                                     MAX_BLOCKAGE=max_blockage_in,  $
                                     Z_BLOCKAGE_THRESH=z_blockage_thresh_in, $
                                     DPR_DM_THRESH=dpr_dm_thresh_in,$
-                                    DPR_DM_CUTOFF=dpr_dm_cutoff_in,$
+                                    DPR_DM_RANGE=dpr_dm_range_in,$
                                     VERSION2MATCH=version2match,   $
                                     BATCH_SAVE=batch_save,         $
                                     DPR_Z_ADJUST=dpr_z_adjust,     $
@@ -805,22 +805,24 @@ IF N_ELEMENTS(dpr_dm_thresh_in) EQ 1 THEN BEGIN
    ENDELSE
 ENDIF
 
-; set some conservative allowed range for dpr_dm_cutoff, if specified
-do_dm_cutoff = 0
-IF N_ELEMENTS(dpr_dm_cutoff_in) EQ 1 THEN BEGIN
-   IF is_a_number(dpr_dm_cutoff_in) THEN BEGIN
-      dpr_dm_cutoff_f = FLOAT(dpr_dm_cutoff_in)
-      IF dpr_dm_cutoff_f LT 0.5 OR dpr_dm_cutoff_f GT 5.0 THEN BEGIN
-         help, dpr_dm_cutoff_in
-         message, "Out of range dpr_dm_cutoff value, " + $
+; set some conservative allowed range for dpr_dm_range, if specified
+do_dm_range = 0
+IF N_ELEMENTS(dpr_dm_range_in) EQ 2 THEN BEGIN
+   IF is_a_number(dpr_dm_range_in[0]) AND is_a_number(dpr_dm_range_in[1]) THEN BEGIN
+      dpr_dm_range_min = FLOAT(min(dpr_dm_range_in))
+      dpr_dm_range_max = FLOAT(max(dpr_dm_range_in))
+      IF dpr_dm_range_min LT 0.5 OR dpr_dm_range_max GT 5.0 THEN BEGIN
+         help, dpr_dm_range_in
+         message, "Out of range dpr_dm_range value, " + $
                   "must be between 0.5 and 5.0 (mm)"
       ENDIF ELSE BEGIN
-         dpr_dm_cutoff = dpr_dm_cutoff_f
-         do_dm_cutoff = 1
+;         dpr_dm_range = dpr_dm_range_f
+         do_dm_range = 1
       ENDELSE
+      ENDIF
    ENDIF ELSE BEGIN
-      help, dpr_dm_cutoff_in
-      message, "Illegal dpr_dm_cutoff type, " + $
+      help, dpr_dm_range_in
+      message, "Illegal dpr_dm_range type, " + $
                "must be a number between 0.5 and 5.0"
    ENDELSE
 ENDIF
@@ -904,11 +906,13 @@ IF N_ELEMENTS(alt_bb_file) EQ 1 THEN addme = addme+'_AltBB'
 IF do_dm_thresh EQ 1 THEN addme = addme+'_Dm_GE_'+ $
                                   STRING(dpr_dm_thresh, FORMAT='(F3.1)')
 
-IF do_dm_cutoff EQ 1 THEN addme = addme+'_Dm_LE_'+ $
-                                  STRING(dpr_dm_cutoff, FORMAT='(F3.1)')
-
-IF do_dm_cutoff EQ 1 AND do_dm_thresh EQ 1 THEN BEGIN
-   message, "Error:  cannot do both dpr_dm_thresh and dpr_dm_cutoff filtering." $
+;IF do_dm_range EQ 1 THEN addme = addme+'_Dm_LE_'+ $
+;                                  STRING(dpr_dm_range, FORMAT='(F3.1)')
+IF do_dm_range EQ 1 THEN addme = addme+'_Dm_'+ $
+                                  STRING(dpr_dm_range_min, dpr_dm_range_max, FORMAT='("GE_",F3.1,"LE_",f3.1)')
+                                  
+IF do_dm_range EQ 1 AND do_dm_thresh EQ 1 THEN BEGIN
+   message, "Error:  cannot do both dpr_dm_thresh and dpr_dm_range filtering." $
             +"  Quitting.", /INFO
    GOTO, cleanUp
 ENDIF
@@ -1416,8 +1420,8 @@ ENDIF ELSE BEGIN
                +"  Quitting.", /INFO
       GOTO, cleanUp
    ENDIF
-   IF do_dm_cutoff EQ 1 THEN BEGIN
-      message, "No DPR Dm present, but dpr_dm_cutoff filtering requested." $
+   IF do_dm_range EQ 1 THEN BEGIN
+      message, "No DPR Dm present, but dpr_dm_range filtering requested." $
                +"  Quitting.", /INFO
       GOTO, cleanUp
    ENDIF
@@ -1615,7 +1619,7 @@ blockfilter = 'C'    ; initialize blockage filter to "by Column"
 ;-------------------------------------------------
 ; TAB 7/27/17 added Z thresholding check
 ; Define and/or reset filter flag variables if doing blockage, Dm, Z, or ET thresholding
-IF do_GR_blockage NE 0 OR do_dm_thresh EQ 1 OR do_dm_cutoff EQ 1  $
+IF do_GR_blockage NE 0 OR do_dm_thresh EQ 1 OR do_dm_range EQ 1  $
    OR N_ELEMENTS( et_range_m ) EQ 2 OR zfilter_type NE 'none' THEN BEGIN
       flag2filter = INTARR( SIZE(gvz, /DIMENSIONS) )
       filterText=''
@@ -1751,21 +1755,26 @@ help, dpr_dm_thresh, ndmdprgt25
             flag2filter[idxDmTooLow] = 1
 ;            filterText=filterText+' DPR_Dm'
             filterText=filterText+' DPR_Dm ge ' + STRING(dpr_dm_thresh, FORMAT='(F3.1)') 
-            dmTitleText=' DPR Dm ge ' + STRING(dpr_dm_thresh, FORMAT='(F3.1)') 
+            dmTitleText=' DPR Dm GE ' + STRING(dpr_dm_thresh, FORMAT='(F3.1)') 
          ENDIF
       ENDIF
 ;   ENDELSE
 ENDIF
 ;********* end original code ************
 
-IF do_dm_cutoff EQ 1 THEN BEGIN
-   ; find all samples with DPR Dm > dpr_dm_cutoff
-   idxdmTooHigh= WHERE(DPR_Dm GT dpr_dm_cutoff , ndmdprgtcutoff)
-help, dpr_dm_cutoff, ndmdprgtcutoff 
+IF do_dm_range EQ 1 THEN BEGIN
+   ; find all samples with DPR Dm outside of dpr_dm_range
+;   idxdmTooHigh= WHERE(DPR_Dm GT dpr_dm_range , ndmdprgtrange)
+   idxdmTooHigh= WHERE(DPR_Dm GT dpr_dm_range_max OR DPR_Dm LT dpr_dm_range_min , ndmdprgtrange)
+help, dpr_dm_range_min, dpr_dm_range_max, ndmdprgtrange 
    IF N_ELEMENTS(idxdmTooHigh) NE 0 THEN BEGIN
        flag2filter[idxDmTooHigh] = 1
-            filterText=filterText+' DPR_Dm le ' + STRING(dpr_dm_cutoff, FORMAT='(F3.1)')
-            dmTitleText=' DPR Dm le ' + STRING(dpr_dm_cutoff, FORMAT='(F3.1)')
+;            filterText=filterText+' DPR_Dm le ' + STRING(dpr_dm_range, FORMAT='(F3.1)')
+;            dmTitleText=' DPR Dm le ' + STRING(dpr_dm_range, FORMAT='(F3.1)')
+            filterText=filterText+' DPR_Dm ' + $
+            	STRING(dpr_dm_range_min, dpr_dm_range_max, FORMAT='("GE ",F3.1,"LE ",f3.1)')
+            dmTitleText=' DPR Dm ' + $
+            	STRING(dpr_dm_range_min, dpr_dm_range_max, FORMAT='("GE ",F3.1,"LE ",f3.1)')
    ENDIF
 ENDIF
 
@@ -3953,7 +3962,7 @@ print, "GRRDSR plot...."
             pctabvstr+" Above Thresh."
    ENDELSE
 ;  TAB 7/26/17
-   IF do_dm_thresh EQ 1 OR do_dm_cutoff EQ 1 THEN BEGIN
+   IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
       imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
    ENDIF ELSE BEGIN 
       imTITLE = imTITLE + " " + filtertitlestring
