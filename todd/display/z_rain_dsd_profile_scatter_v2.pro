@@ -629,8 +629,10 @@ ENDIF
 
 GRZSH_above_3 = []
 GRZSH_above_4 = []
-GRZSH_below = []
-GRDMSH_below = []
+GRZSH_below_c = []
+GRZSH_below_s = []
+GRDMSH_below_c = []
+GRDMSH_below_s = []
 
 ;TAB 8/12/17
 ; LUN for writing anomaly info to file
@@ -2146,9 +2148,15 @@ endif
      		; GR_Dmstddev
 			;GR Dm standard deviation histogram (below BB)
                 CASE raintypeBBidx OF
-                   2 : BEGIN
-                      ; accumulate any/all rain types below the BB at/below 3 km
-                      idxabv = WHERE( GR_Dmstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1, countabv )
+                   0 : BEGIN
+                      ; accumulate stratiform rain types below the BB at/below 3 km
+                      idxabv = WHERE( GR_Dmstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+                        AND rntype EQ RainType_stratiform, countabv )
+                      END
+                   1 : BEGIN
+                      ; accumulate convective rain types below the BB at/below 3 km
+                      idxabv = WHERE( GR_Dmstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+                      	AND rntype EQ RainType_convective, countabv )
                       END
                 ELSE: BEGIN
                       END
@@ -2159,9 +2167,15 @@ endif
        		; gvzstddev
      		;GR Z standard deviation histogram (above & below BB)
                  CASE raintypeBBidx OF
-                    2 : BEGIN
-                      ; accumulate any/all rain types below the BB at/below 3 km
-                      idxabv = WHERE( gvzstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1, countabv )
+                    0 : BEGIN
+                      ; accumulate stratiform rain types below the BB at/below 3 km
+                      idxabv = WHERE( gvzstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+                        AND rntype EQ RainType_stratiform, countabv )
+                      END
+                    1 : BEGIN
+                      ; accumulate convective rain types below the BB at/below 3 km
+                      idxabv = WHERE( gvzstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+                      	AND rntype EQ RainType_convective, countabv )
                       END
                     3 : BEGIN
                       ; use four layers above highest layer affected by BB
@@ -2750,9 +2764,13 @@ print, "" & print, "Using DPR Epsilon." & print, ""
               END
       'GRDMSH' : BEGIN ; only do for all below BB
                CASE raintypeBBidx OF
-                   2 : BEGIN
-                      ; accumulate any/all rain types below the BB at/below 3 km
-                      GRDMSH_below = [GRDMSH_below, GR_Dmstddev[idxabv]]
+                   0 : BEGIN
+                      ; accumulate stratiform at/below 3 km
+                      GRDMSH_below_s = [GRDMSH_below_s, GR_Dmstddev[idxabv]]
+                      END
+                   1 : BEGIN
+                      ; accumulate convective at/below 3 km
+                      GRDMSH_below_c = [GRDMSH_below_c, GR_Dmstddev[idxabv]]
                       END
                 ELSE: BEGIN
                       END
@@ -2761,9 +2779,13 @@ print, "" & print, "Using DPR Epsilon." & print, ""
        'GRZSH' : BEGIN ; do for convective above BB and all below BB
      		;GR Z standard deviation histogram (above & below BB)
                  CASE raintypeBBidx OF
-                    2 : BEGIN
-                      ; accumulate any/all rain types below the BB at/below 3 km
-                      GRZSH_below = [GRZSH_below, gvzstddev[idxabv]]
+                    0 : BEGIN
+                      ; accumulate stratiform below the BB at/below 3 km
+                      GRZSH_below_s = [GRZSH_below_s, gvzstddev[idxabv]]
+                      END
+                    1 : BEGIN
+                      ; accumulate convective below the BB at/below 3 km
+                      GRZSH_below_c = [GRZSH_below_c, gvzstddev[idxabv]]
                       END
                     3 : BEGIN
                       ; use four layers above highest layer affected by BB
@@ -3632,16 +3654,27 @@ print, "GRRDSR plot...."
     	    titleLine1 = "GR Dm Std Dev Histogram  "+satprodtype+" for " $
                + pr_or_dpr+' '+version
 			CASE raintypeBBidx OF
-			   2 : BEGIN
+			   0 : BEGIN
 			      BB_string = '_BelowBB'			      
-			      ; use any/all rain types below the BB at/below 3 km
-				  minstddev=MIN(GRDMSH_below)
-				  maxstddev=MAX(GRDMSH_below)
+			      ; use stratiform types below the BB at/below 3 km
+				  minstddev=MIN(GRDMSH_below_s)
+				  maxstddev=MAX(GRDMSH_below_s)
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
-				  hist1 = HISTOGRAM(GRDMSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
+				  hist1 = HISTOGRAM(GRDMSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
         		  imTITLE = titleLine1+"!C" + $
-                      pctabvstr+" Above Thresh.  Any/All Samples, Below Bright Band and <= 3 km AGL"
+                      pctabvstr+" Above Thresh.  Stratiform Samples, Below Bright Band and <= 3 km AGL"
+			      END
+			   1 : BEGIN
+			      BB_string = '_BelowBB'			      
+			      ; use convective rain types below the BB at/below 3 km
+				  minstddev=MIN(GRDMSH_below_c)
+				  maxstddev=MAX(GRDMSH_below_c)
+				  print,"GRDMSH minstdev ", minstddev
+				  print,"GRDMSH maxstdev ", maxstddev
+				  hist1 = HISTOGRAM(GRDMSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
+        		  imTITLE = titleLine1+"!C" + $
+                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
@@ -3652,16 +3685,27 @@ print, "GRRDSR plot...."
     	    titleLine1 = "GR Z Std Dev Histogram  "+satprodtype+" for " $
                + pr_or_dpr+' '+version
 			CASE raintypeBBidx OF
-			   2 : BEGIN
+			   0 : BEGIN
  				  BB_string = '_BelowBB'
         		  imTITLE = titleLine1+"!C" + $
-                      pctabvstr+" Above Thresh.  Any/All Samples, Below Bright Band and <= 3 km AGL"
+                      pctabvstr+" Above Thresh.  Stratiform Samples, Below Bright Band and <= 3 km AGL"
 			      ; use any/all rain types below the BB at/below 3 km
-				  minstddev=MIN(GRZSH_below)
-				  maxstddev=MAX(GRZSH_below)
+				  minstddev=MIN(GRZSH_below_s)
+				  maxstddev=MAX(GRZSH_below_s)
 ;				  print,"GRZSH minstdev ", minstddev
 ;				  print,"GRZSH maxstdev ", maxstddev
-				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
+				  hist1 = HISTOGRAM(GRZSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
+			      END
+			   1 : BEGIN
+ 				  BB_string = '_BelowBB'
+        		  imTITLE = titleLine1+"!C" + $
+                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
+			      ; use any/all rain types below the BB at/below 3 km
+				  minstddev=MIN(GRZSH_below_c)
+				  maxstddev=MAX(GRZSH_below_c)
+;				  print,"GRZSH minstdev ", minstddev
+;				  print,"GRZSH maxstdev ", maxstddev
+				  hist1 = HISTOGRAM(GRZSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 			      END
 			   3 : BEGIN
   				  BB_string = '_AboveBB'
