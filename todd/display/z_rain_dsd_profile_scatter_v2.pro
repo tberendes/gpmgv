@@ -30,9 +30,12 @@
 ;'NWGZMXP': GR Nw vs. DPR Max(measured Z)  (DPR column max Zm)
 ;   'EPSI': DPR (original 2A product values if available, derived if not)
 ;           epsilon vs. GR derived epsilon
+;    'HID': Hydrometeor ID histogram
 ;'MRMSDSR': MRMS surface RR vs. DPR near sfc RR (x vs y)
 ;'GRRMRMS': GR sfc RR (2nd lowest level) vs MRMS surface RR 
 ; 'GRRDSR': GR sfc RR (2nd lowest level) vs DPR near sfc RR 
+; 'GRZSH' : GR Z standard deviation histogram (above & below BB)
+;'GRDMSH' : GR Dm standard deviation histogram (below BB)
 ;
 ; If an alternate field is specified in the ALTFIELD parameter (values as
 ; defined by the IDs in quotes, above), then scatter plots will be created for
@@ -619,6 +622,15 @@ ENDIF
 ;  HID_histogram1 = LONARR(4,12)
   HID_histogram1 = LONARR(4,13)
   HID_histogram2= LONARR(4,13)
+  
+; accumulators for:
+; 'GRZSH' : GR Z standard deviation histogram (above & below BB)
+;'GRDMSH' : GR Dm standard deviation histogram (below BB)
+
+GRZSH_above_3 = []
+GRZSH_above_4 = []
+GRZSH_below = []
+GRDMSH_below = []
 
 ;TAB 8/12/17
 ; LUN for writing anomaly info to file
@@ -633,7 +645,9 @@ IF KEYWORD_SET(batch_save) THEN buffer=1 ELSE buffer=0
 ; of the data.  First triplet of values are for stratiform/aboveBB, 2nd triplet
 ; is convective/belowBB, 3rd is Any/All
 ; TAB 11/13/17 added fourth dimension for above BB convective
-have_Hist = {   HID : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+			 GRDMSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+				HID : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             MRMSDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             GRRMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              GRRDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
@@ -1031,7 +1045,7 @@ ptr_pctgoodDprDm=ptr_new(/allocate_heap)
 
 ptr_GR_DP_Dm=ptr_new(/allocate_heap)
 ; ptr_GR_DP_Dmmax=ptr_new(/allocate_heap)
-; ptr_GR_DP_Dmstddev=ptr_new(/allocate_heap)
+ptr_GR_DP_Dmstddev=ptr_new(/allocate_heap)
 ptr_DprDm=ptr_new(/allocate_heap)
 ptr_pctgooddmgv=ptr_new(/allocate_heap)
 ptr_pctgoodDprDm=ptr_new(/allocate_heap)
@@ -1335,8 +1349,11 @@ ENDIF
    mysweeps=temporary(*ptr_sweepmeta)
    myflags=temporary(*ptr_fieldflags)
    gvz=temporary(*ptr_gvz)
-   gvzmax=*ptr_gvzmax
-   gvzstddev=*ptr_gvzstddev
+   ; TAB changed to use temporary like rest of the variables
+   ;gvzmax=*ptr_gvzmax
+   ;gvzstddev=*ptr_gvzstddev
+   gvzmax=temporary(*ptr_gvzmax)
+   gvzstddev=temporary(*ptr_gvzstddev)
   ; DPRGMI does not have Zmeasured (zraw), so just copy Zcorrected to define it
    IF pr_or_dpr EQ 'DPRGMI' THEN zraw=*ptr_zcor ELSE zraw=temporary(*ptr_zraw)
    zcor=temporary(*ptr_zcor)
@@ -1379,6 +1396,7 @@ ENDIF
 have_altfield=1   ; initialize as if we have an alternate field to process
 ;    ELSE : have_altfield=0   ; only doing boring old Z
 
+; TAB moved from later in the program so we can apply BBprox filtering for Dm
 ; build an array of BB proximity: 0 if below, 1 if within, 2 if above
 ;#######################################################################################
 ; NOTE THESE CATEGORY NUMBERS ARE ONE LOWER THAN THOSE IN FPREP_GEO_MATCH_PROFILES() !!
@@ -1451,7 +1469,7 @@ IF myflags.have_GR_Dm EQ 1 and have_SAT_DSD EQ 1 THEN BEGIN
 ;              have_hist.DmAny[haveVar,*] = 1
               GR_Dm=temporary(*ptr_GR_DP_Dm)
 ;              GR_Dmmax=temporary(*ptr_GR_DP_Dmmax)
-;              GR_Dmstddev=temporary(*ptr_GR_DP_Dmstddev)
+              GR_Dmstddev=temporary(*ptr_GR_DP_Dmstddev)
               pctgoodGR_Dm=temporary(*ptr_pctgooddmgv)
 ENDIF ELSE have_Dm = 0
 
@@ -1517,12 +1535,10 @@ IF myflags.have_mrms EQ 1 THEN have_mrms = 1 ELSE have_mrms = 0
 
 ; TAB 9/29/17  Hardcode for now, check presence later
 ;******************^^^^^^^^^^^^^^^***************&^^^^^^^^^^^^^^^*^*^
-; fix this !!!!!!!!!!!!!
 IF have_mrms EQ 1 THEN BEGIN
 	have_hist.MRMSDSR[haveVar,*] = 1
 	have_hist.GRRMRMS[haveVar,*] = 1
 	have_hist.GRRDSR[haveVar,*] = 1
-	;have_hist.MRMSDSR[haveVar,*] = 0
 ENDIF
 
 IF have_NW THEN BEGIN
@@ -1911,7 +1927,7 @@ print, ''
           IF have_Dm EQ 1 THEN BEGIN
               GR_Dm=GR_Dm[idxgoodenuff]
 ;              GR_Dmmax=GR_Dmmax[idxgoodenuff]
-;              GR_Dmstddev=GR_Dmstddev[idxgoodenuff]
+              GR_Dmstddev=GR_Dmstddev[idxgoodenuff]
               pctgoodGR_Dm=pctgoodGR_Dm[idxgoodenuff]
               DPR_Dm=DPR_Dm[idxgoodenuff]
               pctgoodDPR_Dm=pctgoodDPR_Dm[idxgoodenuff]
@@ -2060,6 +2076,14 @@ if num_hail GT 0 then begin
 endif
 
 ;-------------------------------------------------------------
+; original location of this block:  needed to move up in program for Dm filtering
+; this is now done earlier in this program
+; build an array of BB proximity: 0 if below, 1 if within, 2 if above
+;#######################################################################################
+; NOTE THESE CATEGORY NUMBERS ARE ONE LOWER THAN THOSE IN FPREP_GEO_MATCH_PROFILES() !!
+;#######################################################################################
+;   BBprox = BBprox - 1
+
 
   ; compute mean bias stratiform/aboveBB weighted by # samples
    IF do_scatr THEN BEGIN
@@ -2118,13 +2142,45 @@ endif
      ; set up the indices of the samples to include in the scatter plots
       skip_plot = 0
       SWITCH PlotTypes(iplot) OF
+     'GRDMSH' : BEGIN ; only do for all below BB
+     		; GR_Dmstddev
+			;GR Dm standard deviation histogram (below BB)
+                CASE raintypeBBidx OF
+                   2 : BEGIN
+                      ; accumulate any/all rain types below the BB at/below 3 km
+                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1, countabv )
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
+       'GRZSH' : BEGIN ; do for convective above BB and all below BB
+       		; gvzstddev
+     		;GR Z standard deviation histogram (above & below BB)
+                 CASE raintypeBBidx OF
+                    2 : BEGIN
+                      ; accumulate any/all rain types below the BB at/below 3 km
+                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1, countabv )
+                      END
+                    3 : BEGIN
+                      ; use four layers above highest layer affected by BB
+                      idxabv4 = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
+                      idxabv3 = WHERE( hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
        'HID' : BEGIN ; only do for convective above BB
                  CASE raintypeBBidx OF
                   3 : BEGIN
                       ; use four layers above highest layer affected by BB
-                      idxabv1 = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      idxabv4 = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
                       ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
-                      idxabv2 = WHERE( hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      idxabv3 = WHERE( hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
                       END
                 ELSE: BEGIN
                       END
@@ -2692,10 +2748,38 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF
               END
+      'GRDMSH' : BEGIN ; only do for all below BB
+               CASE raintypeBBidx OF
+                   2 : BEGIN
+                      ; accumulate any/all rain types below the BB at/below 3 km
+                      GRDMSH_below = [GRDMSH_below, GR_Dmstddev[idxabv]]
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               END
+       'GRZSH' : BEGIN ; do for convective above BB and all below BB
+     		;GR Z standard deviation histogram (above & below BB)
+                 CASE raintypeBBidx OF
+                    2 : BEGIN
+                      ; accumulate any/all rain types below the BB at/below 3 km
+                      GRZSH_below = [GRZSH_below, gvzstddev[idxabv]]
+                      END
+                    3 : BEGIN
+                      ; use four layers above highest layer affected by BB
+                      GRZSH_above_4 = [GRZSH_above_4, gvzstddev[idxabv4]]
+                      ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
+                      GRZSH_above_3 = [GRZSH_above_3, gvzstddev[idxabv3]]
+                      
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               END
       'HID' : BEGIN
                   if raintypeBBidx EQ 3 then begin
 ; skip first array index (missing)  
-                  hc1 = besthid[idxabv1] 
+                  hc1 = besthid[idxabv4] 
               ;    print, 'HID ', hc1 
                   nelem = N_ELEMENTS(hc1)
               ;    print, 'nelem ', nelem
@@ -2705,7 +2789,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                       if hc1[i] eq 2 or hc1[i] eq 8 or hc1[i] eq 9 then HID_histogram1[raintypeBBidx, 12]++ 
                   endfor 
 
-                  hc2 = besthid[idxabv2] 
+                  hc2 = besthid[idxabv3] 
               ;    print, 'HID ', hc2 
                   nelem = N_ELEMENTS(hc2)
               ;    print, 'nelem ', nelem
@@ -2833,6 +2917,10 @@ FOR raintypeBBidx = 0, 3 do begin
    if raintypeBBidx eq 3 then begin
 
       SWITCH PlotTypes(idx2do) OF
+       'GRZSH' : BEGIN ; do for convective above BB and all below BB
+       			print, 'creating GRZSH conv above BB'
+       			break
+                END
          'HID': BEGIN
                 print, 'creating HID plot conv above BB'     
                 break
@@ -3535,6 +3623,94 @@ print, "GRRDSR plot...."
       ; only do plot for MRMS raintypeBBidx 2
       if do_plot NE 1 then continue
       
+      ; Plotting section.....................................................
+    
+    numBars=1
+	CASE PlotTypes(idx2do) OF
+	   'GRDMSH' : BEGIN
+    	    titleLine1 = "GR Dm Std Dev Histogram  "+satprodtype+" for " $
+               + pr_or_dpr+' '+version
+			CASE raintypeBBidx OF
+			   2 : BEGIN
+			      ; use any/all rain types below the BB at/below 3 km
+				  hist1 = HISTOGRAM(GRDMSH_below, LOCATIONS=xvals1, OMIN=omin1, OMAX=omax1)      
+        		  imTITLE = titleLine1+"!C" + $
+                      pctabvstr+" Above Thresh.  Any/All Samples, Below Bright Band and <= 3 km AGL"
+			      END
+			ELSE: BEGIN
+			         goto, plot_skipped1
+			      END
+			ENDCASE
+	   	END
+	   'GRZSH' : BEGIN
+    	    titleLine1 = "GR Z Std Dev Histogram  "+satprodtype+" for " $
+               + pr_or_dpr+' '+version
+			CASE raintypeBBidx OF
+			   2 : BEGIN
+        		  imTITLE = titleLine1+"!C" + $
+                      pctabvstr+" Above Thresh.  Any/All Samples, Below Bright Band and <= 3 km AGL"
+			      ; use any/all rain types below the BB at/below 3 km
+				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, OMIN=omin1, OMAX=omax1)      
+			      END
+			   3 : BEGIN
+         		  imTITLE = titleLine1+"!C" + $
+                   pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
+	              ; use four layers above highest layer affected by BB
+				  min1=MIN(GRZSH_above_4)
+				  min2=MIN(GRZSH_above_3)
+				  max1=MAX(GRZSH_above_4)
+				  max2=MAX(GRZSH_above_3)
+				  minstddev=MIN([min1,min2])
+				  maxstddev=MAX([max1,max2])
+				  hist1 = HISTOGRAM(GRZSH_above_4, LOCATIONS=xvals1, min=minstddev, max=maxstddev)      
+				  hist2 = HISTOGRAM(GRZSH_above_3, LOCATIONS=xvals2, min=minstddev, max=maxstddev)  
+			      numBars=2
+			      END
+			ELSE: BEGIN
+			         goto, plot_skipped1
+			      END
+			ENDCASE
+	   	END
+	ENDCASE		   		
+
+
+   if PlotTypes(idx2do) EQ 'GRDMSH' OR  PlotTypes(idx2do) EQ 'GRZSH' then begin
+   
+        PRINT, ''
+        PRINT, '' 
+        PRINT, "PLOTTING: Std Dev Histograms ", PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
+        PRINT, '' 
+
+        IF do_dm_thresh EQ 1 THEN BEGIN
+             imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
+        ENDIF ELSE BEGIN 
+             imTITLE = imTITLE + " " + filtertitlestring
+        ENDELSE
+        
+        bar = barplot(xvals1,hist1,ytitle='Sample Count', xtitle='Standard Deviation' $
+                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue')
+        if numBars eq 2 then begin
+        	bar = barplot(hist2,ytitle='Sample Count', $
+                      /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green', /OVERPLOT)
+			startx = minstddev + 0.66*(maxstddev-minstddev)
+			starty1 = min(xvals1) + 0.9*(max(xvals1)-min(xvals1))
+			starty2 = min(xvals1) + 0.85*(max(xvals1)-min(xvals1))
+			
+       		text1 = TEXT(startx,starty1, 'Four levels above BB', /CURRENT, $ 
+                COLOR='blue', /DATA)
+        	text2 = TEXT(startx,starty2, 'Three levels starting two above BB', /CURRENT, $ 
+                COLOR='green', /DATA)
+        endif
+
+        pngfile = outpath_sav + '/'+ PlotTypes(idx2do) + '_'+ rntypeLabels[raintypeBBidx] + $
+             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
+             addme + filteraddstring + '.png'
+        print, "PNGFILE: ",pngfile
+        bar.save, pngfile, RESOLUTION=300
+        bar.close
+
+   endif
+      
 ;  TAB 11/14/17  only set this up for non-interactive for the time being
    if PlotTypes(idx2do) EQ 'HID' AND raintypeBBidx EQ 3 then begin
         PRINT, ''
@@ -3965,6 +4141,7 @@ if (ptr_valid(ptr_rain3) eq 1) then ptr_free,ptr_rain3
 if (ptr_valid(ptr_pia) eq 1) then ptr_free,ptr_pia
  if (ptr_valid(ptr_gvzmax) eq 1) then ptr_free,ptr_gvzmax
  if (ptr_valid(ptr_gvzstddev) eq 1) then ptr_free,ptr_gvzstddev
+ if (ptr_valid(ptr_GR_DP_Dmstddev) eq 1) then ptr_free,ptr_GR_DP_Dmstddev
 if (ptr_valid(ptr_nearSurfRain) eq 1) then ptr_free,ptr_nearSurfRain
 if (ptr_valid(ptr_nearSurfRain_2b31) eq 1) then ptr_free,ptr_nearSurfRain_2b31
 ;if (ptr_valid(ptr_rnFlag) eq 1) then ptr_free,ptr_rnFlag
