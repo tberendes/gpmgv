@@ -3639,7 +3639,7 @@ print, "GRRDSR plot...."
 				  maxstddev=MAX(GRDMSH_below)
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
-				  hist1 = HISTOGRAM(GRDMSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev)      
+				  hist1 = HISTOGRAM(GRDMSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
         		  imTITLE = titleLine1+"!C" + $
                       pctabvstr+" Above Thresh.  Any/All Samples, Below Bright Band and <= 3 km AGL"
 			      END
@@ -3661,7 +3661,7 @@ print, "GRRDSR plot...."
 				  maxstddev=MAX(GRZSH_below)
 ;				  print,"GRZSH minstdev ", minstddev
 ;				  print,"GRZSH maxstdev ", maxstddev
-				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev)      
+				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 			      END
 			   3 : BEGIN
   				  BB_string = '_AboveBB'
@@ -3674,8 +3674,8 @@ print, "GRRDSR plot...."
 				  max2=MAX(GRZSH_above_3)
 				  minstddev=MIN([min1,min2])
 				  maxstddev=MAX([max1,max2])
-				  hist1 = HISTOGRAM(GRZSH_above_4, LOCATIONS=xvals1, min=minstddev, max=maxstddev)      
-				  hist2 = HISTOGRAM(GRZSH_above_3, LOCATIONS=xvals2, min=minstddev, max=maxstddev)  
+				  hist1 = HISTOGRAM(GRZSH_above_4, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
+				  hist2 = HISTOGRAM(GRZSH_above_3, LOCATIONS=xvals2, min=minstddev, max=maxstddev, nbins=10)  
 			      numBars=2
 			      END
 			ELSE: BEGIN
