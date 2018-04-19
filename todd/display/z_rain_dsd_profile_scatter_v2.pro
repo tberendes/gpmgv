@@ -819,7 +819,6 @@ IF N_ELEMENTS(dpr_dm_range_in) EQ 2 THEN BEGIN
 ;         dpr_dm_range = dpr_dm_range_f
          do_dm_range = 1
       ENDELSE
-      ENDIF
    ENDIF ELSE BEGIN
       help, dpr_dm_range_in
       message, "Illegal dpr_dm_range type, " + $
