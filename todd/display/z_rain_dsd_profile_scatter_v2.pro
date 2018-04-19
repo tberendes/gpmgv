@@ -3635,7 +3635,11 @@ print, "GRRDSR plot...."
 			   2 : BEGIN
 			      BB_string = '_BelowBB'			      
 			      ; use any/all rain types below the BB at/below 3 km
-				  hist1 = HISTOGRAM(GRDMSH_below, LOCATIONS=xvals1, OMIN=omin1, OMAX=omax1)      
+				  minstddev=MIN(GRDMSH_below)
+				  maxstddev=MAX(GRDMSH_below)
+				  print,"GRDMSH minstdev ", minstddev
+				  print,"GRDMSH maxstdev ", maxstddev
+				  hist1 = HISTOGRAM(GRDMSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev)      
         		  imTITLE = titleLine1+"!C" + $
                       pctabvstr+" Above Thresh.  Any/All Samples, Below Bright Band and <= 3 km AGL"
 			      END
@@ -3655,8 +3659,8 @@ print, "GRRDSR plot...."
 			      ; use any/all rain types below the BB at/below 3 km
 				  minstddev=MIN(GRZSH_below)
 				  maxstddev=MAX(GRZSH_below)
-				  print,"minstdev ", minstddev
-				  print,"maxstdev ", maxstddev
+;				  print,"GRZSH minstdev ", minstddev
+;				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev)      
 			      END
 			   3 : BEGIN
