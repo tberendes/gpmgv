@@ -2945,7 +2945,8 @@ BB_string = '_BelowBB'
 ; histogram data were accumulated for this instance before attempting the plot
 ; TAB 11/14/17 changed conditon to allow the HID histogram without checking have_hist structure
 ;IF have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL THEN BEGIN
-IF PlotTypes(idx2do) EQ 'HID' OR (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL) THEN BEGIN
+IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2do) EQ 'GRDMSH' OR  $
+  (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL) THEN BEGIN
   ; CREATE THE SCATTER PLOT OBJECT FROM THE BINNED DATA
    do_MAE_1_1 = 1    ; flag to include/suppress MAE and the 1:1 line on plots
    bustOut=0
@@ -3710,6 +3711,7 @@ print, "GRRDSR plot...."
         print, "PNGFILE: ",pngfile
         bar.save, pngfile, RESOLUTION=300
         bar.close
+   	  goto, plot_skipped1
 
    endif
       
