@@ -2148,7 +2148,7 @@ endif
                 CASE raintypeBBidx OF
                    2 : BEGIN
                       ; accumulate any/all rain types below the BB at/below 3 km
-                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1, countabv )
+                      idxabv = WHERE( GR_Dmstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1, countabv )
                       END
                 ELSE: BEGIN
                       END
@@ -2161,13 +2161,13 @@ endif
                  CASE raintypeBBidx OF
                     2 : BEGIN
                       ; accumulate any/all rain types below the BB at/below 3 km
-                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1, countabv )
+                      idxabv = WHERE( gvzstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1, countabv )
                       END
                     3 : BEGIN
                       ; use four layers above highest layer affected by BB
-                      idxabv4 = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      idxabv4 = WHERE( gvzstddev GE 0.0 AND hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
                       ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
-                      idxabv3 = WHERE( hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      idxabv3 = WHERE( gvzstddev GE 0.0 AND hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
                       END
                 ELSE: BEGIN
                       END
@@ -3633,6 +3633,7 @@ print, "GRRDSR plot...."
                + pr_or_dpr+' '+version
 			CASE raintypeBBidx OF
 			   2 : BEGIN
+			      BB_string = '_BelowBB'			      
 			      ; use any/all rain types below the BB at/below 3 km
 				  hist1 = HISTOGRAM(GRDMSH_below, LOCATIONS=xvals1, OMIN=omin1, OMAX=omax1)      
         		  imTITLE = titleLine1+"!C" + $
@@ -3648,12 +3649,14 @@ print, "GRRDSR plot...."
                + pr_or_dpr+' '+version
 			CASE raintypeBBidx OF
 			   2 : BEGIN
+ 				  BB_string = '_BelowBB'
         		  imTITLE = titleLine1+"!C" + $
                       pctabvstr+" Above Thresh.  Any/All Samples, Below Bright Band and <= 3 km AGL"
 			      ; use any/all rain types below the BB at/below 3 km
 				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, OMIN=omin1, OMAX=omax1)      
 			      END
 			   3 : BEGIN
+  				  BB_string = '_AboveBB'
          		  imTITLE = titleLine1+"!C" + $
                    pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
 	              ; use four layers above highest layer affected by BB
@@ -3696,8 +3699,9 @@ print, "GRRDSR plot...."
         	bar = barplot(hist2,ytitle='Sample Count', $
                       /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green', /OVERPLOT)
 			startx = minstddev + 0.66*(maxstddev-minstddev)
-			starty1 = min(xvals1) + 0.9*(max(xvals1)-min(xvals1))
-			starty2 = min(xvals1) + 0.85*(max(xvals1)-min(xvals1))
+			histmax = max([hist1,hist2])
+			starty1 = 0.9*histmax
+			starty2 = 0.8*histmax
 			
        		text1 = TEXT(startx,starty1, 'Four levels above BB', /CURRENT, $ 
                 COLOR='blue', /DATA)
