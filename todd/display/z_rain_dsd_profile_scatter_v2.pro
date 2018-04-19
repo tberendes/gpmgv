@@ -3671,6 +3671,8 @@ print, "GRRDSR plot...."
 			      END
 			ENDCASE
 	   	END
+	   	ELSE: BEGIN
+	   	END
 	ENDCASE		   		
 
 
