@@ -3653,7 +3653,9 @@ print, "GRRDSR plot...."
         		  imTITLE = titleLine1+"!C" + $
                       pctabvstr+" Above Thresh.  Any/All Samples, Below Bright Band and <= 3 km AGL"
 			      ; use any/all rain types below the BB at/below 3 km
-				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, OMIN=omin1, OMAX=omax1)      
+				  minstddev=MIN(GRZSH_below)
+				  maxstddev=MAX(GRZSH_below)
+				  hist1 = HISTOGRAM(GRZSH_below, LOCATIONS=xvals1, min=minstddev, max=maxstddev)      
 			      END
 			   3 : BEGIN
   				  BB_string = '_AboveBB'
@@ -3696,9 +3698,9 @@ print, "GRRDSR plot...."
         bar = barplot(xvals1,hist1,ytitle='Sample Count', xtitle='Standard Deviation' $
                       , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue')
         if numBars eq 2 then begin
-        	bar = barplot(hist2,ytitle='Sample Count', $
+        	bar = barplot(xvals2,hist2,ytitle='Sample Count', $
                       /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green', /OVERPLOT)
-			startx = minstddev + 0.66*(maxstddev-minstddev)
+			startx = minstddev + 0.5*(maxstddev-minstddev)
 			histmax = max([hist1,hist2])
 			starty1 = 0.9*histmax
 			starty2 = 0.8*histmax
