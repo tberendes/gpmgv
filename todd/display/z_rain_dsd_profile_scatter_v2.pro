@@ -3679,12 +3679,11 @@ print, "GRRDSR plot...."
 			      ; use stratiform types below the BB at/below 3 km
 				  minstddev=MIN(GRDMSH_below_s)
 				  maxstddev=MAX(GRDMSH_below_s)
-				  numPts = 
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 				  numPts = total(hist1)
-        		  imTITLE = titleLine1+ "N="+numPts+!C" + $
+        		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
@@ -3695,9 +3694,10 @@ print, "GRRDSR plot...."
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
+				  numPts = total(hist1)
 ;        		  imTITLE = titleLine1+"!C" + $
 ;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
-        		  imTITLE = titleLine1+ "N="+numPts+!C" + $
+        		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
                       "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
@@ -3712,34 +3712,36 @@ print, "GRRDSR plot...."
 			   0 : BEGIN
  				  BB_string = '_BelowBB'
  ;       		  imTITLE = titleLine1+"!C" + $
-                      pctabvstr+" Above Thresh.  Stratiform Samples, Below Bright Band and <= 3 km AGL"
- ;       		  imTITLE = titleLine1+ "N="+numPts+!C" + $
-                      "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
+ ;                     pctabvstr+" Above Thresh.  Stratiform Samples, Below Bright Band and <= 3 km AGL"
 			      ; use any/all rain types below the BB at/below 3 km
 				  minstddev=MIN(GRZSH_below_s)
 				  maxstddev=MAX(GRZSH_below_s)
 				  print,"GRZSH minstdev ", minstddev
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
+				  numPts = total(hist1)
+        		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
+                      "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
  				  BB_string = '_BelowBB'
 ;        		  imTITLE = titleLine1+"!C" + $
 ;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
-        		  imTITLE = titleLine1+ "N="+numPts+!C" + $
-                      "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      ; use any/all rain types below the BB at/below 3 km
 				  minstddev=MIN(GRZSH_below_c)
 				  maxstddev=MAX(GRZSH_below_c)
 				  print,"GRZSH minstdev ", minstddev
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
+				  numPts = total(hist1)
+        		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
+                      "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   3 : BEGIN
   				  BB_string = '_AboveBB'
 ;         		  imTITLE = titleLine1+"!C" + $
 ;                   pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
-        		  imTITLE = titleLine1+ !C" + $
+        		  imTITLE = titleLine1+ "!C" + $
                       "convective above BB up to four 1.5km layers, " +pctabvstr+" Above Thresh"
 	              ; use four layers above highest layer affected by BB
 				  min1=MIN(GRZSH_above_4)
@@ -3821,7 +3823,7 @@ print, "GRRDSR plot...."
  ;                  pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
 
      	titleLine1 = satprodtype+' '+version+ " Precip category histogram  "
-        imTITLE = titleLine1+ !C" + $
+        imTITLE = titleLine1+ "!C" + $
               "convective above BB up to four 1.5km layers, " +pctabvstr+" Above Thresh"
 
         IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
@@ -3858,7 +3860,7 @@ print, "GRRDSR plot...."
         text1 = TEXT(6, 9.5*y1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
 ;        text2 = TEXT(0, 9*y1, 'Three levels starting two above BB', /CURRENT, $ 
-		str2 = + Three levels, start two above BB, N="+hist2_total
+		str2 = + "Three levels, start two above BB, N="+hist2_total
         text2 = TEXT(6, 9*y1, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
 
