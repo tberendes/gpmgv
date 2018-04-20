@@ -3862,11 +3862,13 @@ print, "GRRDSR plot...."
                       , title=imTITLE, /BUFFER, INDEX=1, NBARS=2, FILL_COLOR='green', /OVERPLOT)
 ;        text1 = TEXT(0, 9.5*y1, 'Four levels above BB', /CURRENT, $ 
 
-		str1 = + "Four levels above BB, N="+fix(hist1_total)
+		nstr1 = STRING(fix(hist1_total), FORMAT='(I0)')
+		str1 = + "Four levels above BB, N="+nstr1
         text1 = TEXT(6, 9.5*y1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
 ;        text2 = TEXT(0, 9*y1, 'Three levels starting two above BB', /CURRENT, $ 
-		str2 = + "Three levels, start two above BB, N="+fix(hist2_total)
+		nstr2 = STRING(fix(hist2_total), FORMAT='(I0)')
+		str2 = + "Three levels, start two above BB, N="+nstr2
         text2 = TEXT(6, 9*y1, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
 
