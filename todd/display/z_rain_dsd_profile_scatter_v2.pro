@@ -2774,12 +2774,12 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                CASE raintypeBBidx OF
                    0 : BEGIN
                       ; accumulate stratiform at/below 3 km
-                      if countabv gt 0 $
+                      if countabv gt 0 then $
                       	  GRDMSH_below_s = [GRDMSH_below_s, GR_Dmstddev[idxabv]]
                       END
                    1 : BEGIN
                       ; accumulate convective at/below 3 km
-                      if countabv gt 0 $
+                      if countabv gt 0 then $
                           GRDMSH_below_c = [GRDMSH_below_c, GR_Dmstddev[idxabv]]
                       END
                 ELSE: BEGIN
@@ -2791,20 +2791,20 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                  CASE raintypeBBidx OF
                     0 : BEGIN
                       ; accumulate stratiform below the BB at/below 3 km
-                      if countabv gt 0 $
+                      if countabv gt 0 then $
                           GRZSH_below_s = [GRZSH_below_s, gvzstddev[idxabv]]
                       END
                     1 : BEGIN
                       ; accumulate convective below the BB at/below 3 km
-                      if countabv gt 0 $
+                      if countabv gt 0 then $
                           GRZSH_below_c = [GRZSH_below_c, gvzstddev[idxabv]]
                       END
                     3 : BEGIN
                       ; use four layers above highest layer affected by BB
-                      if countabv_4 gt 0 $
+                      if countabv_4 gt 0 then $
                       	  GRZSH_above_4 = [GRZSH_above_4, gvzstddev[idxabv4]]
                       ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
-                      if countabv_3 gt 0 $
+                      if countabv_3 gt 0 then $
                           GRZSH_above_3 = [GRZSH_above_3, gvzstddev[idxabv3]]
                       
                       END
