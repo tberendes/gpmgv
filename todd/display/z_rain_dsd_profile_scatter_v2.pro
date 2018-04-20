@@ -3683,7 +3683,8 @@ print, "GRRDSR plot...."
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 				  numPts = fix(total(hist1))
-        		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ "N="+nstr+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
@@ -3697,7 +3698,8 @@ print, "GRRDSR plot...."
 				  numPts = fix(total(hist1))
 ;        		  imTITLE = titleLine1+"!C" + $
 ;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
-        		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ "N="+nstr+"!C" + $
                       "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
@@ -3720,7 +3722,8 @@ print, "GRRDSR plot...."
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 				  numPts = fix(total(hist1))
-        		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ "N="+nstr+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
@@ -3734,7 +3737,8 @@ print, "GRRDSR plot...."
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 				  numPts = fix(total(hist1))
-        		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ "N="+nstr+"!C" + $
                       "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   3 : BEGIN
@@ -3792,10 +3796,12 @@ print, "GRRDSR plot...."
 			starty1 = 0.9*histmax
 			starty2 = 0.85*histmax
 			
-			str1 = + "Four levels above BB, N="+fix(hist1_total)
+			nstr1 = STRING(fix(hist1_total), FORMAT='(I0)')
+			str1 = "Four levels above BB, N="+nstr1
        		text1 = TEXT(startx,starty1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
-			str2 = + "Three levels, start two above BB, N="+fix(hist2_total)
+			nstr2 = STRING(fix(hist2_total), FORMAT='(I0)')
+			str2 = + "Three levels, start two above BB, N="+nstr2
         	text2 = TEXT(startx,starty2, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
         endif
