@@ -3795,7 +3795,7 @@ print, "GRRDSR plot...."
 			str1 = + "Four levels above BB, N="+hist1_total
        		text1 = TEXT(startx,starty1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
-			str2 = + Three levels, start two above BB, N="+hist2_total
+			str2 = + "Three levels, start two above BB, N="+hist2_total
         	text2 = TEXT(startx,starty2, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
         endif
