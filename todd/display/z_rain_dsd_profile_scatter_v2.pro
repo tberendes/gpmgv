@@ -3789,14 +3789,16 @@ print, "GRRDSR plot...."
         hist1_total=total(hist1, /double)
         hist1=100.0 * (hist1/hist1_total)
         bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Standard Deviation' $
-                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue')
+                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
+                      , xrange=[minstddev,maxstddev])
 ;        bar = barplot(xvals1,hist1,ytitle='Sample Count', xtitle='Standard Deviation' $
 ;                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue')
         if numBars eq 2 then begin
         	hist2_total=total(hist2, /double)
         	hist2=100.0 * (hist2/hist2_total)
         	bar = barplot(xvals2,hist2,ytitle='% Samples', $
-                      /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green', /OVERPLOT)
+                      /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green', $
+                      , xrange=[minstddev,maxstddev], /OVERPLOT)
 			startx = minstddev + 0.45*(maxstddev-minstddev)
 			histmax = max([hist1,hist2])
 			starty1 = 0.9*histmax
