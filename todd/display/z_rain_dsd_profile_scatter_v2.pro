@@ -3805,7 +3805,7 @@ print, "GRRDSR plot...."
 			starty2 = 0.85*histmax
 			
 			nstr1 = STRING(fix(hist1_total), FORMAT='(I0)')
-			str1 = "4 levels above BB, N="+nstr1
+			str1 = '4 levels above BB, N=' + nstr1
        		text1 = TEXT(startx,starty1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
 			nstr2 = STRING(fix(hist2_total), FORMAT='(I0)')
