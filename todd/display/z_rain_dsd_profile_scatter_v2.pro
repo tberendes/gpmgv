@@ -1771,9 +1771,9 @@ help, dpr_dm_range_min, dpr_dm_range_max, ndmdprgtrange
 ;            filterText=filterText+' DPR_Dm le ' + STRING(dpr_dm_range, FORMAT='(F3.1)')
 ;            dmTitleText=' DPR Dm le ' + STRING(dpr_dm_range, FORMAT='(F3.1)')
             filterText=filterText+' DPR_Dm ' + $
-            	STRING(dpr_dm_range_min, dpr_dm_range_max, FORMAT='("GE ",F3.1,"LE ",f3.1)')
+            	STRING(dpr_dm_range_min, dpr_dm_range_max, FORMAT='("GE ",F3.1," LE ",f3.1)')
             dmTitleText=' DPR Dm ' + $
-            	STRING(dpr_dm_range_min, dpr_dm_range_max, FORMAT='("GE ",F3.1,"LE ",f3.1)')
+            	STRING(dpr_dm_range_min, dpr_dm_range_max, FORMAT='("GE ",F3.1," LE ",f3.1)')
    ENDIF
 ENDIF
 
@@ -2187,9 +2187,9 @@ endif
                       END
                     3 : BEGIN
                       ; use four layers above highest layer affected by BB
-                      idxabv4 = WHERE( gvzstddev GE 0.0 AND hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      idxabv4 = WHERE( gvzstddev GE 0.0 AND hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv_4 )
                       ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
-                      idxabv3 = WHERE( gvzstddev GE 0.0 AND hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      idxabv3 = WHERE( gvzstddev GE 0.0 AND hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv_3 )
                       END
                 ELSE: BEGIN
                       END
@@ -2200,9 +2200,9 @@ endif
                  CASE raintypeBBidx OF
                   3 : BEGIN
                       ; use four layers above highest layer affected by BB
-                      idxabv4 = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      idxabv4 = WHERE( hgtcat GT BBparms.BB_HgtHi AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv_4 )
                       ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
-                      idxabv3 = WHERE( hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv )
+                      idxabv3 = WHERE( hgtcat GT BBparms.BB_HgtHi+1 AND hgtcat LE (BBparms.BB_HgtHi + 4) AND rntype EQ RainType_convective, countabv_3 )
                       END
                 ELSE: BEGIN
                       END
@@ -2774,11 +2774,13 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                CASE raintypeBBidx OF
                    0 : BEGIN
                       ; accumulate stratiform at/below 3 km
-                      GRDMSH_below_s = [GRDMSH_below_s, GR_Dmstddev[idxabv]]
+                      if countabv gt 0 $
+                      	  GRDMSH_below_s = [GRDMSH_below_s, GR_Dmstddev[idxabv]]
                       END
                    1 : BEGIN
                       ; accumulate convective at/below 3 km
-                      GRDMSH_below_c = [GRDMSH_below_c, GR_Dmstddev[idxabv]]
+                      if countabv gt 0 $
+                          GRDMSH_below_c = [GRDMSH_below_c, GR_Dmstddev[idxabv]]
                       END
                 ELSE: BEGIN
                       END
@@ -2789,17 +2791,21 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                  CASE raintypeBBidx OF
                     0 : BEGIN
                       ; accumulate stratiform below the BB at/below 3 km
-                      GRZSH_below_s = [GRZSH_below_s, gvzstddev[idxabv]]
+                      if countabv gt 0 $
+                          GRZSH_below_s = [GRZSH_below_s, gvzstddev[idxabv]]
                       END
                     1 : BEGIN
                       ; accumulate convective below the BB at/below 3 km
-                      GRZSH_below_c = [GRZSH_below_c, gvzstddev[idxabv]]
+                      if countabv gt 0 $
+                          GRZSH_below_c = [GRZSH_below_c, gvzstddev[idxabv]]
                       END
                     3 : BEGIN
                       ; use four layers above highest layer affected by BB
-                      GRZSH_above_4 = [GRZSH_above_4, gvzstddev[idxabv4]]
+                      if countabv_4 gt 0 $
+                      	  GRZSH_above_4 = [GRZSH_above_4, gvzstddev[idxabv4]]
                       ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
-                      GRZSH_above_3 = [GRZSH_above_3, gvzstddev[idxabv3]]
+                      if countabv_3 gt 0 $
+                          GRZSH_above_3 = [GRZSH_above_3, gvzstddev[idxabv3]]
                       
                       END
                 ELSE: BEGIN
@@ -2808,25 +2814,29 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                END
       'HID' : BEGIN
                   if raintypeBBidx EQ 3 then begin
-; skip first array index (missing)  
-                  hc1 = besthid[idxabv4] 
-              ;    print, 'HID ', hc1 
-                  nelem = N_ELEMENTS(hc1)
-              ;    print, 'nelem ', nelem
-                  for i=0, nelem-1 do begin
-                      if hc1[i] gt 0 then HID_histogram1[raintypeBBidx, hc1[i]]++
-  ;HID_categories = [ 'MIS','DZ','RN','CR','DS','WS','VI','LDG','HDG','HA','BD','HR','AHA' ]
-                      if hc1[i] eq 2 or hc1[i] eq 8 or hc1[i] eq 9 then HID_histogram1[raintypeBBidx, 12]++ 
-                  endfor 
-
-                  hc2 = besthid[idxabv3] 
-              ;    print, 'HID ', hc2 
-                  nelem = N_ELEMENTS(hc2)
-              ;    print, 'nelem ', nelem
-                  for i=0, nelem-1 do begin
-                      if hc2[i] gt 0 then HID_histogram2[raintypeBBidx, hc2[i]]++
-                      if hc2[i] eq 2 or hc2[i] eq 8 or hc2[i] eq 9 then HID_histogram2[raintypeBBidx, 12]++ 
-                  endfor 
+	; skip first array index (missing)  
+					  if countabv_4 GT 0 then Begin
+		                  hc1 = besthid[idxabv4] 
+		              ;    print, 'HID ', hc1 
+		                  nelem = N_ELEMENTS(hc1)
+		              ;    print, 'nelem ', nelem
+		                  for i=0, nelem-1 do begin
+		                      if hc1[i] gt 0 then HID_histogram1[raintypeBBidx, hc1[i]]++
+		  ;HID_categories = [ 'MIS','DZ','RN','CR','DS','WS','VI','LDG','HDG','HA','BD','HR','AHA' ]
+		                      if hc1[i] eq 2 or hc1[i] eq 8 or hc1[i] eq 9 then HID_histogram1[raintypeBBidx, 12]++ 
+		                  endfor 
+					  endif 
+					  
+	 				  if countabv_3 GT 0 then Begin
+		                  hc2 = besthid[idxabv3] 
+		              ;    print, 'HID ', hc2 
+		                  nelem = N_ELEMENTS(hc2)
+		              ;    print, 'nelem ', nelem
+		                  for i=0, nelem-1 do begin
+		                      if hc2[i] gt 0 then HID_histogram2[raintypeBBidx, hc2[i]]++
+		                      if hc2[i] eq 2 or hc2[i] eq 8 or hc2[i] eq 9 then HID_histogram2[raintypeBBidx, 12]++ 
+		                  endfor 
+	                  endif 
                   endif
 
 ; can't figure out how to correctly reindex hid histograms, so for now use besthid
@@ -3700,8 +3710,8 @@ print, "GRRDSR plot...."
 			      ; use any/all rain types below the BB at/below 3 km
 				  minstddev=MIN(GRZSH_below_s)
 				  maxstddev=MAX(GRZSH_below_s)
-;				  print,"GRZSH minstdev ", minstddev
-;				  print,"GRZSH maxstdev ", maxstddev
+				  print,"GRZSH minstdev ", minstddev
+				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 			      END
 			   1 : BEGIN
@@ -3711,8 +3721,8 @@ print, "GRRDSR plot...."
 			      ; use any/all rain types below the BB at/below 3 km
 				  minstddev=MIN(GRZSH_below_c)
 				  maxstddev=MAX(GRZSH_below_c)
-;				  print,"GRZSH minstdev ", minstddev
-;				  print,"GRZSH maxstdev ", maxstddev
+				  print,"GRZSH minstdev ", minstddev
+				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 			      END
 			   3 : BEGIN
