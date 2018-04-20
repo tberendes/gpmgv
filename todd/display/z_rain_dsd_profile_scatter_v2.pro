@@ -2803,7 +2803,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                       ; use four layers above highest layer affected by BB
                       if countabv_4 gt 0 then $
                       	  GRZSH_above_4 = [GRZSH_above_4, gvzstddev[idxabv4]]
-                      ; use 3 layers above highest layer affected by BB starting at seconde layer above highest affected by BB
+                      ; use 3 layers above highest layer affected by BB starting at second layer above highest affected by BB
                       if countabv_3 gt 0 then $
                           GRZSH_above_3 = [GRZSH_above_3, gvzstddev[idxabv3]]
                       
@@ -3669,19 +3669,23 @@ print, "GRRDSR plot...."
     numBars=1
 	CASE PlotTypes(idx2do) OF
 	   'GRDMSH' : BEGIN
-    	    titleLine1 = "GR Dm Std Dev Histogram  "+satprodtype+" for " $
-               + pr_or_dpr+' '+version
+;    	    titleLine1 = "GR Dm Std Dev Histogram  "+satprodtype+" for " $
+;               + pr_or_dpr+' '+version
+    	    titleLine1 = satprodtype+' '+version+ " GR Dm Std Dev Histogram  "
+   
 			CASE raintypeBBidx OF
 			   0 : BEGIN
 			      BB_string = '_BelowBB'			      
 			      ; use stratiform types below the BB at/below 3 km
 				  minstddev=MIN(GRDMSH_below_s)
 				  maxstddev=MAX(GRDMSH_below_s)
+				  numPts = 
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-        		  imTITLE = titleLine1+"!C" + $
-                      pctabvstr+" Above Thresh.  Stratiform Samples, Below Bright Band and <= 3 km AGL"
+				  numPts = total(hist1)
+        		  imTITLE = titleLine1+ "N="+numPts+!C" + $
+                      "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
 			      BB_string = '_BelowBB'			      
@@ -3691,8 +3695,10 @@ print, "GRRDSR plot...."
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-        		  imTITLE = titleLine1+"!C" + $
-                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
+;        		  imTITLE = titleLine1+"!C" + $
+;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
+        		  imTITLE = titleLine1+ "N="+numPts+!C" + $
+                      "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
@@ -3705,8 +3711,10 @@ print, "GRRDSR plot...."
 			CASE raintypeBBidx OF
 			   0 : BEGIN
  				  BB_string = '_BelowBB'
-        		  imTITLE = titleLine1+"!C" + $
+ ;       		  imTITLE = titleLine1+"!C" + $
                       pctabvstr+" Above Thresh.  Stratiform Samples, Below Bright Band and <= 3 km AGL"
+ ;       		  imTITLE = titleLine1+ "N="+numPts+!C" + $
+                      "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      ; use any/all rain types below the BB at/below 3 km
 				  minstddev=MIN(GRZSH_below_s)
 				  maxstddev=MAX(GRZSH_below_s)
@@ -3716,8 +3724,10 @@ print, "GRRDSR plot...."
 			      END
 			   1 : BEGIN
  				  BB_string = '_BelowBB'
-        		  imTITLE = titleLine1+"!C" + $
-                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
+;        		  imTITLE = titleLine1+"!C" + $
+;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
+        		  imTITLE = titleLine1+ "N="+numPts+!C" + $
+                      "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      ; use any/all rain types below the BB at/below 3 km
 				  minstddev=MIN(GRZSH_below_c)
 				  maxstddev=MAX(GRZSH_below_c)
@@ -3727,8 +3737,10 @@ print, "GRRDSR plot...."
 			      END
 			   3 : BEGIN
   				  BB_string = '_AboveBB'
-         		  imTITLE = titleLine1+"!C" + $
-                   pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
+;         		  imTITLE = titleLine1+"!C" + $
+;                   pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
+        		  imTITLE = titleLine1+ !C" + $
+                      "convective above BB up to four 1.5km layers, " +pctabvstr+" Above Thresh"
 	              ; use four layers above highest layer affected by BB
 				  min1=MIN(GRZSH_above_4)
 				  min2=MIN(GRZSH_above_3)
@@ -3757,25 +3769,32 @@ print, "GRRDSR plot...."
         PRINT, "PLOTTING: Std Dev Histograms ", PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
         PRINT, '' 
 
-        IF do_dm_thresh EQ 1 THEN BEGIN
+        IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
              imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
         ENDIF ELSE BEGIN 
              imTITLE = imTITLE + " " + filtertitlestring
         ENDELSE
-        
-        bar = barplot(xvals1,hist1,ytitle='Sample Count', xtitle='Standard Deviation' $
+        hist1_total=total(hist1, /double)
+        hist1=100.0 * (hist1/hist1_total)
+        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Standard Deviation' $
                       , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue')
+;        bar = barplot(xvals1,hist1,ytitle='Sample Count', xtitle='Standard Deviation' $
+;                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue')
         if numBars eq 2 then begin
-        	bar = barplot(xvals2,hist2,ytitle='Sample Count', $
+        	hist2_total=total(hist2, /double)
+        	hist2=100.0 * (hist2/hist2_total)
+        	bar = barplot(xvals2,hist2,ytitle='% Samples', $
                       /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green', /OVERPLOT)
-			startx = minstddev + 0.5*(maxstddev-minstddev)
+			startx = minstddev + 0.45*(maxstddev-minstddev)
 			histmax = max([hist1,hist2])
 			starty1 = 0.9*histmax
-			starty2 = 0.8*histmax
+			starty2 = 0.85*histmax
 			
-       		text1 = TEXT(startx,starty1, 'Four levels above BB', /CURRENT, $ 
+			str1 = + "Four levels above BB, N="+hist1_total
+       		text1 = TEXT(startx,starty1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
-        	text2 = TEXT(startx,starty2, 'Three levels starting two above BB', /CURRENT, $ 
+			str2 = + Three levels, start two above BB, N="+hist2_total
+        	text2 = TEXT(startx,starty2, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
         endif
 
@@ -3795,12 +3814,17 @@ print, "GRRDSR plot...."
         PRINT, '' 
         PRINT, "PLOTTING: ", PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
         PRINT, '' 
-        titleLine1 = "Precip category counts "+satprodtype+" for " $
-                              + pr_or_dpr+' '+version
-        imTITLE = titleLine1+"!C" + $
-                   pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
 
-        IF do_dm_thresh EQ 1 THEN BEGIN
+;        titleLine1 = "Precip category counts "+satprodtype+" for " $
+ ;                             + pr_or_dpr+' '+version
+;        imTITLE = titleLine1+"!C" + $
+ ;                  pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
+
+     	titleLine1 = satprodtype+' '+version+ " Precip category histogram  "
+        imTITLE = titleLine1+ !C" + $
+              "convective above BB up to four 1.5km layers, " +pctabvstr+" Above Thresh"
+
+        IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
              imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
         ENDIF ELSE BEGIN 
              imTITLE = imTITLE + " " + filtertitlestring
@@ -3829,10 +3853,13 @@ print, "GRRDSR plot...."
         bar = barplot(hist2,ytitle='% Samples', xtitle='Precip category' $
                       , title=imTITLE, /BUFFER, INDEX=1, NBARS=2, FILL_COLOR='green', /OVERPLOT)
 ;        text1 = TEXT(0, 9.5*y1, 'Four levels above BB', /CURRENT, $ 
-        text1 = TEXT(6, 9.5*y1, 'Four levels above BB', /CURRENT, $ 
+
+		str1 = + "Four levels above BB, N="+hist1_total
+        text1 = TEXT(6, 9.5*y1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
 ;        text2 = TEXT(0, 9*y1, 'Three levels starting two above BB', /CURRENT, $ 
-        text2 = TEXT(6, 9*y1, 'Three levels starting two above BB', /CURRENT, $ 
+		str2 = + Three levels, start two above BB, N="+hist2_total
+        text2 = TEXT(6, 9*y1, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
 
         ax = bar.AXES
