@@ -3797,7 +3797,7 @@ print, "GRRDSR plot...."
         	hist2_total=total(hist2, /double)
         	hist2=100.0 * (hist2/hist2_total)
         	bar = barplot(xvals2,hist2,ytitle='% Samples', $
-                      /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green', $
+                      /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green' $
                       , xrange=[minstddev,maxstddev], /OVERPLOT)
 			startx = minstddev + 0.45*(maxstddev-minstddev)
 			histmax = max([hist1,hist2])
