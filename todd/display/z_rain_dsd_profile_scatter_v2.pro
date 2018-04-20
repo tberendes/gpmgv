@@ -3809,7 +3809,7 @@ print, "GRRDSR plot...."
        		text1 = TEXT(startx,starty1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
 			nstr2 = STRING(fix(hist2_total), FORMAT='(I0)')
-			str2 = + "3 levels above BB + 2, N="+nstr2
+			str2 = + '3 levels above BB + 2, N=' + nstr2
         	text2 = TEXT(startx,starty2, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
         endif
@@ -3871,12 +3871,12 @@ print, "GRRDSR plot...."
 ;        text1 = TEXT(0, 9.5*y1, '4 levels above BB', /CURRENT, $ 
 
 		nstr1 = STRING(fix(hist1_total), FORMAT='(I0)')
-		str1 = + "4 levels above BB, N="+nstr1
+		str1 = + '4 levels above BB, N=' + nstr1
         text1 = TEXT(6, 9.5*y1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
 ;        text2 = TEXT(0, 9*y1, '3 levels above BB + 2', /CURRENT, $ 
 		nstr2 = STRING(fix(hist2_total), FORMAT='(I0)')
-		str2 = + "3 levels above BB + 2, N="+nstr2
+		str2 = + '3 levels above BB + 2, N=' + nstr2
         text2 = TEXT(6, 9*y1, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
 
