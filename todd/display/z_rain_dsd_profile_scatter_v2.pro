@@ -3682,7 +3682,7 @@ print, "GRRDSR plot...."
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-				  numPts = total(hist1)
+				  numPts = fix(total(hist1))
         		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
@@ -3694,7 +3694,7 @@ print, "GRRDSR plot...."
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-				  numPts = total(hist1)
+				  numPts = fix(total(hist1))
 ;        		  imTITLE = titleLine1+"!C" + $
 ;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
         		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
@@ -3719,7 +3719,7 @@ print, "GRRDSR plot...."
 				  print,"GRZSH minstdev ", minstddev
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-				  numPts = total(hist1)
+				  numPts = fix(total(hist1))
         		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
@@ -3733,7 +3733,7 @@ print, "GRRDSR plot...."
 				  print,"GRZSH minstdev ", minstddev
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-				  numPts = total(hist1)
+				  numPts = fix(total(hist1))
         		  imTITLE = titleLine1+ "N="+numPts+"!C" + $
                       "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
@@ -3792,10 +3792,10 @@ print, "GRRDSR plot...."
 			starty1 = 0.9*histmax
 			starty2 = 0.85*histmax
 			
-			str1 = + "Four levels above BB, N="+hist1_total
+			str1 = + "Four levels above BB, N="+fix(hist1_total)
        		text1 = TEXT(startx,starty1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
-			str2 = + "Three levels, start two above BB, N="+hist2_total
+			str2 = + "Three levels, start two above BB, N="+fix(hist2_total)
         	text2 = TEXT(startx,starty2, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
         endif
@@ -3856,11 +3856,11 @@ print, "GRRDSR plot...."
                       , title=imTITLE, /BUFFER, INDEX=1, NBARS=2, FILL_COLOR='green', /OVERPLOT)
 ;        text1 = TEXT(0, 9.5*y1, 'Four levels above BB', /CURRENT, $ 
 
-		str1 = + "Four levels above BB, N="+hist1_total
+		str1 = + "Four levels above BB, N="+fix(hist1_total)
         text1 = TEXT(6, 9.5*y1, str1, /CURRENT, $ 
                 COLOR='blue', /DATA)
 ;        text2 = TEXT(0, 9*y1, 'Three levels starting two above BB', /CURRENT, $ 
-		str2 = + "Three levels, start two above BB, N="+hist2_total
+		str2 = + "Three levels, start two above BB, N="+fix(hist2_total)
         text2 = TEXT(6, 9*y1, str2, /CURRENT, $ 
                 COLOR='green', /DATA)
 
