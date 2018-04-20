@@ -3671,7 +3671,7 @@ print, "GRRDSR plot...."
 	   'GRDMSH' : BEGIN
 ;    	    titleLine1 = "GR Dm Std Dev Histogram  "+satprodtype+" for " $
 ;               + pr_or_dpr+' '+version
-    	    titleLine1 = satprodtype+' '+version+ " GR Dm Std Dev Histogram  "
+    	    titleLine1 = satprodtype+' '+version+ " GR Dm Std Dev Histogram"
 ; fix these for easy comparison between runs
 			minstddev=0.0
 			maxstddev=0.8
@@ -3685,7 +3685,7 @@ print, "GRRDSR plot...."
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-				  numPts = fix(total(hist1))
+				  numPts = fix(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
@@ -3698,7 +3698,7 @@ print, "GRRDSR plot...."
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-				  numPts = fix(total(hist1))
+				  numPts = fix(total(hist1,/INTEGER))
 ;        		  imTITLE = titleLine1+"!C" + $
 ;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
 				  nstr = STRING(numPts, FORMAT='(I0)')
@@ -3711,7 +3711,7 @@ print, "GRRDSR plot...."
 			ENDCASE
 	   	END
 	   'GRZSH' : BEGIN
-    	    titleLine1 = "GR Z Std Dev Histogram  "+satprodtype+" for " $
+    	    titleLine1 = "GR Z Std Dev Histogram "+satprodtype+" for " $
                + pr_or_dpr+' '+version
 ; fix these for easy comparison between runs
 			minstddev=0.0
@@ -3727,7 +3727,7 @@ print, "GRRDSR plot...."
 				  print,"GRZSH minstdev ", minstddev
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-				  numPts = fix(total(hist1))
+				  numPts = fix(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
@@ -3742,7 +3742,7 @@ print, "GRRDSR plot...."
 				  print,"GRZSH minstdev ", minstddev
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
-				  numPts = fix(total(hist1))
+				  numPts = fix(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
@@ -3836,9 +3836,9 @@ print, "GRRDSR plot...."
 ;        imTITLE = titleLine1+"!C" + $
  ;                  pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
 
-     	titleLine1 = satprodtype+' '+version+ " Precip category histogram  "
+     	titleLine1 = satprodtype+' '+version+ " Precip category histogram"
         imTITLE = titleLine1+ "!C" + $
-              "convective above BB up to four 1.5km layers, " +pctabvstr+" Above Thresh"
+              "Convective above BB up to four 1.5km layers, " +pctabvstr+" Above Thresh"
 
         IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
              imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
