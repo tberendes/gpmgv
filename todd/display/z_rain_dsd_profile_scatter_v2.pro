@@ -3672,26 +3672,29 @@ print, "GRRDSR plot...."
 ;    	    titleLine1 = "GR Dm Std Dev Histogram  "+satprodtype+" for " $
 ;               + pr_or_dpr+' '+version
     	    titleLine1 = satprodtype+' '+version+ " GR Dm Std Dev Histogram  "
+; fix these for easy comparison between runs
+			minstddev=0.0
+			maxstddev=0.8
    
 			CASE raintypeBBidx OF
 			   0 : BEGIN
 			      BB_string = '_BelowBB'			      
 			      ; use stratiform types below the BB at/below 3 km
-				  minstddev=MIN(GRDMSH_below_s)
-				  maxstddev=MAX(GRDMSH_below_s)
+;				  minstddev=MIN(GRDMSH_below_s)
+;				  maxstddev=MAX(GRDMSH_below_s)
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 				  numPts = fix(total(hist1))
 				  nstr = STRING(numPts, FORMAT='(I0)')
-        		  imTITLE = titleLine1+ "N="+nstr+"!C" + $
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
 			      BB_string = '_BelowBB'			      
 			      ; use convective rain types below the BB at/below 3 km
-				  minstddev=MIN(GRDMSH_below_c)
-				  maxstddev=MAX(GRDMSH_below_c)
+;				  minstddev=MIN(GRDMSH_below_c)
+;				  maxstddev=MAX(GRDMSH_below_c)
 				  print,"GRDMSH minstdev ", minstddev
 				  print,"GRDMSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRDMSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
@@ -3699,7 +3702,7 @@ print, "GRRDSR plot...."
 ;        		  imTITLE = titleLine1+"!C" + $
 ;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
 				  nstr = STRING(numPts, FORMAT='(I0)')
-        		  imTITLE = titleLine1+ "N="+nstr+"!C" + $
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
@@ -3710,20 +3713,23 @@ print, "GRRDSR plot...."
 	   'GRZSH' : BEGIN
     	    titleLine1 = "GR Z Std Dev Histogram  "+satprodtype+" for " $
                + pr_or_dpr+' '+version
+; fix these for easy comparison between runs
+			minstddev=0.0
+			maxstddev=12.0
 			CASE raintypeBBidx OF
 			   0 : BEGIN
  				  BB_string = '_BelowBB'
  ;       		  imTITLE = titleLine1+"!C" + $
  ;                     pctabvstr+" Above Thresh.  Stratiform Samples, Below Bright Band and <= 3 km AGL"
 			      ; use any/all rain types below the BB at/below 3 km
-				  minstddev=MIN(GRZSH_below_s)
-				  maxstddev=MAX(GRZSH_below_s)
+;				  minstddev=MIN(GRZSH_below_s)
+;				  maxstddev=MAX(GRZSH_below_s)
 				  print,"GRZSH minstdev ", minstddev
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_s, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 				  numPts = fix(total(hist1))
 				  nstr = STRING(numPts, FORMAT='(I0)')
-        		  imTITLE = titleLine1+ "N="+nstr+"!C" + $
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
@@ -3731,14 +3737,14 @@ print, "GRRDSR plot...."
 ;        		  imTITLE = titleLine1+"!C" + $
 ;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
 			      ; use any/all rain types below the BB at/below 3 km
-				  minstddev=MIN(GRZSH_below_c)
-				  maxstddev=MAX(GRZSH_below_c)
+;				  minstddev=MIN(GRZSH_below_c)
+;				  maxstddev=MAX(GRZSH_below_c)
 				  print,"GRZSH minstdev ", minstddev
 				  print,"GRZSH maxstdev ", maxstddev
 				  hist1 = HISTOGRAM(GRZSH_below_c, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 				  numPts = fix(total(hist1))
 				  nstr = STRING(numPts, FORMAT='(I0)')
-        		  imTITLE = titleLine1+ "N="+nstr+"!C" + $
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   3 : BEGIN
@@ -3748,12 +3754,12 @@ print, "GRRDSR plot...."
         		  imTITLE = titleLine1+ "!C" + $
                       "convective above BB up to four 1.5km layers, " +pctabvstr+" Above Thresh"
 	              ; use four layers above highest layer affected by BB
-				  min1=MIN(GRZSH_above_4)
-				  min2=MIN(GRZSH_above_3)
-				  max1=MAX(GRZSH_above_4)
-				  max2=MAX(GRZSH_above_3)
-				  minstddev=MIN([min1,min2])
-				  maxstddev=MAX([max1,max2])
+;				  min1=MIN(GRZSH_above_4)
+;				  min2=MIN(GRZSH_above_3)
+;				  max1=MAX(GRZSH_above_4)
+;				  max2=MAX(GRZSH_above_3)
+;				  minstddev=MIN([min1,min2])
+;				  maxstddev=MAX([max1,max2])
 				  hist1 = HISTOGRAM(GRZSH_above_4, LOCATIONS=xvals1, min=minstddev, max=maxstddev, nbins=10)      
 				  hist2 = HISTOGRAM(GRZSH_above_3, LOCATIONS=xvals2, min=minstddev, max=maxstddev, nbins=10)  
 			      numBars=2
