@@ -3551,7 +3551,7 @@ print, "mrms plot...."
 
               yticknames=xticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
-              titleLine1 = satprodtype+' '+version+" MRMS RR vs. DPR Sfc RR "+PlotTypes(idx2do)+ $
+              titleLine1 = satprodtype+' '+version+" MRMS RR vs. DPR Sfc RR "+ $
                             " Scatter, Mean MRMS-DPR RR Bias: "
  ;                          " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_MRMSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
@@ -3579,7 +3579,7 @@ print, "GRRMRMS plot...."
 
               yticknames=xticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
-              titleLine1 = satprodtype+' '+version+" GR RR vs. MRMS RR "+PlotTypes(idx2do)+ $
+              titleLine1 = satprodtype+' '+version+" GR RR vs. MRMS RR "+ $
                            " Scatter, Mean GR-MRMS RR Bias: "
 ;                           " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
@@ -3606,7 +3606,7 @@ print, "GRRDSR plot...."
 
               yticknames=xticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
-              titleLine1 = satprodtype+' '+version+" GR RR vs. DPR Sfc RR "+PlotTypes(idx2do)+ $
+              titleLine1 = satprodtype+' '+version+" GR RR vs. DPR Sfc RR "+ $
                            " Scatter, Mean GR-DPR RR Bias: "
 ;                           " Scatter "
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
