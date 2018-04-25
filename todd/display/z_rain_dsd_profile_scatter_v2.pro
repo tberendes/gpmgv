@@ -3683,6 +3683,10 @@ print, "GRRDSR plot...."
    
 			CASE raintypeBBidx OF
 			   0 : BEGIN
+			      if GRDMSH_below_s eq !NULL then begin
+			      	  print, "GRDMSH histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
 			      BB_string = '_BelowBB'			      
 			      ; use stratiform types below the BB at/below 3 km
 ;				  minstddev=MIN(GRDMSH_below_s)
@@ -3696,6 +3700,10 @@ print, "GRRDSR plot...."
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
+			      if GRDMSH_below_c eq !NULL then begin
+			      	  print, "GRDMSH histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
 			      BB_string = '_BelowBB'			      
 			      ; use convective rain types below the BB at/below 3 km
 ;				  minstddev=MIN(GRDMSH_below_c)
@@ -3723,6 +3731,10 @@ print, "GRRDSR plot...."
 			maxstddev=12.0
 			CASE raintypeBBidx OF
 			   0 : BEGIN
+			      if GRZSH_below_s eq !NULL then begin
+			      	  print, "GRZSH histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
  				  BB_string = '_BelowBB'
  ;       		  imTITLE = titleLine1+"!C" + $
  ;                     pctabvstr+" Above Thresh.  Stratiform Samples, Below Bright Band and <= 3 km AGL"
@@ -3738,6 +3750,10 @@ print, "GRRDSR plot...."
                       "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
+			      if GRZSH_below_c eq !NULL then begin
+			      	  print, "GRZSH histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
  				  BB_string = '_BelowBB'
 ;        		  imTITLE = titleLine1+"!C" + $
 ;                      pctabvstr+" Above Thresh.  Convective Samples, Below Bright Band and <= 3 km AGL"
@@ -3753,6 +3769,10 @@ print, "GRRDSR plot...."
                       "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   3 : BEGIN
+			      if GRZSH_above_3 eq !NULL or GRZSH_above_4 eq !NULL then begin
+			      	  print, "GRZSH histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
   				  BB_string = '_AboveBB'
 ;         		  imTITLE = titleLine1+"!C" + $
 ;                   pctabvstr+" Above Thresh. convective above BB up to four 1.5km layers"
