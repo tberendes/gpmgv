@@ -1474,9 +1474,14 @@ IF myflags.have_GR_Dm EQ 1 and have_SAT_DSD EQ 1 THEN BEGIN
 ;              have_hist.DmAny[haveVar,*] = 1
               GR_Dm=temporary(*ptr_GR_DP_Dm)
 ;              GR_Dmmax=temporary(*ptr_GR_DP_Dmmax)
-              GR_Dmstddev=temporary(*ptr_GR_DP_Dmstddev)
+;              GR_Dmstddev=temporary(*ptr_GR_DP_Dmstddev)
               pctgoodGR_Dm=temporary(*ptr_pctgooddmgv)
 ENDIF ELSE have_Dm = 0
+
+; TAB add this in for GR Dm histograms, always want GR_Dmstddev even when we don't have satellite Dm
+IF myflags.have_GR_Dm EQ 1 THEN BEGIN
+             GR_Dmstddev=temporary(*ptr_GR_DP_Dmstddev)
+ENDIF
 
 IF myflags.have_GR_Nw EQ 1 and have_SAT_DSD EQ 1 THEN BEGIN
               have_Nw = 1
