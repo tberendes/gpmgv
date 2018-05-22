@@ -2681,7 +2681,7 @@ endif
                     if rr_log then begin
                     	idx_not_zero = where(scat_Y gt 0, num_log_pts)
                     	if num_log_pts gt 0 then  scat_Y = scat_Y[idx_not_zero] else scat_Y = []
-                    	scat_X = ALOG10(scat_X)
+                    	scat_Y = ALOG10(scat_Y)
                     endif 
 		            if do_RR_DM_curve_fit eq 1 and RR_DM_curve_fit_bb_type eq raintypeBBidx then begin
                          idx_ok = where(GR_RR ge 0 and GR_Dm ge 0)
