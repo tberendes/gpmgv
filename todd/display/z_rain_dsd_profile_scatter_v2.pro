@@ -3322,7 +3322,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3331,7 +3331,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3340,7 +3340,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3403,7 +3403,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		yticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3413,7 +3413,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		yticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3424,7 +3424,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F0.2)')
+                   		yticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3463,7 +3463,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3473,7 +3473,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3483,7 +3483,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3526,7 +3526,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		yticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3536,7 +3536,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		yticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3546,7 +3546,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F0.2)')
+                   		yticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3581,7 +3581,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3591,7 +3591,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3601,7 +3601,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3744,7 +3744,7 @@ print, "mrms plot...."
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3778,7 +3778,7 @@ print, "GRRMRMS plot...."
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3811,7 +3811,7 @@ print, "GRRDSR plot...."
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F0.2)')
+                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
