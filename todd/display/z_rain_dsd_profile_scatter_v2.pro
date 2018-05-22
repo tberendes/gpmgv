@@ -2590,13 +2590,16 @@ endif
 	                scat_X = GR_RC[idxabv]
 	                scat_Y = DPR_RC[idxabv]
                     if rr_log then begin
-                    	idx_not_zero = where(scat_X gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_X = scat_X[idx_not_zero] else scat_X = []
-                    	scat_X = ALOG10(scat_X)
-                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_Y = scat_Y[idx_not_zero] else scat_Y = []
-                    	scat_Y = ALOG10(scat_Y)
-                    endif 
+                    	idx_zero = where(scat_X eq 0, num_zero)
+                    	idx_not_zero = where(scat_X gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_X[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
+
+                    	idx_zero = where(scat_Y eq 0, num_zero)
+                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
+                     endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2610,12 +2613,15 @@ endif
                     scat_X = GR_RP[idxabv]
                     scat_Y = DPR_RP[idxabv]
                     if rr_log then begin
-                    	idx_not_zero = where(scat_X gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_X = scat_X[idx_not_zero] else scat_X = []
-                    	scat_X = ALOG10(scat_X)
-                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_Y = scat_Y[idx_not_zero] else scat_Y = []
-                    	scat_Y = ALOG10(scat_Y)
+                    	idx_zero = where(scat_X eq 0, num_zero)
+                    	idx_not_zero = where(scat_X gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_X[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
+
+                    	idx_zero = where(scat_Y eq 0, num_zero)
+                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
                     endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
@@ -2630,12 +2636,15 @@ endif
                     scat_X = GR_RR[idxabv]
                     scat_Y = DPR_RR[idxabv]
                     if rr_log then begin
-                    	idx_not_zero = where(scat_X gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_X = scat_X[idx_not_zero] else scat_X = []
-                    	scat_X = ALOG10(scat_X)
-                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_Y = scat_Y[idx_not_zero] else scat_Y = []
-                    	scat_Y = ALOG10(scat_Y)
+                    	idx_zero = where(scat_X eq 0, num_zero)
+                    	idx_not_zero = where(scat_X gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_X[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
+
+                    	idx_zero = where(scat_Y eq 0, num_zero)
+                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
                     endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
@@ -2679,9 +2688,11 @@ endif
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Dm[idxabv]
                     if rr_log then begin
-                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_Y = scat_Y[idx_not_zero] else scat_Y = []
-                    	scat_Y = ALOG10(scat_Y)
+
+                    	idx_zero = where(scat_Y eq 0, num_zero)
+                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
                     endif 
 		            if do_RR_DM_curve_fit eq 1 and RR_DM_curve_fit_bb_type eq raintypeBBidx then begin
                          idx_ok = where(GR_RR ge 0 and GR_Dm ge 0)
@@ -2710,9 +2721,12 @@ endif
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Nw[idxabv]
                     if rr_log then begin
-                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_Y = scat_Y[idx_not_zero] else scat_Y = []
-                    	scat_Y = ALOG10(scat_Y)
+
+                    	idx_zero = where(scat_Y eq 0, num_zero)
+                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
+
                     endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
@@ -2758,9 +2772,10 @@ endif
                     scat_X = DPR_Dm[idxabv]
                     scat_Y = DPR_RR[idxabv]
                     if rr_log then begin
-                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_Y = scat_Y[idx_not_zero] else scat_Y = []
-                    	scat_Y = ALOG10(scat_Y)
+                    	idx_zero = where(scat_Y eq 0, num_zero)
+                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
                     endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
@@ -2776,9 +2791,10 @@ endif
                     scat_Y = DPR_RR[idxabv]
                     scat_X = DPR_Nw[idxabv]
                     if rr_log then begin
-                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
-                    	if num_log_pts gt 0 then  scat_Y = scat_Y[idx_not_zero] else scat_Y = []
-                    	scat_Y = ALOG10(scat_Y)
+                    	idx_zero = where(scat_Y eq 0, num_zero)
+                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
+                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
                     endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
