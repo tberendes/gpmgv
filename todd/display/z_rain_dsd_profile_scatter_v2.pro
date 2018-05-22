@@ -500,7 +500,8 @@ PRO z_rain_dsd_profile_scatter_v2, INSTRUMENT=instrument,         $
                                     Z_FILTER_STRAT=zfilterstrat,       $
                                     Z_FILTER_CONV=zfilterconv,       $
                                     Z_FILTER_TYPE=zfilterinput,       $
-                                    ET_RANGE=et_range
+                                    ET_RANGE=et_range, $
+                                    RR_LOG=rr_log
 
 ; "include" file for structs returned by read_geo_match_netcdf()
 @geo_match_nc_structs.inc
@@ -916,6 +917,7 @@ IF do_dm_range EQ 1 AND do_dm_thresh EQ 1 THEN BEGIN
    GOTO, cleanUp
 ENDIF
 s2ku = KEYWORD_SET( s2ku )
+rr_log = KEYWORD_SET( rr_log )
 
 IF N_ELEMENTS(outpath) NE 1 THEN BEGIN
    outpath='/data/tmp'
@@ -944,7 +946,7 @@ ENDELSE
 ;    Selector to specify the location in this case, starting from the default
 ;    location /data/gpmgv/netcdf/geo_match/SAT, where SAT is defined by the
 ;    value of INSTRUMENT (SAT=GPM for DPR, SAT=TRMM for PR).
-s2ku = KEYWORD_SET( s2ku )
+;s2ku = KEYWORD_SET( s2ku )
 
 IF N_ELEMENTS(outpath) NE 1 THEN BEGIN
    outpath='/data/tmp'
@@ -2293,7 +2295,8 @@ endif
 ;                 ENDELSE
               END
       ENDSWITCH
-
+      
+; TAB start plot scaling here
      if skip_plot eq 1 then goto, plot_skipped
      ; set up histogram parameters by plot type
       SWITCH PlotTypes(iplot) OF
@@ -2316,15 +2319,29 @@ endif
        'RP' : 
        'RR' : BEGIN
                  IF raintypeBBidx GE 1 THEN BEGIN
-                    binmin1 = 0.0  & binmin2 = 0.0
-                    binmax1 = 60.0 & binmax2 = 60.0
-                    BINSPAN1 = 1.0
-                    BINSPAN2 = 1.0
+                    if rr_log then begin
+	                    binmin1 = 0.0  & binmin2 = 0.0
+	                    binmax1 = 1.8 & binmax2 = 1.8
+	                    BINSPAN1 = 0.03
+	                    BINSPAN2 = 0.03
+                    endif else begin
+	                    binmin1 = 0.0  & binmin2 = 0.0
+	                    binmax1 = 60.0 & binmax2 = 60.0
+	                    BINSPAN1 = 1.0
+	                    BINSPAN2 = 1.0                    
+                    endelse
                  ENDIF ELSE BEGIN
-                    binmin1 = 0.0  & binmin2 = 0.0
-                    binmax1 = 15.0 & binmax2 = 15.0
-                    BINSPAN1 = 0.25
-                    BINSPAN2 = 0.25
+                    if rr_log then begin
+	                    binmin1 = 0.0  & binmin2 = 0.0
+	                    binmax1 = 1.2 & binmax2 = 1.2
+	                    BINSPAN1 = 0.02
+	                    BINSPAN2 = 0.02
+                    endif else begin
+	                    binmin1 = 0.0  & binmin2 = 0.0
+	                    binmax1 = 15.0 & binmax2 = 15.0
+	                    BINSPAN1 = 0.25
+	                    BINSPAN2 = 0.25
+                    endelse
                  ENDELSE
                  BREAK
               END
@@ -2362,11 +2379,21 @@ endif
                 ; RR histo parms
                  IF raintypeBBidx GE 1 THEN BEGIN
                     trim = 0
-                    binmin1 = 0.0 & binmax1 = 60.0
-                    BINSPAN1 = 1.0
+                    if rr_log then begin
+                    	binmin1 = 0.0 & binmax1 = 1.8
+                    	BINSPAN1 = 0.03
+                    endif else begin
+                    	binmin1 = 0.0 & binmax1 = 60.0
+                    	BINSPAN1 = 1.0
+                    endelse
                  ENDIF ELSE BEGIN
-                    binmin1 = 0.0 & binmax1 = 15.0
-                    BINSPAN1 = 0.25
+                    if rr_log then begin
+ 	                    binmin1 = 0.0 & binmax1 = 1.2
+	                    BINSPAN1 = 0.02
+                    endif else begin
+	                    binmin1 = 0.0 & binmax1 = 15.0
+	                    BINSPAN1 = 0.25
+                    endelse
                  ENDELSE
 
                 ; Dm histo parms
@@ -2390,11 +2417,21 @@ endif
                 ; RR histo parms
                  IF raintypeBBidx GE 1 THEN BEGIN
                     trim = 0
-                    binmin2 = 0.0 & binmax2 = 60.0
-                    BINSPAN2 = 1.0
+                    if rr_log then begin
+	                    binmin2 = 0.0 & binmax2 = 1.8
+	                    BINSPAN2 = 0.03
+                    endif else begin
+	                    binmin2 = 0.0 & binmax2 = 60.0
+	                    BINSPAN2 = 1.0
+                    endelse
                  ENDIF ELSE BEGIN
-                    binmin2 = 0.0 & binmax2 = 15.0
-                    BINSPAN2 = 0.25
+                    if rr_log then begin
+	                    binmin2 = 0.0 & binmax2 = 1.2
+	                    BINSPAN2 = 0.02
+                    endif else begin
+	                    binmin2 = 0.0 & binmax2 = 15.0
+	                    BINSPAN2 = 0.25
+                    endelse
                  ENDELSE
                  BREAK
               END
@@ -2453,15 +2490,32 @@ endif
   'GRRMRMS' :
   'GRRDSR' :
   'MRMSDSR' : BEGIN
-;                 binmin1 = 0.0  & binmin2 = 0.0
-;                 binmax1 = 60.0 & binmax2 = 60.0
-;                 BINSPAN1 = 1.0
-;                 BINSPAN2 = 1.0
 
-                 binmin1 = 0.0  & binmin2 = 0.0
-                 binmax1 = 15.0 & binmax2 = 15.0
-                 BINSPAN1 = 0.25
-                 BINSPAN2 = 0.25
+                 IF raintypeBBidx GE 1 THEN BEGIN
+                     if rr_log then begin
+		                 binmin1 = 0.0  & binmin2 = 0.0
+		                 binmax1 = 1.8 & binmax2 = 1.8
+		                 BINSPAN1 = 0.03
+		                 BINSPAN2 = 0.03
+                     endif else begin
+		                 binmin1 = 0.0  & binmin2 = 0.0
+		                 binmax1 = 60.0 & binmax2 = 60.0
+		                 BINSPAN1 = 1.0
+		                 BINSPAN2 = 1.0
+                     endelse
+                 endif else begin
+                     if rr_log then begin
+		                 binmin1 = 0.0  & binmin2 = 0.0
+		                 binmax1 = 1.2 & binmax2 = 1.2
+		                 BINSPAN1 = 0.02
+		                 BINSPAN2 = 0.02   
+                     endif else begin
+		                 binmin1 = 0.0  & binmin2 = 0.0
+		                 binmax1 = 15.0 & binmax2 = 15.0
+		                 BINSPAN1 = 0.25
+		                 BINSPAN2 = 0.25   
+	                 endelse              
+                 endelse
 
                  BREAK
               END
@@ -2533,8 +2587,16 @@ endif
               END
        'RC' : BEGIN
                  IF countabv GT 0 AND have_RC THEN BEGIN
-                    scat_X = GR_RC[idxabv]
-                    scat_Y = DPR_RC[idxabv]
+	                scat_X = GR_RC[idxabv]
+	                scat_Y = DPR_RC[idxabv]
+                    if rr_log then begin
+                    	idx_not_zero = where(scat_X gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_X = scat_X[idx_not_zero] else scat_X = []
+                    	scat_X = ALOG10(scat_X)
+                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_Y = scat_Y[idx_not_zero] else scat_Y = []
+                    	scat_Y = ALOG10(scat_Y)
+                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2547,6 +2609,14 @@ endif
                  IF countabv GT 0 AND have_RP THEN BEGIN
                     scat_X = GR_RP[idxabv]
                     scat_Y = DPR_RP[idxabv]
+                    if rr_log then begin
+                    	idx_not_zero = where(scat_X gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_X = scat_X[idx_not_zero] else scat_X = []
+                    	scat_X = ALOG10(scat_X)
+                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_Y = scat_Y[idx_not_zero] else scat_Y = []
+                    	scat_Y = ALOG10(scat_Y)
+                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2559,6 +2629,14 @@ endif
                  IF countabv GT 0 AND have_RR THEN BEGIN
                     scat_X = GR_RR[idxabv]
                     scat_Y = DPR_RR[idxabv]
+                    if rr_log then begin
+                    	idx_not_zero = where(scat_X gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_X = scat_X[idx_not_zero] else scat_X = []
+                    	scat_X = ALOG10(scat_X)
+                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_Y = scat_Y[idx_not_zero] else scat_Y = []
+                    	scat_Y = ALOG10(scat_Y)
+                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2600,6 +2678,11 @@ endif
                     ;scat_X = GR_RR[idxabv]
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Dm[idxabv]
+                    if rr_log then begin
+                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_Y = scat_Y[idx_not_zero] else scat_Y = []
+                    	scat_X = ALOG10(scat_X)
+                    endif 
 		            if do_RR_DM_curve_fit eq 1 and RR_DM_curve_fit_bb_type eq raintypeBBidx then begin
                          idx_ok = where(GR_RR ge 0 and GR_Dm ge 0)
                          ; subset every 4 samples to accumulate fit function points
@@ -2626,6 +2709,11 @@ endif
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Nw[idxabv]
+                    if rr_log then begin
+                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_Y = scat_Y[idx_not_zero] else scat_Y = []
+                    	scat_Y = ALOG10(scat_Y)
+                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2669,6 +2757,11 @@ endif
                     ;scat_X = DPR_RR[idxabv]
                     scat_X = DPR_Dm[idxabv]
                     scat_Y = DPR_RR[idxabv]
+                    if rr_log then begin
+                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_Y = scat_Y[idx_not_zero] else scat_Y = []
+                    	scat_Y = ALOG10(scat_Y)
+                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2682,6 +2775,11 @@ endif
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
                     scat_Y = DPR_RR[idxabv]
                     scat_X = DPR_Nw[idxabv]
+                    if rr_log then begin
+                    	idx_not_zero = where(scat_Y gt 0, num_log_pts)
+                    	if num_log_pts gt 0 scat_Y = scat_Y[idx_not_zero] else scat_Y = []
+                    	scat_Y = ALOG10(scat_Y)
+                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -3207,16 +3305,29 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
                    xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    END
               ENDCASE
@@ -3244,7 +3355,12 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               ;yunits='mm'
               ;xtitle=  'GR RR '+ xunits
               ;ytitle=  'GR Dm (' + yunits + ')'
-              yunits='(mm/h)'
+              if rr_log then begin
+              		yunits='(log mm/h)'
+              endif else begin
+              		yunits='(mm/h)'
+              endelse                    
+              
               xunits='mm'
               ytitle=  'GR RR '+ yunits
               xtitle=  'GR Dm (' + xunits + ')'
@@ -3270,18 +3386,33 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		yticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+;                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		yticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+;                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   if rr_log then begin
+                   		yticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F2.1)')
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
+;                   yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -3298,7 +3429,13 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               titleLine1 = "GR RR vs. Nw Scatter"
               pngpre="GR_RR_vs_Nw_Scatter"
               xunits='log(Nw)'
-              yunits='mm/h'
+              if rr_log then begin
+              		yunits='(log mm/h)'
+              endif else begin
+              		yunits='(mm/h)'
+              endelse                    
+              
+              ;yunits='mm/h'
               xtitle= 'GR '+ xunits
               ytitle= 'GR RR (' + yunits + ')'
               BREAK
@@ -3308,17 +3445,32 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -3340,7 +3492,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               pngpre=pr_or_dpr+'_'+version+"_RR_vs_Dm_Scatter"
 ;              titleLine1 = satprodtype+' '+version+" Dm vs. RR Scatter"
 ;              pngpre=pr_or_dpr+'_'+version+"_Dm_vs_RR_Scatter"
-              yunits='(mm/h)'
+              ;yunits='(mm/h)'
+              if rr_log then yunits='(log mm/h)' else yunits='(mm/h)'
               xunits='mm'
               ytitle= pr_or_dpr + ' RR'+ yunits
               xtitle= pr_or_dpr + ' Dm (' + xunits + ')'
@@ -3355,17 +3508,32 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		yticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		yticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   ;yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   if rr_log then begin
+                   		yticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F2.1)')
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -3382,7 +3550,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               titleLine1 = satprodtype+' '+version+" RR vs. Nw Scatter"
               pngpre=pr_or_dpr+'_'+version+"_RR_vs_Nw_Scatter"
               xunits='log(Nw)'
-              yunits='mm/h'
+              ;yunits='mm/h'
+              if rr_log then yunits='(log mm/h)' else yunits='(mm/h)'
               xtitle= pr_or_dpr +' '+ xunits
               ytitle= pr_or_dpr + ' RR (' + yunits + ')'
               BREAK
@@ -3394,17 +3563,32 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.03, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -3420,7 +3604,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               titleLine1 = satprodtype+' '+version+" RR vs. GR "+PlotTypes(idx2do)+ $
                            " Scatter, Mean GR-DPR Bias: "
               pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
-              units='(mm/h)'
+              ;units='(mm/h)'
+              if rr_log then units='(log mm/h)' else units='(mm/h)'
               xtitle= 'GR '+units
               ytitle= pr_or_dpr +' '+ units
               BREAK
@@ -3541,7 +3726,12 @@ print, "mrms plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Footprints"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
                    END
                ELSE : BEGIN
                    do_plot = 0
@@ -3555,7 +3745,8 @@ print, "mrms plot...."
                             " Scatter, Mean MRMS-DPR RR Bias: "
  ;                          " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_MRMSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
-              units='(mm/h)'
+              ;units='(mm/h)'
+              if rr_log then units='(log mm/h)' else units='(mm/h)'
               xtitle= 'MRMS '+ units
               ytitle= 'DPR '+units
               BREAK
@@ -3569,7 +3760,12 @@ print, "GRRMRMS plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Footprints"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
                    END
                ELSE : BEGIN
                    do_plot = 0
@@ -3583,7 +3779,8 @@ print, "GRRMRMS plot...."
                            " Scatter, Mean GR-MRMS RR Bias: "
 ;                           " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
-              units='(mm/h)'
+              ;units='(mm/h)'
+              if rr_log then units='(log mm/h)' else units='(mm/h)'
               xtitle= 'GR '+units
               ytitle= 'MRMS '+ units
               BREAK
@@ -3596,7 +3793,12 @@ print, "GRRDSR plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Footprints"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   if rr_log then begin
+                   		xticknames=STRING(FINDGEN(16)*0.02, FORMAT='(F2.1)')
+                   endif else begin
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
                    END
                ELSE : BEGIN
                    do_plot = 0
@@ -3610,7 +3812,8 @@ print, "GRRDSR plot...."
                            " Scatter, Mean GR-DPR RR Bias: "
 ;                           " Scatter "
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
-              units='(mm/h)'
+              ;units='(mm/h)'
+              if rr_log then units='(log mm/h)' else units='(mm/h)'
               xtitle= 'GR '+units
               ytitle= 'DPR '+ units
               BREAK
@@ -3815,7 +4018,7 @@ print, "GRRDSR plot...."
         hist1=100.0 * (hist1/hist1_total)
         bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Standard Deviation' $
                       , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
-                      , xrange=[minstddev,maxstddev])
+                      , xrange=[minstddev,maxstddev], yrange=[0,100])
 ;        bar = barplot(xvals1,hist1,ytitle='Sample Count', xtitle='Standard Deviation' $
 ;                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue')
         if numBars eq 2 then begin
@@ -3823,7 +4026,7 @@ print, "GRRDSR plot...."
         	hist2=100.0 * (hist2/hist2_total)
         	bar = barplot(xvals2,hist2,ytitle='% Samples', $
                       /BUFFER, INDEX=1, NBARS=numBars, FILL_COLOR='green' $
-                      , xrange=[minstddev,maxstddev], /OVERPLOT)
+                      , xrange=[minstddev,maxstddev], yrange=[0,100], /OVERPLOT)
 			startx = minstddev + 0.45*(maxstddev-minstddev)
 			histmax = max([hist1,hist2])
 			starty1 = 0.9*histmax
@@ -3889,10 +4092,10 @@ print, "GRRDSR plot...."
 ;        bar = barplot(HID_histogram1[raintypeBBidx,*],ytitle='Count', xtitle='Precip category' $
 ;        bar = barplot(hist1,ytitle='% Samples', xtitle='Precip category', margin=[0.1, 0.3, 0.1, 0.1] $
         bar = barplot(hist1,ytitle='% Samples', xtitle='Precip category' $
-                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=2, FILL_COLOR='blue')
+                      , title=imTITLE, yrange=[0,100], /BUFFER, INDEX=0, NBARS=2, FILL_COLOR='blue')
 ;        bar = barplot(HID_histogram2[raintypeBBidx,*],ytitle='Count', xtitle='Precip category' $
         bar = barplot(hist2,ytitle='% Samples', xtitle='Precip category' $
-                      , title=imTITLE, /BUFFER, INDEX=1, NBARS=2, FILL_COLOR='green', /OVERPLOT)
+                      , title=imTITLE, yrange=[0,100], /BUFFER, INDEX=1, NBARS=2, FILL_COLOR='green', /OVERPLOT)
 ;        text1 = TEXT(0, 9.5*y1, '4 levels above BB', /CURRENT, $ 
 
 		nstr1 = STRING(long(hist1_total), FORMAT='(I0)')
