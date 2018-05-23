@@ -4149,12 +4149,15 @@ print, "GRRDSR plot...."
    przmean = TOTAL((*ptr2do[0]).przmeanaccum[idxzdef])/nSamp
    MAE = TOTAL((*ptr2do[0]).MAEaccum[idxzdef])/nSamp
    biasgrpr = gvzmean-przmean
-   bias_str = STRING(biasgrpr, FORMAT='(F0.1)')
-   MAE_str = STRING(MAE, FORMAT='(F0.1)')
+   bias_str = STRING(biasgrpr, FORMAT='(F0.2)')
+;   bias_str = STRING(biasgrpr, FORMAT='(F0.1)')
+   MAE_str = STRING(MAE, FORMAT='(F0.2)')
+;   MAE_str = STRING(MAE, FORMAT='(F0.1)')
   ; compute normalized bias, used for rain rate plots
    IF ABS(przmean) GT 0.1 THEN BEGIN
       biasNorm = biasgrpr/przmean
-      biasNorm_str = STRING(biasNorm, FORMAT='(F0.1)')
+      biasNorm_str = STRING(biasNorm, FORMAT='(F0.2)')
+;      biasNorm_str = STRING(biasNorm, FORMAT='(F0.1)')
    ENDIF ELSE biasNorm_str = "MISSING"
 
 ;   print, ''
