@@ -4268,9 +4268,9 @@ print, "GRRDSR plot...."
    ENDELSE
 
 
-//   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
- //           xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
- //           TITLE = imTITLE)
+;   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
+ ;           xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
+ ;           TITLE = imTITLE)
    im=image(histImg, axis_style=2, RGB_TABLE=rgb, BUFFER=buffer, $
             TITLE = imTITLE)
    im.xlog=rr_log_x
