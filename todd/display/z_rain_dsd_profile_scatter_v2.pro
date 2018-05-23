@@ -475,7 +475,7 @@ FUNCTION log_label, num_pts, scale
 
 	indices=FINDGEN(num_pts)*scale
 	l_idx=where(indices gt 0)
-	indices[l_idx]=AL0G10(indices[l_idx])
+	indices[l_idx]=ALOG10(indices[l_idx])
 	xticknames=STRING(indices, FORMAT='(F0.2)')
 	return, xticknames
 
