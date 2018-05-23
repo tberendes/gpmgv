@@ -371,13 +371,27 @@
 
 PRO accum_scat_data, scat_X, scat_Y, binmin1, binmin2, binmax1, binmax2, $
                      BINSPAN1, BINSPAN2, ptrData_array, have_Hist, plotTypes, $
-                     plotIndex, raintypeBBidx
+                     plotIndex, raintypeBBidx, rr_log_x, rr_log_y
 
 ; position indices/definitions of the 3 flags in the arrays in the structure
 ; - must be as initially defined in z_rain_dsd_profile_scatter_all.pro
 haveVar = 0   ; do we have data for the variable
 have1D  = 1   ; does the accumulating 2-D histogram for the variable exist yet?
 have2D  = 2   ; does the accumulating 1-D histogram for the variable exist yet?
+
+; apply log10 scaling if requested
+if rr_log_x then begin
+	idx_zero = where(scat_X eq 0, num_zero)
+	idx_not_zero = where(scat_X gt 0, num_not_zero)
+	if num_zero gt 0 then scat_X[idx_zero] = 0
+	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
+endif
+if rr_log_y then begin
+	idx_zero = where(scat_Y eq 0, num_zero)
+	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+	if num_zero gt 0 then scat_Y[idx_zero] = 0
+	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
+endif 
 
 ; get a short version of the array pointer being worked
 aptr = (ptrData_array)[plotIndex,raintypeBBidx]
@@ -2532,7 +2546,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2544,7 +2558,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2556,7 +2570,7 @@ endif
 ;                    accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
 ;                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
 ;                                     plotDataPtrs, have_Hist, PlotTypes, $
-;                                     iPlot, raintypeBBidx
+;                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
 ;                 ENDIF ELSE countabv=0
@@ -2568,7 +2582,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2580,7 +2594,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2589,21 +2603,10 @@ endif
                  IF countabv GT 0 AND have_RC THEN BEGIN
 	                scat_X = GR_RC[idxabv]
 	                scat_Y = DPR_RC[idxabv]
-                    if rr_log then begin
-                    	idx_zero = where(scat_X eq 0, num_zero)
-                    	idx_not_zero = where(scat_X gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_X[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
-
-                    	idx_zero = where(scat_Y eq 0, num_zero)
-                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-                     endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, rr_log, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2612,21 +2615,10 @@ endif
                  IF countabv GT 0 AND have_RP THEN BEGIN
                     scat_X = GR_RP[idxabv]
                     scat_Y = DPR_RP[idxabv]
-                    if rr_log then begin
-                    	idx_zero = where(scat_X eq 0, num_zero)
-                    	idx_not_zero = where(scat_X gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_X[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
-
-                    	idx_zero = where(scat_Y eq 0, num_zero)
-                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, rr_log, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2635,21 +2627,10 @@ endif
                  IF countabv GT 0 AND have_RR THEN BEGIN
                     scat_X = GR_RR[idxabv]
                     scat_Y = DPR_RR[idxabv]
-                    if rr_log then begin
-                    	idx_zero = where(scat_X eq 0, num_zero)
-                    	idx_not_zero = where(scat_X gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_X[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
-
-                    	idx_zero = where(scat_Y eq 0, num_zero)
-                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, rr_log, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2661,7 +2642,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2674,7 +2655,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2687,13 +2668,6 @@ endif
                     ;scat_X = GR_RR[idxabv]
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Dm[idxabv]
-                    if rr_log then begin
-
-                    	idx_zero = where(scat_Y eq 0, num_zero)
-                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-                    endif 
 		            if do_RR_DM_curve_fit eq 1 and RR_DM_curve_fit_bb_type eq raintypeBBidx then begin
                          idx_ok = where(GR_RR ge 0 and GR_Dm ge 0)
                          ; subset every 4 samples to accumulate fit function points
@@ -2709,7 +2683,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2720,18 +2694,10 @@ endif
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Nw[idxabv]
-                    if rr_log then begin
-
-                    	idx_zero = where(scat_Y eq 0, num_zero)
-                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-
-                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2745,7 +2711,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2758,7 +2724,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2771,16 +2737,10 @@ endif
                     ;scat_X = DPR_RR[idxabv]
                     scat_X = DPR_Dm[idxabv]
                     scat_Y = DPR_RR[idxabv]
-                    if rr_log then begin
-                    	idx_zero = where(scat_Y eq 0, num_zero)
-                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2790,16 +2750,10 @@ endif
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
                     scat_Y = DPR_RR[idxabv]
                     scat_X = DPR_Nw[idxabv]
-                    if rr_log then begin
-                    	idx_zero = where(scat_Y eq 0, num_zero)
-                    	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-                    	if num_zero gt 0 then scat_Y[idx_zero] = 0
-                    	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-                    endif 
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2811,7 +2765,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2824,7 +2778,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2854,7 +2808,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                         binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                         plotDataPtrs, have_Hist, PlotTypes, $
-                                        iPlot, raintypeBBidx
+                                        iPlot, raintypeBBidx, 0, 0
 ;                       print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                              (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                     endif else countabv=0
@@ -2869,7 +2823,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF
@@ -2883,7 +2837,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, 0, 0
 ;                    print, PlotTypes[iPlot]+" NUMPTS, MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).NUMPTS, $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
@@ -3000,7 +2954,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, rr_log, rr_log
                     endif
                  ENDIF
               END
@@ -3018,7 +2972,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, rr_log, rr_log
                     endif
                  ENDIF
               END
@@ -3034,7 +2988,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx
+                                     iPlot, raintypeBBidx, rr_log, rr_log
                     endif
               END
       ENDCASE
@@ -3322,7 +3276,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3331,7 +3285,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3340,7 +3294,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3403,7 +3357,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		yticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3413,7 +3367,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		yticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3424,7 +3378,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
+                   		yticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3463,7 +3417,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3473,7 +3427,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3483,7 +3437,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3526,7 +3480,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		yticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3536,7 +3490,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		yticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3546,7 +3500,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
+                   		yticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3581,7 +3535,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3591,7 +3545,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.111, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)*4.0), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3601,7 +3555,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3744,7 +3698,7 @@ print, "mrms plot...."
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3778,7 +3732,7 @@ print, "GRRMRMS plot...."
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3811,7 +3765,7 @@ print, "GRRDSR plot...."
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=STRING(FINDGEN(16)*0.937, FORMAT='(F0.2)')
+                   		xticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
