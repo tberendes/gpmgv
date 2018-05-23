@@ -474,8 +474,10 @@ end
 FUNCTION log_label, num_pts, scale
 
 	indices=FINDGEN(num_pts)*scale
-	l_idx=where(indices gt 0)
-	indices[l_idx]=ALOG10(indices[l_idx])
+	indices(0)=0.01
+;	indices=FINDGEN(num_pts)*scale
+;	l_idx=where(indices gt 0)
+;	indices[l_idx]=ALOG10(indices[l_idx])
 	xticknames=STRING(indices, FORMAT='(F0.2)')
 	return, xticknames
 
@@ -2177,6 +2179,8 @@ endif
 
    IF do_scatr EQ 1 THEN BEGIN
    FOR iplot = 0, nPlots-1 DO BEGIN
+   rr_log_x=0
+   rr_log_y=0
    trim = 1   ; flag whether to suppress low percentage bins in plots
 ;   for raintypeBBidx = 0, 2 do begin
 ; TAB 11/10/17 added fourth raintypeBBidx for convective above BB within 3 height bins for Z plots only 
@@ -2614,10 +2618,12 @@ endif
                  IF countabv GT 0 AND have_RC THEN BEGIN
 	                scat_X = GR_RC[idxabv]
 	                scat_Y = DPR_RC[idxabv]
+	                rr_log_x=rr_log
+	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2626,10 +2632,12 @@ endif
                  IF countabv GT 0 AND have_RP THEN BEGIN
                     scat_X = GR_RP[idxabv]
                     scat_Y = DPR_RP[idxabv]
+	                rr_log_x=rr_log
+	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2638,10 +2646,12 @@ endif
                  IF countabv GT 0 AND have_RR THEN BEGIN
                     scat_X = GR_RR[idxabv]
                     scat_Y = DPR_RR[idxabv]
+	                rr_log_x=rr_log
+	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2691,10 +2701,12 @@ endif
                             rr_dm_y = [ temporary(rr_dm_y), GR_RR[subset] ]     
                          endif
                     endif
+	                rr_log_x=0
+	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2705,10 +2717,12 @@ endif
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Nw[idxabv]
+	                rr_log_x=0
+	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2748,10 +2762,12 @@ endif
                     ;scat_X = DPR_RR[idxabv]
                     scat_X = DPR_Dm[idxabv]
                     scat_Y = DPR_RR[idxabv]
+	                rr_log_x=0
+	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2761,10 +2777,12 @@ endif
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
                     scat_Y = DPR_RR[idxabv]
                     scat_X = DPR_Nw[idxabv]
+ 	                rr_log_x=0
+	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2962,10 +2980,12 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;                       scat_Y = mrmsrrveryhigh[idxnonzero]
                        scat_X = mrms_rr[idxnonzero]
                        scat_Y = ns_rr[idxnonzero]
+	                   rr_log_x=rr_log
+	                   rr_log_y=rr_log
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
                     endif
                  ENDIF
               END
@@ -2980,10 +3000,12 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        scat_X = near_sfc_gr_rr[idxnonzero]
                        scat_Y = mrms_rr[idxnonzero]
  ;                      scat_Y = mrmsrrveryhigh[idxnonzero]
+ 	                   rr_log_x=rr_log
+	                   rr_log_y=rr_log
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
                     endif
                  ENDIF
               END
@@ -2996,10 +3018,12 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        scat_X = near_sfc_gr_rr[idxnonzero]
                        scat_Y = ns_rr[idxnonzero]
 ;                       scat_Y = nearSurfRain[idxnonzero]
+	                   rr_log_x=rr_log
+	                   rr_log_y=rr_log
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log_x, rr_log_y
                     endif
               END
       ENDCASE
@@ -4243,7 +4267,8 @@ print, "GRRDSR plot...."
 
    im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
             xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
-            TITLE = imTITLE )
+            TITLE = imTITLE $
+            Xlog=rr_log_x, Ylog=rr_log_y)
    im.xtickname=xticknames
    im.ytickname=yticknames
    im.xtitle= xtitle
