@@ -472,6 +472,9 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 end
 
 FUNCTION log_label, num_pts, scale
+;===============================================================================
+; 
+;===============================================================================
 
 	indices=FINDGEN(num_pts)*scale
 	indices(0)=0.01
@@ -4268,8 +4271,8 @@ print, "GRRDSR plot...."
    im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
             xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
             TITLE = imTITLE)
-   im.axes[0].log=rr_log_x
-   im.axes[1].log=rr_log_y
+   im.xlog=rr_log_x
+   im.ylog=rr_log_y
    
    im.xtickname=xticknames
    im.ytickname=yticknames
