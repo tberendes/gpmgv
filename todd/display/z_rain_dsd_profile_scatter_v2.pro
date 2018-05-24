@@ -4268,13 +4268,17 @@ print, "GRRDSR plot...."
    ENDELSE
 
 
-;   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
- ;           xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
- ;           TITLE = imTITLE)
-   im=image(histImg, axis_style=2, RGB_TABLE=rgb, BUFFER=buffer, $
-            TITLE = imTITLE)
-   im.xlog=rr_log_x
-   im.ylog=rr_log_y
+   if rr_log then begin
+	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
+	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
+	            TITLE = imTITLE, xlog=1, ylog=1)
+;	   im.xlog=rr_log_x
+;	   im.ylog=rr_log_y
+   endif else begin
+	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
+	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
+	            TITLE = imTITLE)
+   endelse
    
    im.xtickname=xticknames
    im.ytickname=yticknames
