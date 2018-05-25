@@ -380,18 +380,18 @@ have1D  = 1   ; does the accumulating 2-D histogram for the variable exist yet?
 have2D  = 2   ; does the accumulating 1-D histogram for the variable exist yet?
 
 ; apply log10 scaling if requested
-;if rr_log_x then begin
-;	idx_zero = where(scat_X eq 0, num_zero)
-;	idx_not_zero = where(scat_X gt 0, num_not_zero)
-;	if num_zero gt 0 then scat_X[idx_zero] = 0
-;	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
-;endif
-;if rr_log_y then begin
-;	idx_zero = where(scat_Y eq 0, num_zero)
-;	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-;	if num_zero gt 0 then scat_Y[idx_zero] = 0
-;	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-;endif 
+if rr_log_x then begin
+	idx_zero = where(scat_X eq 0, num_zero)
+	idx_not_zero = where(scat_X gt 0, num_not_zero)
+	if num_zero gt 0 then scat_X[idx_zero] = 9999
+	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
+endif
+if rr_log_y then begin
+	idx_zero = where(scat_Y eq 0, num_zero)
+	idx_not_zero = where(scat_Y gt 0, num_not_zero)
+	if num_zero gt 0 then scat_Y[idx_zero] = 9999
+	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
+endif 
 
 ; get a short version of the array pointer being worked
 aptr = (ptrData_array)[plotIndex,raintypeBBidx]
@@ -406,23 +406,22 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
               AND scat_Y GE binmin2 AND scat_Y LE binmax2, count_XY)
    IF (count_XY GT 0) THEN BEGIN
 
-		 if rr_log_x or rr_log_x then begin
-	         zhist2d =  MAKE_HIST2D(scat_X, scat_Y , MISSING=0 , $
-	                             XLOG=rr_log_x, YLOG=rr_log_y, $
-	                             XHRANGE=[binmin1, binmax1], $
-	                             YHRANGE=[binmin2, binmax2] , $
-	                             XBIN=BINSPAN1, YBIN=BINSPAN2 )       
-	                             ; note XHRANGE, YHRANGE, XBIN and YBIN are in log scale
-		 endif else begin
-	         zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
-	                            MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
-	                            BIN1=BINSPAN1, BIN2=BINSPAN2 )
-         endelse
-;         zhist2d =  MAKE_HIST2D(image1,image2 [ , MISSING=0 ,
-;                             /XLOG           , /YLOG ,
-;                             XHRANGE=xrange  , YHRANGE=yrange ,
-;                             XBIN=xbin       , YBIN=ybin ,
-;                             INFO=hist_info  , IMAGES=hist_input ] )                   
+	      zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
+	                      MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
+	                      BIN1=BINSPAN1, BIN2=BINSPAN2 )
+
+;		 if rr_log_x or rr_log_x then begin
+;	         zhist2d =  MAKE_HIST2D(scat_X, scat_Y , MISSING=0 , $
+;	                             XLOG=rr_log_x, YLOG=rr_log_y, $
+;	                             XHRANGE=[binmin1, binmax1], $
+;	                             YHRANGE=[binmin2, binmax2] , $
+;	                             XBIN=BINSPAN1, YBIN=BINSPAN2 )       
+;	                             ; note XHRANGE, YHRANGE, XBIN and YBIN are in log scale
+;  	 endif else begin
+;	         zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
+;	                            MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
+;	                            BIN1=BINSPAN1, BIN2=BINSPAN2 )
+;         endelse
                             
          minprz = MIN(scat_Y)
          numpts = TOTAL(zhist2d)
