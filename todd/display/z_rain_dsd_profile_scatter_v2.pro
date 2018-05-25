@@ -381,14 +381,14 @@ have2D  = 2   ; does the accumulating 1-D histogram for the variable exist yet?
 
 ; apply log10 scaling if requested
 if rr_log_x then begin
-    print, 'X log scale'
+;    print, 'X log scale'
 	idx_zero = where(scat_X eq 0, num_zero)
 	idx_not_zero = where(scat_X gt 0, num_not_zero)
 	if num_zero gt 0 then scat_X[idx_zero] = 9999
 	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
 endif
 if rr_log_y then begin
-    print, 'Y log scale'
+;    print, 'Y log scale'
 	idx_zero = where(scat_Y eq 0, num_zero)
 	idx_not_zero = where(scat_Y gt 0, num_not_zero)
 	if num_zero gt 0 then scat_Y[idx_zero] = 9999
@@ -722,6 +722,34 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             NWGZMXP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              PIADMP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
+; set up plot specific axis scaling [x,y]
+axis_scale = { GRZSH : [0,0], $
+			 GRDMSH : [0,0], $
+				HID : [0,0], $
+            MRMSDSR : [0,0], $
+            GRRMRMS : [0,0], $
+             GRRDSR : [0,0], $
+                 ZM : [0,0], $
+              DMRRG : [0,0], $
+                 ZC : [0,0], $
+                 D0 : [0,0], $
+                 DM : [0,0], $
+;              DMANY : [0,0], $
+                 NW : [0,0], $
+                 N2 : [0,0], $
+                 RR : [0,0], $
+                 RC : [0,0], $
+                 RP : [0,0], $
+              ZCNWG : [0,0], $
+              NWDMG : [0,0], $
+              ZCNWP : [0,0], $
+              NWDMP : [0,0], $
+              RRNWG : [0,0], $
+              DMRRP : [0,0], $
+              RRNWP : [0,0], $
+            NWGZMXP : [0,0], $
+             PIADMP : [0,0], $
+               EPSI : [0,0] }
 
 ; position indices/definitions of the 3 flags in the array triplets in the structure
 ; - must be identically defined in accum_scat_data.pro
@@ -2638,8 +2666,12 @@ endif
                  IF countabv GT 0 AND have_RC THEN BEGIN
 	                scat_X = GR_RC[idxabv]
 	                scat_Y = DPR_RC[idxabv]
-	                rr_log_x=rr_log
-	                rr_log_y=rr_log
+	                ; figure out what idx2do is in this scope and check if it's used right
+	                
+	                axis_scaling.(PlotTypes(iplot))[0]=rr_log
+	                axis_scaling.(PlotTypes(iplot))[1]=rr_log
+;	                rr_log_x=rr_log
+;	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
