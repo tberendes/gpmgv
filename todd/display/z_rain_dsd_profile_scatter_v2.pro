@@ -381,12 +381,14 @@ have2D  = 2   ; does the accumulating 1-D histogram for the variable exist yet?
 
 ; apply log10 scaling if requested
 if rr_log_x then begin
+    print, 'X log scale'
 	idx_zero = where(scat_X eq 0, num_zero)
 	idx_not_zero = where(scat_X gt 0, num_not_zero)
 	if num_zero gt 0 then scat_X[idx_zero] = 9999
 	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
 endif
 if rr_log_y then begin
+    print, 'Y log scale'
 	idx_zero = where(scat_Y eq 0, num_zero)
 	idx_not_zero = where(scat_Y gt 0, num_not_zero)
 	if num_zero gt 0 then scat_Y[idx_zero] = 9999
