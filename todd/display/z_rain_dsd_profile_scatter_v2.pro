@@ -2668,8 +2668,8 @@ endif
 	                scat_Y = DPR_RC[idxabv]
 	                ; figure out what idx2do is in this scope and check if it's used right
 	                
-	                axis_scaling.(PlotTypes(iplot))[0]=rr_log
-	                axis_scaling.(PlotTypes(iplot))[1]=rr_log
+	                axis_scale.(PlotTypes(iplot))[0]=rr_log
+	                axis_scale.(PlotTypes(iplot))[1]=rr_log
 ;	                rr_log_x=rr_log
 ;	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
