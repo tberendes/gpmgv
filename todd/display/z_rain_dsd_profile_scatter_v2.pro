@@ -4317,8 +4317,8 @@ print, "GRRDSR plot...."
 
 
    if rr_log then begin
-   	   rr_log_x=axis_scale.(PlotTypes(idx2do))[0]
-   	   rr_log_y=axis_scale.(PlotTypes(idx2do))[1]
+   	   rr_log_x=axis_scale.(PlotHash(PlotHash(PlotTypes(idx2do))))[0]
+   	   rr_log_y=axis_scale.(PlotHash(PlotHash(PlotTypes(idx2do))))[1]
 	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
 	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
