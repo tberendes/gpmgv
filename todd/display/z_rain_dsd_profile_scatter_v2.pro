@@ -380,6 +380,7 @@ have1D  = 1   ; does the accumulating 2-D histogram for the variable exist yet?
 have2D  = 2   ; does the accumulating 1-D histogram for the variable exist yet?
 
 ; apply log10 scaling if requested
+
 if rr_log_x then begin
 ;    print, 'X log scale'
 	idx_zero = where(scat_X eq 0, num_zero)
