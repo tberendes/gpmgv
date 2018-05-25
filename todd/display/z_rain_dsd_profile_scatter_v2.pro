@@ -4330,10 +4330,10 @@ print, 'rr_log_y: ', rr_log_y
 	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
 	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE)
+   		im.xtickname=xticknames
+   		im.ytickname=yticknames
    endelse
    
-   im.xtickname=xticknames
-   im.ytickname=yticknames
    im.xtitle= xtitle
    im.ytitle= ytitle
    im.Title.Font_Size = 10
