@@ -2667,8 +2667,8 @@ endif
 	                scat_Y = DPR_RC[idxabv]
 	                ; figure out what idx2do is in this scope and check if it's used right
 	                
-	                axis_scale.(PlotTypes(iplot))[0]=rr_log
-	                axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
 ;	                rr_log_x=rr_log
 ;	                rr_log_y=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
@@ -2683,8 +2683,8 @@ endif
                  IF countabv GT 0 AND have_RP THEN BEGIN
                     scat_X = GR_RP[idxabv]
                     scat_Y = DPR_RP[idxabv]
-	                axis_scale.(PlotTypes(iplot))[0]=rr_log
-	                axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2697,8 +2697,8 @@ endif
                  IF countabv GT 0 AND have_RR THEN BEGIN
                     scat_X = GR_RR[idxabv]
                     scat_Y = DPR_RR[idxabv]
-	                axis_scale.(PlotTypes(iplot))[0]=rr_log
-	                axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2752,8 +2752,8 @@ endif
                             rr_dm_y = [ temporary(rr_dm_y), GR_RR[subset] ]     
                          endif
                     endif
-	                axis_scale.(PlotTypes(iplot))[0]=0
-	                axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[0]=0
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2768,8 +2768,8 @@ endif
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
                     scat_Y = GR_RR[idxabv]
                     scat_X = GR_Nw[idxabv]
-	                axis_scale.(PlotTypes(iplot))[0]=0
-	                axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[0]=0
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2813,8 +2813,8 @@ endif
                     ;scat_X = DPR_RR[idxabv]
                     scat_X = DPR_Dm[idxabv]
                     scat_Y = DPR_RR[idxabv]
-	                axis_scale.(PlotTypes(iplot))[0]=0
-	                axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[0]=0
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -2828,8 +2828,8 @@ endif
                  IF countabv GT 0 AND have_Nw AND have_RR THEN BEGIN
                     scat_Y = DPR_RR[idxabv]
                     scat_X = DPR_Nw[idxabv]
-	                axis_scale.(PlotTypes(iplot))[0]=0
-	                axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[0]=0
+	                axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -3031,8 +3031,8 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;                       scat_Y = mrmsrrveryhigh[idxnonzero]
                        scat_X = mrms_rr[idxnonzero]
                        scat_Y = ns_rr[idxnonzero]
-	                   axis_scale.(PlotTypes(iplot))[0]=rr_log
-	                   axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -3051,8 +3051,8 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        scat_X = near_sfc_gr_rr[idxnonzero]
                        scat_Y = mrms_rr[idxnonzero]
  ;                      scat_Y = mrmsrrveryhigh[idxnonzero]
-	                   axis_scale.(PlotTypes(iplot))[0]=rr_log
-	                   axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -3069,8 +3069,8 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        scat_X = near_sfc_gr_rr[idxnonzero]
                        scat_Y = ns_rr[idxnonzero]
 ;                       scat_Y = nearSurfRain[idxnonzero]
-	                   axis_scale.(PlotTypes(iplot))[0]=rr_log
-	                   axis_scale.(PlotTypes(iplot))[1]=rr_log
+	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
