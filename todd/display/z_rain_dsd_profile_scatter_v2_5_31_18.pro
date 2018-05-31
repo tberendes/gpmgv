@@ -3027,31 +3027,11 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                   ;ENDFOREACH
               END
   'MRMSDSR' : BEGIN
-  
-  ; this section if from RR
- ;                  IF countabv GT 0 AND have_RR THEN BEGIN
- ;                   scat_X = GR_RR[idxabv]
- ;                   scat_Y = DPR_RR[idxabv]
- ;                   accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
- ;                                    binmax1, binmax2, BINSPAN1, BINSPAN2, $
- ;                                    plotDataPtrs, have_Hist, PlotTypes, $
- ;                                    iPlot, raintypeBBidx, rr_log, rr_log
-;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
-;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
- ;                ENDIF ELSE countabv=0
-  
-  
-;  				IF have_mrms EQ 1 THEN BEGIN
- ; 				    rqi = mrmsrqipveryhigh[*,0]
- ; 					ns_rr = nearSurfRain[*,0]
-;  					mrms_rr = mrmsrrveryhigh[*,0]
-;                    idxnonzero=WHERE(ns_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
-
-   				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
-  				    rqi = mrmsrqipveryhigh[idxabv]
-  					ns_rr = nearSurfRain[idxabv]
-  					mrms_rr = mrmsrrveryhigh[idxabv]
-                    idxnonzero=WHERE(ns_rr GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
+  				IF have_mrms EQ 1 THEN BEGIN
+  				    rqi = mrmsrqipveryhigh[*,0]
+  					ns_rr = nearSurfRain[*,0]
+  					mrms_rr = mrmsrrveryhigh[*,0]
+                    idxnonzero=WHERE(ns_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
                     if count gt 0 then begin 
 ;                       scat_X = nearSurfRain[idxnonzero]
 ;                       scat_Y = mrmsrrveryhigh[idxnonzero]
@@ -3067,26 +3047,12 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                  ENDIF
               END
   'GRRMRMS' : BEGIN
-;   				IF have_mrms EQ 1 THEN BEGIN
-;;   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
-;  				    rqi = mrmsrqipveryhigh[*,0]
-;  					near_sfc_gr_rr = GR_RR_orig[*,0] ; choose lowest scan above surface
-;  					mrms_rr = mrmsrrveryhigh[*,0]
-;                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
-
-  				IF countabv GT 0 have_mrms EQ 1 THEN BEGIN
-  					; create new scan stack for GR_RR
-  					nswp = SIZE(GR_RR_orig)[2]
-  					sfc_layer = GR_RR_orig[*,0] ; choose lowest scan above surface
-  					near_sfc_gr_rr = sfc_layer
-  					; append sfc layer to all layers
-  					FOR iswp=1, nswp-1 DO BEGIN
-  						near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
-  					ENDFOR
-  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
-  					mrms_rr = mrmsrrveryhigh[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
-
+   				IF have_mrms EQ 1 THEN BEGIN
+;   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
+  				    rqi = mrmsrqipveryhigh[*,0]
+  					near_sfc_gr_rr = GR_RR_orig[*,0] ; choose lowest scan above surface
+  					mrms_rr = mrmsrrveryhigh[*,0]
+                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rr[idxnonzero]
                        scat_Y = mrms_rr[idxnonzero]
@@ -3101,23 +3067,10 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                  ENDIF
               END
   'GRRDSR' : BEGIN
-;;   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
-;   					near_sfc_gr_rr = GR_RR_orig[*,0] ; choose lowest scan above surface
-;  					ns_rr = nearSurfRain[*,0]
-;                   idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and ns_rr GT 0.0,count )
-
-  					; create new scan stack for GR_RR
-  					nswp = SIZE(GR_RR_orig)[2]
-  					sfc_layer = GR_RR_orig[*,0] ; choose lowest scan above surface
-  					near_sfc_gr_rr = sfc_layer
-  					; append sfc layer to all layers
-  					FOR iswp=1, nswp-1 DO BEGIN
-  						near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
-  					ENDFOR
-  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
-  					
-  					ns_rr = nearSurfRain[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and ns_rr GE 0.0,count )
+;   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
+   					near_sfc_gr_rr = GR_RR_orig[*,0] ; choose lowest scan above surface
+  					ns_rr = nearSurfRain[*,0]
+                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and ns_rr GT 0.0,count )
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rr[idxnonzero]
                        scat_Y = ns_rr[idxnonzero]
@@ -3833,45 +3786,18 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
 print, "mrms plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
-;               2 : BEGIN
-;                   SCAT_DATA = "Any/All Footprints"
-;                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-;                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
-;                   if rr_log then begin
-;                   		xticknames=log_label(8, 2)
-;                   endif else begin
-;                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
-;                   endelse                    
-;                   END
-;               ELSE : BEGIN
-;                   do_plot = 0
-;                   END
-
-              2 : BEGIN
-                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
-                   trim = 0    ; show low-percentage outliers
-                   END
-               1 : BEGIN
-                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+               2 : BEGIN
+                   SCAT_DATA = "Any/All Footprints"
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		xticknames=log_label(8, 2)
                    endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
-                   trim = 0    ; show low-percentage outliers
                    END
-               0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-                   		yticknames=log_label(8, 2)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   endelse                    
+               ELSE : BEGIN
+                   do_plot = 0
                    END
               ENDCASE
               if do_plot NE 1 then break
@@ -3895,30 +3821,17 @@ print, "GRRMRMS plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
-                   trim = 0    ; show low-percentage outliers
-                   END
-               1 : BEGIN
-                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   SCAT_DATA = "Any/All Footprints"
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		xticknames=log_label(8, 2)
                    endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
-                   trim = 0    ; show low-percentage outliers
                    END
-               0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-                   		yticknames=log_label(8, 2)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   endelse                    
+               ELSE : BEGIN
+                   do_plot = 0
                    END
               ENDCASE
               if do_plot NE 1 then break
@@ -3941,30 +3854,17 @@ print, "GRRDSR plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
-                   trim = 0    ; show low-percentage outliers
-                   END
-               1 : BEGIN
-                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   SCAT_DATA = "Any/All Footprints"
+                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		xticknames=log_label(8, 2)
                    endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
-                   trim = 0    ; show low-percentage outliers
                    END
-               0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-                   		yticknames=log_label(8, 2)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   endelse                    
+               ELSE : BEGIN
+                   do_plot = 0
                    END
               ENDCASE
               if do_plot NE 1 then break
