@@ -3074,9 +3074,10 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;  					mrms_rr = mrmsrrveryhigh[*,0]
 ;                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
 
-  				IF countabv GT 0 have_mrms EQ 1 THEN BEGIN
+  				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
   					; create new scan stack for GR_RR
-  					nswp = SIZE(GR_RR_orig)[2]
+  					varsize=SIZE(GR_RR_orig)
+  					nswp = varsize[2]
   					sfc_layer = GR_RR_orig[*,0] ; choose lowest scan above surface
   					near_sfc_gr_rr = sfc_layer
   					; append sfc layer to all layers
@@ -3107,7 +3108,8 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;                   idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and ns_rr GT 0.0,count )
 
   					; create new scan stack for GR_RR
-  					nswp = SIZE(GR_RR_orig)[2]
+  					varsize=SIZE(GR_RR_orig)
+  					nswp = varsize[2]
   					sfc_layer = GR_RR_orig[*,0] ; choose lowest scan above surface
   					near_sfc_gr_rr = sfc_layer
   					; append sfc layer to all layers
