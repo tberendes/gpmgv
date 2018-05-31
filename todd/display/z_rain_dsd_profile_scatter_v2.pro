@@ -3878,7 +3878,7 @@ print, "mrms plot...."
               ENDCASE
               if do_plot NE 1 then break
 
-              yticknames=xticknames
+              xticknames=yticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
               titleLine1 = satprodtype+' '+version+" MRMS RR vs. DPR Sfc RR "+ $
                             " Scatter, Mean MRMS-DPR RR Bias: "
@@ -3925,7 +3925,7 @@ print, "GRRMRMS plot...."
               ENDCASE
               if do_plot NE 1 then break
 
-              yticknames=xticknames
+              xticknames=yticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
               titleLine1 = satprodtype+' '+version+" GR RR vs. MRMS RR "+ $
                            " Scatter, Mean GR-MRMS RR Bias: "
@@ -3971,7 +3971,7 @@ print, "GRRDSR plot...."
               ENDCASE
               if do_plot NE 1 then break
 
-              yticknames=xticknames
+              xticknames=yticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
               titleLine1 = satprodtype+' '+version+" GR RR vs. DPR Sfc RR "+ $
                            " Scatter, Mean GR-DPR RR Bias: "
