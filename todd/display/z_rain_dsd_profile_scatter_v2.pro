@@ -4366,39 +4366,7 @@ print, "GRRDSR plot...."
      ; set values below pct2blank to 0%
       histLE5 = WHERE(zhist2d LT pct2blank, countLT5)
       IF countLT5 GT 0 THEN zhist2d[histLE5] = 0.0D
-      
-    ; dump csv version of histogram
-   if dump_hist_csv then begin
-	   csvfile = outpath_sav + '/' + pngpre + '_'+ rntypeLabels[raintypeBBidx] + $
-	             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
-	             addme + filteraddstring + '.csv'
-	   openw, csv_LUN, csvfile, /GET_LUN
-	   ; dump histogram as csv
-	  ; binmin1:binmin1, binmin2:binmin2, binmax1:binmax1, binmax2:binmax2, $
-       ;        binspan1:binspan1, binspan2:binspan
-	   
-	   xmin = (*ptr2do[0]).binmin1
-	   ymin = (*ptr2do[0]).binmin2
-	   xmax = (*ptr2do[0]).binmax1
-	   ymax = (*ptr2do[0]).binmax2
-	   xspan = (*ptr2do[0]).binspan1
-	   yspan = (*ptr2do[0]).binspan2
-	   
-	   histsize = size(zhist2d)
-	   xsize = histsize[1]
-	   ysize = histsize[2]
-	   
-	   for i = 0,xsize-1 do begin
-	      for j=0, ysize-1 do begin
-	      	  printf, csv_LUN, i*xspan+xmin, ',', j*yspan+ymin,',', zhist2d[i,j]
-	      endfor 
-	   endfor
-	   
-	   close, csv_LUN
-	   FREE_LUN, csv_LUN
-	   
-   endif
-      
+       
      ; SCALE THE HISTOGRAM COUNTS TO 0-255 IMAGE BYTE VALUES
       histImg = BYTSCL(zhist2D)
    ENDIF ELSE BEGIN
@@ -4530,6 +4498,38 @@ print, 'rr_log_y: ', rr_log_y
    pngfile = outpath_sav + '/' + pngpre + '_'+ rntypeLabels[raintypeBBidx] + $
              BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
              addme + filteraddstring + '.png'
+    ; dump csv version of histogram
+   if dump_hist_csv then begin
+	   csvfile = outpath_sav + '/' + pngpre + '_'+ rntypeLabels[raintypeBBidx] + $
+	             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
+	             addme + filteraddstring + '.csv'
+	   openw, csv_LUN, csvfile, /GET_LUN
+	   ; dump histogram as csv
+	  ; binmin1:binmin1, binmin2:binmin2, binmax1:binmax1, binmax2:binmax2, $
+       ;        binspan1:binspan1, binspan2:binspan
+	   
+	   xmin = (*ptr2do[0]).binmin1
+	   ymin = (*ptr2do[0]).binmin2
+	   xmax = (*ptr2do[0]).binmax1
+	   ymax = (*ptr2do[0]).binmax2
+	   xspan = (*ptr2do[0]).binspan1
+	   yspan = (*ptr2do[0]).binspan2
+	   
+	   histsize = size(zhist2d)
+	   xsize = histsize[1]
+	   ysize = histsize[2]
+	   
+	   printf, csv_LUN, xtitle,',', ytitle,',',ticID
+	   for i = 0,xsize-1 do begin
+	      for j=0, ysize-1 do begin
+	      	  printf, csv_LUN, i*xspan+xmin, ',', j*yspan+ymin,',', zhist2d[i,j]
+	      endfor 
+	   endfor
+	   
+	   close, csv_LUN
+	   FREE_LUN, csv_LUN
+	   
+   endif
 
    IF KEYWORD_SET(batch_save) THEN BEGIN
       print, '' & print, "PNGFILE: ",pngfile & print, ""
