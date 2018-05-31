@@ -383,16 +383,18 @@ have2D  = 2   ; does the accumulating 1-D histogram for the variable exist yet?
 
 if rr_log_x then begin
 ;    print, 'X log scale'
-	idx_zero = where(scat_X eq 0, num_zero)
+	idx_zero = where(scat_X le 0, num_zero)
 	idx_not_zero = where(scat_X gt 0, num_not_zero)
-	if num_zero gt 0 then scat_X[idx_zero] = 9999
+	; put zeros in max bin which is filtered out later
+	if num_zero gt 0 then scat_X[idx_zero] = binmax1
 	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
 endif
 if rr_log_y then begin
 ;    print, 'Y log scale'
-	idx_zero = where(scat_Y eq 0, num_zero)
+	idx_zero = where(scat_Y le 0, num_zero)
 	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-	if num_zero gt 0 then scat_Y[idx_zero] = 9999
+	; put zeros in max bin which is filtered out later
+	if num_zero gt 0 then scat_Y[idx_zero] = binmax2
 	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
 endif 
 
@@ -436,7 +438,9 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
          ENDIF ELSE BEGIN
             have_hist.(plotIndex)[have2d,raintypeBBidx] = 1
            ; create this part of the I/O structure to assign to the pointer
-            iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts }
+            iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
+               binmin1:binmin1, binmin2:binmin2, binmax1:binmax1, binmax2:binmax2, $
+               binspan1:binspan1, binspan2:binspan2}
          ENDELSE
         ; compute the mean X (gv) for the samples in each Y (pr) histogram bin
         ; -- restrict the samples to those where both scat_X and scat_Y are within
@@ -561,6 +565,7 @@ IF FLOAT(!version.release) lt 8.1 THEN message, "Requires IDL 8.1 or later."
 do_RR_DM_curve_fit = 0
 ; 0= st below bb, 1=conv below bb, 2=all below bb 
 RR_DM_curve_fit_bb_type = 0
+dump_hist_csv=1
 
 if do_RR_DM_curve_fit eq 1 then begin
 
@@ -4259,7 +4264,39 @@ print, "GRRDSR plot...."
      ; set values below pct2blank to 0%
       histLE5 = WHERE(zhist2d LT pct2blank, countLT5)
       IF countLT5 GT 0 THEN zhist2d[histLE5] = 0.0D
-
+      
+    ; dump csv version of histogram
+   if dump_hist_csv then begin
+	   csvfile = outpath_sav + '/' + pngpre + '_'+ rntypeLabels[raintypeBBidx] + $
+	             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
+	             addme + filteraddstring + '.csv'
+	   openw, csv_LUN, csvfile, /GET_LUN
+	   ; dump histogram as csv
+	  ; binmin1:binmin1, binmin2:binmin2, binmax1:binmax1, binmax2:binmax2, $
+       ;        binspan1:binspan1, binspan2:binspan
+	   
+	   xmin = (*ptr2do[0]).binmin1
+	   ymin = (*ptr2do[0]).binmin2
+	   xmax = (*ptr2do[0]).binmax1
+	   ymax = (*ptr2do[0]).binmax2
+	   xspan = (*ptr2do[0]).binspan1
+	   yspan = (*ptr2do[0]).binspan2
+	   
+	   histsize = size(zhist2d)
+	   xsize = histsize[1]
+	   ysize = histsize[2]
+	   
+	   for i = 0,xsize-1 do begin
+	      for j=0, ysize-1 do begin
+	      	  printf, csv_LUN, i*xspan+xmin, ',', j*yspan+ymin,',', zhist2d[i,j]
+	      endfor 
+	   endfor
+	   
+	   close, csv_LUN
+	   FREE_LUN, csv_LUN
+	   
+   endif
+      
      ; SCALE THE HISTOGRAM COUNTS TO 0-255 IMAGE BYTE VALUES
       histImg = BYTSCL(zhist2D)
    ENDIF ELSE BEGIN
@@ -4319,6 +4356,7 @@ print, "GRRDSR plot...."
    if rr_log then begin
    	   rr_log_x=axis_scale.(idx2do)[0]
    	   rr_log_y=axis_scale.(idx2do)[1]
+   	   ; log axis labels not working, causes arthmetic error
 	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
 	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
