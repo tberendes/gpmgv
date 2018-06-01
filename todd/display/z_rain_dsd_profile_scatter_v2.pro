@@ -36,6 +36,8 @@
 ;'GRCMRMS': GR sfc RC (lowest level) vs MRMS surface RR 
 ;'GRPMRMS': GR sfc RP (lowest level) vs MRMS surface RR 
 ; 'GRRDSR': GR sfc RR (lowest level) vs DPR near sfc RR 
+; 'GRCDSR': GR sfc RC (lowest level) vs DPR near sfc RR 
+; 'GRPDSR': GR sfc RP (lowest level) vs DPR near sfc RR 
 ; 'GRZSH' : GR Z standard deviation histogram (above & below BB)
 ;'GRDMSH' : GR Dm standard deviation histogram (below BB)
 ;
@@ -712,6 +714,8 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             GRCMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             GRPMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              GRRDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+             GRCDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+             GRPDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                  ZM : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
               DMRRG : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                  ZC : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
@@ -1610,6 +1614,8 @@ IF have_mrms EQ 1 THEN BEGIN
 	have_hist.GRPMRMS[haveVar,*] = 1
 	have_hist.GRCMRMS[haveVar,*] = 1
 	have_hist.GRRDSR[haveVar,*] = 1
+	have_hist.GRCDSR[haveVar,*] = 1
+	have_hist.GRPDSR[haveVar,*] = 1
 ENDIF
 
 IF have_NW THEN BEGIN
@@ -1975,7 +1981,8 @@ print, ''
           hgtcat = hgtcat[idxgoodenuff]
 ; TAB 12/01/17 added HID variables, any new variables must be filtered here
  ;         hid = hid[*,idxgoodenuff]
- 
+ 		  nearSurfRain = nearSurfRain[idxgoodenuff]
+ 		  
 ;  cant figure out how to reindex the Hid arrays, so for now just use besthid
 ;          sz = size(hid)
 ;         hid_new = lonarr(sz[1],N_ELEMENTS(idxgoodenuff))
@@ -2038,6 +2045,17 @@ print, ''
               pctgoodDPR_N2=pctgoodDPR_N2[idxgoodenuff]
           ENDIF
           IF have_RR EQ 1 THEN BEGIN
+              ; TAB set up GR near sfc stacks
+  			  varsize=SIZE(GR_RR)
+  			  nswp = varsize[2]
+			  sfc_layer = GR_RR[*,0] ; choose lowest scan above surface
+			  near_sfc_gr_rr = sfc_layer
+			  ; append sfc layer to all layers
+			  FOR iswp=1, nswp-1 DO BEGIN
+				near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
+			  ENDFOR
+			  near_sfc_gr_rr = near_sfc_gr_rr[idxgoodenuff]
+          
               GR_RR=GR_RR[idxgoodenuff]
 ;              GR_RRmax=GR_RRmax[idxgoodenuff]
 ;              GR_RRstddev=GR_RRstddev[idxgoodenuff]
@@ -2046,6 +2064,16 @@ print, ''
               pctgoodDPR_RR=pctgoodDPR_RR[idxgoodenuff]
           ENDIF
           IF have_RC EQ 1 THEN BEGIN
+              ; TAB set up GR near sfc stacks
+  			  varsize=SIZE(GR_RC)
+  			  nswp = varsize[2]
+			  sfc_layer = GR_RC[*,0] ; choose lowest scan above surface
+			  near_sfc_gr_rc = sfc_layer
+			  ; append sfc layer to all layers
+			  FOR iswp=1, nswp-1 DO BEGIN
+				near_sfc_gr_rc = [near_sfc_gr_rc, sfc_layer]
+			  ENDFOR
+			  near_sfc_gr_rc = near_sfc_gr_rc[idxgoodenuff]
               GR_RC=GR_RC[idxgoodenuff]
 ;              GR_RCmax=GR_RCmax[idxgoodenuff]
 ;              GR_RCstddev=GR_RCstddev[idxgoodenuff]
@@ -2054,6 +2082,16 @@ print, ''
               pctgoodDPR_RC=pctgoodDPR_RC[idxgoodenuff]
           ENDIF
           IF have_RP EQ 1 THEN BEGIN
+   			  varsize=SIZE(GR_RP)
+  			  nswp = varsize[2]
+              ; TAB set up GR near sfc stacks
+			  sfc_layer = GR_RP[*,0] ; choose lowest scan above surface
+			  near_sfc_gr_rp = sfc_layer
+			  ; append sfc layer to all layers
+			  FOR iswp=1, nswp-1 DO BEGIN
+				near_sfc_gr_rp = [near_sfc_gr_rp, sfc_layer]
+			  ENDFOR
+			  near_sfc_gr_rp = near_sfc_gr_rp[idxgoodenuff]
               GR_RP=GR_RP[idxgoodenuff]
 ;              GR_RPmax=GR_RPmax[idxgoodenuff]
 ;              GR_RPstddev=GR_RPstddev[idxgoodenuff]
@@ -2563,6 +2601,8 @@ endif
   'GRCMRMS' :
   'GRPMRMS' :
   'GRRDSR' :
+  'GRRDSC' :
+  'GRRDSP' :
   'MRMSDSR' : BEGIN
 
                  IF raintypeBBidx GE 1 THEN BEGIN
@@ -3067,15 +3107,6 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
 
   				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
-  					; create new scan stack for GR_RR
-  					varsize=SIZE(GR_RR)
-  					nswp = varsize[2]
-  					sfc_layer = GR_RR[*,0] ; choose lowest scan above surface
-  					near_sfc_gr_rr = sfc_layer
-  					; append sfc layer to all layers
-  					FOR iswp=1, nswp-1 DO BEGIN
-  						near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
-  					ENDFOR
   					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
   					mrms_rr = mrmsrrveryhigh[idxabv]
                     idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
@@ -3096,21 +3127,12 @@ print, "" & print, "Using DPR Epsilon." & print, ""
   'GRCMRMS' : BEGIN
 
   				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
-  					; create new scan stack for GR_RC
-  					varsize=SIZE(GR_RC)
-  					nswp = varsize[2]
-  					sfc_layer = GR_RC[*,0] ; choose lowest scan above surface
-  					near_sfc_gr_rr = sfc_layer
-  					; append sfc layer to all layers
-  					FOR iswp=1, nswp-1 DO BEGIN
-  						near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
-  					ENDFOR
-  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
+  					near_sfc_gr_rc = near_sfc_gr_rc[idxabv]
   					mrms_rr = mrmsrrveryhigh[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
+                    idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and mrms_rc GE 0.0 and rqi ge 95 ,count )
 
                     if count gt 0 then begin 
-                       scat_X = near_sfc_gr_rr[idxnonzero]
+                       scat_X = near_sfc_gr_rc[idxnonzero]
                        scat_Y = mrms_rr[idxnonzero]
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
@@ -3122,21 +3144,12 @@ print, "" & print, "Using DPR Epsilon." & print, ""
   'GRPMRMS' : BEGIN
 
   				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
-  					; create new scan stack for GR_RP
-  					varsize=SIZE(GR_RP)
-  					nswp = varsize[2]
-  					sfc_layer = GR_RP[*,0] ; choose lowest scan above surface
-  					near_sfc_gr_rr = sfc_layer
-  					; append sfc layer to all layers
-  					FOR iswp=1, nswp-1 DO BEGIN
-  						near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
-  					ENDFOR
-  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
+  					near_sfc_gr_rp = near_sfc_gr_rp[idxabv]
   					mrms_rr = mrmsrrveryhigh[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
+                    idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and mrms_rp GE 0.0 and rqi ge 95 ,count )
 
                     if count gt 0 then begin 
-                       scat_X = near_sfc_gr_rr[idxnonzero]
+                       scat_X = near_sfc_gr_rp[idxnonzero]
                        scat_Y = mrms_rr[idxnonzero]
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
@@ -3151,21 +3164,45 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;  					ns_rr = nearSurfRain[*,0]
 ;                   idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and ns_rr GT 0.0,count )
 
-  					; create new scan stack for GR_RR
-  					varsize=SIZE(GR_RR)
-  					nswp = varsize[2]
-  					sfc_layer = GR_RR[*,0] ; choose lowest scan above surface
-  					near_sfc_gr_rr = sfc_layer
-  					; append sfc layer to all layers
-  					FOR iswp=1, nswp-1 DO BEGIN
-  						near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
-  					ENDFOR
-  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
-  					
+  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]  					
   					ns_rr = nearSurfRain[idxabv]
                     idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and ns_rr GE 0.0,count )
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rr[idxnonzero]
+                       scat_Y = ns_rr[idxnonzero]
+;                       scat_Y = nearSurfRain[idxnonzero]
+;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
+                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log
+                    endif
+              END
+  'GRCDSR' : BEGIN
+
+  					near_sfc_gr_rc = near_sfc_gr_rc[idxabv]  					
+  					ns_rr = nearSurfRain[idxabv]
+                    idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and ns_rc GE 0.0,count )
+                    if count gt 0 then begin 
+                       scat_X = near_sfc_gr_rc[idxnonzero]
+                       scat_Y = ns_rr[idxnonzero]
+;                       scat_Y = nearSurfRain[idxnonzero]
+;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
+                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log
+                    endif
+              END
+  'GRPDSR' : BEGIN
+
+  					near_sfc_gr_rp = near_sfc_gr_rp[idxabv]  					
+  					ns_rr = nearSurfRain[idxabv]
+                    idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and ns_rp GE 0.0,count )
+                    if count gt 0 then begin 
+                       scat_X = near_sfc_gr_rp[idxnonzero]
                        scat_Y = ns_rr[idxnonzero]
 ;                       scat_Y = nearSurfRain[idxnonzero]
 ;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
@@ -4117,7 +4154,99 @@ print, "GRRDSR plot...."
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
               if rr_log then units='(log mm/h)' else units='(mm/h)'
-              xtitle= 'GR '+units
+              xtitle= 'GR RR '+units
+              ytitle= 'DPR '+ units
+              BREAK
+           END
+  'GRCDSR' :BEGIN
+print, "GRCDSR plot...."
+
+              do_MAE_1_1 = 1
+              CASE raintypeBBidx OF
+               2 : BEGIN
+                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+                    if rr_log then begin
+                   		yticknames=log_label(8, 8)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+                   trim = 0    ; show low-percentage outliers
+                   END
+               1 : BEGIN
+                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		yticknames=log_label(8, 8)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+                   trim = 0    ; show low-percentage outliers
+                   END
+               0 : BEGIN
+                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		yticknames=log_label(8, 2)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
+                   END
+              ENDCASE
+              if do_plot NE 1 then break
+
+              xticknames=yticknames
+              xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
+              titleLine1 = satprodtype+' '+version+" GR RC vs. DPR Sfc RR "+ $
+                           " Scatter, Mean GR-DPR RR Bias: "
+;                           " Scatter "
+              pngpre=pr_or_dpr+'_'+version+"_GRSRC_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
+              ;units='(mm/h)'
+              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              xtitle= 'GR RC '+units
+              ytitle= 'DPR '+ units
+              BREAK
+           END
+  'GRPDSR' :BEGIN
+print, "GRPDSR plot...."
+
+              do_MAE_1_1 = 1
+              CASE raintypeBBidx OF
+               2 : BEGIN
+                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+                    if rr_log then begin
+                   		yticknames=log_label(8, 8)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+                   trim = 0    ; show low-percentage outliers
+                   END
+               1 : BEGIN
+                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		yticknames=log_label(8, 8)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+                   trim = 0    ; show low-percentage outliers
+                   END
+               0 : BEGIN
+                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		yticknames=log_label(8, 2)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
+                   END
+              ENDCASE
+              if do_plot NE 1 then break
+
+              xticknames=yticknames
+              xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
+              titleLine1 = satprodtype+' '+version+" GR RP vs. DPR Sfc RR "+ $
+                           " Scatter, Mean GR-DPR RR Bias: "
+;                           " Scatter "
+              pngpre=pr_or_dpr+'_'+version+"_GRSRP_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
+              ;units='(mm/h)'
+              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              xtitle= 'GR RP '+units
               ytitle= 'DPR '+ units
               BREAK
            END
