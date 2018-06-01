@@ -3799,7 +3799,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
               if rr_log then units='(log mm/h)' else units='(mm/h)'
-              xtitle= 'GR '+units
+              xtitle= 'GR '+PlotTypes(idx2do)+' '+units
               ytitle= pr_or_dpr +' '+ units
               BREAK
            END
