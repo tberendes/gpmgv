@@ -3129,7 +3129,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
   				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
   					near_sfc_gr_rc = near_sfc_gr_rc[idxabv]
   					mrms_rr = mrmsrrveryhigh[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and mrms_rc GE 0.0 and rqi ge 95 ,count )
+                    idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
 
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rc[idxnonzero]
@@ -3146,7 +3146,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
   				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
   					near_sfc_gr_rp = near_sfc_gr_rp[idxabv]
   					mrms_rr = mrmsrrveryhigh[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and mrms_rp GE 0.0 and rqi ge 95 ,count )
+                    idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
 
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rp[idxnonzero]
