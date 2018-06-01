@@ -32,8 +32,10 @@
 ;           epsilon vs. GR derived epsilon
 ;    'HID': Hydrometeor ID histogram
 ;'MRMSDSR': MRMS surface RR vs. DPR near sfc RR (x vs y)
-;'GRRMRMS': GR sfc RR (2nd lowest level) vs MRMS surface RR 
-; 'GRRDSR': GR sfc RR (2nd lowest level) vs DPR near sfc RR 
+;'GRRMRMS': GR sfc RR (lowest level) vs MRMS surface RR 
+;'GRCMRMS': GR sfc RC (lowest level) vs MRMS surface RR 
+;'GRPMRMS': GR sfc RP (lowest level) vs MRMS surface RR 
+; 'GRRDSR': GR sfc RR (lowest level) vs DPR near sfc RR 
 ; 'GRZSH' : GR Z standard deviation histogram (above & below BB)
 ;'GRDMSH' : GR Dm standard deviation histogram (below BB)
 ;
@@ -707,6 +709,8 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 				HID : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             MRMSDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             GRRMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+            GRCMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+            GRPMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              GRRDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                  ZM : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
               DMRRG : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
@@ -729,35 +733,6 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             NWGZMXP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              PIADMP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
-; set up plot specific axis scaling [x,y]
-;axis_scale = { GRZSH : [0,0], $
-;			 GRDMSH : [0,0], $
-;				HID : [0,0], $
-;            MRMSDSR : [0,0], $
-;            GRRMRMS : [0,0], $
-;             GRRDSR : [0,0], $
-;                 ZM : [0,0], $
-;              DMRRG : [0,0], $
-;                 ZC : [0,0], $
-;                 D0 : [0,0], $
-;                 DM : [0,0], $
-;;              DMANY : [0,0], $
-;                 NW : [0,0], $
-;                 N2 : [0,0], $
-;                 RR : [0,0], $
-;                 RC : [0,0], $
-;                 RP : [0,0], $
-;              ZCNWG : [0,0], $
-;              NWDMG : [0,0], $
-;              ZCNWP : [0,0], $
-;              NWDMP : [0,0], $
-;              RRNWG : [0,0], $
-;              DMRRP : [0,0], $
-;              RRNWP : [0,0], $
-;            NWGZMXP : [0,0], $
-;             PIADMP : [0,0], $
-;               EPSI : [0,0] }
-;
 ; position indices/definitions of the 3 flags in the array triplets in the structure
 ; - must be identically defined in accum_scat_data.pro
 haveVar = 0   ; do we have data for the variable
@@ -1594,7 +1569,7 @@ IF myflags.have_GR_RR_rainrate EQ 1 THEN BEGIN
               have_RR = 1
               have_hist.RR[haveVar,*] = 1
               GR_RR=temporary(*ptr_gvrr)
-              GR_RR_orig=GR_RR
+;              GR_RR_orig=GR_RR
 ;              GR_RRmax=temporary(*ptr_gvrrmax)
 ;              GR_RRstddev=temporary(*ptr_gvrrstddev)
               pctgoodGR_RR=temporary(*ptr_pctgoodrrgv)
@@ -1632,6 +1607,8 @@ IF myflags.have_mrms EQ 1 THEN have_mrms = 1 ELSE have_mrms = 0
 IF have_mrms EQ 1 THEN BEGIN
 	have_hist.MRMSDSR[haveVar,*] = 1
 	have_hist.GRRMRMS[haveVar,*] = 1
+	have_hist.GRPMRMS[haveVar,*] = 1
+	have_hist.GRCMRMS[haveVar,*] = 1
 	have_hist.GRRDSR[haveVar,*] = 1
 ENDIF
 
@@ -1998,6 +1975,7 @@ print, ''
           hgtcat = hgtcat[idxgoodenuff]
 ; TAB 12/01/17 added HID variables, any new variables must be filtered here
  ;         hid = hid[*,idxgoodenuff]
+ 
 ;  cant figure out how to reindex the Hid arrays, so for now just use besthid
 ;          sz = size(hid)
 ;         hid_new = lonarr(sz[1],N_ELEMENTS(idxgoodenuff))
@@ -2015,6 +1993,18 @@ print, ''
              dprEpsilon = dprEpsilon[idxgoodenuff]
              pctgoodDPR_Epsilon = pctgoodDPR_Epsilon[idxgoodenuff]
           ENDIF
+          if have_mrms eq 1 then begin
+ 			  mrmsrrlow=mrmsrrlow[idxgoodenuff]
+			  mrmsrrmed=mrmsrrmed[idxgoodenuff]
+			  mrmsrrhigh=mrmsrrhigh[idxgoodenuff]
+			  mrmsrrveryhigh=mrmsrrveryhigh[idxgoodenuff]
+
+			  mrmsrqiplow=mrmsrqiplow[idxgoodenuff]
+			  mrmsrqipmed=mrmsrqipmed[idxgoodenuff]
+			  mrmsrqiphigh=mrmsrqiphigh[idxgoodenuff]
+			  mrmsrqipveryhigh=mrmsrqipveryhigh[idxgoodenuff]
+          
+          endif
           IF have_D0 EQ 1 THEN BEGIN
               GR_D0=GR_D0[idxgoodenuff]
 ;              GR_D0max=GR_D0max[idxgoodenuff]
@@ -2570,6 +2560,8 @@ endif
                  BREAK
               END
   'GRRMRMS' :
+  'GRCMRMS' :
+  'GRPMRMS' :
   'GRRDSR' :
   'MRMSDSR' : BEGIN
 
@@ -3076,9 +3068,9 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 
   				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
   					; create new scan stack for GR_RR
-  					varsize=SIZE(GR_RR_orig)
+  					varsize=SIZE(GR_RR)
   					nswp = varsize[2]
-  					sfc_layer = GR_RR_orig[*,0] ; choose lowest scan above surface
+  					sfc_layer = GR_RR[*,0] ; choose lowest scan above surface
   					near_sfc_gr_rr = sfc_layer
   					; append sfc layer to all layers
   					FOR iswp=1, nswp-1 DO BEGIN
@@ -3101,6 +3093,58 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                     endif
                  ENDIF
               END
+  'GRCMRMS' : BEGIN
+
+  				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
+  					; create new scan stack for GR_RC
+  					varsize=SIZE(GR_RC)
+  					nswp = varsize[2]
+  					sfc_layer = GR_RC[*,0] ; choose lowest scan above surface
+  					near_sfc_gr_rr = sfc_layer
+  					; append sfc layer to all layers
+  					FOR iswp=1, nswp-1 DO BEGIN
+  						near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
+  					ENDFOR
+  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
+  					mrms_rr = mrmsrrveryhigh[idxabv]
+                    idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
+
+                    if count gt 0 then begin 
+                       scat_X = near_sfc_gr_rr[idxnonzero]
+                       scat_Y = mrms_rr[idxnonzero]
+                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log
+                    endif
+                 ENDIF
+              END
+  'GRPMRMS' : BEGIN
+
+  				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
+  					; create new scan stack for GR_RP
+  					varsize=SIZE(GR_RP)
+  					nswp = varsize[2]
+  					sfc_layer = GR_RP[*,0] ; choose lowest scan above surface
+  					near_sfc_gr_rr = sfc_layer
+  					; append sfc layer to all layers
+  					FOR iswp=1, nswp-1 DO BEGIN
+  						near_sfc_gr_rr = [near_sfc_gr_rr, sfc_layer]
+  					ENDFOR
+  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
+  					mrms_rr = mrmsrrveryhigh[idxabv]
+                    idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
+
+                    if count gt 0 then begin 
+                       scat_X = near_sfc_gr_rr[idxnonzero]
+                       scat_Y = mrms_rr[idxnonzero]
+                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log
+                    endif
+                 ENDIF
+              END
   'GRRDSR' : BEGIN
 ;;   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
 ;   					near_sfc_gr_rr = GR_RR_orig[*,0] ; choose lowest scan above surface
@@ -3108,9 +3152,9 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;                   idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and ns_rr GT 0.0,count )
 
   					; create new scan stack for GR_RR
-  					varsize=SIZE(GR_RR_orig)
+  					varsize=SIZE(GR_RR)
   					nswp = varsize[2]
-  					sfc_layer = GR_RR_orig[*,0] ; choose lowest scan above surface
+  					sfc_layer = GR_RR[*,0] ; choose lowest scan above surface
   					near_sfc_gr_rr = sfc_layer
   					; append sfc layer to all layers
   					FOR iswp=1, nswp-1 DO BEGIN
@@ -3933,7 +3977,101 @@ print, "GRRMRMS plot...."
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
               if rr_log then units='(log mm/h)' else units='(mm/h)'
-              xtitle= 'GR '+units
+              xtitle= 'GR RR '+units
+              ytitle= 'MRMS '+ units
+              BREAK
+           END
+   'GRCMRMS' :BEGIN
+print, "GRCMRMS plot...."
+
+			  if have_mrms NE 1 then break
+              do_MAE_1_1 = 1
+              CASE raintypeBBidx OF
+               2 : BEGIN
+                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+                    if rr_log then begin
+                   		yticknames=log_label(8, 8)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+                   trim = 0    ; show low-percentage outliers
+                   END
+               1 : BEGIN
+                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		yticknames=log_label(8, 8)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+                   trim = 0    ; show low-percentage outliers
+                   END
+               0 : BEGIN
+                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		yticknames=log_label(8, 2)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
+                   END
+              ENDCASE
+              if do_plot NE 1 then break
+
+              xticknames=yticknames
+              xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
+              titleLine1 = satprodtype+' '+version+" GR RC vs. MRMS RR "+ $
+                           " Scatter, Mean GR-MRMS RR Bias: "
+;                           " Scatter"
+              pngpre=pr_or_dpr+'_'+version+"_GRSRC_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
+              ;units='(mm/h)'
+              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              xtitle= 'GR RC '+units
+              ytitle= 'MRMS '+ units
+              BREAK
+           END
+   'GRPMRMS' :BEGIN
+print, "GRCMRMS plot...."
+
+			  if have_mrms NE 1 then break
+              do_MAE_1_1 = 1
+              CASE raintypeBBidx OF
+               2 : BEGIN
+                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+                    if rr_log then begin
+                   		yticknames=log_label(8, 8)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+                   trim = 0    ; show low-percentage outliers
+                   END
+               1 : BEGIN
+                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		yticknames=log_label(8, 8)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+                   endelse                    
+                   trim = 0    ; show low-percentage outliers
+                   END
+               0 : BEGIN
+                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   if rr_log then begin
+                   		yticknames=log_label(8, 2)
+                   endif else begin
+                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+                   endelse                    
+                   END
+              ENDCASE
+              if do_plot NE 1 then break
+
+              xticknames=yticknames
+              xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
+              titleLine1 = satprodtype+' '+version+" GR RP vs. MRMS RR "+ $
+                           " Scatter, Mean GR-MRMS RR Bias: "
+;                           " Scatter"
+              pngpre=pr_or_dpr+'_'+version+"_GRSRP_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
+              ;units='(mm/h)'
+              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              xtitle= 'GR RP '+units
               ytitle= 'MRMS '+ units
               BREAK
            END
