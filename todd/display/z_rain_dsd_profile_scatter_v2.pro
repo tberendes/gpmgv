@@ -3183,7 +3183,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 
   					near_sfc_gr_rc = near_sfc_gr_rc[idxabv]  					
   					ns_rr = nearSurfRain[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and ns_rc GE 0.0,count )
+                    idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and ns_rr GE 0.0,count )
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rc[idxnonzero]
                        scat_Y = ns_rr[idxnonzero]
@@ -3200,7 +3200,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 
   					near_sfc_gr_rp = near_sfc_gr_rp[idxabv]  					
   					ns_rr = nearSurfRain[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and ns_rp GE 0.0,count )
+                    idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and ns_rr GE 0.0,count )
                     if count gt 0 then begin 
                        scat_X = near_sfc_gr_rp[idxnonzero]
                        scat_Y = ns_rr[idxnonzero]
