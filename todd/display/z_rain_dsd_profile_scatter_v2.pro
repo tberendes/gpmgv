@@ -415,7 +415,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
               AND scat_Y GE binmin2 AND scat_Y LE binmax2, count_XY)
    IF (count_XY GT 0) THEN BEGIN
 
-		  if rr_log_x or rr_log_x then begin
+		  if rr_log_x or rr_log_y then begin
 			  scat_logX = scat_X[idx_XY]
 			  binmin1log=binmin1
 			  binmax1log=binmax1
@@ -429,7 +429,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					scat_logX = ALOG10(scat_X[idx_XY])
 					binmin1log=ALOG10(binmin1)
 					binmax1log=ALOG10(binmax1)
-					binspan1log = (binmax1log - binmax1log) / 100.0
+					binspan1log = (binmax1log - binmin1log) / 100.0
 					
 			  endif
 			  if rr_log_y then begin
@@ -437,7 +437,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					scat_logY = ALOG10(scat_Y[idx_XY])
 					binmin2log=ALOG10(binmin2)
 					binmax2log=ALOG10(binmax2)
-					binspan2log = (binmax2log - binmax2log) / 100.0
+					binspan2log = (binmax2log - binmin2log) / 100.0
 			  endif 
 		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
 		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
@@ -449,7 +449,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
           
           endelse
 
-;		 if rr_log_x or rr_log_x then begin
+;		 if rr_log_x or rr_log_y then begin
 ;	         zhist2d =  MAKE_HIST2D(scat_X, scat_Y , MISSING=0 , $
 ;	                             XLOG=rr_log_x, YLOG=rr_log_y, $
 ;	                             XHRANGE=[binmin1, binmax1], $
