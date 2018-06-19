@@ -4797,6 +4797,7 @@ print, "GRPDSR plot...."
 print, 'rr_log_x: ', rr_log_x
 print, 'rr_log_y: ', rr_log_y
 print, 'xmajor: ', xmajor
+print, 'xticknames ',xticknames
 ;	   im.xlog=rr_log_x
 ;	   im.ylog=rr_log_y
 
