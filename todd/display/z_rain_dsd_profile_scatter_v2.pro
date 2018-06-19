@@ -416,6 +416,14 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
    IF (count_XY GT 0) THEN BEGIN
 
 		  if rr_log_x or rr_log_x then begin
+			  scat_logX = scat_X[idx_XY]
+			  binmin1log=binmin1
+			  binmax1log=binmax1
+			  binspan1log = binspan1
+			  scat_logY = scat_Y[idx_XY]
+			  binmin2log=binmin2
+			  binmax2log=binmax2
+			  binspan2log = binspan2
 			  if rr_log_x then begin
 				;    print, 'X log scale'
 					scat_logX = ALOG10(scat_X[idx_XY])
