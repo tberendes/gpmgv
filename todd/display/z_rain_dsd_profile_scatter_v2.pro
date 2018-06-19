@@ -384,23 +384,23 @@ have1D  = 1   ; does the accumulating 2-D histogram for the variable exist yet?
 have2D  = 2   ; does the accumulating 1-D histogram for the variable exist yet?
 
 ; apply log10 scaling if requested
-
-if rr_log_x then begin
-;    print, 'X log scale'
-	idx_zero = where(scat_X le 0, num_zero)
-	idx_not_zero = where(scat_X gt 0, num_not_zero)
-	; put zeros in max bin which is filtered out later
-	if num_zero gt 0 then scat_X[idx_zero] = binmax1
-	if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
-endif
-if rr_log_y then begin
-;    print, 'Y log scale'
-	idx_zero = where(scat_Y le 0, num_zero)
-	idx_not_zero = where(scat_Y gt 0, num_not_zero)
-	; put zeros in max bin which is filtered out later
-	if num_zero gt 0 then scat_Y[idx_zero] = binmax2
-	if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
-endif 
+;			  if rr_log_x then begin
+;				;    print, 'X log scale'
+;					idx_zero = where(scat_X le 0, num_zero)
+;					idx_not_zero = where(scat_X gt 0, num_not_zero)
+;					; put zeros in max bin which is filtered out later
+;					if num_zero gt 0 then scat_X[idx_zero] = binmax1
+;					if num_not_zero gt 0 then scat_X[idx_not_zero] = ALOG10(scat_X[idx_not_zero])
+					
+;			  endif
+;			  if rr_log_y then begin
+;				;    print, 'Y log scale'
+;					idx_zero = where(scat_Y le 0, num_zero)
+;;					idx_not_zero = where(scat_Y gt 0, num_not_zero)
+;					; put zeros in max bin which is filtered out later
+;					if num_zero gt 0 then scat_Y[idx_zero] = binmax2
+;					if num_not_zero gt 0 then scat_Y[idx_not_zero] = ALOG10(scat_Y[idx_not_zero])
+;			  endif 
 
 ; get a short version of the array pointer being worked
 aptr = (ptrData_array)[plotIndex,raintypeBBidx]
@@ -415,9 +415,31 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
               AND scat_Y GE binmin2 AND scat_Y LE binmax2, count_XY)
    IF (count_XY GT 0) THEN BEGIN
 
-	      zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
-	                      MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
-	                      BIN1=BINSPAN1, BIN2=BINSPAN2 )
+		  if rr_log_x or rr_log_x then begin
+			  if rr_log_x then begin
+				;    print, 'X log scale'
+					scat_logX = ALOG10(scat_X[idx_XY])
+					binmin1log=ALOG10(binmin1)
+					binmax1log=ALOG10(binmax1)
+					binspan1log = (binmax1log - binmax1log) / 100.0
+					
+			  endif
+			  if rr_log_y then begin
+				;    print, 'Y log scale'
+					scat_logY = ALOG10(scat_Y[idx_XY])
+					binmin2log=ALOG10(binmin2)
+					binmax2log=ALOG10(binmax2)
+					binspan2log = (binmax2log - binmax2log) / 100.0
+			  endif 
+		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
+		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
+		                      BIN1=BINSPAN1log, BIN2=BINSPAN2log )
+          endif else begin 
+		      zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
+		                      MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
+		                      BIN1=BINSPAN1, BIN2=BINSPAN2 )
+          
+          endelse
 
 ;		 if rr_log_x or rr_log_x then begin
 ;	         zhist2d =  MAKE_HIST2D(scat_X, scat_Y , MISSING=0 , $
@@ -2440,10 +2462,14 @@ endif
        'RR' : BEGIN
                  IF raintypeBBidx GE 1 THEN BEGIN
                     if rr_log then begin
-	                    binmin1 = -2  & binmin2 = -2
-	                    binmax1 = 1.8 & binmax2 = 1.8
-	                    BINSPAN1 = 0.03
-	                    BINSPAN2 = 0.03
+;	                    binmin1 = -2  & binmin2 = -2
+;	                    binmax1 = 1.8 & binmax2 = 1.8
+;	                    BINSPAN1 = 0.03
+;	                    BINSPAN2 = 0.03
+	                    binmin1 = 0.01  & binmin2 = 0.01
+	                    binmax1 = 60.0 & binmax2 = 60.0
+	                    BINSPAN1 = 1.0
+	                    BINSPAN2 = 1.0                    
                     endif else begin
 	                    binmin1 = 0.0  & binmin2 = 0.0
 	                    binmax1 = 60.0 & binmax2 = 60.0
@@ -2452,10 +2478,14 @@ endif
                     endelse
                  ENDIF ELSE BEGIN
                     if rr_log then begin
-	                    binmin1 = -2  & binmin2 = -2
-	                    binmax1 = 1.2 & binmax2 = 1.2
-	                    BINSPAN1 = 0.02
-	                    BINSPAN2 = 0.02
+;	                    binmin1 = -2  & binmin2 = -2
+;	                    binmax1 = 1.2 & binmax2 = 1.2
+;	                    BINSPAN1 = 0.02
+;	                    BINSPAN2 = 0.02
+	                    binmin1 = 0.01  & binmin2 = 0.01
+	                    binmax1 = 15.0 & binmax2 = 15.0
+	                    BINSPAN1 = 0.25
+	                    BINSPAN2 = 0.25
                     endif else begin
 	                    binmin1 = 0.0  & binmin2 = 0.0
 	                    binmax1 = 15.0 & binmax2 = 15.0
@@ -2500,18 +2530,16 @@ endif
                  IF raintypeBBidx GE 1 THEN BEGIN
                     trim = 0
                     if rr_log then begin
-                    	binmin1 = -2 & binmax1 = 1.8
-;                    	binmin1 = 0.0 & binmax1 = 1.8
-                    	BINSPAN1 = 0.03
+                    	binmin1 = 0.01 & binmax1 = 60.0
+                    	BINSPAN1 = 1.0
                     endif else begin
                     	binmin1 = 0.0 & binmax1 = 60.0
                     	BINSPAN1 = 1.0
                     endelse
                  ENDIF ELSE BEGIN
                     if rr_log then begin
- 	                    binmin1 = -2 & binmax1 = 1.2
-;	                    binmin1 = 0.0 & binmax1 = 1.2
-	                    BINSPAN1 = 0.02
+	                    binmin1 = 0.01 & binmax1 = 15.0
+	                    BINSPAN1 = 0.25
                     endif else begin
 	                    binmin1 = 0.0 & binmax1 = 15.0
 	                    BINSPAN1 = 0.25
@@ -2540,18 +2568,16 @@ endif
                  IF raintypeBBidx GE 1 THEN BEGIN
                     trim = 0
                     if rr_log then begin
-	                    binmin2 = -2 & binmax2 = 1.8
-;	                    binmin2 = 0.0 & binmax2 = 1.8
-	                    BINSPAN2 = 0.03
+	                    binmin2 = 0.01 & binmax2 = 60.0
+	                    BINSPAN2 = 1.0
                     endif else begin
 	                    binmin2 = 0.0 & binmax2 = 60.0
 	                    BINSPAN2 = 1.0
                     endelse
                  ENDIF ELSE BEGIN
                     if rr_log then begin
-	                    binmin2 = -2 & binmax2 = 1.2
-;	                    binmin2 = 0.0 & binmax2 = 1.2
-	                    BINSPAN2 = 0.02
+	                    binmin2 = 0.01 & binmax2 = 15.0
+	                    BINSPAN2 = 0.25
                     endif else begin
 	                    binmin2 = 0.0 & binmax2 = 15.0
 	                    BINSPAN2 = 0.25
@@ -2621,11 +2647,10 @@ endif
 
                  IF raintypeBBidx GE 1 THEN BEGIN
                      if rr_log then begin
-		                 binmin1 = -2  & binmin2 = -2
-;		                 binmin1 = 0.0  & binmin2 = 0.0
-		                 binmax1 = 1.8 & binmax2 = 1.8
-		                 BINSPAN1 = 0.03
-		                 BINSPAN2 = 0.03
+		                 binmin1 = 0.01  & binmin2 = 0.01
+		                 binmax1 = 60.0 & binmax2 = 60.0
+		                 BINSPAN1 = 1.0
+		                 BINSPAN2 = 1.0
                      endif else begin
 		                 binmin1 = 0.0  & binmin2 = 0.0
 		                 binmax1 = 60.0 & binmax2 = 60.0
@@ -2634,11 +2659,10 @@ endif
                      endelse
                  endif else begin
                      if rr_log then begin
-		                 binmin1 = -2  & binmin2 = -2
-;		                 binmin1 = 0.0  & binmin2 = 0.0
-		                 binmax1 = 1.2 & binmax2 = 1.2
-		                 BINSPAN1 = 0.02
-		                 BINSPAN2 = 0.02   
+		                 binmin1 = 0.01  & binmin2 = 0.01
+		                 binmax1 = 15.0 & binmax2 = 15.0
+		                 BINSPAN1 = 0.25
+		                 BINSPAN2 = 0.25   
                      endif else begin
 		                 binmin1 = 0.0  & binmin2 = 0.0
 		                 binmax1 = 15.0 & binmax2 = 15.0
