@@ -4795,7 +4795,7 @@ print, "GRPDSR plot...."
 ;   	   rr_log_y=axis_scale.(idx2do)[1]
    	   ; log axis labels not working, causes arthmetic error
    	   xmajortick = N_ELEMENTS(xticknames)
-   	   ymajortick = xmajortick
+   	   ymajortick = N_ELEMENTS(xticknames)
 print, 'rr_log_x: ', rr_log_x
 print, 'rr_log_y: ', rr_log_y
 print, 'xmajor: ', xmajor
