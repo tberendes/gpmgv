@@ -4796,16 +4796,16 @@ print, "GRPDSR plot...."
    	   ; log axis labels not working, causes arthmetic error
    	   xmajortick = N_ELEMENTS(xticknames)
    	   ymajortick = xmajor
+print, 'rr_log_x: ', rr_log_x
+print, 'rr_log_y: ', rr_log_y
+print, 'xmajor: ', xmajor
+print, 'xticknames ',xticknames
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
 	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, XTICKINTERVAL=(*ptr2do[0]).binspan1, YTICKINTERVAL=(*ptr2do[0]).binspan2, $
 	            xtickname=xticknames, ytickname=yticknames)
 
 ;	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
-print, 'rr_log_x: ', rr_log_x
-print, 'rr_log_y: ', rr_log_y
-print, 'xmajor: ', xmajor
-print, 'xticknames ',xticknames
 ;	   im.xlog=rr_log_x
 ;	   im.ylog=rr_log_y
 
