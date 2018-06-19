@@ -4780,11 +4780,11 @@ print, "GRPDSR plot...."
    ENDELSE
 
 
-   if rr_log then begin
+	rr_log_x=(*ptr2do[0]).xlog
+	rr_log_y=(*ptr2do[0]).ylog
+   if rr_log_x or rr_log_y then begin
 ;   	   rr_log_x=axis_scale.(idx2do)[0]
 ;   	   rr_log_y=axis_scale.(idx2do)[1]
-	   rr_log_x=(*ptr2do[0]).xlog
-	   rr_log_y=(*ptr2do[0]).ylog
    	   ; log axis labels not working, causes arthmetic error
    	   xmajortick = N_ELEMENTS(xticknames)
    	   ymajortick = xmajor
