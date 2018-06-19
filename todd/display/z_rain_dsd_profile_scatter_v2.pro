@@ -4803,7 +4803,7 @@ print, 'xmajortick: ', xmajortick
 print, 'xticknames ',xticknames
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
 	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
-	            TITLE = imTITLE, XTICKINTERVAL=(*ptr2do[0]).binspan1, YTICKINTERVAL=(*ptr2do[0]).binspan2, $
+	            TITLE = imTITLE, XTICKINTERVAL=1, YTICKINTERVAL=1, $
 	            xtickname=xticknames, ytickname=yticknames)
 
 ;	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
