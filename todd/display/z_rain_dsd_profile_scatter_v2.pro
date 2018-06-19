@@ -4799,6 +4799,7 @@ print, "GRPDSR plot...."
 print, 'rr_log_x: ', rr_log_x
 print, 'rr_log_y: ', rr_log_y
 print, 'xmajor: ', xmajor
+print, 'xmajortick: ', xmajortick
 print, 'xticknames ',xticknames
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
 	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
