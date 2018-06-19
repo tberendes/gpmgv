@@ -4754,19 +4754,22 @@ print, "GRPDSR plot...."
 	   rr_log_x=(*ptr2do[0]).xlog
 	   rr_log_y=(*ptr2do[0]).ylog
    	   ; log axis labels not working, causes arthmetic error
-   	   xmajor = N_ELEMENTS(xticknames)
-   	   ymajor = xmajor
-	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
+   	   xmajortick = N_ELEMENTS(xticknames)
+   	   ymajortick = xmajor
+	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
 	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
-	            TITLE = imTITLE, XTICKINTERVAL=1, YTICKINTERVAL=1)
+	            TITLE = imTITLE, XTICKINTERVAL=1, YTICKINTERVAL=1, $
+	            xtickname=xticknames, ytickname=yticknames)
+
 ;	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
 print, 'rr_log_x: ', rr_log_x
 print, 'rr_log_y: ', rr_log_y
 print, 'xmajor: ', xmajor
 ;	   im.xlog=rr_log_x
 ;	   im.ylog=rr_log_y
-   		im.xtickname=xticknames
-   		im.ytickname=yticknames
+
+;   		im.xtickname=xticknames
+;   		im.ytickname=yticknames
    endif else begin
 	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
 	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
