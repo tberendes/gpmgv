@@ -497,6 +497,16 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
    ENDIF
 end
 
+FUNCTION log_ticks
+;===============================================================================
+; 
+;===============================================================================
+
+   xticknames=['0.01','0.1','1','10','100']
+   return, xticknames
+end
+   
+
 FUNCTION log_label, num_pts, scale
 ;===============================================================================
 ; 
@@ -2430,7 +2440,7 @@ endif
        'RR' : BEGIN
                  IF raintypeBBidx GE 1 THEN BEGIN
                     if rr_log then begin
-	                    binmin1 = 0.0  & binmin2 = 0.0
+	                    binmin1 = -2  & binmin2 = -2
 	                    binmax1 = 1.8 & binmax2 = 1.8
 	                    BINSPAN1 = 0.03
 	                    BINSPAN2 = 0.03
@@ -2442,7 +2452,7 @@ endif
                     endelse
                  ENDIF ELSE BEGIN
                     if rr_log then begin
-	                    binmin1 = 0.0  & binmin2 = 0.0
+	                    binmin1 = -2  & binmin2 = -2
 	                    binmax1 = 1.2 & binmax2 = 1.2
 	                    BINSPAN1 = 0.02
 	                    BINSPAN2 = 0.02
@@ -2490,7 +2500,8 @@ endif
                  IF raintypeBBidx GE 1 THEN BEGIN
                     trim = 0
                     if rr_log then begin
-                    	binmin1 = 0.0 & binmax1 = 1.8
+                    	binmin1 = -2 & binmax1 = 1.8
+;                    	binmin1 = 0.0 & binmax1 = 1.8
                     	BINSPAN1 = 0.03
                     endif else begin
                     	binmin1 = 0.0 & binmax1 = 60.0
@@ -2498,7 +2509,8 @@ endif
                     endelse
                  ENDIF ELSE BEGIN
                     if rr_log then begin
- 	                    binmin1 = 0.0 & binmax1 = 1.2
+ 	                    binmin1 = -2 & binmax1 = 1.2
+;	                    binmin1 = 0.0 & binmax1 = 1.2
 	                    BINSPAN1 = 0.02
                     endif else begin
 	                    binmin1 = 0.0 & binmax1 = 15.0
@@ -2528,7 +2540,8 @@ endif
                  IF raintypeBBidx GE 1 THEN BEGIN
                     trim = 0
                     if rr_log then begin
-	                    binmin2 = 0.0 & binmax2 = 1.8
+	                    binmin2 = -2 & binmax2 = 1.8
+;	                    binmin2 = 0.0 & binmax2 = 1.8
 	                    BINSPAN2 = 0.03
                     endif else begin
 	                    binmin2 = 0.0 & binmax2 = 60.0
@@ -2536,7 +2549,8 @@ endif
                     endelse
                  ENDIF ELSE BEGIN
                     if rr_log then begin
-	                    binmin2 = 0.0 & binmax2 = 1.2
+	                    binmin2 = -2 & binmax2 = 1.2
+;	                    binmin2 = 0.0 & binmax2 = 1.2
 	                    BINSPAN2 = 0.02
                     endif else begin
 	                    binmin2 = 0.0 & binmax2 = 15.0
@@ -2607,7 +2621,8 @@ endif
 
                  IF raintypeBBidx GE 1 THEN BEGIN
                      if rr_log then begin
-		                 binmin1 = 0.0  & binmin2 = 0.0
+		                 binmin1 = -2  & binmin2 = -2
+;		                 binmin1 = 0.0  & binmin2 = 0.0
 		                 binmax1 = 1.8 & binmax2 = 1.8
 		                 BINSPAN1 = 0.03
 		                 BINSPAN2 = 0.03
@@ -2619,7 +2634,8 @@ endif
                      endelse
                  endif else begin
                      if rr_log then begin
-		                 binmin1 = 0.0  & binmin2 = 0.0
+		                 binmin1 = -2  & binmin2 = -2
+;		                 binmin1 = 0.0  & binmin2 = 0.0
 		                 binmax1 = 1.2 & binmax2 = 1.2
 		                 BINSPAN1 = 0.02
 		                 BINSPAN2 = 0.02   
@@ -3498,7 +3514,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		xticknames=log_label(8, 8)
+                   		xticknames=log_ticks()
+;                   		xticknames=log_label(8, 8)
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3508,7 +3525,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
 ;                   		xticknames=log_label(8, 8)
-                   		xticknames=log_label(8, 8)
+                   		xticknames=log_ticks()
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3518,7 +3535,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
 ;                   		xticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
-                   		xticknames=log_label(8, 2)
+                   		xticknames=log_ticks()
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3581,7 +3598,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+;                   		yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3591,7 +3609,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+;                   		yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3601,7 +3620,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
+;                   		yticknames=log_label(8, 2)
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3640,7 +3660,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=log_label(8, 8)
+ ;                  		xticknames=log_label(8, 8)
+                   		xticknames=log_ticks()
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3650,7 +3671,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=log_label(8, 8)
+ ;                  		xticknames=log_label(8, 8)
+                   		xticknames=log_ticks()
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3660,7 +3682,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=log_label(8, 2)
+;                   		xticknames=log_label(8, 2)
+                   		xticknames=log_ticks()
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3703,7 +3726,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                    	yticknames=log_ticks()
+;                   		yticknames=log_label(8, 8)
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3713,7 +3737,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+;                   		yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3723,7 +3748,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
+;                   		yticknames=log_label(8, 2)
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3758,7 +3784,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=log_label(8, 8)
+                   		xticknames=log_ticks()
+;                   		xticknames=log_label(8, 8)
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3768,7 +3795,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=log_label(8, 8)
+;                   		xticknames=log_label(8, 8)
+                   		xticknames=log_ticks()
                    endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3778,7 +3806,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
-                   		xticknames=log_label(8, 2)
+;                   		xticknames=log_label(8, 2)
+                   		xticknames=log_ticks()
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3798,7 +3827,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                            " Scatter, Mean GR-DPR Bias: "
               pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
-              if rr_log then units='(log mm/h)' else units='(mm/h)'
+             ; if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
               xtitle= 'GR '+PlotTypes(idx2do)+' '+units
               ytitle= pr_or_dpr +' '+ units
               BREAK
@@ -3933,7 +3963,8 @@ print, "mrms plot...."
               2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                     if rr_log then begin
-                   		yticknames=log_label(8, 8)
+ ;                  		yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3942,7 +3973,8 @@ print, "mrms plot...."
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+;                   		yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3951,7 +3983,8 @@ print, "mrms plot...."
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+;                   		yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -3966,7 +3999,8 @@ print, "mrms plot...."
  ;                          " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_MRMSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
-              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              ;if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
               xtitle= 'MRMS '+ units
               ytitle= 'DPR '+units
               BREAK
@@ -3980,7 +4014,8 @@ print, "GRRMRMS plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                     if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
+                   		;yticknames=log_label(8, 8)
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3989,7 +4024,8 @@ print, "GRRMRMS plot...."
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -3998,7 +4034,8 @@ print, "GRRMRMS plot...."
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+                   		;yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4013,7 +4050,8 @@ print, "GRRMRMS plot...."
 ;                           " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
-              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              ;if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
               xtitle= 'GR RR '+units
               ytitle= 'MRMS '+ units
               BREAK
@@ -4027,7 +4065,8 @@ print, "GRCMRMS plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                     if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4036,7 +4075,8 @@ print, "GRCMRMS plot...."
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4045,7 +4085,8 @@ print, "GRCMRMS plot...."
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+                   		;yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4060,7 +4101,8 @@ print, "GRCMRMS plot...."
 ;                           " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_GRSRC_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
-              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              ;if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
               xtitle= 'GR RC '+units
               ytitle= 'MRMS '+ units
               BREAK
@@ -4074,7 +4116,8 @@ print, "GRCMRMS plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                     if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4083,7 +4126,8 @@ print, "GRCMRMS plot...."
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
+                   		;yticknames=log_label(8, 8)
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4092,7 +4136,8 @@ print, "GRCMRMS plot...."
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+                   		;yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4107,7 +4152,8 @@ print, "GRCMRMS plot...."
 ;                           " Scatter"
               pngpre=pr_or_dpr+'_'+version+"_GRSRP_vs_MRMSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
-              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              ;if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
               xtitle= 'GR RP '+units
               ytitle= 'MRMS '+ units
               BREAK
@@ -4120,7 +4166,8 @@ print, "GRRDSR plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                     if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4129,7 +4176,8 @@ print, "GRRDSR plot...."
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4138,7 +4186,8 @@ print, "GRRDSR plot...."
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+                   		;yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4153,7 +4202,8 @@ print, "GRRDSR plot...."
 ;                           " Scatter "
               pngpre=pr_or_dpr+'_'+version+"_GRSRR_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
-              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              ;if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
               xtitle= 'GR RR '+units
               ytitle= 'DPR '+ units
               BREAK
@@ -4166,7 +4216,8 @@ print, "GRCDSR plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                     if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4175,7 +4226,8 @@ print, "GRCDSR plot...."
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4184,7 +4236,8 @@ print, "GRCDSR plot...."
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+                   		;yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4199,7 +4252,8 @@ print, "GRCDSR plot...."
 ;                           " Scatter "
               pngpre=pr_or_dpr+'_'+version+"_GRSRC_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
-              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              ;if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
               xtitle= 'GR RC '+units
               ytitle= 'DPR '+ units
               BREAK
@@ -4212,7 +4266,8 @@ print, "GRPDSR plot...."
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
                     if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		;yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4221,7 +4276,8 @@ print, "GRPDSR plot...."
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 8)
+                   		yticknames=log_ticks()
+                   		;yticknames=log_label(8, 8)
                    endif else begin
                    		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    endelse                    
@@ -4230,7 +4286,8 @@ print, "GRPDSR plot...."
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    if rr_log then begin
-                   		yticknames=log_label(8, 2)
+                   		;yticknames=log_label(8, 2)
+                   		yticknames=log_ticks()
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4245,7 +4302,8 @@ print, "GRPDSR plot...."
 ;                           " Scatter "
               pngpre=pr_or_dpr+'_'+version+"_GRSRP_vs_DPRSRR_"+PlotTypes(idx2do)+"_Scatter"
               ;units='(mm/h)'
-              if rr_log then units='(log mm/h)' else units='(mm/h)'
+              ;if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
               xtitle= 'GR RP '+units
               ytitle= 'DPR '+ units
               BREAK
@@ -4696,13 +4754,18 @@ print, "GRPDSR plot...."
 	   rr_log_x=(*ptr2do[0]).xlog
 	   rr_log_y=(*ptr2do[0]).ylog
    	   ; log axis labels not working, causes arthmetic error
+   	   xmajor = N_ELEMENTS(xticknames)
+   	   ymajor = xmajor
 	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
 	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
-	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
+	            TITLE = imTITLE, XTICKINTERVAL=1, YTICKINTERVAL=1)
+;	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
 print, 'rr_log_x: ', rr_log_x
 print, 'rr_log_y: ', rr_log_y
 ;	   im.xlog=rr_log_x
 ;	   im.ylog=rr_log_y
+   		im.xtickname=xticknames
+   		im.ytickname=yticknames
    endif else begin
 	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
 	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $

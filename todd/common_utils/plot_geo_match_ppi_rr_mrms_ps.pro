@@ -4,10 +4,11 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; plot_geo_match_ppi_anim_ps.pro      - Morris/SAIC/GPM_GV  February 2014
+; plot_geo_match_ppi_rr_mrms_ps.pro      - Berendes/UAH June 2018
 ;
 ; DESCRIPTION
 ; -----------
+; Modified version of plot_geo_match_ppi_anim_ps.pro for MRMS rain rate PPI
 ; Plots static or dynamic display of PPI images from geometry-match data fields
 ; passed as an array of pointers to their data arrays.  Plots to an on-screen
 ; window by default, and also to a previously-opened Postscript device if DO_PS
