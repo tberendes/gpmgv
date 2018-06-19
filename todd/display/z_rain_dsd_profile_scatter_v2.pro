@@ -472,10 +472,17 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
          ENDIF ELSE BEGIN
             have_hist.(plotIndex)[have2d,raintypeBBidx] = 1
            ; create this part of the I/O structure to assign to the pointer
-            iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
+           if rr_log_x or rr_log_y then begin 
+               iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
+               binmin1:binmin1log, binmin2:binmin2log, binmax1:binmax1log, binmax2:binmax2log, $
+               binspan1:binspan1log, binspan2:binspan2log, $
+               xlog:rr_log_x, ylog:rr_log_y}                    
+           endif else begin
+               iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
                binmin1:binmin1, binmin2:binmin2, binmax1:binmax1, binmax2:binmax2, $
                binspan1:binspan1, binspan2:binspan2, $
-               xlog:rr_log_x, ylog:rr_log_y}
+               xlog:rr_log_x, ylog:rr_log_y}          
+           endelse
          ENDELSE
         ; compute the mean X (gv) for the samples in each Y (pr) histogram bin
         ; -- restrict the samples to those where both scat_X and scat_Y are within
@@ -4782,6 +4789,7 @@ print, "GRPDSR plot...."
 
 	rr_log_x=(*ptr2do[0]).xlog
 	rr_log_y=(*ptr2do[0]).ylog
+	
    if rr_log_x or rr_log_y then begin
 ;   	   rr_log_x=axis_scale.(idx2do)[0]
 ;   	   rr_log_y=axis_scale.(idx2do)[1]
@@ -4789,8 +4797,8 @@ print, "GRPDSR plot...."
    	   xmajortick = N_ELEMENTS(xticknames)
    	   ymajortick = xmajor
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
-	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
-	            TITLE = imTITLE, XTICKINTERVAL=1, YTICKINTERVAL=1, $
+	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
+	            TITLE = imTITLE, XTICKINTERVAL=(*ptr2do[0]).binspan1, YTICKINTERVAL=(*ptr2do[0]).binspan2, $
 	            xtickname=xticknames, ytickname=yticknames)
 
 ;	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
