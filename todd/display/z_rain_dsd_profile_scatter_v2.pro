@@ -4798,9 +4798,14 @@ print, "GRPDSR plot...."
    	   ymajortick = N_ELEMENTS(yticknames)
 print, 'rr_log_x: ', rr_log_x
 print, 'rr_log_y: ', rr_log_y
-print, 'xmajor: ', xmajor
-print, 'xmajortick: ', xmajortick
+;print, 'xmajor: ', xmajor
+;print, 'xmajortick: ', xmajortick
 print, 'xticknames ',xticknames
+print, 'yticknames ',yticknames
+print, 'binmin1 ',binmin1
+print, 'binmax1 ',binmax1
+print, 'binmin2 ',binmin2
+print, 'binmax2 ',binmax2
 	  
 	   xtickvalues = FLTARR(xmajortick)
 	   for z = 0,xmajortick-1 do begin
@@ -4811,6 +4816,7 @@ print, 'xticknames ',xticknames
 	      	  xtickvalues(z) = (xtickvalues(z) - binmin1) * (winsiz[0]-1) / (binmax1 - binmin1) 
 	      endelse
 	   endfor
+print, 'xtickvalues ',xtickvalues
 	   ytickvalues = FLTARR(ymajortick)
 	   for z = 0,xmajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
@@ -4820,6 +4826,7 @@ print, 'xticknames ',xticknames
 	      	  ytickvalues(z) = (ytickvalues(z) - binmin2) * (winsiz[1]-1) / (binmax2 - binmin2) 
 	      endelse
 	   endfor
+print, 'ytickvalues ',ytickvalues
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
 	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
