@@ -4840,7 +4840,7 @@ print, 'xtickvalues ',xtickvalues
 	   endfor
 print, 'ytickvalues ',ytickvalues
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
-	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
+	            xminor=10, yminor=10, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
 	            xtickname=xticknames, ytickname=yticknames)
 
