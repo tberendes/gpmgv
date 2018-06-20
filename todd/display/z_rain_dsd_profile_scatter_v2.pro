@@ -4801,9 +4801,18 @@ print, 'rr_log_y: ', rr_log_y
 print, 'xmajor: ', xmajor
 print, 'xmajortick: ', xmajortick
 print, 'xticknames ',xticknames
+	  
+	   xtickvalues = FLTARR(xmajortick)
+	   for z = 0,xmajortick-1 do begin
+	      xtickvalues(z) = float(xticknames(z))
+	   endfor
+	   ytickvalues = FLTARR(ymajortick)
+	   for z = 0,xmajortick-1 do begin
+	      ytickvalues(z) = float(yticknames(z))
+	   endfor
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
 	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
-	            TITLE = imTITLE, XTICKINTERVAL=1, YTICKINTERVAL=1, $
+	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
 	            xtickname=xticknames, ytickname=yticknames)
 
 ;	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
