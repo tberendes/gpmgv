@@ -3609,11 +3609,12 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               ;yunits='mm'
               ;xtitle=  'GR RR '+ xunits
               ;ytitle=  'GR Dm (' + yunits + ')'
-              if rr_log then begin
-              		yunits='(log mm/h)'
-              endif else begin
-              		yunits='(mm/h)'
-              endelse                    
+              ;if rr_log then begin
+              ;		yunits='(log mm/h)'
+              ;endif else begin
+              ;		yunits='(mm/h)'
+              ;endelse                    
+              yunits='(mm/h)'
               
               xunits='mm'
               ytitle=  'GR RR '+ yunits
@@ -3685,13 +3686,13 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               titleLine1 = "GR RR vs. Nw Scatter"
               pngpre="GR_RR_vs_Nw_Scatter"
               xunits='log(Nw)'
-              if rr_log then begin
-              		yunits='(log mm/h)'
-              endif else begin
-              		yunits='(mm/h)'
-              endelse                    
+              ;if rr_log then begin
+              ;		yunits='(log mm/h)'
+              ;endif else begin
+              ;		yunits='(mm/h)'
+              ;endelse                    
               
-              ;yunits='mm/h'
+              yunits='(mm/h)'
               xtitle= 'GR '+ xunits
               ytitle= 'GR RR (' + yunits + ')'
               BREAK
@@ -3752,7 +3753,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
 ;              titleLine1 = satprodtype+' '+version+" Dm vs. RR Scatter"
 ;              pngpre=pr_or_dpr+'_'+version+"_Dm_vs_RR_Scatter"
               ;yunits='(mm/h)'
-              if rr_log then yunits='(log mm/h)' else yunits='(mm/h)'
+              ;if rr_log then yunits='(log mm/h)' else yunits='(mm/h)'
+              yunits='(mm/h)'
               xunits='mm'
               ytitle= pr_or_dpr + ' RR'+ yunits
               xtitle= pr_or_dpr + ' Dm (' + xunits + ')'
@@ -3813,7 +3815,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               pngpre=pr_or_dpr+'_'+version+"_RR_vs_Nw_Scatter"
               xunits='log(Nw)'
               ;yunits='mm/h'
-              if rr_log then yunits='(log mm/h)' else yunits='(mm/h)'
+              ;if rr_log then yunits='(log mm/h)' else yunits='(mm/h)'
+              yunits='(mm/h)'
               xtitle= pr_or_dpr +' '+ xunits
               ytitle= pr_or_dpr + ' RR (' + yunits + ')'
               BREAK
@@ -4830,9 +4833,9 @@ print, 'xtickvalues ',xtickvalues
 	   for z = 0,ymajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
 	      if rr_log_y then begin
-	          ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[0]-1) / (ymax - ymin) 
+	          ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[1]-1) / (ymax - ymin) 
 	      endif else begin
-	          ytickvalues(z) = (ytickvalues(z) - ymin) * (winsiz[0]-1) / (ymax - ymin) 
+	          ytickvalues(z) = (ytickvalues(z) - ymin) * (winsiz[1]-1) / (ymax - ymin) 
 	      endelse
 	   endfor
 print, 'ytickvalues ',ytickvalues
