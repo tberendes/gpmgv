@@ -4789,6 +4789,11 @@ print, "GRPDSR plot...."
 
 	rr_log_x=(*ptr2do[0]).xlog
 	rr_log_y=(*ptr2do[0]).ylog
+	xmin = (*ptr2do[0]).binmin1
+	ymin = (*ptr2do[0]).binmin2
+	xmax = (*ptr2do[0]).binmax1
+	ymax = (*ptr2do[0]).binmax2
+	
 	
    if rr_log_x or rr_log_y then begin
 ;   	   rr_log_x=axis_scale.(idx2do)[0]
@@ -4802,29 +4807,31 @@ print, 'rr_log_y: ', rr_log_y
 ;print, 'xmajortick: ', xmajortick
 print, 'xticknames ',xticknames
 print, 'yticknames ',yticknames
-print, 'binmin1 ',binmin1
-print, 'binmax1 ',binmax1
-print, 'binmin2 ',binmin2
-print, 'binmax2 ',binmax2
+print, 'xmin ',xmin
+print, 'xmax ',xmax
+print, 'ymin ',ymin
+print, 'ymax ',ymax
 	  
 	   xtickvalues = FLTARR(xmajortick)
 	   for z = 0,xmajortick-1 do begin
 	      xtickvalues(z) = float(xticknames(z))
-	      if rr_log_x then begin
-	      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - ALOG10(binmin1)) * (winsiz[0]-1) / (ALOG10(binmax1) - ALOG10(binmin1)) 
-	      endif else begin
-	      	  xtickvalues(z) = (xtickvalues(z) - binmin1) * (winsiz[0]-1) / (binmax1 - binmin1) 
-	      endelse
+	      xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
+;	      if rr_log_x then begin
+;	      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
+;	      endif else begin
+;	      	  xtickvalues(z) = (xtickvalues(z) - binmin1) * (winsiz[0]-1) / (binmax1 - binmin1) 
+;	      endelse
 	   endfor
 print, 'xtickvalues ',xtickvalues
 	   ytickvalues = FLTARR(ymajortick)
 	   for z = 0,xmajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
-	      if rr_log_y then begin
-	      	  ytickvalues(z) = (ALOG10(ytickvalues(z)) - ALOG10(binmin2)) * (winsiz[1]-1) / (ALOG10(binmax2) - ALOG10(binmin2)) 
-	      endif else begin
-	      	  ytickvalues(z) = (ytickvalues(z) - binmin2) * (winsiz[1]-1) / (binmax2 - binmin2) 
-	      endelse
+	      ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[0]-1) / (ymax - ymin) 
+;	      if rr_log_y then begin
+;	      	  ytickvalues(z) = (ALOG10(ytickvalues(z)) - ALOG10(binmin2)) * (winsiz[1]-1) / (ALOG10(binmax2) - ALOG10(binmin2)) 
+;	      endif else begin
+;	      	  ytickvalues(z) = (ytickvalues(z) - binmin2) * (winsiz[1]-1) / (binmax2 - binmin2) 
+;	      endelse
 	   endfor
 print, 'ytickvalues ',ytickvalues
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
