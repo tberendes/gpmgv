@@ -4827,7 +4827,7 @@ print, 'ymax ',ymax
 	   endfor
 print, 'xtickvalues ',xtickvalues
 	   ytickvalues = FLTARR(ymajortick)
-	   for z = 0,xmajortick-1 do begin
+	   for z = 0,ymajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
 	      if rr_log_y then begin
 	          ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[0]-1) / (ymax - ymin) 
