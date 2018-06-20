@@ -429,7 +429,9 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					scat_logX = ALOG10(scat_X[idx_XY])
 					binmin1log=ALOG10(binmin1)
 					binmax1log=ALOG10(binmax1)
-					binspan1log = (binmax1log - binmin1log) / 100.0
+					; use 60 bins for 2d histogram, may want to pass as parameter
+					; instead of binspan
+					binspan1log = (binmax1log - binmin1log) / 60.0
 					
 			  endif
 			  if rr_log_y then begin
@@ -437,7 +439,9 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					scat_logY = ALOG10(scat_Y[idx_XY])
 					binmin2log=ALOG10(binmin2)
 					binmax2log=ALOG10(binmax2)
-					binspan2log = (binmax2log - binmin2log) / 100.0
+					; use 60 bins for 2d histogram, may want to pass as parameter
+					; instead of binspan
+					binspan2log = (binmax2log - binmin2log) / 60.0
 			  endif 
 		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
 		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
@@ -4815,23 +4819,21 @@ print, 'ymax ',ymax
 	   xtickvalues = FLTARR(xmajortick)
 	   for z = 0,xmajortick-1 do begin
 	      xtickvalues(z) = float(xticknames(z))
-	      xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
-;	      if rr_log_x then begin
-;	      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
-;	      endif else begin
-;	      	  xtickvalues(z) = (xtickvalues(z) - binmin1) * (winsiz[0]-1) / (binmax1 - binmin1) 
-;	      endelse
+	      if rr_log_x then begin
+	      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
+	      endif else begin
+	          xtickvalues(z) = (xtickvalues(z) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
+	      endelse
 	   endfor
 print, 'xtickvalues ',xtickvalues
 	   ytickvalues = FLTARR(ymajortick)
 	   for z = 0,xmajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
-	      ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[0]-1) / (ymax - ymin) 
-;	      if rr_log_y then begin
-;	      	  ytickvalues(z) = (ALOG10(ytickvalues(z)) - ALOG10(binmin2)) * (winsiz[1]-1) / (ALOG10(binmax2) - ALOG10(binmin2)) 
-;	      endif else begin
-;	      	  ytickvalues(z) = (ytickvalues(z) - binmin2) * (winsiz[1]-1) / (binmax2 - binmin2) 
-;	      endelse
+	      if rr_log_y then begin
+	          ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[0]-1) / (ymax - ymin) 
+	      endif else begin
+	          ytickvalues(z) = (ytickvalues(z) - ymin) * (winsiz[0]-1) / (ymax - ymin) 
+	      endelse
 	   endfor
 print, 'ytickvalues ',ytickvalues
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
