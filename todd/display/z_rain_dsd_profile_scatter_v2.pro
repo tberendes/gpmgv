@@ -4805,12 +4805,20 @@ print, 'xticknames ',xticknames
 	   xtickvalues = FLTARR(xmajortick)
 	   for z = 0,xmajortick-1 do begin
 	      xtickvalues(z) = float(xticknames(z))
-	      xtickvalues(z) = (xtickvalues(z) - binmin1) * (winsiz[0]-1) / (binmax1 - binmin1) 
+	      if rr_log_x then begin
+	      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - ALOG10(binmin1)) * (winsiz[0]-1) / (ALOG10(binmax1) - ALOG10(binmin1)) 
+	      endif else begin
+	      	  xtickvalues(z) = (xtickvalues(z) - binmin1) * (winsiz[0]-1) / (binmax1 - binmin1) 
+	      endelse
 	   endfor
 	   ytickvalues = FLTARR(ymajortick)
 	   for z = 0,xmajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
-	      ytickvalues(z) = (ytickvalues(z) - binmin2) * (winsiz[1]-1) / (binmax2 - binmin2) 
+	      if rr_log_y then begin
+	      	  ytickvalues(z) = (ALOG10(ytickvalues(z)) - ALOG10(binmin2)) * (winsiz[1]-1) / (ALOG10(binmax2) - ALOG10(binmin2)) 
+	      endif else begin
+	      	  ytickvalues(z) = (ytickvalues(z) - binmin2) * (winsiz[1]-1) / (binmax2 - binmin2) 
+	      endelse
 	   endfor
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
 	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
