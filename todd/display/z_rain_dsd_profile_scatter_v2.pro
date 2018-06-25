@@ -4808,6 +4808,8 @@ print, "GRPDSR plot...."
 
 ; test
 ;xticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '5', '7','10','30','60']
+xticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '4', '5', '7','8','10','30','60']
+yticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '4', '5', '7','8','10','30','60']
 
    	   ; log axis labels not working, causes arthmetic error
    	   xmajortick = N_ELEMENTS(xticknames)
