@@ -439,7 +439,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					scat_logY = ALOG10(scat_Y[idx_XY])
 					binmin2log=ALOG10(binmin2)
 					binmax2log=ALOG10(binmax2)
-					; use 60 bins for 2d histogram, may want to pass as parameter
+					; use 100 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
 					binspan2log = (binmax2log - binmin2log) / 100.0
 			  endif 
@@ -4808,8 +4808,8 @@ print, "GRPDSR plot...."
 
 ; test
 ;xticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '5', '7','10','30','60']
-xticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '4', '5', '7','8','10','30','60']
-yticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '4', '5', '7','8','10','30','60']
+xticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '4', '5', '7','8','10','30','60','100']
+yticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '4', '5', '7','8','10','30','60','100']
 
    	   ; log axis labels not working, causes arthmetic error
    	   xmajortick = N_ELEMENTS(xticknames)
