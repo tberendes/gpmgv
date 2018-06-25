@@ -429,9 +429,9 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					scat_logX = ALOG10(scat_X[idx_XY])
 					binmin1log=ALOG10(binmin1)
 					binmax1log=ALOG10(binmax1)
-					; use 60 bins for 2d histogram, may want to pass as parameter
+					; use 100 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
-					binspan1log = (binmax1log - binmin1log) / 60.0
+					binspan1log = (binmax1log - binmin1log) / 100.0
 					
 			  endif
 			  if rr_log_y then begin
@@ -441,7 +441,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					binmax2log=ALOG10(binmax2)
 					; use 60 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
-					binspan2log = (binmax2log - binmin2log) / 60.0
+					binspan2log = (binmax2log - binmin2log) / 100.0
 			  endif 
 		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
 		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
@@ -543,7 +543,7 @@ FUNCTION log_ticks
 ; 
 ;===============================================================================
 
-   xticknames=['0.01','0.1','1','10']
+   xticknames=['0.01','0.1','1','10','100']
    return, xticknames
 end
    
@@ -2486,7 +2486,7 @@ endif
 ;	                    BINSPAN1 = 0.03
 ;	                    BINSPAN2 = 0.03
 	                    binmin1 = 0.01  & binmin2 = 0.01
-	                    binmax1 = 60.0 & binmax2 = 60.0
+	                    binmax1 = 100.0 & binmax2 = 100.0
 	                    BINSPAN1 = 1.0
 	                    BINSPAN2 = 1.0                    
                     endif else begin
@@ -2502,7 +2502,7 @@ endif
 ;	                    BINSPAN1 = 0.02
 ;	                    BINSPAN2 = 0.02
 	                    binmin1 = 0.01  & binmin2 = 0.01
-	                    binmax1 = 15.0 & binmax2 = 15.0
+	                    binmax1 = 100.0 & binmax2 = 100.0
 	                    BINSPAN1 = 0.25
 	                    BINSPAN2 = 0.25
                     endif else begin
@@ -2549,7 +2549,7 @@ endif
                  IF raintypeBBidx GE 1 THEN BEGIN
                     trim = 0
                     if rr_log then begin
-                    	binmin1 = 0.01 & binmax1 = 60.0
+                    	binmin1 = 0.01 & binmax1 = 100.0
                     	BINSPAN1 = 1.0
                     endif else begin
                     	binmin1 = 0.0 & binmax1 = 60.0
@@ -2557,7 +2557,7 @@ endif
                     endelse
                  ENDIF ELSE BEGIN
                     if rr_log then begin
-	                    binmin1 = 0.01 & binmax1 = 15.0
+	                    binmin1 = 0.01 & binmax1 = 100.0
 	                    BINSPAN1 = 0.25
                     endif else begin
 	                    binmin1 = 0.0 & binmax1 = 15.0
@@ -2587,7 +2587,7 @@ endif
                  IF raintypeBBidx GE 1 THEN BEGIN
                     trim = 0
                     if rr_log then begin
-	                    binmin2 = 0.01 & binmax2 = 60.0
+	                    binmin2 = 0.01 & binmax2 = 100.0
 	                    BINSPAN2 = 1.0
                     endif else begin
 	                    binmin2 = 0.0 & binmax2 = 60.0
@@ -2595,7 +2595,7 @@ endif
                     endelse
                  ENDIF ELSE BEGIN
                     if rr_log then begin
-	                    binmin2 = 0.01 & binmax2 = 15.0
+	                    binmin2 = 0.01 & binmax2 = 100.0
 	                    BINSPAN2 = 0.25
                     endif else begin
 	                    binmin2 = 0.0 & binmax2 = 15.0
@@ -2667,7 +2667,7 @@ endif
                  IF raintypeBBidx GE 1 THEN BEGIN
                      if rr_log then begin
 		                 binmin1 = 0.01  & binmin2 = 0.01
-		                 binmax1 = 60.0 & binmax2 = 60.0
+		                 binmax1 = 100.0 & binmax2 = 100.0
 		                 BINSPAN1 = 1.0
 		                 BINSPAN2 = 1.0
                      endif else begin
@@ -2679,7 +2679,7 @@ endif
                  endif else begin
                      if rr_log then begin
 		                 binmin1 = 0.01  & binmin2 = 0.01
-		                 binmax1 = 15.0 & binmax2 = 15.0
+		                 binmax1 = 100.0 & binmax2 = 100.0
 		                 BINSPAN1 = 0.25
 		                 BINSPAN2 = 0.25   
                      endif else begin
@@ -4807,7 +4807,7 @@ print, "GRPDSR plot...."
 ;   	   rr_log_y=axis_scale.(idx2do)[1]
 
 ; test
-xticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '5', '7','10','30','60']
+;xticknames = ['.01', '03', '.05', '.07', '.1', '.3', '.5', '.7', '1', '3', '5', '7','10','30','60']
 
    	   ; log axis labels not working, causes arthmetic error
    	   xmajortick = N_ELEMENTS(xticknames)
