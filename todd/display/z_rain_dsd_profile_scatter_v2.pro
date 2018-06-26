@@ -4846,6 +4846,9 @@ print, 'xtickvalues ',xtickvalues
 	      endelse
 	   endfor
 print, 'ytickvalues ',ytickvalues
+	   
+	   ; smooth image 
+	   histImg=smooth(histImg,5)
 	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
 ;	            xminor=10, yminor=10, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
