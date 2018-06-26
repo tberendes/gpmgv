@@ -2313,7 +2313,7 @@ endif
 
    IF do_scatr EQ 1 THEN BEGIN
    FOR iplot = 0, nPlots-1 DO BEGIN
-   trim = 1   ; flag whether to suppress low percentage bins in plots
+;   trim = 1   ; flag whether to suppress low percentage bins in plots
 ;   for raintypeBBidx = 0, 2 do begin
 ; TAB 11/10/17 added fourth raintypeBBidx for convective above BB within 3 height bins for Z plots only 
    for raintypeBBidx = 0, 3 do begin
@@ -2547,22 +2547,21 @@ endif
 
                 ; RR histo parms
                  IF raintypeBBidx GE 1 THEN BEGIN
-                    trim = 0
-                    if rr_log then begin
-                    	binmin1 = 0.01 & binmax1 = 100.0
-                    	BINSPAN1 = 1.0
-                    endif else begin
+;                    if rr_log then begin
+;                    	binmin1 = 0.01 & binmax1 = 100.0
+;                    	BINSPAN1 = 1.0
+;                    endif else begin
                     	binmin1 = 0.0 & binmax1 = 60.0
                     	BINSPAN1 = 1.0
-                    endelse
+;                    endelse
                  ENDIF ELSE BEGIN
-                    if rr_log then begin
-	                    binmin1 = 0.01 & binmax1 = 100.0
-	                    BINSPAN1 = 0.25
-                    endif else begin
+;                    if rr_log then begin
+;	                    binmin1 = 0.01 & binmax1 = 100.0
+;	                    BINSPAN1 = 0.25
+;                    endif else begin
 	                    binmin1 = 0.0 & binmax1 = 15.0
 	                    BINSPAN1 = 0.25
-                    endelse
+;                    endelse
                  ENDELSE
 
                 ; Dm histo parms
@@ -2585,22 +2584,21 @@ endif
 
                 ; RR histo parms
                  IF raintypeBBidx GE 1 THEN BEGIN
-                    trim = 0
-                    if rr_log then begin
-	                    binmin2 = 0.01 & binmax2 = 100.0
-	                    BINSPAN2 = 1.0
-                    endif else begin
+;                    if rr_log then begin
+;	                    binmin2 = 0.01 & binmax2 = 100.0
+;	                    BINSPAN2 = 1.0
+;                    endif else begin
 	                    binmin2 = 0.0 & binmax2 = 60.0
 	                    BINSPAN2 = 1.0
-                    endelse
+;                    endelse
                  ENDIF ELSE BEGIN
-                    if rr_log then begin
-	                    binmin2 = 0.01 & binmax2 = 100.0
-	                    BINSPAN2 = 0.25
-                    endif else begin
+;                    if rr_log then begin
+;	                    binmin2 = 0.01 & binmax2 = 100.0
+;	                    BINSPAN2 = 0.25
+;                    endif else begin
 	                    binmin2 = 0.0 & binmax2 = 15.0
 	                    BINSPAN2 = 0.25
-                    endelse
+;                    endelse
                  ENDELSE
                  BREAK
               END
@@ -2854,7 +2852,8 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, rr_log
+                                     iPlot, raintypeBBidx, 0, 0
+;                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2870,7 +2869,8 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, rr_log
+                                     iPlot, raintypeBBidx, 0, 0
+;                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2915,7 +2915,8 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, rr_log
+                                     iPlot, raintypeBBidx, 0, 0
+;                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2930,7 +2931,8 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, rr_log
+                                     iPlot, raintypeBBidx, 0, 0
+;                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -3556,33 +3558,30 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-                   		xticknames=log_ticks()
-;                   		xticknames=log_label(8, 8)
-                   endif else begin
+;                   if rr_log then begin
+;                   		xticknames=log_ticks()
+;                   endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
+;                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-;                   		xticknames=log_label(8, 8)
-                   		xticknames=log_ticks()
-                   endif else begin
+;                   if rr_log then begin
+;                   		xticknames=log_ticks()
+;                   endif else begin
                    		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
+;                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-;                   		xticknames=STRING(ALOG10(FINDGEN(16)), FORMAT='(F0.2)')
-                   		xticknames=log_ticks()
-                   endif else begin
-                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   endelse                    
-                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		xticknames=log_ticks()
+;                   endif else begin
+;                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+;                   endelse                    
+                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -3641,35 +3640,32 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-;                   		yticknames=log_label(8, 8)
-                   		yticknames=log_ticks()
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
-;                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		yticknames=log_ticks()
+;                   endif else begin
+;                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   endelse                    
+                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-;                   		yticknames=log_label(8, 8)
-                   		yticknames=log_ticks()
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
-;                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		yticknames=log_ticks()
+;                   endif else begin
+;                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   endelse                    
+                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   if rr_log then begin
-                   		yticknames=log_ticks()
-;                   		yticknames=log_label(8, 2)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   endelse                    
-;                   yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		yticknames=log_ticks()
+;                   endif else begin
+;                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+;                   endelse                    
+                   yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -3702,35 +3698,32 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   if rr_log then begin
- ;                  		xticknames=log_label(8, 8)
-                   		xticknames=log_ticks()
-                   endif else begin
-                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
+                   xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		xticknames=log_ticks()
+;                   endif else begin
+;                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   if rr_log then begin
- ;                  		xticknames=log_label(8, 8)
-                   		xticknames=log_ticks()
-                   endif else begin
-                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
+                   xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		xticknames=log_ticks()
+;                   endif else begin
+;                   		xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   if rr_log then begin
-;                   		xticknames=log_label(8, 2)
-                   		xticknames=log_ticks()
-                   endif else begin
-                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   endelse                    
+                   xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		xticknames=log_ticks()
+;                   endif else begin
+;                   		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
+;                   endelse                    
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -3769,35 +3762,32 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                    SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                   ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   if rr_log then begin
-                    	yticknames=log_ticks()
-;                   		yticknames=log_label(8, 8)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
+                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   if rr_log then begin
+;                    	yticknames=log_ticks()
+;                   endif else begin
+;                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   ;yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   if rr_log then begin
-;                   		yticknames=log_label(8, 8)
-                   		yticknames=log_ticks()
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
-                   endelse                    
+                   yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		yticknames=log_ticks()
+;                   endif else begin
+;                   		yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
+;                   endelse                    
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
                    SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   ;yticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   if rr_log then begin
-                   		yticknames=log_ticks()
-;                   		yticknames=log_label(8, 2)
-                   endif else begin
-                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
-                   endelse                    
+                   yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+;                   if rr_log then begin
+;                   		yticknames=log_ticks()
+;                   endif else begin
+;                   		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
+;                   endelse                    
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -3854,6 +3844,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    if rr_log then begin
 ;                   		xticknames=log_label(8, 2)
                    		xticknames=log_ticks()
+                   		trim = 0    ; show low-percentage outliers
                    endif else begin
                    		xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4031,6 +4022,7 @@ print, "mrms plot...."
                    if rr_log then begin
 ;                   		yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
+                   		trim = 0    ; show low-percentage outliers
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4082,6 +4074,7 @@ print, "GRRMRMS plot...."
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
+                   		trim = 0    ; show low-percentage outliers
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4133,6 +4126,7 @@ print, "GRCMRMS plot...."
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
+                   		trim = 0    ; show low-percentage outliers
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4184,6 +4178,7 @@ print, "GRCMRMS plot...."
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
+                   		trim = 0    ; show low-percentage outliers
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4234,6 +4229,7 @@ print, "GRRDSR plot...."
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
+                   		trim = 0    ; show low-percentage outliers
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4284,6 +4280,7 @@ print, "GRCDSR plot...."
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
+                   		trim = 0    ; show low-percentage outliers
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4334,6 +4331,7 @@ print, "GRPDSR plot...."
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
+                    	trim = 0    ; show low-percentage outliers
                    endif else begin
                    		yticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    endelse                    
@@ -4734,6 +4732,18 @@ print, "GRPDSR plot...."
 ; TAB 4/12/17, set pct2blank to zero if you want to include all small values (requested by Bill Olson)
 ;  pct2blank = 0.0
 
+	rr_log_x=(*ptr2do[0]).xlog
+	rr_log_y=(*ptr2do[0]).ylog
+	xmin = (*ptr2do[0]).binmin1
+	ymin = (*ptr2do[0]).binmin2
+	xmax = (*ptr2do[0]).binmax1
+	ymax = (*ptr2do[0]).binmax2
+	
+	; for log-log plots set pct2blank to zero to show all small values
+   if rr_log_x and rr_log_y then begin
+   		pct2blank = 0.0
+   endif
+
      ; set values below pct2blank to 0%
       histLE5 = WHERE(zhist2d LT pct2blank, countLT5)
       IF countLT5 GT 0 THEN zhist2d[histLE5] = 0.0D
@@ -4792,15 +4802,6 @@ print, "GRPDSR plot...."
    ENDIF ELSE BEGIN 
       imTITLE = imTITLE + " " + filtertitlestring
    ENDELSE
-
-
-	rr_log_x=(*ptr2do[0]).xlog
-	rr_log_y=(*ptr2do[0]).ylog
-	xmin = (*ptr2do[0]).binmin1
-	ymin = (*ptr2do[0]).binmin2
-	xmax = (*ptr2do[0]).binmax1
-	ymax = (*ptr2do[0]).binmax2
-	
 	
    if rr_log_x or rr_log_y then begin
 ;   	   rr_log_x=axis_scale.(idx2do)[0]
