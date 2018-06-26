@@ -431,7 +431,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					binmax1log=ALOG10(binmax1)
 					; use 100 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
-					binspan1log = (binmax1log - binmin1log) / 100.0
+					binspan1log = (binmax1log - binmin1log) / 200.0
 					
 			  endif
 			  if rr_log_y then begin
@@ -441,7 +441,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 					binmax2log=ALOG10(binmax2)
 					; use 100 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
-					binspan2log = (binmax2log - binmin2log) / 100.0
+					binspan2log = (binmax2log - binmin2log) / 200.0
 			  endif 
 		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
 		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
