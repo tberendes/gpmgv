@@ -4742,8 +4742,8 @@ print, "GRPDSR plot...."
 	ymax = (*ptr2do[0]).binmax2
 	xbinwidth = (*ptr2do[0]).binspan1
 	ybinwidth = (*ptr2do[0]).binspan2
-	hist_x_size = sh[0]-2
-	hist_y_size = sh[1]-2
+	hist_x_size = sh[0]-1
+	hist_y_size = sh[1]-1
 	
 	; for log-log plots set pct2blank to zero to show all small values
    if rr_log_x and rr_log_y then begin
