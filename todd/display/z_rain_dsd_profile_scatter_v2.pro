@@ -4756,6 +4756,7 @@ print, "GRPDSR plot...."
        
      ; SCALE THE HISTOGRAM COUNTS TO 0-255 IMAGE BYTE VALUES
       histImg = BYTSCL(zhist2D)
+      logHistImg = histImg
    ENDIF ELSE BEGIN
      ; SCALE THE HISTOGRAM COUNTS TO 0-255 IMAGE BYTE VALUES
       histImg = BYTSCL(zhist2D)
