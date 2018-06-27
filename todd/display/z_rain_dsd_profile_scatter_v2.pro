@@ -415,43 +415,44 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
               AND scat_Y GE binmin2 AND scat_Y LE binmax2, count_XY)
    IF (count_XY GT 0) THEN BEGIN
 
-		  if rr_log_x or rr_log_y then begin
-			  scat_logX = scat_X[idx_XY]
-			  binmin1log=binmin1
-			  binmax1log=binmax1
-			  binspan1log = binspan1
-			  scat_logY = scat_Y[idx_XY]
-			  binmin2log=binmin2
-			  binmax2log=binmax2
-			  binspan2log = binspan2
-			  if rr_log_x then begin
+;***************
+;		  if rr_log_x or rr_log_y then begin
+;			  scat_logX = scat_X[idx_XY]
+;			  binmin1log=binmin1
+;			  binmax1log=binmax1
+;			  binspan1log = binspan1
+;			  scat_logY = scat_Y[idx_XY]
+;			  binmin2log=binmin2
+;			  binmax2log=binmax2
+;			  binspan2log = binspan2
+;			  if rr_log_x then begin
 				;    print, 'X log scale'
-					scat_logX = ALOG10(scat_X[idx_XY])
-					binmin1log=ALOG10(binmin1)
-					binmax1log=ALOG10(binmax1)
-					; use 100 bins for 2d histogram, may want to pass as parameter
-					; instead of binspan
-					binspan1log = (binmax1log - binmin1log) / 100.0
-					
-			  endif
-			  if rr_log_y then begin
+;					scat_logX = ALOG10(scat_X[idx_XY])
+;					binmin1log=ALOG10(binmin1)
+;					binmax1log=ALOG10(binmax1)
+;					; use 100 bins for 2d histogram, may want to pass as parameter
+;					; instead of binspan
+;					binspan1log = (binmax1log - binmin1log) / 100.0
+;					
+;			  endif
+;			  if rr_log_y then begin
 				;    print, 'Y log scale'
-					scat_logY = ALOG10(scat_Y[idx_XY])
-					binmin2log=ALOG10(binmin2)
-					binmax2log=ALOG10(binmax2)
-					; use 100 bins for 2d histogram, may want to pass as parameter
-					; instead of binspan
-					binspan2log = (binmax2log - binmin2log) / 100.0
-			  endif 
-		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
-		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
-		                      BIN1=BINSPAN1log, BIN2=BINSPAN2log )
-          endif else begin 
+;					scat_logY = ALOG10(scat_Y[idx_XY])
+;					binmin2log=ALOG10(binmin2)
+;					binmax2log=ALOG10(binmax2)
+;					; use 100 bins for 2d histogram, may want to pass as parameter
+;					; instead of binspan
+;					binspan2log = (binmax2log - binmin2log) / 100.0
+;			  endif 
+;		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
+;		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
+;		                      BIN1=BINSPAN1log, BIN2=BINSPAN2log )
+;          endif else begin 
 		      zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
 		                      MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
 		                      BIN1=BINSPAN1, BIN2=BINSPAN2 )
           
-          endelse
+;          endelse
 
 ;		 if rr_log_x or rr_log_y then begin
 ;	         zhist2d =  MAKE_HIST2D(scat_X, scat_Y , MISSING=0 , $
@@ -476,17 +477,18 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
          ENDIF ELSE BEGIN
             have_hist.(plotIndex)[have2d,raintypeBBidx] = 1
            ; create this part of the I/O structure to assign to the pointer
-           if rr_log_x or rr_log_y then begin 
-               iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
-               binmin1:binmin1log, binmin2:binmin2log, binmax1:binmax1log, binmax2:binmax2log, $
-               binspan1:binspan1log, binspan2:binspan2log, $
-               xlog:rr_log_x, ylog:rr_log_y}                    
-           endif else begin
+;***************
+;           if rr_log_x or rr_log_y then begin 
+;               iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
+;               binmin1:binmin1log, binmin2:binmin2log, binmax1:binmax1log, binmax2:binmax2log, $
+;               binspan1:binspan1log, binspan2:binspan2log, $
+;               xlog:rr_log_x, ylog:rr_log_y}                    
+;           endif else begin
                iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
                binmin1:binmin1, binmin2:binmin2, binmax1:binmax1, binmax2:binmax2, $
                binspan1:binspan1, binspan2:binspan2, $
                xlog:rr_log_x, ylog:rr_log_y}          
-           endelse
+;           endelse
          ENDELSE
         ; compute the mean X (gv) for the samples in each Y (pr) histogram bin
         ; -- restrict the samples to those where both scat_X and scat_Y are within
@@ -4738,6 +4740,10 @@ print, "GRPDSR plot...."
 	ymin = (*ptr2do[0]).binmin2
 	xmax = (*ptr2do[0]).binmax1
 	ymax = (*ptr2do[0]).binmax2
+	xbinwidth = (*ptr2do[0]).binspan1
+	ybinwidth = (*ptr2do[0]).binspan2
+	hist_x_size = sh[0]-2
+	hist_y_size = sh[1]-2
 	
 	; for log-log plots set pct2blank to zero to show all small values
    if rr_log_x and rr_log_y then begin
@@ -4757,19 +4763,7 @@ print, "GRPDSR plot...."
       idxnotzero = WHERE(histImg EQ 0b AND zhist2D GT 0, nnotzero)
       IF nnotzero GT 0 THEN histImg[idxnotzero] = 1b
    ENDELSE
-  ; resize the image array to something like 150 pixels if it is small
-   sh = SIZE(histImg, /DIMENSIONS)
-;PRINT, "sh: ", SH
-   IF MAX(sh) LT 125 THEN BEGIN
-      scale = 150/MAX(sh) + 1
-      sh2 = sh*scale
-;PRINT, "sh2: ", SH2
-      histImg = REBIN(histImg, sh2[0], sh2[1], /SAMPLE)
-   ENDIF
-   winsiz = SIZE( histImg, /DIMENSIONS )
-   histImg = CONGRID(histImg, winsiz[0]*4, winsiz[1]*4)
-   winsiz = SIZE( histImg, /DIMENSIONS )
-;print, 'winsiz: ', winsiz
+   
 ;   rgb=COLORTABLE(33)     ; not available for IDL 8.1, use LOADCT calls
    LOADCT, 33, RGB=rgb, /SILENT   ; gets the values w/o loading the color table
    LOADCT, 33, /SILENT            ; - so call again to load the color table
@@ -4789,6 +4783,20 @@ print, "GRPDSR plot...."
 ;   rgb[*,2] = bluescl
 ; *******
    rgb[0,*]=255   ; set zero count color to White background
+
+  ; resize the image array to something like 150 pixels if it is small
+   sh = SIZE(histImg, /DIMENSIONS)
+;PRINT, "sh: ", SH
+   IF MAX(sh) LT 125 THEN BEGIN
+      scale = 150/MAX(sh) + 1
+      sh2 = sh*scale
+;PRINT, "sh2: ", SH2
+      histImg = REBIN(histImg, sh2[0], sh2[1], /SAMPLE)
+   ENDIF
+   winsiz = SIZE( histImg, /DIMENSIONS )
+   histImg = CONGRID(histImg, winsiz[0]*4, winsiz[1]*4)
+   winsiz = SIZE( histImg, /DIMENSIONS )
+;print, 'winsiz: ', winsiz
    IF do_MAE_1_1 THEN BEGIN
             imTITLE = titleLine1+bias_str+" "+units+n_str+"!C"+SCAT_DATA+", "+ $
             pctabvstr+" Above Thresh."
@@ -4830,7 +4838,7 @@ print, 'ymax ',ymax
 	   for z = 0,xmajortick-1 do begin
 	      xtickvalues(z) = float(xticknames(z))
 	      if rr_log_x then begin
-	      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
+;	      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
 	      endif else begin
 	          xtickvalues(z) = (xtickvalues(z) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
 	      endelse
@@ -4840,27 +4848,36 @@ print, 'xtickvalues ',xtickvalues
 	   for z = 0,ymajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
 	      if rr_log_y then begin
-	          ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[1]-1) / (ymax - ymin) 
+;	          ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[1]-1) / (ymax - ymin) 
 	      endif else begin
 	          ytickvalues(z) = (ytickvalues(z) - ymin) * (winsiz[1]-1) / (ymax - ymin) 
 	      endelse
 	   endfor
 print, 'ytickvalues ',ytickvalues
 	   
-	   ; smooth image 
-	   histImg=smooth(histImg,9)
-	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
-;	            xminor=10, yminor=10, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
-	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
+	   
+  ; try contour plot for log plots
+       x_cont = fltarr(hist_x_size)
+       for ind1=0,hist_x_size-1 do begin
+       	   x_cont(ind1) = ind1*xbinwidth + (xbinwidth/2.0)
+       endfor
+       for ind1=0,hist_y_size-1 do begin
+       	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
+       endfor
+       im = contour(histImg,x_cont,y_cont,axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
+ 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
-	            xtickname=xticknames, ytickname=yticknames)
+	            xtickname=xticknames, ytickname=yticknames)   
+	   
+;	   ; smooth image 
+;	   histImg=smooth(histImg,9)
+;	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
+;;	            xminor=10, yminor=10, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
+;	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
+;	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
+;	            xtickname=xticknames, ytickname=yticknames)
 
-;	            TITLE = imTITLE, xlog=rr_log_x, ylog=rr_log_y)
-;	   im.xlog=rr_log_x
-;	   im.ylog=rr_log_y
 
-;   		im.xtickname=xticknames
-;   		im.ytickname=yticknames
    endif else begin
 	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
 	            xminor=4, yminor=4, RGB_TABLE=rgb, BUFFER=buffer, $
