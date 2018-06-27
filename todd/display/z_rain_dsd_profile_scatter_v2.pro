@@ -4867,6 +4867,9 @@ print, 'ytickvalues ',ytickvalues
        for ind1=0,hist_y_size-1 do begin
        	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
        endfor
+       print, 'img dim ', size(logHistImg)
+       print, ' x ', hist_x_size
+       print, ' y ', hist_y_size
        im = contour(logHistImg,x_cont,y_cont,axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
  	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
