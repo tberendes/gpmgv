@@ -4861,6 +4861,7 @@ print, 'ytickvalues ',ytickvalues
        for ind1=0,hist_x_size-1 do begin
        	   x_cont(ind1) = ind1*xbinwidth + (xbinwidth/2.0)
        endfor
+       y_cont = fltarr(hist_y_size)
        for ind1=0,hist_y_size-1 do begin
        	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
        endfor
