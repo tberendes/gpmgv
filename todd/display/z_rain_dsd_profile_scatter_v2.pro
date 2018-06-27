@@ -4759,6 +4759,7 @@ print, "GRPDSR plot...."
    ENDIF ELSE BEGIN
      ; SCALE THE HISTOGRAM COUNTS TO 0-255 IMAGE BYTE VALUES
       histImg = BYTSCL(zhist2D)
+      logHistImg = histImg
      ; set non-zero Histo bins that are bytescaled to 0 to a small non-zero value
       idxnotzero = WHERE(histImg EQ 0b AND zhist2D GT 0, nnotzero)
       IF nnotzero GT 0 THEN histImg[idxnotzero] = 1b
@@ -4865,7 +4866,7 @@ print, 'ytickvalues ',ytickvalues
        for ind1=0,hist_y_size-1 do begin
        	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
        endfor
-       im = contour(histImg,x_cont,y_cont,axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
+       im = contour(logHistImg,x_cont,y_cont,axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
  	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
 	            xtickname=xticknames, ytickname=yticknames)   
