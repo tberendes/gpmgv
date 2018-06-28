@@ -4766,9 +4766,9 @@ print, "GRPDSR plot...."
 	hist_y_size = sh[1]-1
 	
 	; for log-log plots set pct2blank to zero to show all small values
-   if rr_log_x and rr_log_y then begin
-   		pct2blank = 0.0
-   endif
+;   if rr_log_x and rr_log_y then begin
+;   		pct2blank = 0.0
+;   endif
 
      ; set values below pct2blank to 0%
       histLE5 = WHERE(zhist2d LT pct2blank, countLT5)
@@ -4897,7 +4897,7 @@ print, 'ymajortick ',ymajortick
 	            TITLE = imTITLE, $
 	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
 	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1, $
-	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues,N_LEVELS=32)   
+	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues)   
 ;	            C_VALUE=0)   
 	   
 ;	   ; smooth image 
