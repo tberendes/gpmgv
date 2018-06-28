@@ -4883,12 +4883,12 @@ print, 'ymajortick ',ymajortick
   ; try contour plot for log plots
        x_cont = fltarr(hist_x_size)
        for ind1=0,hist_x_size-1 do begin
-       	   x_cont(ind1) = xmin + float(ind1)*xbinwidth
+       	   x_cont(ind1) = xmin + float(ind1)*xbinwidth + (xbinwidth/2.0)
 ;       	   x_cont(ind1) = ind1*xbinwidth + (xbinwidth/2.0)
        endfor
        y_cont = fltarr(hist_y_size)
        for ind1=0,hist_y_size-1 do begin
-       	   y_cont(ind1) = ymin + float(ind1)*ybinwidth
+       	   y_cont(ind1) = ymin + float(ind1)*ybinwidth + (ybinwidth/2.0)
 ;       	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
        endfor
        print, 'img dim ', size(logHistImg)
