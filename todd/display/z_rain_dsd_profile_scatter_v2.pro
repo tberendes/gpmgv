@@ -4875,10 +4875,9 @@ print, 'ymajortick ',ymajortick
        im = contour(logHistImg,x_cont,y_cont,axis_style=2,  $
  	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, $
-	            /FILL, $
-;	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
-	            xrange=[xmin,xmax],yrange=[ymin,ymax], C_VALUE=0)   
-;	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues)   
+	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
+	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1, $
+	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues,C_VALUE=0)   
 	   
 ;	   ; smooth image 
 ;	   histImg=smooth(histImg,9)
@@ -4945,9 +4944,11 @@ print, 'ymajortick ',ymajortick
       ticID = "# samples"
    ENDELSE
    ticnms[ticlocs] = ticnames
-   cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
+   
+   if not rr_log then begin
+  		 cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
                  TICKVALUES=ticlocs, TICKNAME=ticnms, TITLE=ticID)
-
+   endif
    pngfile = outpath_sav + '/' + pngpre + '_'+ rntypeLabels[raintypeBBidx] + $
              BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
              addme + filteraddstring + '.png'
