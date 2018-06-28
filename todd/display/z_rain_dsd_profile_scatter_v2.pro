@@ -448,24 +448,44 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 ;		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
 ;		                      BIN1=BINSPAN1log, BIN2=BINSPAN2log )
 ;          endif else begin 
+;		      zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
+;		                      MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
+;		                      BIN1=BINSPAN1, BIN2=BINSPAN2 )
+;          
+;          endelse
+
+		  if rr_log_x or rr_log_y then begin
+			  scat_logX = scat_X[idx_XY]
+			  binmin1log=binmin1
+			  binmax1log=binmax1
+			  binspan1log = binspan1
+			  scat_logY = scat_Y[idx_XY]
+			  binmin2log=binmin2
+			  binmax2log=binmax2
+			  binspan2log = binspan2
+			  if rr_log_x then begin
+				;    print, 'X log scale'
+					; use 100 bins for 2d histogram, may want to pass as parameter
+					; instead of binspan
+					binspan1log = (binmax1log - binmin1log) / 100.0
+					
+			  endif
+			  if rr_log_y then begin
+				;    print, 'Y log scale'
+					; use 100 bins for 2d histogram, may want to pass as parameter
+					; instead of binspan
+					binspan2log = (binmax2log - binmin2log) / 100.0
+			  endif 
+		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
+		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
+		                      BIN1=BINSPAN1log, BIN2=BINSPAN2log )
+          endif else begin 
 		      zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
 		                      MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
 		                      BIN1=BINSPAN1, BIN2=BINSPAN2 )
-          
-;          endelse
+          endelse
 
-;		 if rr_log_x or rr_log_y then begin
-;	         zhist2d =  MAKE_HIST2D(scat_X, scat_Y , MISSING=0 , $
-;	                             XLOG=rr_log_x, YLOG=rr_log_y, $
-;	                             XHRANGE=[binmin1, binmax1], $
-;	                             YHRANGE=[binmin2, binmax2] , $
-;	                             XBIN=BINSPAN1, YBIN=BINSPAN2 )       
-;	                             ; note XHRANGE, YHRANGE, XBIN and YBIN are in log scale
-;  	 endif else begin
-;	         zhist2d = HIST_2D( scat_X, scat_Y, MIN1=binmin1, $
-;	                            MIN2=binmin2, MAX1=binmax1, MAX2=binmax2, $
-;	                            BIN1=BINSPAN1, BIN2=BINSPAN2 )
-;         endelse
+
                             
          minprz = MIN(scat_Y)
          numpts = TOTAL(zhist2d)
@@ -477,18 +497,18 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
          ENDIF ELSE BEGIN
             have_hist.(plotIndex)[have2d,raintypeBBidx] = 1
            ; create this part of the I/O structure to assign to the pointer
-;***************
-;           if rr_log_x or rr_log_y then begin 
-;               iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
-;               binmin1:binmin1log, binmin2:binmin2log, binmax1:binmax1log, binmax2:binmax2log, $
-;               binspan1:binspan1log, binspan2:binspan2log, $
-;               xlog:rr_log_x, ylog:rr_log_y}                    
-;           endif else begin
+
+           if rr_log_x or rr_log_y then begin 
+               iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
+               binmin1:binmin1log, binmin2:binmin2log, binmax1:binmax1log, binmax2:binmax2log, $
+               binspan1:binspan1log, binspan2:binspan2log, $
+               xlog:rr_log_x, ylog:rr_log_y}                    
+           endif else begin
                iostruct2 = { zhist2d:zhist2d, minprz:minprz, numpts:numpts, $
                binmin1:binmin1, binmin2:binmin2, binmax1:binmax1, binmax2:binmax2, $
                binspan1:binspan1, binspan2:binspan2, $
                xlog:rr_log_x, ylog:rr_log_y}          
-;           endelse
+           endelse
          ENDELSE
         ; compute the mean X (gv) for the samples in each Y (pr) histogram bin
         ; -- restrict the samples to those where both scat_X and scat_Y are within
