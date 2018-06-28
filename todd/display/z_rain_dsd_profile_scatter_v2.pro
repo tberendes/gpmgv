@@ -4888,7 +4888,7 @@ print, 'ymajortick ',ymajortick
        endfor
        y_cont = fltarr(hist_y_size)
        for ind1=0,hist_y_size-1 do begin
-       	   y_cont(ind1) = ymin + float(ind1)*xbinwidth
+       	   y_cont(ind1) = ymin + float(ind1)*ybinwidth
 ;       	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
        endfor
        print, 'img dim ', size(logHistImg)
