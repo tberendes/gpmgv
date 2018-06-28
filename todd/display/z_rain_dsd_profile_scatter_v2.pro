@@ -4897,7 +4897,8 @@ print, 'ymajortick ',ymajortick
 	            TITLE = imTITLE, $
 	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
 	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1, $
-	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues,C_VALUE=0)   
+	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues,N_LEVELS=32)   
+;	            C_VALUE=0)   
 	   
 ;	   ; smooth image 
 ;	   histImg=smooth(histImg,9)
@@ -4965,7 +4966,10 @@ print, 'ymajortick ',ymajortick
    ENDELSE
    ticnms[ticlocs] = ticnames
    
-   if not rr_log then begin
+   if rr_log_x or rr_log_y then begin
+;  		 cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
+;                 TICKVALUES=ticlocs, TICKNAME=ticnms, TITLE=ticID)   
+   endif else begin
   		 cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
                  TICKVALUES=ticlocs, TICKNAME=ticnms, TITLE=ticID)
    endif
