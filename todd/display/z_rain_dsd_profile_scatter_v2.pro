@@ -4873,9 +4873,9 @@ print, 'ytickvalues ',ytickvalues
        im = contour(logHistImg,x_cont,y_cont,axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
  	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
-	            xtickname=xticknames, ytickname=yticknames, /FILL, xstyle=1, ystyle=1, $
+	            xtickname=xticknames, ytickname=yticknames, /FILL, $
 	            xrange=[xmin,xmax],yrange=[ymin,ymax], C_VALUE=0)   
-;	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32)   
+;	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1)   
 	   
 ;	   ; smooth image 
 ;	   histImg=smooth(histImg,9)
