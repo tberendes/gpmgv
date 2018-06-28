@@ -4967,6 +4967,8 @@ print, 'ymajortick ',ymajortick
    ticnms[ticlocs] = ticnames
    
    if rr_log_x or rr_log_y then begin
+        ; placeholder
+        holding=1
 ;  		 cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
 ;                 TICKVALUES=ticlocs, TICKNAME=ticnms, TITLE=ticID)   
    endif else begin
