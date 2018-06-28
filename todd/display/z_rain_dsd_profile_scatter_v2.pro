@@ -4846,6 +4846,7 @@ print, 'ymax ',ymax
 	      endelse
 	   endfor
 print, 'xtickvalues ',xtickvalues
+print, 'xmajortick ',xmajortick
 	   ytickvalues = FLTARR(ymajortick)
 	   for z = 0,ymajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
@@ -4856,6 +4857,7 @@ print, 'xtickvalues ',xtickvalues
 	      endelse
 	   endfor
 print, 'ytickvalues ',ytickvalues
+print, 'ymajortick ',ymajortick
 	   
 	   
   ; try contour plot for log plots
