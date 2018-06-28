@@ -4894,14 +4894,21 @@ print, 'ymajortick ',ymajortick
        print, 'img dim ', size(logHistImg)
        print, ' x ', hist_x_size
        print, ' y ', hist_y_size
-       im = contour(logHistImg,x_cont,y_cont,axis_style=2,  $
- 	            xminor=9, yminor=9, RGB_TABLE=rgb, BUFFER=buffer, $
-; 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
+;       im = contour(logHistImg,x_cont,y_cont,axis_style=2,  $
+; 	            xminor=9, yminor=9, RGB_TABLE=rgb, BUFFER=buffer, $
+;; 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
+;	            TITLE = imTITLE, $
+;	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
+;	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1, $
+;	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, min_value=1)   
+;;	            C_VALUE=0)   
+
+       im = image(logHistImg,axis_style=2,  $
+ 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, $
 	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
-	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1, $
-	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, min_value=1)   
-;	            C_VALUE=0)   
+	            xrange=[xmin,xmax],yrange=[ymin,ymax], xstyle=1, ystyle=1, $
+	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues)     
 	   
 ;	   ; smooth image 
 ;	   histImg=smooth(histImg,9)
