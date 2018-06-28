@@ -4895,8 +4895,8 @@ print, 'ymajortick ',ymajortick
        print, ' x ', hist_x_size
        print, ' y ', hist_y_size
        im = contour(logHistImg,x_cont,y_cont,axis_style=2,  $
- 	            xminor=9, yminor=9, RGB_TABLE=rgb, BUFFER=buffer, $
-; 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
+; 	            xminor=9, yminor=9, RGB_TABLE=rgb, BUFFER=buffer, $
+ 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, $
 	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
 	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=256, xstyle=1, ystyle=1, $
