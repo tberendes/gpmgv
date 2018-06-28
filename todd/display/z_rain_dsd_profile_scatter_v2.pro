@@ -4974,7 +4974,7 @@ print, 'ymajortick ',ymajortick
    endif else begin
   		 cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
                  TICKVALUES=ticlocs, TICKNAME=ticnms, TITLE=ticID)
-   endif
+   endelse
    pngfile = outpath_sav + '/' + pngpre + '_'+ rntypeLabels[raintypeBBidx] + $
              BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
              addme + filteraddstring + '.png'
