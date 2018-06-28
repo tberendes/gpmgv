@@ -4899,7 +4899,7 @@ print, 'ymajortick ',ymajortick
 	            TITLE = imTITLE, $
 	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
 	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1, $
-	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues)   
+	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, min_value=1)   
 ;	            C_VALUE=0)   
 	   
 ;	   ; smooth image 
