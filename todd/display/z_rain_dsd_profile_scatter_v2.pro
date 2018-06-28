@@ -467,14 +467,14 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 				;    print, 'X log scale'
 					; use 100 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
-					binspan1log = (binmax1log - binmin1log) / 400.0
+					binspan1log = (binmax1log - binmin1log) / 800.0
 					
 			  endif
 			  if rr_log_y then begin
 				;    print, 'Y log scale'
 					; use 100 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
-					binspan2log = (binmax2log - binmin2log) / 400.0
+					binspan2log = (binmax2log - binmin2log) / 800.0
 			  endif 
 		      zhist2d = HIST_2D( scat_logX, scat_logY, MIN1=binmin1log, $
 		                      MIN2=binmin2log, MAX1=binmax1log, MAX2=binmax2log, $
@@ -4894,22 +4894,15 @@ print, 'ymajortick ',ymajortick
        print, 'img dim ', size(logHistImg)
        print, ' x ', hist_x_size
        print, ' y ', hist_y_size
-;       im = contour(logHistImg,x_cont,y_cont,axis_style=2,  $
-; 	            xminor=9, yminor=9, RGB_TABLE=rgb, BUFFER=buffer, $
-;; 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
-;	            TITLE = imTITLE, $
-;	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
-;	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=32, xstyle=1, ystyle=1, $
-;	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, min_value=1)   
-;;	            C_VALUE=0)   
-
-       im = image(logHistImg,axis_style=2,  $
- 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
+       im = contour(logHistImg,x_cont,y_cont,axis_style=2,  $
+ 	            xminor=9, yminor=9, RGB_TABLE=rgb, BUFFER=buffer, $
+; 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
 	            TITLE = imTITLE, $
 	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
-	            xrange=[xmin,xmax],yrange=[ymin,ymax], xstyle=1, ystyle=1, $
-	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues)     
-	   
+	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=256, xstyle=1, ystyle=1, $
+	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, min_value=1)   
+
+   
 ;	   ; smooth image 
 ;	   histImg=smooth(histImg,9)
 ;	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
