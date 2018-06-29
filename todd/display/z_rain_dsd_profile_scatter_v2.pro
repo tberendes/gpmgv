@@ -375,7 +375,7 @@
 
 PRO accum_scat_data, scat_X, scat_Y, binmin1, binmin2, binmax1, binmax2, $
                      BINSPAN1, BINSPAN2, ptrData_array, have_Hist, plotTypes, $
-                     plotIndex, raintypeBBidx, rr_log_x, rr_log_y
+                     plotIndex, raintypeBBidx, rr_log_x, rr_log_y, log_bins
 
 ; position indices/definitions of the 3 flags in the arrays in the structure
 ; - must be as initially defined in z_rain_dsd_profile_scatter_all.pro
@@ -2741,7 +2741,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2753,7 +2753,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2765,7 +2765,7 @@ endif
 ;                    accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
 ;                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
 ;                                     plotDataPtrs, have_Hist, PlotTypes, $
-;                                     iPlot, raintypeBBidx, 0, 0
+;                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
 ;                 ENDIF ELSE countabv=0
@@ -2777,7 +2777,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2789,7 +2789,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2807,7 +2807,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2821,7 +2821,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2835,7 +2835,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2847,7 +2847,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2860,7 +2860,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2890,7 +2890,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
@@ -2907,7 +2907,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
@@ -2922,7 +2922,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2935,7 +2935,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2953,7 +2953,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
@@ -2969,7 +2969,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                                     iPlot, raintypeBBidx, 0, rr_log
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
@@ -2982,7 +2982,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -2995,7 +2995,7 @@ endif
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
@@ -3025,7 +3025,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                         binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                         plotDataPtrs, have_Hist, PlotTypes, $
-                                        iPlot, raintypeBBidx, 0, 0
+                                        iPlot, raintypeBBidx, 0, 0, log_bins
 ;                       print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                              (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                     endif else countabv=0
@@ -3040,7 +3040,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF
@@ -3054,7 +3054,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, 0, 0
+                                     iPlot, raintypeBBidx, 0, 0, log_bins
 ;                    print, PlotTypes[iPlot]+" NUMPTS, MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).NUMPTS, $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
@@ -3166,7 +3166,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
  ;                   accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
  ;                                    binmax1, binmax2, BINSPAN1, BINSPAN2, $
  ;                                    plotDataPtrs, have_Hist, PlotTypes, $
- ;                                    iPlot, raintypeBBidx, rr_log, rr_log
+ ;                                    iPlot, raintypeBBidx, rr_log, rr_log, log_bins
 ;                    print, PlotTypes[iPlot]+" MAEaccum: ", $
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
  ;                ENDIF ELSE countabv=0
@@ -3193,7 +3193,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
                     endif
                  ENDIF
               END
@@ -3219,7 +3219,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
                     endif
                  ENDIF
               END
@@ -3236,7 +3236,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
                     endif
                  ENDIF
               END
@@ -3253,7 +3253,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
                     endif
                  ENDIF
               END
@@ -3275,7 +3275,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
                     endif
               END
   'GRCDSR' : BEGIN
@@ -3292,7 +3292,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
                     endif
               END
   'GRPDSR' : BEGIN
@@ -3309,7 +3309,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                        accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log
+                                     iPlot, raintypeBBidx, rr_log, rr_log, log_bins
                     endif
               END
       ENDCASE
