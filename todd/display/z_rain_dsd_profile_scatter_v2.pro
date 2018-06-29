@@ -415,6 +415,8 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
               AND scat_Y GE binmin2 AND scat_Y LE binmax2, count_XY)
    IF (count_XY GT 0) THEN BEGIN
 
+
+; this sets up for constant log scale bins
 ;***************
 ;		  if rr_log_x or rr_log_y then begin
 ;			  scat_logX = scat_X[idx_XY]
@@ -454,6 +456,8 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 ;          
 ;          endelse
 
+; ************
+; this sets up for constant linear scale bins which are used in contour for log scale plotting
 		  if rr_log_x or rr_log_y then begin
 			  scat_logX = scat_X[idx_XY]
 			  binmin1log=binmin1
@@ -465,12 +469,23 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 			  binspan2log = binspan2
 			  if rr_log_x then begin
 				;    print, 'X log scale'
+					if log_bins then begin
+						scat_logX = ALOG10(scat_X[idx_XY])
+						binmin1log=ALOG10(binmin1)
+						binmax1log=ALOG10(binmax1)
+					endif
+					
 					; use 100 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
 					binspan1log = (binmax1log - binmin1log) / 200.0
 					
 			  endif
 			  if rr_log_y then begin
+					if log_bins then begin
+						scat_logY = ALOG10(scat_Y[idx_XY])
+						binmin2log=ALOG10(binmin2)
+						binmax2log=ALOG10(binmax2)
+					endif
 				;    print, 'Y log scale'
 					; use 100 bins for 2d histogram, may want to pass as parameter
 					; instead of binspan
@@ -644,6 +659,7 @@ do_RR_DM_curve_fit = 0
 ; 0= st below bb, 1=conv below bb, 2=all below bb 
 RR_DM_curve_fit_bb_type = 0
 dump_hist_csv=1
+log_bins=0
 
 if do_RR_DM_curve_fit eq 1 then begin
 
@@ -4740,6 +4756,7 @@ print, "GRPDSR plot...."
 
    sh = SIZE((*ptr2do[0]).zhist2d, /DIMENSIONS)
 ;PRINT, "sh: ", SH
+
   ; last bin in 2-d histogram only contains values = MAX, cut these
   ; out of the array
   ; zhist2d = (*ptr2do[0]).zhist2d[0:sh[0]-2,0:sh[1]-2]
@@ -4788,7 +4805,9 @@ print, "GRPDSR plot...."
    ENDIF ELSE BEGIN
      ; SCALE THE HISTOGRAM COUNTS TO 0-255 IMAGE BYTE VALUES
       histImg = BYTSCL(zhist2D)
-      logHistImg = histImg
+      if not log_bins then begin
+      		logHistImg = histImg     		
+  	  endif
      ; set non-zero Histo bins that are bytescaled to 0 to a small non-zero value
       idxnotzero = WHERE(histImg EQ 0b AND zhist2D GT 0, nnotzero)
       IF nnotzero GT 0 THEN histImg[idxnotzero] = 1b
@@ -4899,26 +4918,27 @@ print, 'ymajortick ',ymajortick
        	   y_cont(ind1) = ymin + float(ind1)*ybinwidth
 ;       	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
        endfor
-       print, 'img dim ', size(logHistImg)
-       print, ' x ', hist_x_size
-       print, ' y ', hist_y_size
-       im = contour(logHistImg,x_cont,y_cont,axis_style=2,  $
-; 	            xminor=9, yminor=9, RGB_TABLE=rgb, BUFFER=buffer, $
- 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
-	            TITLE = imTITLE, $
-	            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
-	            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=64, xstyle=1, ystyle=1, $
-	            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, min_value=1)   
-
-   
-;	   ; smooth image 
-;	   histImg=smooth(histImg,9)
-;	   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
-;;	            xminor=10, yminor=10, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
-;	            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
-;	            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
-;	            xtickname=xticknames, ytickname=yticknames)
-
+       if not log_bins then begin
+       
+	       print, 'img dim ', size(logHistImg)
+	       print, ' x ', hist_x_size
+	       print, ' y ', hist_y_size
+	       im = contour(logHistImg,x_cont,y_cont,axis_style=2,  $
+	; 	            xminor=9, yminor=9, RGB_TABLE=rgb, BUFFER=buffer, $
+	 	            xminor=9, yminor=9, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
+		            TITLE = imTITLE, $
+		            xmajor=xmajortick, ymajor=ymajortick,xtickname=xticknames, ytickname=yticknames, /FILL, $
+		            xrange=[xmin,xmax],yrange=[ymin,ymax], N_LEVELS=64, xstyle=1, ystyle=1, $
+		            XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, min_value=1)   
+	   endif else begin   
+		   ; smooth image 
+		   histImg=smooth(histImg,9)
+		   im=image(histImg, axis_style=2, xmajor=xmajortick, ymajor=ymajortick, $
+	;	            xminor=10, yminor=10, /xlog, /ylog, RGB_TABLE=rgb, BUFFER=buffer, $
+		            xminor=0, yminor=0, RGB_TABLE=rgb, BUFFER=buffer, $
+		            TITLE = imTITLE, XTICKVALUES=xtickvalues, YTICKVALUES=ytickvalues, $
+		            xtickname=xticknames, ytickname=yticknames)
+		endelse
 
    endif else begin
 	   im=image(histImg, axis_style=2, xmajor=xmajor, ymajor=ymajor, $
@@ -4977,15 +4997,11 @@ print, 'ymajortick ',ymajortick
    ENDELSE
    ticnms[ticlocs] = ticnames
    
-   if rr_log_x or rr_log_y then begin
-        ; placeholder
-        holding=1
-;  		 cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
-;                 TICKVALUES=ticlocs, TICKNAME=ticnms, TITLE=ticID)   
-   endif else begin
-  		 cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
+   if not rr_log or log_bins then begin
+   		 cbar=colorbar(target=im, orientation=1, position=[0.95, 0.2, 0.98, 0.75], $
                  TICKVALUES=ticlocs, TICKNAME=ticnms, TITLE=ticID)
-   endelse
+   endif
+   
    pngfile = outpath_sav + '/' + pngpre + '_'+ rntypeLabels[raintypeBBidx] + $
              BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
              addme + filteraddstring + '.png'
