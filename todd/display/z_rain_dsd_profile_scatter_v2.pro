@@ -661,7 +661,7 @@ do_RR_DM_curve_fit = 0
 ; 0= st below bb, 1=conv below bb, 2=all below bb 
 RR_DM_curve_fit_bb_type = 0
 dump_hist_csv=1
-hist_bins_log=1
+hist_bins_log=0
 
 if do_RR_DM_curve_fit eq 1 then begin
 
