@@ -4887,7 +4887,8 @@ print, 'ymax ',ymax
 	   for z = 0,xmajortick-1 do begin
 	      xtickvalues(z) = float(xticknames(z))
 	      if rr_log_x then begin
-;	      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
+	      	  if hist_bins_log then $
+		      	  xtickvalues(z) = (ALOG10(xtickvalues(z)) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
 	      endif else begin
 	          xtickvalues(z) = (xtickvalues(z) - xmin) * (winsiz[0]-1) / (xmax - xmin) 
 	      endelse
@@ -4898,7 +4899,8 @@ print, 'xmajortick ',xmajortick
 	   for z = 0,ymajortick-1 do begin
 	      ytickvalues(z) = float(yticknames(z))
 	      if rr_log_y then begin
-;	          ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[1]-1) / (ymax - ymin) 
+	          if hist_bins_log then $
+	               ytickvalues(z) = (ALOG10(ytickvalues(z)) - ymin) * (winsiz[1]-1) / (ymax - ymin) 
 	      endif else begin
 	          ytickvalues(z) = (ytickvalues(z) - ymin) * (winsiz[1]-1) / (ymax - ymin) 
 	      endelse
@@ -4907,19 +4909,19 @@ print, 'ytickvalues ',ytickvalues
 print, 'ymajortick ',ymajortick
 	   
 	   
-  ; try contour plot for log plots
-       x_cont = fltarr(hist_x_size)
-       for ind1=0,hist_x_size-1 do begin
-       	   x_cont(ind1) = xmin + float(ind1)*xbinwidth
-;       	   x_cont(ind1) = ind1*xbinwidth + (xbinwidth/2.0)
-       endfor
-       y_cont = fltarr(hist_y_size)
-       for ind1=0,hist_y_size-1 do begin
-       	   y_cont(ind1) = ymin + float(ind1)*ybinwidth
-;       	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
-       endfor
        if not hist_bins_log then begin
        
+  	; try contour plot for log plots
+       		x_cont = fltarr(hist_x_size)
+       		for ind1=0,hist_x_size-1 do begin
+       	  		x_cont(ind1) = xmin + float(ind1)*xbinwidth
+	;       	   x_cont(ind1) = ind1*xbinwidth + (xbinwidth/2.0)
+       		endfor
+       		y_cont = fltarr(hist_y_size)
+       		for ind1=0,hist_y_size-1 do begin
+       	   		y_cont(ind1) = ymin + float(ind1)*ybinwidth
+	;       	   y_cont(ind1) = ind1*ybinwidth + (ybinwidth/2.0)
+       		endfor
 	       print, 'img dim ', size(logHistImg)
 	       print, ' x ', hist_x_size
 	       print, ' y ', hist_y_size
