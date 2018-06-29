@@ -4742,7 +4742,13 @@ print, "GRPDSR plot...."
 ;PRINT, "sh: ", SH
   ; last bin in 2-d histogram only contains values = MAX, cut these
   ; out of the array
-   zhist2d = (*ptr2do[0]).zhist2d[0:sh[0]-2,0:sh[1]-2]
+  ; zhist2d = (*ptr2do[0]).zhist2d[0:sh[0]-2,0:sh[1]-2]
+
+   ; change this to keep size of zhist2D same for proper number of bins
+   ; just blank out the last row, col
+   zhist2d = (*ptr2do[0]).zhist2d
+   zhist2d[sh[0]-2:sh[0]-1,*] = 0
+   zhist2d[*,sh[1]-2:sh[1]-1] = 0
 
   ; convert counts to percent of total if show_pct is set
    show_pct=1
@@ -4762,8 +4768,10 @@ print, "GRPDSR plot...."
 	ymax = (*ptr2do[0]).binmax2
 	xbinwidth = (*ptr2do[0]).binspan1
 	ybinwidth = (*ptr2do[0]).binspan2
-	hist_x_size = sh[0]-1
-	hist_y_size = sh[1]-1
+;	hist_x_size = sh[0]-1
+;	hist_y_size = sh[1]-1
+	hist_x_size = sh[0]
+	hist_y_size = sh[1]
 	
 	; for log-log plots set pct2blank to zero to show all small values
 ;   if rr_log_x and rr_log_y then begin
