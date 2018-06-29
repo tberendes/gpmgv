@@ -460,7 +460,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
 ; this sets up for constant linear scale bins which are used in contour for log scale plotting
 		  if rr_log_x or rr_log_y then begin
 		  	  ; use 100 bins for linear, 200 for log for 2d histogram, may want to pass as parameter
-		  	  if hist_bins_log then num_hist_bins = 200.0 else num_hist_bins = 100.0
+		  	  if hist_bins_log then num_hist_bins = 100.0 else num_hist_bins = 200.0
 			  scat_logX = scat_X[idx_XY]
 			  binmin1log=binmin1
 			  binmax1log=binmax1
