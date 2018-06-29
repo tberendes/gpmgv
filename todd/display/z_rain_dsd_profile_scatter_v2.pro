@@ -4794,7 +4794,7 @@ print, "GRPDSR plot...."
 	
 	; for log-log plots set pct2blank to zero to show all small values
 ;   if rr_log_x and rr_log_y then begin
-		if not hist_bins_log then $
+		if hist_bins_log then $
    			pct2blank = 0.0
 ;   endif
 
