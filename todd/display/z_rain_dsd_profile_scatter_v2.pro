@@ -2117,9 +2117,10 @@ print, ''
  		  botm_ht = botm_ht[idxgoodenuff]
  		  ; convert bbheight from MSL to AGL and from m to km
  		  bbHeight = (bbHeight[idxgoodenuff] / 1000.0) - site_elev
- 		  print, 'site_elev ',site_elev
- 		  print, 'bbHeight ', bbHeight
- 		  print, 'botm_ht ', botm_ht
+ 
+; 		  print, 'site_elev ',site_elev
+; 		  print, 'bbHeight ', bbHeight
+ ;		  print, 'botm_ht ', botm_ht
  		  
 ;  cant figure out how to reindex the Hid arrays, so for now just use besthid
 ;          sz = size(hid)
@@ -2441,7 +2442,7 @@ endif
                       END
                    1 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE( rntype EQ RainType_convectiveand bbHeight GT 0, countabv )
+                      idxabv = WHERE( rntype EQ RainType_convective and bbHeight GT 0, countabv )
                       END
                    2 : BEGIN
                       ; accumulate convective rain types
