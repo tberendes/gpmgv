@@ -4972,7 +4972,11 @@ print, "GRPDSR plot...."
         PRINT, '' 
         PRINT, "PLOTTING: Histograms ", PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
         PRINT, '' 
-
+		if PlotTypes(idx2do) EQ 'HGTHIST' then begin
+	    	histxtitle = 'Sample Height (km AGL)'
+	    endif else begin
+	    	histxtitle = 'Sample minus BB height (km)'
+	    endelse
         IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
              imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
         ENDIF ELSE BEGIN 
@@ -4980,7 +4984,7 @@ print, "GRPDSR plot...."
         ENDELSE
         hist1_total=total(hist1, /double)
         hist1=100.0 * (hist1/hist1_total)
-        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Sample Height (km)' $
+        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle=histxtitle $
                       , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
                       , xrange=[minhistval,maxhistval], yrange=[0,100])
 
