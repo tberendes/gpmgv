@@ -40,6 +40,10 @@
 ; 'GRPDSR': GR sfc RP (lowest level) vs DPR near sfc RR 
 ; 'GRZSH' : GR Z standard deviation histogram (above & below BB)
 ;'GRDMSH' : GR Dm standard deviation histogram (below BB)
+;'HGTHIST': Histogram of sample heights
+;'BBHIST': Histogram of Difference between sample and BB heights
+;'MRHIST': Histogram of MRMS Rain rates
+;'DRHIST': Histogram of DPR Rain rates
 ;
 ; If an alternate field is specified in the ALTFIELD parameter (values as
 ; defined by the IDs in quotes, above), then scatter plots will be created for
@@ -784,6 +788,24 @@ GRZSH_below_s = []
 GRDMSH_below_c = []
 GRDMSH_below_s = []
 
+;'HGTHIST': Histogram of sample heights
+;'BBDHIST': Histogram of Difference between sample and BB heights
+
+HGTHIST_accum0 = []
+HGTHIST_accum1 = []
+HGTHIST_accum2 = []
+BBHIST_accum0 = []
+BBHIST_accum1 = []
+BBHIST_accum2 = []
+MRHIST_accum0 = []
+MRHIST_accum1 = []
+MRHIST_accum2 = []
+DRHIST_accum0 = []
+DRHIST_accum1 = []
+DRHIST_accum2 = []
+;'MRHIST': Histogram of MRMS Rain rates
+;'DRHIST': Histogram of DPR Rain rates
+;
 ;TAB 8/12/17
 ; LUN for writing anomaly info to file
 openw, anom_LUN, outpath + '/anomaly.txt', /GET_LUN
@@ -797,8 +819,13 @@ IF KEYWORD_SET(batch_save) THEN buffer=1 ELSE buffer=0
 ; of the data.  First triplet of values are for stratiform/aboveBB, 2nd triplet
 ; is convective/belowBB, 3rd is Any/All
 ; TAB 11/13/17 added fourth dimension for above BB convective
+
 have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 			 GRDMSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+			HGTHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+			 BBHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+			 MRHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+			 DRHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 				HID : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             MRMSDSR : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             GRRMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
@@ -1173,6 +1200,9 @@ ptr_mrmsrrmed=ptr_new(/allocate_heap)
 ptr_mrmsrrhigh=ptr_new(/allocate_heap)
 ptr_mrmsrrveryhigh=ptr_new(/allocate_heap)
 
+ptr_top=ptr_new(/allocate_heap)
+ptr_botm=ptr_new(/allocate_heap)
+
 ptr_mrmsrqiplow=ptr_new(/allocate_heap)
 ptr_mrmsrqipmed=ptr_new(/allocate_heap)
 ptr_mrmsrqiphigh=ptr_new(/allocate_heap)
@@ -1435,6 +1465,9 @@ CASE pr_or_dpr OF
        PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
        PTRMRMSHID=ptr_MRMS_HID, $
 
+	   ; TAB 7/9/18
+	   PTRtop=ptr_top, PTRbotm=ptr_botm, $
+	   
        PTRrainflag_int=ptr_rnFlag, PTRraintype_int=ptr_rnType, PTRbbProx=ptr_bbProx, $
        PTRhgtcat=ptr_hgtcat, PTRdist=ptr_dist,PTRbbHgt=ptr_bbHeight,  $
        PTRpctgoodpr=ptr_pctgoodpr, PTRpctgoodrain=ptr_pctgoodrain, $
@@ -1529,6 +1562,10 @@ ENDIF
    mrmsrqipmed=temporary(*ptr_mrmsrqipmed)
    mrmsrqiphigh=temporary(*ptr_mrmsrqiphigh)
    mrmsrqipveryhigh=temporary(*ptr_mrmsrqipveryhigh)
+   
+   ; TAB, get top and bottom height of volume
+   top_ht = temporary(*ptr_top)
+   botm_ht = temporary(*ptr_botm)
 
    mrmshid=temporary(*ptr_MRMS_HID)
 
@@ -2070,9 +2107,13 @@ print, ''
           dist = dist[idxgoodenuff]
           bbProx = bbProx[idxgoodenuff]
           hgtcat = hgtcat[idxgoodenuff]
+          
 ; TAB 12/01/17 added HID variables, any new variables must be filtered here
  ;         hid = hid[*,idxgoodenuff]
  		  nearSurfRain = nearSurfRain[idxgoodenuff]
+ 		  top_ht = top_ht[idxgoodenuff]
+ 		  botm_ht = botm_ht[idxgoodenuff]
+ 		  bbHeight = bbHeight[idxgoodenuff]
  		  
 ;  cant figure out how to reindex the Hid arrays, so for now just use besthid
 ;          sz = size(hid)
@@ -2360,6 +2401,34 @@ endif
      ; set up the indices of the samples to include in the scatter plots
       skip_plot = 0
       SWITCH PlotTypes(iplot) OF
+      
+ 
+ ;			HGTHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+;			 BBHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+ 
+     'HGTHIST' :
+      'BBHIST' :
+      'MRHIST' :
+      'DRHIST' :  BEGIN ; Don't stratify on height
+                CASE raintypeBBidx OF
+                   0 : BEGIN
+                      ; accumulate stratiform rain types
+                      idxabv = WHERE( rntype EQ RainType_stratiform, countabv )
+                      END
+                   1 : BEGIN
+                      ; accumulate convective rain types
+                      idxabv = WHERE( rntype EQ RainType_convective, countabv )
+                      END
+                   2 : BEGIN
+                      ; accumulate convective rain types
+                      idxabv = WHERE( rntype EQ RainType_convective OR rntype EQ RainType_stratiform, countabv )
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
+      
      'GRDMSH' : BEGIN ; only do for all below BB
      		; GR_Dmstddev
 			;GR Dm standard deviation histogram (below BB)
@@ -3062,6 +3131,103 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF
               END
+     'HGTHIST' : BEGIN ; Don't stratify on height
+                CASE raintypeBBidx OF
+                   0 : BEGIN
+                      ; accumulate stratiform rain types
+                      IF countabv GT 0 THEN $
+                      	HGTHIST_accum0 = [HGTHIST_accum0, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0]
+                      END
+                   1 : BEGIN
+                      ; accumulate convective rain types
+                      IF countabv GT 0 THEN $
+                      	HGTHIST_accum1 = [HGTHIST_accum1, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0]
+                      END
+                   2 : BEGIN
+                      ; accumulate all rain types
+                      HGTHIST_accum2 = [HGTHIST_accum2, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0]
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
+     'BBHIST' : BEGIN ; Don't stratify on height
+                CASE raintypeBBidx OF
+                   0 : BEGIN
+                      ; accumulate stratiform rain types
+                      IF countabv GT 0 THEN $
+                      	BBHIST_accum0 = [BBHIST_accum0, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0 - bbHeight[idxabv] ]
+                      END
+                   1 : BEGIN
+                      ; accumulate convective rain types
+                      IF countabv GT 0 THEN $
+                      	BBHIST_accum1 = [BBHIST_accum1, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0 - bbHeight[idxabv] ]
+                      END
+                   2 : BEGIN
+                      ; accumulate all rain types
+                      BBHIST_accum2 = [BBHIST_accum2, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0  - bbHeight[idxabv] ]
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
+     'MRHIST' : BEGIN ; Don't stratify on height
+   				IF have_mrms EQ 0 OR countabv eq 0 THEN break
+   				
+			    rqi = mrmsrqipveryhigh[idxabv]
+  				mrms_rr = mrmsrrveryhigh[idxabv]
+                idxnonzero=WHERE(mrms_rr GE 0.0 and rqi ge 95 ,count )
+                                        
+                CASE raintypeBBidx OF
+                   0 : BEGIN
+                      ; accumulate stratiform rain types
+                      if count gt 0 then $
+                      	 MRHIST_accum0 = [MRHIST_accum0, mrms_rr[idxnonzero]]
+                      END
+                   1 : BEGIN
+                      ; accumulate convective rain types
+                      if count gt 0 then $
+                      	 MRHIST_accum1 = [MRHIST_accum1, mrms_rr[idxnonzero] ]
+                      END
+                   2 : BEGIN
+                      ; accumulate all rain types
+                      if count gt 0 then $
+                      	 MRHIST_accum2 = [MRHIST_accum2, mrms_rr[idxnonzero]]
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
+     'DRHIST' : BEGIN ; Don't stratify on height
+   				IF have_mrms EQ 0 OR countabv eq 0 THEN break
+   				
+   				ns_rr = nearSurfRain[idxabv]
+                idxnonzero=WHERE(ns_rr GE 0.0,count )
+                
+                CASE raintypeBBidx OF
+                   0 : BEGIN
+                      ; accumulate stratiform rain types
+                      if count gt 0 then $
+                      	 DRHIST_accum0 = [DRHIST_accum0, ns_rr[idxnonzero]]
+                      END
+                   1 : BEGIN
+                      ; accumulate convective rain types
+                       if count gt 0 then $
+                      	 DRHIST_accum1 = [DRHIST_accum1, ns_rr[idxnonzero] ]
+                      END
+                   2 : BEGIN
+                      ; accumulate all rain types
+                      if count gt 0 then $
+                     	 DRHIST_accum2 = [DRHIST_accum2, ns_rr[idxnonzero]]
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
       'GRDMSH' : BEGIN ; only do for all below BB
                CASE raintypeBBidx OF
                    0 : BEGIN
@@ -3382,7 +3548,9 @@ BB_string = '_BelowBB'
 ; TAB 11/14/17 changed conditon to allow the HID histogram without checking have_hist structure
 ;IF have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL THEN BEGIN
 IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2do) EQ 'GRDMSH' OR  $
-  (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL) THEN BEGIN
+   PlotTypes(idx2do) EQ 'HGTHIST' OR PlotTypes(idx2do) EQ 'BBHIST' OR $
+   PlotTypes(idx2do) EQ 'MRHIST' OR PlotTypes(idx2do) EQ 'DRHIST' OR $
+   (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL) THEN BEGIN
   ; CREATE THE SCATTER PLOT OBJECT FROM THE BINNED DATA
    do_MAE_1_1 = 1    ; flag to include/suppress MAE and the 1:1 line on plots
    bustOut=0
@@ -4450,6 +4618,194 @@ print, "GRPDSR plot...."
     
     numBars=1
 	CASE PlotTypes(idx2do) OF
+	   'HGTHIST' : BEGIN
+    	    titleLine1 = satprodtype+' '+version+ " Sample Height Histogram"  
+			CASE raintypeBBidx OF
+			   0 : BEGIN
+			      if HGTHIST_accum0 eq !NULL then begin
+			      	  print, "Height histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use stratiform types
+				  hist1 = HISTOGRAM(HGTHIST_accum0, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Stratiform Samples, " +pctabvstr+" Above Thresh"
+			      END
+			   1 : BEGIN
+			      if HGTHIST_accum1 eq !NULL then begin
+			      	  print, "Height histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use convective types
+				  hist1 = HISTOGRAM(HGTHIST_accum1, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Convective Samples, " +pctabvstr+" Above Thresh"
+			      END
+			   2 : BEGIN
+			      if HGTHIST_accum2 eq !NULL then begin
+			      	  print, "Height histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use convective types
+				  hist1 = HISTOGRAM(HGTHIST_accum2, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "All Samples, " +pctabvstr+" Above Thresh"
+			      END
+			ELSE: BEGIN
+			         goto, plot_skipped1
+			      END
+			ENDCASE
+	   	END
+	   'BBHIST' : BEGIN
+    	    titleLine1 = satprodtype+' '+version+ " BB Height diff Histogram"  
+			CASE raintypeBBidx OF
+			   0 : BEGIN
+			      if BBHIST_accum0 eq !NULL then begin
+			      	  print, "BB Height diff histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use stratiform types
+				  hist1 = HISTOGRAM(BBHIST_accum0, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Stratiform Samples, " +pctabvstr+" Above Thresh"
+			      END
+			   1 : BEGIN
+			      if BBHIST_accum1 eq !NULL then begin
+			      	  print, "BB Height diff is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use convective types
+				  hist1 = HISTOGRAM(BBHIST_accum1, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Convective Samples, " +pctabvstr+" Above Thresh"
+			      END
+			   2 : BEGIN
+			      if BBHIST_accum2 eq !NULL then begin
+			      	  print, "BB Height diff is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use convective types
+				  hist1 = HISTOGRAM(BBHIST_accum2, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "All Samples, " +pctabvstr+" Above Thresh"
+			      END
+			ELSE: BEGIN
+			         goto, plot_skipped1
+			      END
+			ENDCASE
+	   	END
+	   'MRHIST' : BEGIN
+    	    titleLine1 = satprodtype+' '+version+ " MRMS RR Histogram"  
+			CASE raintypeBBidx OF
+			   0 : BEGIN
+			      if MRHIST_accum0 eq !NULL then begin
+			      	  print, "MRMS RR is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use stratiform types
+				  hist1 = HISTOGRAM(MRHIST_accum0, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Stratiform Samples, " +pctabvstr+" Above Thresh"
+			      END
+			   1 : BEGIN
+			      if MRHIST_accum1 eq !NULL then begin
+			      	  print, "MRMS RR is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use convective types
+				  hist1 = HISTOGRAM(MRHIST_accum1, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Convective Samples, " +pctabvstr+" Above Thresh"
+			      END
+			   2 : BEGIN
+			      if MRHIST_accum2 eq !NULL then begin
+			      	  print, "MRMS RR is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use convective types
+				  hist1 = HISTOGRAM(MRHIST_accum2, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "All Samples, " +pctabvstr+" Above Thresh"
+			      END
+			ELSE: BEGIN
+			         goto, plot_skipped1
+			      END
+			ENDCASE
+	   	END
+	   'DRHIST' : BEGIN
+    	    titleLine1 = satprodtype+' '+version+ " DPR RR Histogram"  
+			CASE raintypeBBidx OF
+			   0 : BEGIN
+			      if DRHIST_accum0 eq !NULL then begin
+			      	  print, "DPR RR is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use stratiform types
+				  hist1 = HISTOGRAM(DRHIST_accum0, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Stratiform Samples, " +pctabvstr+" Above Thresh"
+			      END
+			   1 : BEGIN
+			      if DRHIST_accum1 eq !NULL then begin
+			      	  print, "DPR RR is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use convective types
+				  hist1 = HISTOGRAM(DRHIST_accum1, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Convective Samples, " +pctabvstr+" Above Thresh"
+			      END
+			   2 : BEGIN
+			      if DRHIST_accum2 eq !NULL then begin
+			      	  print, "DPR RR is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use convective types
+				  hist1 = HISTOGRAM(DRHIST_accum2, LOCATIONS=xvals1, nbins=10)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "All Samples, " +pctabvstr+" Above Thresh"
+			      END
+			ELSE: BEGIN
+			         goto, plot_skipped1
+			      END
+			ENDCASE
+	   	END
 	   'GRDMSH' : BEGIN
 ;    	    titleLine1 = "GR Dm Std Dev Histogram  "+satprodtype+" for " $
 ;               + pr_or_dpr+' '+version
@@ -4575,6 +4931,60 @@ print, "GRPDSR plot...."
 	   	END
 	ENDCASE		   		
 
+   if PlotTypes(idx2do) EQ 'HGTHIST' OR PlotTypes(idx2do) EQ 'BBHIST' then begin
+   
+        PRINT, ''
+        PRINT, '' 
+        PRINT, "PLOTTING: Histograms ", PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
+        PRINT, '' 
+
+        IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
+             imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
+        ENDIF ELSE BEGIN 
+             imTITLE = imTITLE + " " + filtertitlestring
+        ENDELSE
+        hist1_total=total(hist1, /double)
+        hist1=100.0 * (hist1/hist1_total)
+        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Sample Height' $
+                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
+                      , xrange=[minstddev,maxstddev], yrange=[0,100])
+
+        pngfile = outpath_sav + '/'+ PlotTypes(idx2do) + '_'+ rntypeLabels[raintypeBBidx] + $
+             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
+             addme + filteraddstring + '.png'
+        print, "PNGFILE: ",pngfile
+        bar.save, pngfile, RESOLUTION=300
+        bar.close
+   	  goto, plot_skipped1
+
+   endif
+   if PlotTypes(idx2do) EQ 'MRHIST' OR PlotTypes(idx2do) EQ 'DRHIST' then begin
+   
+        PRINT, ''
+        PRINT, '' 
+        PRINT, "PLOTTING: Histograms ", PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
+        PRINT, '' 
+
+        IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
+             imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
+        ENDIF ELSE BEGIN 
+             imTITLE = imTITLE + " " + filtertitlestring
+        ENDELSE
+        hist1_total=total(hist1, /double)
+        hist1=100.0 * (hist1/hist1_total)
+        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Rain Rate (mm/h)' $
+                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
+                      , xrange=[minstddev,maxstddev], yrange=[0,100])
+
+        pngfile = outpath_sav + '/'+ PlotTypes(idx2do) + '_'+ rntypeLabels[raintypeBBidx] + $
+             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
+             addme + filteraddstring + '.png'
+        print, "PNGFILE: ",pngfile
+        bar.save, pngfile, RESOLUTION=300
+        bar.close
+   	  goto, plot_skipped1
+
+   endif
 
    if PlotTypes(idx2do) EQ 'GRDMSH' OR  PlotTypes(idx2do) EQ 'GRZSH' then begin
    
@@ -5251,6 +5661,9 @@ if (ptr_valid(ptr_mrmsrqiplow) eq 1) then ptr_free,ptr_mrmsrqiplow
 if (ptr_valid(ptr_mrmsrqipmed) eq 1) then ptr_free,ptr_mrmsrqipmed
 if (ptr_valid(ptr_mrmsrqiphigh) eq 1) then ptr_free,ptr_mrmsrqiphigh
 if (ptr_valid(ptr_mrmsrqipveryhigh) eq 1) then ptr_free,ptr_mrmsrqipveryhigh
+
+if (ptr_valid(ptr_top) eq 1) then ptr_free,ptr_top
+if (ptr_valid(ptr_botm) eq 1) then ptr_free,ptr_botm
 
 if (ptr_valid(ptr_MRMS_HID) eq 1) then ptr_free,ptr_MRMS_HID
 
