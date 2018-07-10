@@ -3157,16 +3157,16 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                    0 : BEGIN
                       ; accumulate stratiform rain types
                       IF countabv GT 0 THEN $
-                      	BBHIST_accum0 = [BBHIST_accum0, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0 - bbHeight[idxabv] ]
+                      	BBHIST_accum0 = [BBHIST_accum0, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0 - bbHeight[idxabv]/1000.0 ]
                       END
                    1 : BEGIN
                       ; accumulate convective rain types
                       IF countabv GT 0 THEN $
-                      	BBHIST_accum1 = [BBHIST_accum1, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0 - bbHeight[idxabv] ]
+                      	BBHIST_accum1 = [BBHIST_accum1, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0 - bbHeight[idxabv]/1000.0 ]
                       END
                    2 : BEGIN
                       ; accumulate all rain types
-                      BBHIST_accum2 = [BBHIST_accum2, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0  - bbHeight[idxabv] ]
+                      BBHIST_accum2 = [BBHIST_accum2, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0  - bbHeight[idxabv]/1000.0 ]
                       END
                 ELSE: BEGIN
                       END
@@ -4630,7 +4630,7 @@ print, "GRPDSR plot...."
 			      ; use stratiform types
 				  minhistval=MIN(HGTHIST_accum0)
 				  maxhistval=MAX(HGTHIST_accum0)
-				  hist1 = HISTOGRAM(HGTHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(HGTHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4645,7 +4645,7 @@ print, "GRPDSR plot...."
 			      ; use convective types
 				  minhistval=MIN(HGTHIST_accum1)
 				  maxhistval=MAX(HGTHIST_accum1)
-				  hist1 = HISTOGRAM(HGTHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(HGTHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4660,7 +4660,7 @@ print, "GRPDSR plot...."
 			      ; use convective types
 				  minhistval=MIN(HGTHIST_accum2)
 				  maxhistval=MAX(HGTHIST_accum2)
-				  hist1 = HISTOGRAM(HGTHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(HGTHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4683,7 +4683,7 @@ print, "GRPDSR plot...."
 			      ; use stratiform types
 				  minhistval=MIN(BBHIST_accum0)
 				  maxhistval=MAX(BBHIST_accum0)
-				  hist1 = HISTOGRAM(BBHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(BBHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4698,7 +4698,7 @@ print, "GRPDSR plot...."
 			      ; use convective types
 				  minhistval=MIN(BBHIST_accum1)
 				  maxhistval=MAX(BBHIST_accum1)
-				  hist1 = HISTOGRAM(BBHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(BBHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4713,7 +4713,7 @@ print, "GRPDSR plot...."
 			      ; use convective types
 				  minhistval=MIN(BBHIST_accum2)
 				  maxhistval=MAX(BBHIST_accum2)
-				  hist1 = HISTOGRAM(BBHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(BBHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4736,7 +4736,7 @@ print, "GRPDSR plot...."
 			      ; use stratiform types
 				  minhistval=MIN(MRHIST_accum0)
 				  maxhistval=MAX(MRHIST_accum0)
-				  hist1 = HISTOGRAM(MRHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(MRHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4751,7 +4751,7 @@ print, "GRPDSR plot...."
 			      ; use convective types
 				  minhistval=MIN(MRHIST_accum1)
 				  maxhistval=MAX(MRHIST_accum1)
-				  hist1 = HISTOGRAM(MRHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(MRHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4766,7 +4766,7 @@ print, "GRPDSR plot...."
 			      ; use convective types
 				  minhistval=MIN(MRHIST_accum2)
 				  maxhistval=MAX(MRHIST_accum2)
-				  hist1 = HISTOGRAM(MRHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(MRHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4789,7 +4789,7 @@ print, "GRPDSR plot...."
 			      ; use stratiform types
 				  minhistval=MIN(DRHIST_accum0)
 				  maxhistval=MAX(DRHIST_accum0)
-				  hist1 = HISTOGRAM(DRHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(DRHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4804,7 +4804,7 @@ print, "GRPDSR plot...."
 			      ; use convective types
 				  minhistval=MIN(DRHIST_accum1)
 				  maxhistval=MAX(DRHIST_accum1)
-				  hist1 = HISTOGRAM(DRHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(DRHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4819,7 +4819,7 @@ print, "GRPDSR plot...."
 			      ; use convective types
 				  minhistval=MIN(DRHIST_accum2)
 				  maxhistval=MAX(DRHIST_accum2)
-				  hist1 = HISTOGRAM(DRHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=10)      
+				  hist1 = HISTOGRAM(DRHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
@@ -4969,7 +4969,7 @@ print, "GRPDSR plot...."
         ENDELSE
         hist1_total=total(hist1, /double)
         hist1=100.0 * (hist1/hist1_total)
-        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Sample Height' $
+        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Sample Height (km)' $
                       , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
                       , xrange=[minhistval,maxhistval], yrange=[0,100])
 
