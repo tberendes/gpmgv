@@ -2117,7 +2117,7 @@ print, ''
  		  botm_ht = botm_ht[idxgoodenuff]
  		  ; convert bbheight from MSL to AGL and from m to km
  		  bbHeight = (bbHeight[idxgoodenuff] / 1000.0) - site_elev
- 		  
+ 		  print, 'site_elev ',site_elev
  		  print, 'bbHeight ', bbHeight
  		  print, 'botm_ht ', botm_ht
  		  
