@@ -1792,6 +1792,8 @@ blockfilter = 'C'    ; initialize blockage filter to "by Column"
 ; extract some needed values from the metadata structures
    site_lat = mysite.site_lat
    site_lon = mysite.site_lon
+   site_elev = mysite.site_elev
+   
    siteID = string(mysite.site_id)
    nsweeps = mygeometa.num_sweeps
 
@@ -2113,7 +2115,8 @@ print, ''
  		  nearSurfRain = nearSurfRain[idxgoodenuff]
  		  top_ht = top_ht[idxgoodenuff]
  		  botm_ht = botm_ht[idxgoodenuff]
- 		  bbHeight = bbHeight[idxgoodenuff]
+ 		  ; convert bbheight from MSL to AGL and from m to km
+ 		  bbHeight = (bbHeight[idxgoodenuff] / 1000.0) - site_elev
  		  
 ;  cant figure out how to reindex the Hid arrays, so for now just use besthid
 ;          sz = size(hid)
@@ -3157,16 +3160,16 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                    0 : BEGIN
                       ; accumulate stratiform rain types
                       IF countabv GT 0 THEN $
-                      	BBHIST_accum0 = [BBHIST_accum0, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0 - bbHeight[idxabv]/1000.0 ]
+                      	BBHIST_accum0 = [BBHIST_accum0, (botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0) - bbHeight[idxabv]]
                       END
                    1 : BEGIN
                       ; accumulate convective rain types
                       IF countabv GT 0 THEN $
-                      	BBHIST_accum1 = [BBHIST_accum1, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0 - bbHeight[idxabv]/1000.0 ]
+                      	BBHIST_accum1 = [BBHIST_accum1, (botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0) - bbHeight[idxabv]]
                       END
                    2 : BEGIN
                       ; accumulate all rain types
-                      BBHIST_accum2 = [BBHIST_accum2, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0  - bbHeight[idxabv]/1000.0 ]
+                      BBHIST_accum2 = [BBHIST_accum2, (botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0)  - bbHeight[idxabv]]
                       END
                 ELSE: BEGIN
                       END
