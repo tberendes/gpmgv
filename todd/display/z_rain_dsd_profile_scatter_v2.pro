@@ -2118,6 +2118,9 @@ print, ''
  		  ; convert bbheight from MSL to AGL and from m to km
  		  bbHeight = (bbHeight[idxgoodenuff] / 1000.0) - site_elev
  		  
+ 		  print, 'bbHeight ', bbHeight
+ 		  print, 'botm_ht ', botm_ht
+ 		  
 ;  cant figure out how to reindex the Hid arrays, so for now just use besthid
 ;          sz = size(hid)
 ;         hid_new = lonarr(sz[1],N_ELEMENTS(idxgoodenuff))
