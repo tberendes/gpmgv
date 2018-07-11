@@ -2419,15 +2419,16 @@ endif
                 CASE raintypeBBidx OF
                    0 : BEGIN
                       ; accumulate stratiform rain types
-                      idxabv = WHERE( rntype EQ RainType_stratiform, countabv )
+                      
+                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_stratiform, countabv )
                       END
                    1 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE( rntype EQ RainType_convective, countabv )
+                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_convective, countabv )
                       END
                    2 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE( rntype EQ RainType_convective OR rntype EQ RainType_stratiform, countabv )
+                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_convective OR rntype EQ RainType_stratiform, countabv )
                       END
                 ELSE: BEGIN
                       END
@@ -2438,15 +2439,15 @@ endif
                 CASE raintypeBBidx OF
                    0 : BEGIN
                       ; accumulate stratiform rain types
-                      idxabv = WHERE( rntype EQ RainType_stratiform and bbHeight GT 0, countabv )
+                      idxabv = WHERE(  BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_stratiform and bbHeight GT 0, countabv )
                       END
                    1 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE( rntype EQ RainType_convective and bbHeight GT 0, countabv )
+                      idxabv = WHERE(  BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_convective and bbHeight GT 0, countabv )
                       END
                    2 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE( rntype EQ RainType_convective OR rntype EQ RainType_stratiform and bbHeight GT 0, countabv )
+                      idxabv = WHERE(  BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_convective OR rntype EQ RainType_stratiform and bbHeight GT 0, countabv )
                       END
                 ELSE: BEGIN
                       END
