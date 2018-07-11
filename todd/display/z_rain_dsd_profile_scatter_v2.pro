@@ -3169,7 +3169,8 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                       END
                    2 : BEGIN
                       ; accumulate all rain types
-                      HGTHIST_accum2 = [HGTHIST_accum2, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0]
+                      IF countabv GT 0 THEN $
+                      	HGTHIST_accum2 = [HGTHIST_accum2, botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0]
                       END
                 ELSE: BEGIN
                       END
@@ -3190,7 +3191,8 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                       END
                    2 : BEGIN
                       ; accumulate all rain types
-                      BBHIST_accum2 = [BBHIST_accum2, (botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0)  - bbHeight[idxabv]]
+                      IF countabv GT 0 THEN $
+                      	BBHIST_accum2 = [BBHIST_accum2, (botm_ht[idxabv] + (top_ht[idxabv] - botm_ht[idxabv])/2.0)  - bbHeight[idxabv]]
                       END
                 ELSE: BEGIN
                       END
