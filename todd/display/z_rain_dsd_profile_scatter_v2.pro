@@ -4663,7 +4663,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Samples, " +pctabvstr+" Above Thresh"
+                      "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
 			      if HGTHIST_accum1 eq !NULL then begin
@@ -4678,7 +4678,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Convective Samples, " +pctabvstr+" Above Thresh"
+                      "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   2 : BEGIN
 			      if HGTHIST_accum2 eq !NULL then begin
@@ -4693,7 +4693,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "All Samples, " +pctabvstr+" Above Thresh"
+                      "All Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
@@ -4718,7 +4718,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Samples, " +pctabvstr+" Above Thresh"
+                      "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
 			      if BBHIST_accum1 eq !NULL then begin
@@ -4733,7 +4733,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Convective Samples, " +pctabvstr+" Above Thresh"
+                      "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   2 : BEGIN
 			      if BBHIST_accum2 eq !NULL then begin
@@ -4748,7 +4748,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "All Samples, " +pctabvstr+" Above Thresh"
+                      "All Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
@@ -4773,7 +4773,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Samples, " +pctabvstr+" Above Thresh"
+                      "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
 			      if MRHIST_accum1 eq !NULL then begin
@@ -4788,7 +4788,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Convective Samples, " +pctabvstr+" Above Thresh"
+                      "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   2 : BEGIN
 			      if MRHIST_accum2 eq !NULL then begin
@@ -4803,7 +4803,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "All Samples, " +pctabvstr+" Above Thresh"
+                      "All Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
@@ -4828,7 +4828,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Samples, " +pctabvstr+" Above Thresh"
+                      "Stratiform Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   1 : BEGIN
 			      if DRHIST_accum1 eq !NULL then begin
@@ -4843,7 +4843,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Convective Samples, " +pctabvstr+" Above Thresh"
+                      "Convective Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			   2 : BEGIN
 			      if DRHIST_accum2 eq !NULL then begin
@@ -4858,7 +4858,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "All Samples, " +pctabvstr+" Above Thresh"
+                      "All Samples, Below Bright Band and <= 3 km AGL, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
