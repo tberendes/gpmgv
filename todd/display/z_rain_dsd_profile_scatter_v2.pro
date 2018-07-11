@@ -4647,7 +4647,7 @@ print, "GRPDSR plot...."
 	CASE PlotTypes(idx2do) OF
 	   'HGTHIST' : BEGIN
  			minhistval=0
-			maxhistval=14
+			maxhistval=3
     	    titleLine1 = satprodtype+' '+version+ " Sample Height Histogram"  
 			CASE raintypeBBidx OF
 			   0 : BEGIN
