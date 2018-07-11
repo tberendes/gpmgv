@@ -2428,7 +2428,7 @@ endif
                       END
                    2 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_convective OR rntype EQ RainType_stratiform, countabv )
+                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1 AND (rntype EQ RainType_convective OR rntype EQ RainType_stratiform), countabv )
                       END
                 ELSE: BEGIN
                       END
@@ -2447,7 +2447,7 @@ endif
                       END
                    2 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE(  BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_convective OR rntype EQ RainType_stratiform and bbHeight GT 0, countabv )
+                      idxabv = WHERE(  BBprox EQ 0 AND hgtcat LE 1 AND (rntype EQ RainType_convective OR rntype EQ RainType_stratiform) and bbHeight GT 0, countabv )
                       END
                 ELSE: BEGIN
                       END
