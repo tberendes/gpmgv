@@ -5061,7 +5061,7 @@ print, "GRPDSR plot...."
 		histmax = max(hist1)
 		starty = 90
  
-       	text1 = TEXT(startx,starty1, histMean, /CURRENT, /DATA)
+       	text1 = TEXT(startx,starty, histMean, /CURRENT, /DATA)
 
         pngfile = outpath_sav + '/'+ PlotTypes(idx2do) + '_'+ rntypeLabels[raintypeBBidx] + $
              BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
