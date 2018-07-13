@@ -4769,6 +4769,9 @@ print, "GRPDSR plot...."
 			      ; use stratiform types
 ;				  minhistval=MIN(MRHIST_accum0)
 ;				  maxhistval=MAX(MRHIST_accum0)
+				  mean=MEAN(MRHIST_accum0)
+				  mean_str = STRING(mean, FORMAT='(F5.2)')
+				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(MRHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
@@ -4784,6 +4787,9 @@ print, "GRPDSR plot...."
 			      ; use convective types
 ;				  minhistval=MIN(MRHIST_accum1)
 ;				  maxhistval=MAX(MRHIST_accum1)
+				  mean=MEAN(MRHIST_accum1)
+				  mean_str = STRING(mean, FORMAT='(F5.2)')
+				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(MRHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
@@ -4799,6 +4805,9 @@ print, "GRPDSR plot...."
 			      ; use convective types
 ;				  minhistval=MIN(MRHIST_accum2)
 ;				  maxhistval=MAX(MRHIST_accum2)
+				  mean=MEAN(MRHIST_accum2)
+				  mean_str = STRING(mean, FORMAT='(F5.2)')
+				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(MRHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
@@ -4824,6 +4833,9 @@ print, "GRPDSR plot...."
 			      ; use stratiform types
 ;				  minhistval=MIN(DRHIST_accum0)
 ;				  maxhistval=MAX(DRHIST_accum0)
+				  mean=MEAN(DRHIST_accum0)
+				  mean_str = STRING(mean, FORMAT='(F5.2)')
+				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(DRHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
@@ -4839,6 +4851,9 @@ print, "GRPDSR plot...."
 			      ; use convective types
 ;				  minhistval=MIN(DRHIST_accum1)
 ;				  maxhistval=MAX(DRHIST_accum1)
+				  mean=MEAN(DRHIST_accum1)
+				  mean_str = STRING(mean, FORMAT='(F5.2)')
+				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(DRHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
@@ -4854,6 +4869,9 @@ print, "GRPDSR plot...."
 			      ; use convective types
 ;				  minhistval=MIN(DRHIST_accum2)
 ;				  maxhistval=MAX(DRHIST_accum2)
+				  mean=MEAN(DRHIST_accum2)
+				  mean_str = STRING(mean, FORMAT='(F5.2)')
+				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(DRHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
@@ -5038,6 +5056,12 @@ print, "GRPDSR plot...."
         bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Rain Rate (mm/h)' $
                       , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
                       , xrange=[minhistval,maxhistval], yrange=[0,100])
+
+		startx = minhistval + 0.45*(maxhistval-minhistval)
+		histmax = max(hist1)
+		starty = 90
+ 
+       	text1 = TEXT(startx,starty1, histMean, /CURRENT, /DATA)
 
         pngfile = outpath_sav + '/'+ PlotTypes(idx2do) + '_'+ rntypeLabels[raintypeBBidx] + $
              BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
