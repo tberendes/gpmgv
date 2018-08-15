@@ -299,6 +299,8 @@
 ; 11/30/16 by Bob Morris, GPM GV (SAIC)
 ;  - Added reading of DPRGMI stormTopAltitude (ptr_stmTopHgt) field for version
 ;    1.3 file.
+; 8/15/18 Todd Berendes, UAH 
+;  - returned value for BBheight, previously not returned
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
@@ -1402,6 +1404,10 @@ IF PTR_VALID(ptr_sweepmeta) THEN *ptr_sweepmeta = mysweeps
 IF PTR_VALID(ptr_sitemeta) THEN *ptr_sitemeta = mysite
 IF PTR_VALID(ptr_fieldflags) THEN *ptr_fieldflags = myflags
 IF PTR_VALID(ptr_filesmeta) THEN *ptr_filesmeta = myfiles
+
+; TAB 8/15/18 added 
+IF PTR_VALID(ptr_bbHeight) THEN *ptr_bbHeight = BBHeight
+
 
 errorExit:
 
