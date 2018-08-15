@@ -1731,7 +1731,14 @@ ENDIF ELSE have_RP = 0
 
 ; set up the data presence flags for the two-parameter plots
 
-IF myflags.have_mrms EQ 1 THEN have_mrms = 1 ELSE have_mrms = 0
+; mrms not set up for DPRGMI or PR yet
+if STRUPCASE(instrument) NE 'DPR' then begin
+	have_mrms = 0
+endif else begin
+
+	IF myflags.have_mrms EQ 1 THEN have_mrms = 1 ELSE have_mrms = 0
+
+endelse
 
 
 ; TAB 9/29/17  Hardcode for now, check presence later
@@ -4770,7 +4777,7 @@ print, "GRPDSR plot...."
 ;				  minhistval=MIN(MRHIST_accum0)
 ;				  maxhistval=MAX(MRHIST_accum0)
 				  mean=MEAN(MRHIST_accum0)
-				  mean_str = STRING(mean, FORMAT='(F5.3)')
+				  mean_str = STRING(mean, FORMAT='(F7.3)')
 				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(MRHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
@@ -4788,7 +4795,7 @@ print, "GRPDSR plot...."
 ;				  minhistval=MIN(MRHIST_accum1)
 ;				  maxhistval=MAX(MRHIST_accum1)
 				  mean=MEAN(MRHIST_accum1)
-				  mean_str = STRING(mean, FORMAT='(F5.3)')
+				  mean_str = STRING(mean, FORMAT='(F7.3)')
 				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(MRHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
@@ -4806,7 +4813,7 @@ print, "GRPDSR plot...."
 ;				  minhistval=MIN(MRHIST_accum2)
 ;				  maxhistval=MAX(MRHIST_accum2)
 				  mean=MEAN(MRHIST_accum2)
-				  mean_str = STRING(mean, FORMAT='(F5.3)')
+				  mean_str = STRING(mean, FORMAT='(F7.3)')
 				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(MRHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
@@ -4834,7 +4841,7 @@ print, "GRPDSR plot...."
 ;				  minhistval=MIN(DRHIST_accum0)
 ;				  maxhistval=MAX(DRHIST_accum0)
 				  mean=MEAN(DRHIST_accum0)
-				  mean_str = STRING(mean, FORMAT='(F5.3)')
+				  mean_str = STRING(mean, FORMAT='(F7.3)'
 				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(DRHIST_accum0, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
@@ -4852,7 +4859,7 @@ print, "GRPDSR plot...."
 ;				  minhistval=MIN(DRHIST_accum1)
 ;				  maxhistval=MAX(DRHIST_accum1)
 				  mean=MEAN(DRHIST_accum1)
-				  mean_str = STRING(mean, FORMAT='(F5.3)')
+				  mean_str = STRING(mean, FORMAT='(F7.3)'
 				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(DRHIST_accum1, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
@@ -4870,7 +4877,7 @@ print, "GRPDSR plot...."
 ;				  minhistval=MIN(DRHIST_accum2)
 ;				  maxhistval=MAX(DRHIST_accum2)
 				  mean=MEAN(DRHIST_accum2)
-				  mean_str = STRING(mean, FORMAT='(F5.3)')
+				  mean_str = STRING(mean, FORMAT='(F7.3)'
 				  histMean = "Mean " + mean_str
 				  hist1 = HISTOGRAM(DRHIST_accum2, LOCATIONS=xvals1, min=minhistval, max=maxhistval, nbins=20)      
 				  numPts = long(total(hist1,/INTEGER))
