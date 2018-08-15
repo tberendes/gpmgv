@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; fprep_dprgmi_geo_match_profiles.pro
+; fprep_dprgmi_geo_match_profiles_mrms.pro
 ; - Morris/SAIC/GPM_GV  June 2015
 ;
 ; DESCRIPTION
@@ -309,7 +309,7 @@
 ;===============================================================================
 
 
-FUNCTION fprep_dprgmi_geo_match_profiles, ncfilepr, heights_in, KUKA=KuKaIn, $
+FUNCTION fprep_dprgmi_geo_match_profiles_mrms, ncfilepr, heights_in, KUKA=KuKaIn, $
     SCANTYPE=scanTypeIn, PCT_ABV_THRESH=pctAbvThresh, GV_CONVECTIVE=gvconvective, $
     GV_STRATIFORM=gvstratiform, S2KU=s2ku, PTRgeometa=ptr_geometa, $
     PTRsweepmeta=ptr_sweepmeta, PTRsitemeta=ptr_sitemeta, $
