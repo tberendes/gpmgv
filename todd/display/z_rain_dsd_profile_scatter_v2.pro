@@ -1487,7 +1487,7 @@ CASE pr_or_dpr OF
  END
   'DPRGMI' : BEGIN
     PRINT, "INSTRUMENT: ", pr_or_dpr
-    status = fprep_dprgmi_geo_match_profiles( ncfilepr, heights, $
+    status = fprep_dprgmi_geo_match_profiles_mrms( ncfilepr, heights, $
        KUKA=KuKa, SCANTYPE=swath, PCT_ABV_THRESH=pctAbvThresh, S2KU=s2ku, $
        PTRfieldflags=ptr_fieldflags, PTRgeometa=ptr_geometa, $
        PTRsweepmeta=ptr_sweepmeta, PTRsitemeta=ptr_sitemeta, $
