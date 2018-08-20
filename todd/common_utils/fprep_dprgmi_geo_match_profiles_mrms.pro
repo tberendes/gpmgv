@@ -1394,6 +1394,9 @@ ENDIF
 
 status = 0   ; set to SUCCESS
 
+; TAB 8/15/18 added 
+IF PTR_VALID(ptr_bbHeight) THEN *ptr_bbHeight = BBHeight
+
 noMSdata:   ; skip to here if no MS swath data exist
 
 ; assign metadata pointer variables provided as optional keyword parameters,
@@ -1404,9 +1407,6 @@ IF PTR_VALID(ptr_sweepmeta) THEN *ptr_sweepmeta = mysweeps
 IF PTR_VALID(ptr_sitemeta) THEN *ptr_sitemeta = mysite
 IF PTR_VALID(ptr_fieldflags) THEN *ptr_fieldflags = myflags
 IF PTR_VALID(ptr_filesmeta) THEN *ptr_filesmeta = myfiles
-
-; TAB 8/15/18 added 
-IF PTR_VALID(ptr_bbHeight) THEN *ptr_bbHeight = BBHeight
 
 
 errorExit:
