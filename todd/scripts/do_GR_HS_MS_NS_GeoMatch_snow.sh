@@ -534,7 +534,7 @@ echo ''
 echo ""
 echo "Output control file:"
 ls -al $outfileall
-exit  # if uncommented, creates the control file for first date, and exits
+#exit  # if uncommented, creates the control file for first date, and exits
 
     if [ -s $outfileall ]
       then
