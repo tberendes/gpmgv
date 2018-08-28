@@ -56,7 +56,7 @@
 #                           polar2dpr_hs_ms_ns_V.bat is to be used in processing matchups.
 #                           This value also gets written to the geo_match_product table
 #                           in the gpmgv database as a descriptive attribute.  It's up
-#                           to the user to keep track of its use and meaning in relation#                           to the configured parameters in the polar2dpr_hs_ms_ns_V.bat#                           files. See do_GR_HS_MS_NS_geo_matchup4date.sh for details.#                           INTEGER type.
+#                           to the user to keep track of its use and meaning in relation#                           to the configured parameters in the polar2dpr_hs_ms_ns_V.bat#                           files. See do_GR_HS_MS_NS_geo_matchup4date_snow.sh for details.#                           INTEGER type.
 #
 #    -m GEO_MATCH_VERSION   Override default GEO_MATCH_VERSION to the specified
 #                           GEO_MATCH_VERSION.  This only changes if the IDL code that
@@ -75,7 +75,7 @@
 #    
 #
 # NOTE:  When running dates that have already had GR->DPR matchup sets run,
-#        the child script do_GR_HS_MS_NS_geo_matchup4date.sh will skip
+#        the child script do_GR_HS_MS_NS_geo_matchup4date_snow.sh will skip
 #        processing for these dates, as its query of the 'appstatus' table
 #        will say that the date has already been done.  Delete the entries
 #        from this table where app_id='geo_match_GRx3', either for the date(s)
@@ -146,7 +146,7 @@ export SAT_ID
 
 SWATH="All3"   # do not change this
 export SWATH
-# - Note that appstatus table entries for the child script do_GR_HS_MS_NS_geo_matchup4date.sh
+# - Note that appstatus table entries for the child script do_GR_HS_MS_NS_geo_matchup4date_snow.sh
 #   use the fixed app_id value 'geo_match_GRx3', not something based on $SWATH.
 
 # TAB 8/27/18 changed version to 1.1 for new snow water equivalent field
@@ -156,7 +156,7 @@ export GEO_MATCH_VERSION
 SKIP_NEWRAIN=0   # if 1, skip call to psql with SQL_BIN to update "rainy" events
 
 # If FORCE_MATCH is set to 1, ignore appstatus for date(s) and force (re)run of
-# matchups by child script do_GR_HS_MS_NS_geo_matchup4date.sh:
+# matchups by child script do_GR_HS_MS_NS_geo_matchup4date_snow.sh:
 FORCE_MATCH=0
 
 # override coded defaults with any optional user-specified values
@@ -190,7 +190,7 @@ COMBO=${SAT_ID}_${INSTRUMENT_ID}_${ALGORITHM}_${SWATH}
 
 rundate=`date -u +%y%m%d`
 #rundate=allYMD                                      # BOGUS for all dates
-LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_GeoMatch.${rundate}.log
+LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_GeoMatch_snow.${rundate}.log
 export rundate
 
 umask 0002
@@ -200,8 +200,8 @@ function catalog_to_db() {
 
 # function finds matchup file names produced by IDL polar2dpr_hs_ms_ns procedure
 # as listed in the do_GR_HS_MS_NS_geo_matchup_catalog.yymmdd.txt file, which was
-# produced by do_GR_HS_MS_NS_geo_matchup4date.sh by examining its own log file,
-# do_GR_HS_MS_NS_geo_matchup4date.yymmdd.log, for the date yymmdd.  Parses the
+# produced by do_GR_HS_MS_NS_geo_matchup4date_snow.sh by examining its own log file,
+# do_GR_HS_MS_NS_geo_matchup4date_snow.yymmdd.log, for the date yymmdd.  Parses the
 # output netCDF file names to extract individual identifying fields, formats
 # the 'geo_match_product' table in the 'gpmgv' database, and loads the entries
 # fields into a row of data for to the database by calling the 'psql' utility
@@ -522,23 +522,23 @@ exit  # if uncommented, creates the control file for first date, and exits
 
     if [ -s $outfileall ]
       then
-       # Call the IDL wrapper script, do_GR_HS_MS_NS_geo_matchup4date.sh, to run
+       # Call the IDL wrapper script, do_GR_HS_MS_NS_geo_matchup4date_snow.sh, to run
        # the IDL .bat files.  Let each of these deal with whether the yymmdd
        # has been done before.
 
         echo "" | tee -a $LOG_FILE
         start1=`date -u`
-        echo "Calling do_GR_HS_MS_NS_geo_matchup4date.sh $yymmdd on $start1" | tee -a $LOG_FILE
-        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date.sh -f $FORCE_MATCH $yymmdd $outfileall
+        echo "Calling do_GR_HS_MS_NS_geo_matchup4date_snow.sh $yymmdd on $start1" | tee -a $LOG_FILE
+        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f $FORCE_MATCH $yymmdd $outfileall
 
         case $? in
           0 )
             echo ""
-            echo "SUCCESS status returned from do_GR_HS_MS_NS_geo_matchup4date.sh"\
+            echo "SUCCESS status returned from do_GR_HS_MS_NS_geo_matchup4date_snow.sh"\
              | tee -a $LOG_FILE
            # extract the pathnames of the matchup files created this run, and 
            # catalog them in the geo_matchup_product table.  The following file
-           # must be identically defined here and in do_GR_HS_MS_NS_geo_matchup4date.sh
+           # must be identically defined here and in do_GR_HS_MS_NS_geo_matchup4date_snow.sh
             DBCATALOGFILE=${TMP_DIR}/do_GR_HS_MS_NS_geo_matchup_catalog.${yymmdd}.txt
             if [ -s $DBCATALOGFILE ] 
               then
@@ -551,13 +551,13 @@ exit  # if uncommented, creates the control file for first date, and exits
           ;;
           1 )
             echo ""
-            echo "FAILURE status returned from do_GR_HS_MS_NS_geo_matchup4date.sh, quitting!"\
+            echo "FAILURE status returned from do_GR_HS_MS_NS_geo_matchup4date_snow.sh, quitting!"\
              | tee -a $LOG_FILE
             exit 1
           ;;
           2 )
             echo ""
-            echo "REPEAT status returned from do_GR_HS_MS_NS_geo_matchup4date.sh, do nothing!"\
+            echo "REPEAT status returned from do_GR_HS_MS_NS_geo_matchup4date_snow.sh, do nothing!"\
              | tee -a $LOG_FILE
           ;;
         esac

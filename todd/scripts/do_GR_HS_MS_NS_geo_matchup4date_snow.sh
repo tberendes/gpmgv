@@ -96,7 +96,7 @@
 #
 #    Output for script run is logged to file:
 #
-#           do_GR_HS_MS_NS_geo_matchup4date.yymmdd.log
+#           do_GR_HS_MS_NS_geo_matchup4date_snow.yymmdd.log
 #
 #    in the $LOG_DIR directory, where 'yymmdd' is the input data date,
 #    unless an improper number of arguments are passed. In this case the error
@@ -176,16 +176,16 @@ shift $((OPTIND-1))  # shift the non-option arguments to beginning of list
 if [ $# != 2 ] 
   then
      THISRUN=`date -u +%y%m%d`
-     LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_geo_matchup4date.${THISRUN}.fatal.log
+     LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.${THISRUN}.fatal.log
      echo "FATAL: Exactly two non-option arguments required, $# given." | tee -a $LOG_FILE
-     echo "Usage: do_GR_HS_MS_NS_geo_matchup4date.sh [-f[0|1]] YYMMDD CONTROLFILE"
+     echo "Usage: do_GR_HS_MS_NS_geo_matchup4date_snow.sh [-f[0|1]] YYMMDD CONTROLFILE"
      exit 1
 fi
 
 THISRUN=$1
 CONTROLFILE=$2  # e.g., /data/tmp/DPR_files_sites4geoMatch.2AKu.NS.V03B.${THISRUN}.txt
 
-LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_geo_matchup4date.${THISRUN}.log
+LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.${THISRUN}.log
 
 echo "+++++++++++++++++++++++++++++++++++++++++++" | tee -a $LOG_FILE
 echo "Processing matchups for control file ${CONTROLFILE}" | tee $LOG_FILE
@@ -195,7 +195,7 @@ case "${FORCE_MATCH}"
   in
     0) echo "FORCE_MATCH: $FORCE_MATCH" | tee -a $LOG_FILE ;;
     1) echo "FORCE_MATCH: $FORCE_MATCH" | tee -a $LOG_FILE ;;
-    *) echo "Invalid value ${FORCE_MATCH} for -f option in do_GR_HS_MS_NS_geo_matchup4date.sh."\
+    *) echo "Invalid value ${FORCE_MATCH} for -f option in do_GR_HS_MS_NS_geo_matchup4date_snow.sh."\
        | tee -a $LOG_FILE
        exit 1;;
 esac
@@ -207,7 +207,7 @@ case "${DO_RHI}"
   in
     0) BATFILE=polar2dpr_hs_ms_ns_snow_${PARAMETER_SET}.bat ;;
     1) BATFILE=rhi2dpr_hs_ms_ns_${PARAMETER_SET}.bat ;;
-    *) echo "Invalid value ${DO_RHI} for -r option in do_GR_HS_MS_NS_geo_matchup4date.sh."\
+    *) echo "Invalid value ${DO_RHI} for -r option in do_GR_HS_MS_NS_geo_matchup4date_snow.sh."\
        | tee -a $LOG_FILE
        exit 1;;
 esac
@@ -218,7 +218,7 @@ if [ -s $CONTROLFILE ]
   then
     export CONTROLFILE          # IDL polar2dpr_hs_ms_ns_V.bat needs this
   else
-    echo "ERROR in do_GR_HS_MS_NS_geo_matchup4date.sh, control file $CONTROLFILE not found."\
+    echo "ERROR in do_GR_HS_MS_NS_geo_matchup4date_snow.sh, control file $CONTROLFILE not found."\
      | tee -a $LOG_FILE
     exit 1
 fi
@@ -376,7 +376,7 @@ if [ -s $DBCATALOGFILE -a "$FORCE_MATCH" = "0" ]
 fi
 
 echo "" | tee -a $LOG_FILE
-echo "do_GR_HS_MS_NS_geo_matchup4date.sh complete, exiting." | tee -a $LOG_FILE
+echo "do_GR_HS_MS_NS_geo_matchup4date_snow.sh complete, exiting." | tee -a $LOG_FILE
 echo "See log file $LOG_FILE"
 echo "+++++++++++++++++++++++++++++++++++++++++++" | tee -a $LOG_FILE
 echo "" | tee -a $LOG_FILE
