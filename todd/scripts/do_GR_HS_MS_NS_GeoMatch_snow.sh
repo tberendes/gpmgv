@@ -98,18 +98,34 @@
 
 
 USER_ID=`whoami`
+#if [ "$USER_ID" = "morris" ]
+#  then
+#    GV_BASE_DIR=/home/morris/swdev
+#  else
+#    if [ "$USER_ID" = "gvoper" ]
+#      then
+#        GV_BASE_DIR=/home/gvoper
+#      else
+#        echo "User unknown, can't set GV_BASE_DIR!"
+#        exit 1
+#    fi
+#fi
+
 if [ "$USER_ID" = "morris" ]
   then
     GV_BASE_DIR=/home/morris/swdev
-  else
-    if [ "$USER_ID" = "gvoper" ]
+  elif [ "$USER_ID" = "gvoper" ]
       then
         GV_BASE_DIR=/home/gvoper
-      else
-        echo "User unknown, can't set GV_BASE_DIR!"
-        exit 1
-    fi
+  elif [ "$USER_ID" = "tberendes" ]
+      then
+        GV_BASE_DIR=/home/tberendes/git/gpmgv/todd
+  else
+      echo "User unknown, can't set GV_BASE_DIR!"
+      exit 1
 fi
+
+
 echo "GV_BASE_DIR: $GV_BASE_DIR"
 export GV_BASE_DIR
 
@@ -135,7 +151,7 @@ export BIN_DIR
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
 #PPS_VERSION="V04A"        # specifies which PPS version of products to process
-PPS_VERSION="V05B"
+PPS_VERSION="V05A"
 export PPS_VERSION
 PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
 export PARAMETER_SET
@@ -343,8 +359,8 @@ dateStart=`echo $ymdstart | awk \
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
-dateStart='2018-04-13'
-dateEnd='2018-04-14'
+dateStart='2018-02-23'
+dateEnd='2018-02-23'
 
 echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 

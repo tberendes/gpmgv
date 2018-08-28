@@ -136,7 +136,7 @@
 
 #GV_BASE_DIR=/home/morris/swdev    # must be set & exported by calling process
 BIN_DIR=${GV_BASE_DIR}/scripts
-IDL_PRO_DIR=${GV_BASE_DIR}/idl/dev/geo_match
+IDL_PRO_DIR=${GV_BASE_DIR}/geo_match
 export IDL_PRO_DIR                 # IDL polar2dpr_hs_ms_ns.bat needs this
 IDL=/usr/local/bin/idl
 #TMP_DIR=/data/tmp   # must be set & exported by calling process
