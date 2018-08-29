@@ -761,6 +761,7 @@
                	  if (meantop le 1.5 ) then begin
 					  ; compute snow index 
                	      snow_index = where(gvhidvals ge 3 and gvhidvals le 6, num_snow)
+               	      notsnow_index = where(gvhidvals lt 3 and gvhidvals gt 6, num_notsnow)
                	  	  if num_snow eq 0 then skip_swerr1=1
                	  
                	  endif else begin
@@ -773,8 +774,8 @@
 	               	  
 	               	  Z = 10^(dbzvals/10)	               	  
 	               	  swerr1 = 1.53 * gvkdpvals^0.68 * Z^0.29
-	                  
-	                  altstats=mean_stddev_max_by_rules(swerr1[snow_index],'RR', dpr_rain_min, $
+	                  swerr1 [notsnow_index]=Z_MISSING
+	                  altstats=mean_stddev_max_by_rules(swerr1,'RR', dpr_rain_min, $
 	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
 	                  n_gr_swerr1_points_rejected = altstats.rejects
 	                  swerr1_avg_gv = altstats.mean
