@@ -11,6 +11,7 @@
 ;-
 
 PRO_DIR = getenv("IDL_PRO_DIR")
+print, 'IDL_PRO_DIR ', PRO_DIR
 cd, PRO_DIR
 ;cd , '..'
 
@@ -25,12 +26,13 @@ help, ITE_OR_OPERATIONAL, gpm_root
 exit
 
 FILES4NC = GETENV("CONTROLFILE")
-restore, '/home/tberendes/git/gpmgv/todd/geo_match/polar2dpr_hs_ms_ns_snow.sav'
-;.compile polar2dpr_hs_ms_ns_snow.pro
+;restore, '/home/tberendes/git/gpmgv/todd/geo_match/polar2dpr_hs_ms_ns_snow.sav'
+.compile polar2dpr_hs_ms_ns_snow.pro
 polar2dpr_hs_ms_ns_snow, FILES4NC, 100, SCORES=0, GPM_ROOT=gpm_root, $
            DIRGV='/data/gpmgv/gv_radar/finalQC_in', PLOT_PPIS=0, $
            NC_DIR='/data/gpmgv/netcdf/grmatch', DIR2ADPR='/.', DIR_BLOCK='/data/gpmgv/blockage', $
-           DPR_DBZ_MIN=15.0, DBZ_MIN=15.0, NC_NAME_ADD='15dbzGRDPR_newDm'
-
-;resolve_all
-;save, /routines, file='/home/tberendes/git/gpmgv/todd/geo_match/polar2dpr_hs_ms_ns_snow.sav'
+           DPR_DBZ_MIN=15.0, DBZ_MIN=15.0, NC_NAME_ADD='snow'
+ ;          DPR_DBZ_MIN=15.0, DBZ_MIN=15.0, NC_NAME_ADD='15dbzGRDPR_newDm'
+ 
+resolve_all
+save, /routines, file='/home/tberendes/git/gpmgv/todd/geo_match/polar2dpr_hs_ms_ns_snow.sav'
