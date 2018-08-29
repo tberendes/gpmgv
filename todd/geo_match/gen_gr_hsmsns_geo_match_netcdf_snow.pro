@@ -58,7 +58,7 @@ FUNCTION gen_gr_hsmsns_geo_match_netcdf_snow, geo_match_nc_file, numpts_HS, nump
 @environs.inc   ; for file prefixes, netCDF file definition version
 @dpr_params.inc  ; for the type-specific fill values
 
-# TAB 8/27/18 changed version to 1.1 from 1.0 for new snow water equivalent field
+; TAB 8/27/18 changed version to 1.1 from 1.0 for new snow water equivalent field
 GEO_MATCH_FILE_VERSION=1.1   ; hard code inside function now, not from "Include"
 
 IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
