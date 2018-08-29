@@ -23,7 +23,7 @@ ITE_OR_OPERATIONAL = getenv("ITE_or_Operational")
 gpm_root='/data/gpmgv/orbit_subset'   ; for operational files
 IF ITE_OR_OPERATIONAL EQ 'I' THEN gpm_root='/data/emdata/orbit_subset'
 help, ITE_OR_OPERATIONAL, gpm_root
-exit
+;exit
 
 FILES4NC = GETENV("CONTROLFILE")
 ;restore, '/home/tberendes/git/gpmgv/todd/geo_match/polar2dpr_hs_ms_ns_snow.sav'
