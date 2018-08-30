@@ -293,7 +293,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 ; "Include" file for names, paths, etc.:
 @environs.inc
 ; for structures to be read from GR netCDF file
-@dpr_geo_match_nc_structs.inc
+@dpr_geo_match_nc_structs_snow.inc
 
    decluttered = KEYWORD_SET(declutter)
 
@@ -1586,7 +1586,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          myfiles={ dpr_gr_input_files }
          CATCH, error
          IF error EQ 0 THEN BEGIN
-            status=read_gr_hs_ms_ns_geo_match_netcdf( ncfile1, $
+            status=read_gr_hs_ms_ns_geo_match_netcdf_snow( ncfile1, $
                         matchupmeta=mygeometa, sweepsmeta=mysweeps, $
                         sitemeta=mysite, fieldflags=myflags, $
                         filesmeta=myfiles, DATA_HS=data_HS, $

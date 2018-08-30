@@ -9,7 +9,7 @@
 ;
 ;-------------------------------------------------------------------------------
 ;
-; gen_dpr_geo_match_netcdf.pro    Bob Morris, GPM GV (SAIC)    June 2013
+; gen_dpr_geo_match_netcdf_snow.pro    Bob Morris, GPM GV (SAIC)    June 2013
 ;
 ; DESCRIPTION:
 ; Using the "special values" parameters in the 'include' file dpr_params.inc,
@@ -92,7 +92,7 @@
 ;-------------------------------------------------------------------------------
 ;-
 
-FUNCTION gen_dpr_geo_match_netcdf, geo_match_nc_file, numpts, elev_angles, $
+FUNCTION gen_dpr_geo_match_netcdf_snow, geo_match_nc_file, numpts, elev_angles, $
                                    gv_UF_field, scanType, DPR_vers, siteID, $
                                    dprgrfiles, DECLUTTERED=decluttered, $
                                    GEO_MATCH_VERS=geo_match_vers, $
@@ -104,6 +104,7 @@ FUNCTION gen_dpr_geo_match_netcdf, geo_match_nc_file, numpts, elev_angles, $
 @environs.inc   ; for file prefixes, netCDF file definition version
 @dpr_params.inc  ; for the type-specific fill values
 
+; 8/30/18 TAB updated version to 1.22 from 1.21
 GEO_MATCH_FILE_VERSION=1.22
 
 IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
