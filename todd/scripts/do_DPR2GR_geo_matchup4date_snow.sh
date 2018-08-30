@@ -133,6 +133,7 @@ IDL=/usr/local/bin/idl
 #TMP_DIR=/data/tmp   # must be set & exported by calling process
 #LOG_DIR=/data/logs  # Ditto
 
+
 umask 0002
 
 # re-used file to hold output from database queries
