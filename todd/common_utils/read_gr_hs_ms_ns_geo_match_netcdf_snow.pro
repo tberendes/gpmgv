@@ -362,9 +362,9 @@ for iswa=0,2 do begin
    NCDF_VARGET, ncid1, 'DPRlongitude_'+swath[iswa], DPRlongitude
    NCDF_VARGET, ncid1, 'scanNum_'+swath[iswa], scanNum
    NCDF_VARGET, ncid1, 'rayNum_'+swath[iswa], rayNum
-   NCDF_VARGET, ncid1, 'GR_SWERR1_'+swath[iswa], GR_Z
-   NCDF_VARGET, ncid1, 'GR_SWERR1_StdDev_'+swath[iswa], GR_Z_StdDev
-   NCDF_VARGET, ncid1, 'GR_SWERR1_Max_'+swath[iswa], GR_Z_Max
+   NCDF_VARGET, ncid1, 'GR_SWERR1_'+swath[iswa], GR_SWERR1
+   NCDF_VARGET, ncid1, 'GR_SWERR1_StdDev_'+swath[iswa], GR_SWERR1_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWERR1_Max_'+swath[iswa], GR_SWERR1_Max
    NCDF_VARGET, ncid1, 'n_gr_swerr1_rejected_'+swath[iswa], n_gr_swerr1_rejected
 
   ; copy the swath-specific data variables into anonymous structure, use
@@ -435,7 +435,7 @@ for iswa=0,2 do begin
                  n_gr_nw_rejected : TEMPORARY(n_gr_nw_rejected), $
                  n_gr_dm_rejected : TEMPORARY(n_gr_dm_rejected), $
                  n_gr_n2_rejected : TEMPORARY(n_gr_n2_rejected), $
-                 n_gr_swerr1_rejected : TEMPORARY(n_gr_z_rejected), $
+                 n_gr_swerr1_rejected : TEMPORARY(n_gr_swerr1_rejected), $
                  n_gr_expected : TEMPORARY(n_gr_expected), $
                  DPRlatitude : TEMPORARY(DPRlatitude), $
                  DPRlongitude : TEMPORARY(DPRlongitude), $
