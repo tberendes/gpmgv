@@ -576,6 +576,9 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_N2_stddev = data_GR2DPR.GR_N2_STDDEV
       tocdf_gr_N2_max = data_GR2DPR.GR_N2_MAX
       tocdf_gr_blockage = data_GR2DPR.GR_BLOCKAGE
+      tocdf_gr_swerr1 = data_GR2DPR.GR_SWERR1
+      tocdf_gr_swerr1_stddev = data_GR2DPR.GR_SWERR1_STDDEV
+      tocdf_gr_swerr1_max = data_GR2DPR.GR_SWERR1_MAX
       tocdf_meas_dbz = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                   VALUE=FLOAT_RANGE_EDGE)
       tocdf_corr_dbz = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -603,6 +606,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_dm_rejected = data_GR2DPR.N_GR_DM_REJECTED
       tocdf_gr_n2_rejected = data_GR2DPR.N_GR_N2_REJECTED
       tocdf_gr_expected = data_GR2DPR.N_GR_EXPECTED
+      tocdf_gr_swerr1_rejected = data_GR2DPR.N_GR_SWERR1_REJECTED
       tocdf_meas_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_r_rejected = UINTARR(numDPRrays, num_elevations_out)
@@ -1061,6 +1065,11 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'GR_Kdp_StdDev', tocdf_gr_kdp_stddev
    NCDF_VARPUT, ncid, 'GR_Kdp_Max', tocdf_gr_kdp_max
 
+   NCDF_VARPUT, ncid, 'GR_SWERR1', tocdf_gr_swerr1
+    NCDF_VARPUT, ncid, 'have_GR_SWERR1', myflags.HAVE_GR_SWERR1
+   NCDF_VARPUT, ncid, 'GR_SWERR1_StdDev', tocdf_gr_swerr1_stddev
+   NCDF_VARPUT, ncid, 'GR_SWERR1_Max', tocdf_gr_swerr1_max
+
    NCDF_VARPUT, ncid, 'GR_RHOhv', tocdf_gr_rhohv
     NCDF_VARPUT, ncid, 'have_GR_RHOhv', myflags.HAVE_GR_RHOHV
    NCDF_VARPUT, ncid, 'GR_RHOhv_StdDev', tocdf_gr_rhohv_stddev
@@ -1122,6 +1131,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_gr_dm_rejected', tocdf_gr_dm_rejected
    NCDF_VARPUT, ncid, 'n_gr_n2_rejected', tocdf_gr_n2_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected', tocdf_gr_expected
+   NCDF_VARPUT, ncid, 'n_gr_swerr1_rejected', tocdf_gr_swerr1_rejected
    NCDF_VARPUT, ncid, 'n_dpr_meas_z_rejected', tocdf_meas_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_z_rejected', tocdf_corr_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_epsilon_rejected', tocdf_epsilon_rejected
@@ -1179,7 +1189,7 @@ PRO dpr2gr_prematch_snow, control_file, GPM_ROOT=gpmroot, DIRDPR=dir2adpr, $
 ; "Include" file for names, paths, etc.:
 @environs.inc
 ; for structures to be read from GR netCDF file
-@dpr_geo_match_nc_structs.inc
+@dpr_geo_match_nc_structs_snow.inc
 
 decluttered = KEYWORD_SET(declutter)
 

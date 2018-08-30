@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; read_gr_hs_ms_ns_geo_match_netcdf.pro        Morris/SAIC/GPM_GV      Feb 2016
+; read_gr_hs_ms_ns_geo_match_netcdf_snow.pro        Morris/SAIC/GPM_GV      Feb 2016
 ;
 ; DESCRIPTION
 ; -----------
@@ -62,10 +62,9 @@
 ;-
 ;===============================================================================
 
-FUNCTION read_gr_hs_ms_ns_geo_match_netcdf, ncfile, matchupmeta=matchupmeta, $
+FUNCTION read_gr_hs_ms_ns_geo_match_netcdf_snow, ncfile, matchupmeta=matchupmeta, $
     sweepsmeta=sweepsmeta, sitemeta=sitemeta, fieldflags=fieldFlags, $
     filesmeta=filesmeta, DATA_HS=data_HS, DATA_MS=data_MS, DATA_NS=data_NS
-
 
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
 @dpr_params.inc
@@ -283,6 +282,8 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      fieldFlags.have_GR_N2 = have_GR_N2
      NCDF_VARGET, ncid1, 'have_GR_blockage', have_blockage
      fieldFlags.have_GR_blockage = have_blockage
+     NCDF_VARGET, ncid1, 'have_GR_SWERR1', have_GR_SWERR1
+     fieldFlags.have_GR_SWERR1 = have_GR_SWERR1
 ENDIF
 
 
@@ -361,6 +362,10 @@ for iswa=0,2 do begin
    NCDF_VARGET, ncid1, 'DPRlongitude_'+swath[iswa], DPRlongitude
    NCDF_VARGET, ncid1, 'scanNum_'+swath[iswa], scanNum
    NCDF_VARGET, ncid1, 'rayNum_'+swath[iswa], rayNum
+   NCDF_VARGET, ncid1, 'GR_SWERR1_'+swath[iswa], GR_Z
+   NCDF_VARGET, ncid1, 'GR_SWERR1_StdDev_'+swath[iswa], GR_Z_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWERR1_Max_'+swath[iswa], GR_Z_Max
+   NCDF_VARGET, ncid1, 'n_gr_swerr1_rejected_'+swath[iswa], n_gr_swerr1_rejected
 
   ; copy the swath-specific data variables into anonymous structure, use
   ; TEMPORARY to avoid making a copy of the variable when loading to struct
@@ -401,6 +406,9 @@ for iswa=0,2 do begin
                  GR_RR_rainrate : TEMPORARY(GR_RR_rainrate), $
                  GR_RR_rainrate_StdDev : TEMPORARY(GR_RR_rainrate_StdDev), $
                  GR_RR_rainrate_Max : TEMPORARY(GR_RR_rainrate_Max), $
+                 GR_SWERR1 : TEMPORARY(GR_SWERR1), $
+                 GR_SWERR1_StdDev : TEMPORARY(GR_SWERR1_StdDev), $
+                 GR_SWERR1_Max : TEMPORARY(GR_SWERR1_Max), $
                  GR_HID : TEMPORARY(GR_HID), $
                  GR_Dzero : TEMPORARY(GR_Dzero), $
                  GR_Dzero_StdDev : TEMPORARY(GR_Dzero_StdDev), $
@@ -427,6 +435,7 @@ for iswa=0,2 do begin
                  n_gr_nw_rejected : TEMPORARY(n_gr_nw_rejected), $
                  n_gr_dm_rejected : TEMPORARY(n_gr_dm_rejected), $
                  n_gr_n2_rejected : TEMPORARY(n_gr_n2_rejected), $
+                 n_gr_swerr1_rejected : TEMPORARY(n_gr_z_rejected), $
                  n_gr_expected : TEMPORARY(n_gr_expected), $
                  DPRlatitude : TEMPORARY(DPRlatitude), $
                  DPRlongitude : TEMPORARY(DPRlongitude), $
