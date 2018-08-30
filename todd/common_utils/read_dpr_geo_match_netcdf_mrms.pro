@@ -289,6 +289,9 @@
 ;    available in IDL 8.0 and later.
 ;  - Added MESSAGE command to exit with error if attempting to run under IDL
 ;    versions before 8.0.
+; 06/20/18 by Bob Morris, GPM GV (SAIC)
+;  - Added reading of new global variables PR_2APR_file and PR_2BPRTMI_File
+;    and output to filesmeta struct to support PR version 8 processing.
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
@@ -639,7 +642,13 @@ FOR ncattnum = 0, N_ELEMENTS(parsed)-1 DO BEGIN
                                               /GLOBAL_ATTRIBUTE, /BYTE )
       'DPR_2BCMB_file' : status=PREPARE_NCVAR( ncid1, thisncatt, DPR_2BCMB_file_byte, $
                                                STRUCT=filesmeta, TAG='file_2bcomb', $
-                                              /GLOBAL_ATTRIBUTE, /BYTE )
+                                               /GLOBAL_ATTRIBUTE, /BYTE )
+      'PR_2APR_file' : status=PREPARE_NCVAR( ncid1, thisncatt, PR_2APR_file_byte, $
+                                             STRUCT=filesmeta, TAG='file_2apr', $
+                                             /GLOBAL_ATTRIBUTE, /BYTE )
+      'PR_2BPRTMI_File' : status=PREPARE_NCVAR( ncid1, thisncatt, PR_2BPRTMI_file_byte, $
+                                                STRUCT=filesmeta, TAG='file_2bprtmi', $
+                                                /GLOBAL_ATTRIBUTE, /BYTE )
       'GR_file' : status=PREPARE_NCVAR( ncid1, thisncatt, GR_file_byte, $
                                         STRUCT=filesmeta, TAG='file_1CUF', $
                                         /GLOBAL_ATTRIBUTE, /BYTE )
