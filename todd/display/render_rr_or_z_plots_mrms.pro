@@ -243,6 +243,7 @@ Kdp = data_struct.Kdp
 RHOhv = data_struct.RHOhv
 mrmsrr = data_struct.mrmsrr
 nearsurfrain = data_struct.nearsurfrain
+swerr1 = data_struct.swerr1
 IF do_GR_blockage EQ 1 THEN GR_blockage = data_struct.GR_blockage
 top = data_struct.top
 botm = data_struct.botm
