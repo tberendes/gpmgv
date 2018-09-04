@@ -372,8 +372,8 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     
     ; snow variables
     swerr1=swerr1, $
-    swerr1_max=swerr1_max, $
-    swerr1_stddev=swerr1_stddev, $
+;    swerr1_max=swerr1_max, $
+;    swerr1_stddev=swerr1_stddev, $
     
    ; horizontally summarized GR Hydromet Identifier category at elevs.:
     hidmrms=mrmshid,                                                             $

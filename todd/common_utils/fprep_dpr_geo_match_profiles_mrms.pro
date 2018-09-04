@@ -409,6 +409,7 @@ FUNCTION fprep_dpr_geo_match_profiles_mrms, ncfilepr, heights_in, $
     
 	; TAB 9/4/18
     PTRswerr1=ptr_swerr1, $
+;    PTRswerr1=ptr_swerr1, PTRswerr1stddev=ptr_swerr1stddev, PTRswerr1max=ptr_swerr1max, $
 
     PTRMRMSHID=ptr_MRMS_HID, $
 
@@ -761,6 +762,8 @@ if (cpstatus eq 'OK') then begin
     mrmsrqiphigh=mrmsrqiphigh, $
     mrmsrqipveryhigh=mrmsrqipveryhigh, $
     swerr1=swerr1, $
+;    swerr1max=swerr1max, $
+;    swerr1stddev=swerr1stddev, $
     
     hidmrms=MRMS_HID, $
 
