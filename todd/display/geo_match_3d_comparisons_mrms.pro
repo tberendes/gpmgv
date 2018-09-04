@@ -278,6 +278,7 @@ ptr_mrmsrrlow=ptr_new(/allocate_heap)
 ptr_mrmsrrmed=ptr_new(/allocate_heap)
 ptr_mrmsrrhigh=ptr_new(/allocate_heap)
 ptr_mrmsrrveryhigh=ptr_new(/allocate_heap)
+ptr_swerr1=ptr_new(/allocate_heap)
 ptr_rnFlag=ptr_new(/allocate_heap)
 ptr_rnType=ptr_new(/allocate_heap)
 ptr_landOcean=ptr_new(/allocate_heap)
@@ -359,6 +360,9 @@ CASE pr_or_dpr OF
     PTRmrmsrrmed=ptr_mrmsrrmed, $
     PTRmrmsrrhigh=ptr_mrmsrrhigh, $
     PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
+    ; TAB 9/4/18
+    ; SWERR varaibles
+    PTRswerr1=ptr_swerr1, $
     ALT_BB_HGT=alt_bb_hgt, FORCEBB=forcebb )
  END
   'DPRGMI' : BEGIN
@@ -520,6 +524,12 @@ ENDIF
      mrmsrr=*ptr_mrmsrrveryhigh
      havemrms = 1
      ptr_free,ptr_mrmsrrveryhigh
+  ENDIF ELSE message, "No MRMS RR field in netCDF file.", /INFO
+  haveswerr1 = 0
+  IF ptr_valid(ptr_swerr1) THEN BEGIN
+     swerr1=*ptr_swerr1
+     haveswerr1 = 1
+     ptr_free,ptr_swerr1
   ENDIF ELSE message, "No MRMS RR field in netCDF file.", /INFO
    ; initialize flag as to source of GR rain rate to use to "compute Z-R"
    have_gvrr = 0
@@ -712,6 +722,7 @@ ENDIF
     ptr_free,ptr_mrmsrrmed
     ptr_free,ptr_mrmsrrhigh
     ptr_free,ptr_mrmsrrveryhigh
+    ptr_free,ptr_swerr1    
     ptr_free,ptr_rnFlag
     ptr_free,ptr_rnType
     ptr_free,ptr_pr_index
@@ -754,6 +765,7 @@ haveIt = { have_gvrr : have_gvrr, $
            have_pia : have_pia, $
            have_nearsurfrain : havenearsurfrain, $
            have_mrms : havemrms, $
+           have_swerr1 : haveswerr1, $
            have_GR_blockage : have_GR_blockage }
 
 dataStruc = { haveFlags : haveIt, $
@@ -776,6 +788,8 @@ dataStruc = { haveFlags : haveIt, $
               nearsurfrain : nearsurfrain, $ 
               mrmsrr : mrmsrr, $ 
               HIDcat : HIDcat, $
+; TAB 9/4/18
+              swerr1 : swerr1, $ 
               Zdr : Zdr, $
               Kdp : Kdp, $
               RHOhv : RHOhv, $
@@ -835,7 +849,10 @@ IF N_ELEMENTS(submeth) EQ 1 THEN BEGIN
       dataStrucCopy = dataStruc  ; don't know why original gets hosed below
      ; set the field to use in case of threshold-by-value
       IF xxx EQ 'RR' THEN rr_or_z = 'RR' ELSE rr_or_z = 'Z'
-      dataStrucTrimmed = select_geomatch_subarea( hide_rntype, pr_or_dpr, $
+      ; TODO
+      ; TAB 9/4/18, currently this does not do anything with MRMS and/or SWERR variables
+      ; need to implement
+      dataStrucTrimmed = select_geomatch_subarea_mrms( hide_rntype, pr_or_dpr, $
                                                   startelev, dataStrucCopy, $
                                                   SUBSET_METHOD=submeth, $
                                                   RR_OR_Z=rr_or_z, $
@@ -844,7 +861,7 @@ IF N_ELEMENTS(submeth) EQ 1 THEN BEGIN
       IF size(dataStrucTrimmed, /TYPE) NE 8 THEN BEGIN
         ; set up to go to another case rather than to automatically quit, as
         ; user may just have right-clicked to skip storm selection. In these
-        ; situations select_geomatch_subarea() should already have closed the
+        ; situations select_geomatch_subarea_mrms() should already have closed the
         ; PPI location window
          status = 0
          message, "Unable to run statistics for storm area, skipping case.",/info

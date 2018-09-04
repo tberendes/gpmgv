@@ -63,6 +63,9 @@
 ; 10/18/17 by Bob Morris, GPM GV (SAIC)
 ;  - Added tag/value pairs for file_2apr and file_2bprtmi to dpr_gr_input_files
 ;    structure to support TRMM PR version 8 matchups.
+; 08/30/18 by Todd Berendes (UAH)
+;  - Added mods for mrms fields
+;  - Added tag/value pairs for SWERR1 (snow water equivalent RR)
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -183,7 +186,8 @@ field_flags =  { dpr_gr_field_flags,                        $
                  have_BBstatus:            NO_DATA_PRESENT, $
                  have_qualityData:         NO_DATA_PRESENT, $
                  have_clutterStatus:       NO_DATA_PRESENT,  $
-                 have_mrms:       	NO_DATA_PRESENT  $
+                 have_mrms:       		NO_DATA_PRESENT,  $
+                 have_GR_SWERR1:       	NO_DATA_PRESENT  $
                }
 
 ;field_flags_gmi =  { gmi_gr_field_flags,                           $

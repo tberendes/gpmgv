@@ -197,6 +197,8 @@ haveZdr = data_struct.haveFlags.haveZdr
 haveKdp = data_struct.haveFlags.haveKdp
 haveRHOhv = data_struct.haveFlags.haveRHOhv
 havemrms = data_struct.haveFlags.have_mrms
+haveswerr1 = data_struct.haveFlags.have_swerr1
+
 havenearsurfrain = data_struct.haveFlags.have_nearsurfrain
 ; and set flag to try to filter by GR blockage if blockage data are present
 do_GR_blockage = data_struct.haveFlags.have_GR_blockage
@@ -1302,7 +1304,10 @@ ENDIF
       *fieldData[0] = zcor_in
       *fieldData[1] = gvz_in
       IF xxx EQ 'Z' THEN *fieldData[2] = zcor_in2 ELSE *fieldData[2] = rain3_in2
-      IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[3] = gvrr_in2
+; TAB 9/4/18:
+;  I think this is a preexisting bug, changed index from 2 to 3
+;      IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[3] = gvrr_in2
+      IF xxx EQ 'Z' THEN *fieldData[3] = gvz_in2 ELSE *fieldData[3] = gvrr_in2
    ENDELSE
 
    plot_geo_match_ppi_anim_ps, fieldIDs, sources, fieldData, thresholded, $
@@ -1323,6 +1328,22 @@ ENDIF
 
       *fieldData[0] = nearsurfrain
       *fieldData[1] = mrmsrr
+      IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[2] = gvrr_in2
+
+      plot_geo_match_ppi_rr_mrms_ps, fieldIDs, sources, fieldData, thresholded, $
+                               ppi_comn, DO_PS=do_ps, SHOW_PPIS=show_ppis
+
+      FOR nfieldptr = 0, N_ELEMENTS(fieldData)-1 DO ptr_free, fieldData[nfieldptr]
+    endif
+   if haveswerr1 then begin
+
+      fieldData = ptrarr(1,3, /allocate_heap)
+      fieldIDs = [['RR'],['RR'],['RR']]
+      sources = [['DPR'],['SWERR1'],[siteID+gr_rr_zr]]
+      thresholded = [[0],[0],[sayPct]]
+
+      *fieldData[0] = nearsurfrain
+      *fieldData[1] = swerr1
       IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[2] = gvrr_in2
 
       plot_geo_match_ppi_rr_mrms_ps, fieldIDs, sources, fieldData, thresholded, $

@@ -369,6 +369,9 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     mrmsrqiphigh=mrmsrqiphigh, $
     mrmsrqipveryhigh=mrmsrqipveryhigh, $
     
+    ; snow variables
+    swerr1=swerr1, $
+    
    ; horizontally summarized GR Hydromet Identifier category at elevs.:
     hidmrms=mrmshid,                                                             $
 
@@ -790,6 +793,8 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                 STRUCT=fieldFlags )
       'have_MRMS' : status=PREPARE_NCVAR( ncid1, thisncvar, have_mrms, $
                                               STRUCT=fieldFlags )
+      'have_GR_SWERR1' : status=PREPARE_NCVAR( ncid1, thisncvar, have_swerr1, $
+                                              STRUCT=fieldFlags )
       'n_gr_expected' : status=PREPARE_NCVAR( ncid1, thisncvar, gvexpect, $
                                               DIM2SORT=2, IDXSORT=idxsort )
       'n_gr_z_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gvreject, $
@@ -976,6 +981,7 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'RqiPercentMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipmed )
       'RqiPercentHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqiphigh )
       'RqiPercentVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipveryhigh )
+      'GR_SWERR1' : status=PREPARE_NCVAR( ncid1, thisncvar, swerr1 )
       'MRMS_HID' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmshid)
 
        ELSE : BEGIN
