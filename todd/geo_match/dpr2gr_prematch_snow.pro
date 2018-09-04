@@ -23,7 +23,7 @@
 ; data file.  Once the volume matching of the DPR data for the selected scan
 ; type and GR site are completed, these data are written, along with the volume-
 ; matched GR data, to a new GRtoDPR matchup netCDF file of a format defined by
-; the function gen_dpr_geo_match_netcdf().
+; the function gen_dpr_geo_match_netcdf_snow().
 ;
 ; The DPR and GR (ground radar) files to process are specified in the mandatory
 ; parameter 'control_file', a fully-qualified file name of the control file to
@@ -250,6 +250,8 @@
 ;  - Added VERSION2MATCH optional parameter to look for a GRtoDPR_HS_MS_NS file
 ;    matching the 2A[DPR/Ka|Ku] file specified in the control file, but having a
 ;    different PPS Version from the 2A file.
+; 09/04/18 Berendes, UAH
+;  - Added mods for SWERR1 variables
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -966,7 +968,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 
   ; Create a netCDF file with the proper 'numDPRrays' and 'num_elevations_out'
   ; dimensions, also passing the global attribute values along
-   ncfile = gen_dpr_geo_match_netcdf( fname_netCDF, numDPRrays, $
+   ncfile = gen_dpr_geo_match_netcdf_snow( fname_netCDF, numDPRrays, $
                                       tocdf_elev_angle, ufstruct, $
                                       STRUPCASE(DPR_scantype), DPR_version, $
                                       siteID, infileNameArr, $
@@ -1303,7 +1305,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    matchup_file_version=0.0  ; give it a bogus value, for now
   ; Call gen_geo_match_netcdf with the option to only get current file version
   ; so that it can become part of the matchup file name
-   throwaway = gen_dpr_geo_match_netcdf( GEO_MATCH_VERS=matchup_file_version )
+   throwaway = gen_dpr_geo_match_netcdf_snow( GEO_MATCH_VERS=matchup_file_version )
 
   ; separate version into integer and decimal parts, with 2 decimal places
    verarr=strsplit(string(matchup_file_version,FORMAT='(F0.2)'),'.',/extract)
@@ -1548,7 +1550,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       PRINT, igv+1, ": ", dpr_dtime, "  ", siteID, siteLat, siteLon
 
      ; store the file basenames in a string array to be passed to
-     ; gen_dpr_geo_match_netcdf() via dpr2gr_prematch_scan_snow()
+     ; gen_dpr_geo_match_netcdf_snow() via dpr2gr_prematch_scan_snow()
       infileNameArr = STRARR(5)
       infileNameArr[0] = FILE_BASENAME(origFileDPRName)
       infileNameArr[1] = FILE_BASENAME(origFileKuName)

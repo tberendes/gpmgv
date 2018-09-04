@@ -431,6 +431,13 @@ ncdf_attput, cdfid, haveBLKvarid, 'long_name', $
              'data exists flag for ground radar blockage fraction'
 ncdf_attput, cdfid, haveBLKvarid, '_FillValue', NO_DATA_PRESENT
 
+; TAB 8/27/18 added new variables for snowfall water equivalent rate in the VN data using one of 
+; the new polarimetric relationships suggested by Bukocvic et al (2017)
+haveSWERR1varid = ncdf_vardef(cdfid, 'have_GR_SWERR1', /short)
+ncdf_attput, cdfid, haveSWERR1varid, 'long_name', $
+             'data exists flag for ground radar snowfall water equivalent rate, Bukocvic et al (2017)'
+ncdf_attput, cdfid, haveSWERR1varid, '_FillValue', NO_DATA_PRESENT
+
 havedbzrawvarid = ncdf_vardef(cdfid, 'have_ZFactorMeasured', /short)
 ncdf_attput, cdfid, havedbzrawvarid, 'long_name', $
              'data exists flag for ZFactorMeasured'
@@ -737,6 +744,36 @@ BLKvarid = ncdf_vardef(cdfid, 'GR_blockage', [fpdimid,eldimid])
 ncdf_attput, cdfid, BLKvarid, 'long_name', $
              'ground radar blockage fraction'
 ncdf_attput, cdfid, BLKvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+
+; TAB 8/27/18 added new variables for snowfall water equivalent rate in the VN data using one of 
+; the new polarimetric relationships suggested by Bukocvic et al (2017)
+
+;***********  Start here, fill thes
+   SWERR1varid = ncdf_vardef(cdfid, 'GR_SWERR1', [fpdimid,eldimid])
+   ncdf_attput, cdfid, SWERR1varid, 'long_name', 'GV snowfall water equivalent rate, Bukocvic et al (2017)'
+   ncdf_attput, cdfid, SWERR1varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWERR1varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWERR1varid = ncdf_vardef(cdfid, 'GR_SWERR1_StdDev', [fpdimid,eldimid])
+   ncdf_attput, cdfid, stddevgvSWERR1varid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, Bukocvic et al (2017)'
+   ncdf_attput, cdfid, stddevgvSWERR1varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWERR1varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWERR1varid = ncdf_vardef(cdfid, 'GR_SWERR1_Max', [fpdimid,eldimid])
+   ncdf_attput, cdfid, gvmaxSWERR1varid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate, Bukocvic et al (2017)'
+   ncdf_attput, cdfid, gvmaxSWERR1varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWERR1varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gv_swerr1_rejvarid = ncdf_vardef(cdfid, 'n_gr_swerr1_rejected', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_swerr1_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWERR1 average'
+   ncdf_attput, cdfid, gv_swerr1_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+
+;*******************
 
 dbzrawvarid = ncdf_vardef(cdfid, 'ZFactorMeasured', [fpdimid,eldimid])
 ncdf_attput, cdfid, dbzrawvarid, 'long_name', 'DPR Uncorrected Reflectivity'
