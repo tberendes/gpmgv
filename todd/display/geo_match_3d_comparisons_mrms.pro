@@ -144,7 +144,7 @@ FUNCTION geo_match_plots_prep, ncfilepr, xxx, looprate, elevs2show, startelev, $
                                LAND_OCEAN=land_ocean
 
 ; "include" file for read_geo_match_netcdf() structs returned
-@geo_match_nc_structs.inc
+@geo_match_nc_structs_mrms.inc
 
 ; "include" file for PR data constants
 @pr_params.inc
