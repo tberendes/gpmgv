@@ -316,7 +316,8 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     gv_nw_reject_int=gv_nw_reject, gv_dm_reject_int=gv_dm_reject,             $
     gv_n2_reject_int=gv_n2_reject, gv_zdr_reject_int=gv_zdr_reject,           $
     gv_kdp_reject_int=gv_kdp_reject, gv_RHOhv_reject_int=gv_RHOhv_reject,     $
-
+    gv_swerr1_reject_int=gv_swerr1_reject, $
+    
    ; horizontally (GV) and vertically (DPR Z, rain) averaged values at elevs.:
     dbzgv=threeDreflect, dbzraw=ZFactorMeasured, dbzcor=ZFactorCorrected,     $
     dbz250raw=ZFactorMeasured250m, dbz250cor=ZFactorCorrected250m,            $
@@ -371,6 +372,8 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     
     ; snow variables
     swerr1=swerr1, $
+    swerr1_max=swerr1_max, $
+    swerr1_stddev=swerr1_stddev, $
     
    ; horizontally summarized GR Hydromet Identifier category at elevs.:
     hidmrms=mrmshid,                                                             $
@@ -850,6 +853,8 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                   DIM2SORT=2, IDXSORT=idxsort )
       'n_dpr_nw_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, dpr_nw_reject, $
                                                   DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swerr1_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swerr1_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
       'GR_Z' : status=PREPARE_NCVAR( ncid1, thisncvar, threeDreflect, $
                                      DIM2SORT=2, IDXSORT=idxsort )
       'GR_Z_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, threeDreflectMax, $

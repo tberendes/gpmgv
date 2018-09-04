@@ -519,16 +519,16 @@ ENDIF
      havenearsurfrain = 1
      ptr_free,ptr_nearsurfrain
   ENDIF ELSE message, "No near surface RR field in netCDF file.", /INFO
-  havemrms = 0
-  IF ptr_valid(ptr_mrmsrrveryhigh) THEN BEGIN
+  havemrms = myflags.have_mrms
+;  IF ptr_valid(ptr_mrmsrrveryhigh) THEN BEGIN
+  IF havemrms THEN BEGIN
      mrmsrr=*ptr_mrmsrrveryhigh
-     havemrms = 1
      ptr_free,ptr_mrmsrrveryhigh
   ENDIF ELSE message, "No MRMS RR field in netCDF file.", /INFO
-  haveswerr1 = 0
-  IF ptr_valid(ptr_swerr1) THEN BEGIN
+  haveswerr1 = myflags.have_swerr1
+;  IF ptr_valid(ptr_swerr1) THEN BEGIN
+  IF haveswerr1 THEN BEGIN
      swerr1=*ptr_swerr1
-     haveswerr1 = 1
      ptr_free,ptr_swerr1
   ENDIF ELSE message, "No MRMS RR field in netCDF file.", /INFO
    ; initialize flag as to source of GR rain rate to use to "compute Z-R"
