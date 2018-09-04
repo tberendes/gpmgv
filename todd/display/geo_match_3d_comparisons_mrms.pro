@@ -525,7 +525,7 @@ ENDIF
      mrmsrr=*ptr_mrmsrrveryhigh
      ptr_free,ptr_mrmsrrveryhigh
   ENDIF ELSE message, "No MRMS RR field in netCDF file.", /INFO
-  haveswerr1 = myflags.have_swerr1
+  haveswerr1 = myflags.have_gr_swerr1
 ;  IF ptr_valid(ptr_swerr1) THEN BEGIN
   IF haveswerr1 THEN BEGIN
      swerr1=*ptr_swerr1
