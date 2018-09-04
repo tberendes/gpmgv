@@ -502,10 +502,14 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.nc_file_version = ncversion
      ; MRMS categories
      MRMS_dimid = NCDF_DIMID(ncid1, 'mrms_mask')
-     if MRMS_dimid ne -1 then begin
+;     if MRMS_dimid ne -1 then begin
+     if MRMS_dimid ge 0 then begin
      	NCDF_DIMINQ, ncid1, MRMS_dimid, MRMSDIMNAME, mrmscats
      	matchupmeta.num_MRMS_categories = mrmscats
-     endif
+     endif else begin
+        print,'No MRMS categories in data file'
+        matchupmeta.num_MRMS_categories = 0;
+     endelse
 
 ENDIF
 
@@ -982,6 +986,8 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'RqiPercentHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqiphigh )
       'RqiPercentVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipveryhigh )
       'GR_SWERR1' : status=PREPARE_NCVAR( ncid1, thisncvar, swerr1 )
+      'GR_SWERR1_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swerr1_max)
+      'GR_SWERR1_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swerr1_stddev)
       'MRMS_HID' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmshid)
 
        ELSE : BEGIN
