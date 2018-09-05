@@ -712,12 +712,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       
   ; TAB 8/27/18 Added have_gv_swe flag
   if (have_gv_kdp eq 1) and (have_gv_hid eq 1) then begin
-  	  have_swe = 1
+  	  have_gv_swe = 1
   endif else begin
       PRINT, ""
       PRINT, "Missing KDP or HID fields for SWE in file ", file_1CUF
       PRINT, ""
-  	  have_swe = 0  
+  	  have_gv_swe = 0  
   endelse
 
   ; Retrieve the desired radar volumes from the radar structure
@@ -1638,7 +1638,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'GR_blockage_'+DPR_scantype, tocdf_gr_blockage      ; data
        NCDF_VARPUT, ncid, 'have_GR_blockage', DATA_PRESENT      ; data presence flag
    ENDIF
-   if ( have_swe ) then begin
+   if ( have_gv_swe ) then begin
       NCDF_VARPUT, ncid, 'have_SWE', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_SWEDP_'+DPR_scantype, tocdf_gr_swedp            ; data
       NCDF_VARPUT, ncid, 'GR_SWEDP_StdDev_'+DPR_scantype, tocdf_gr_swedp_stddev
