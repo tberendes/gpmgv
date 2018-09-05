@@ -65,6 +65,9 @@
 ;    structure to support TRMM PR version 8 matchups.
 ; 08/30/18 by Todd Berendes (UAH)
 ;  - Added tag/value pairs for SWERR1 (snow water equivalent RR)
+; 9/05/18 by Todd Berendes
+;  - changed SWERR1 to SWEDP (Snow water equivalent dual pol GR)
+;  - added SWE25, SWE50, SWE75 for snow PQPE relation (Pierre Kirstetter)
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -183,7 +186,7 @@ field_flags =  { dpr_gr_field_flags,                        $
                  have_BBstatus:            NO_DATA_PRESENT, $
                  have_qualityData:         NO_DATA_PRESENT, $
                  have_clutterStatus:       NO_DATA_PRESENT,  $
-                 have_GR_SWERR1:       	NO_DATA_PRESENT  $
+                 have_SWE:       	NO_DATA_PRESENT  $
                }
 
 ;field_flags_gmi =  { gmi_gr_field_flags,                           $
