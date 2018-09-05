@@ -848,7 +848,7 @@
 	                 
 	                  ; Pierre's methods
 	                  
-	               	  swe25 = 0.101 Z^0.413
+	               	  swe25 = 0.101 * Z^0.413
 	                  ; use RP rain rate where snow is not detected
 	                  swe25 [notsnow_index]=gvrpvals[notsnow_index]
 	                  altstats=mean_stddev_max_by_rules(swe25,'RR', dpr_rain_min, $
@@ -858,7 +858,7 @@
               		  swe25_stddev_gv = altstats.stddev
               		  swe25_max_gv = altstats.max
            	  	      
-	               	  swe50 = 0.204 Z^0.389
+	               	  swe50 = 0.204 * Z^0.389
 	                  ; use RP rain rate where snow is not detected
 	                  swe50 [notsnow_index]=gvrpvals[notsnow_index]
 	                  altstats=mean_stddev_max_by_rules(swe50,'RR', dpr_rain_min, $
@@ -868,7 +868,7 @@
               		  swe50_stddev_gv = altstats.stddev
               		  swe50_max_gv = altstats.max
            	  	      
- 	               	  swe75 = 0.257 Z^0.388
+ 	               	  swe75 = 0.257 * Z^0.388
 	                  ; use RP rain rate where snow is not detected
 	                  swe75 [notsnow_index]=gvrpvals[notsnow_index]
  	                  altstats=mean_stddev_max_by_rules(swe75,'RR', dpr_rain_min, $
