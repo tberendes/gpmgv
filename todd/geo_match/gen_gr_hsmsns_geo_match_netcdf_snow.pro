@@ -365,11 +365,11 @@ ncdf_attput, cdfid, haveBLKvarid, 'long_name', $
 ncdf_attput, cdfid, haveBLKvarid, '_FillValue', NO_DATA_PRESENT
 
 ; TAB 8/27/18 added new variables for snowfall water equivalent rate in the VN data using one of 
-; the new polarimetric relationships suggested by Bukocvic et al (2017)
-haveSWERR1varid = ncdf_vardef(cdfid, 'have_GR_SWERR1', /short)
-ncdf_attput, cdfid, haveSWERR1varid, 'long_name', $
-             'data exists flag for ground radar snowfall water equivalent rate, Bukocvic et al (2017)'
-ncdf_attput, cdfid, haveSWERR1varid, '_FillValue', NO_DATA_PRESENT
+; the new polarimetric relationships suggested by Bukocvic et al (2017) and Pierre Kirstetter
+haveSWEvarid = ncdf_vardef(cdfid, 'have_SWE', /short)
+ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
+             'data exists flag for ground radar snowfall water equivalent rate'
+ncdf_attput, cdfid, haveSWEvarid, '_FillValue', NO_DATA_PRESENT
 
 
 for iswa=0,2 do begin
@@ -605,22 +605,75 @@ for iswa=0,2 do begin
 
 ; TAB 8/27/18 added new variables for snowfall water equivalent rate in the VN data using one of 
 ; the new polarimetric relationships suggested by Bukocvic et al (2017)
-   SWERR1varid = ncdf_vardef(cdfid, 'GR_SWERR1_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, SWERR1varid, 'long_name', 'GV snowfall water equivalent rate, Bukocvic et al (2017)'
-   ncdf_attput, cdfid, SWERR1varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, SWERR1varid, '_FillValue', FLOAT_RANGE_EDGE
+   SWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWEDPvarid, 'long_name', 'GV snowfall water equivalent rate, Bukocvic et al (2017)'
+   ncdf_attput, cdfid, SWEDPvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-   stddevgvSWERR1varid = ncdf_vardef(cdfid, 'GR_SWERR1_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, stddevgvSWERR1varid, 'long_name', $
+   stddevgvSWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWEDPvarid, 'long_name', $
              'Standard Deviation of GV snowfall water equivalent rate, Bukocvic et al (2017)'
-   ncdf_attput, cdfid, stddevgvSWERR1varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, stddevgvSWERR1varid, '_FillValue', FLOAT_RANGE_EDGE
+   ncdf_attput, cdfid, stddevgvSWEDPvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-   gvmaxSWERR1varid = ncdf_vardef(cdfid, 'GR_SWERR1_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, gvmaxSWERR1varid, 'long_name', $
+   gvmaxSWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWEDPvarid, 'long_name', $
              'Sample Maximum GV snowfall water equivalent rate, Bukocvic et al (2017)'
-   ncdf_attput, cdfid, gvmaxSWERR1varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, gvmaxSWERR1varid, '_FillValue', FLOAT_RANGE_EDGE
+   ncdf_attput, cdfid, gvmaxSWEDPvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
+   
+   ; Z only relationships
+   SWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWE25varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 25%'
+   ncdf_attput, cdfid, SWE25varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWE25varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWE25varid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 25%'
+   ncdf_attput, cdfid, stddevgvSWE25varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWE25varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWE25varid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate,  PQPE conditional quantiles 25%'
+   ncdf_attput, cdfid, gvmaxSWE25varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWE25varid, '_FillValue', FLOAT_RANGE_EDGE
+   
+   SWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWE50varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 50%'
+   ncdf_attput, cdfid, SWE50varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWE50varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWE50varid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 50%'
+   ncdf_attput, cdfid, stddevgvSWE50varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWE50varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWE50varid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate,  PQPE conditional quantiles 50%'
+   ncdf_attput, cdfid, gvmaxSWE50varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWE50varid, '_FillValue', FLOAT_RANGE_EDGE
+   
+   SWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWE75varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 75%'
+   ncdf_attput, cdfid, SWE75varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWE75varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWE75varid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 75%'
+   ncdf_attput, cdfid, stddevgvSWE75varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWE75varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWE75varid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate,  PQPE conditional quantiles 75%'
+   ncdf_attput, cdfid, gvmaxSWE75varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWE75varid, '_FillValue', FLOAT_RANGE_EDGE
+   
 
 ;*******************
 
@@ -659,10 +712,25 @@ for iswa=0,2 do begin
              'number of bins below rain_min in GR_RR_rainrate average'
    ncdf_attput, cdfid, gv_rr_rejvarid, '_FillValue', INT_RANGE_EDGE
 
-   gv_swerr1_rejvarid = ncdf_vardef(cdfid, 'n_gr_swerr1_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
-   ncdf_attput, cdfid, gv_swerr1_rejvarid, 'long_name', $
-             'number of bins below rain_min in GR_SWERR1_rainrate average'
-   ncdf_attput, cdfid, gv_swerr1_rejvarid, '_FillValue', INT_RANGE_EDGE
+   gv_swedp_rejvarid = ncdf_vardef(cdfid, 'n_gr_swedp_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swedp_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWEDP_rainrate average'
+   ncdf_attput, cdfid, gv_swedp_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   gv_swe25_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe25_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swe25_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWE25_rainrate average'
+   ncdf_attput, cdfid, gv_swe25_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   gv_swe50_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe50_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swe50_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWE50_rainrate average'
+   ncdf_attput, cdfid, gv_swe50_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   gv_swe75_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe75_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swe75_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWE75_rainrate average'
+   ncdf_attput, cdfid, gv_swe75_rejvarid, '_FillValue', INT_RANGE_EDGE
 
    gv_hid_rejvarid = ncdf_vardef(cdfid, 'n_gr_hid_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_hid_rejvarid, 'long_name', $

@@ -710,14 +710,14 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       ufstruct.N2_ID = gv_n2_field
    ENDELSE
       
-  ; TAB 8/27/18 Added have_gv_swerr1 flag
+  ; TAB 8/27/18 Added have_gv_swe flag
   if (have_gv_kdp eq 1) and (have_gv_hid eq 1) then begin
-  	  have_gv_swerr1 = 1
+  	  have_swe = 1
   endif else begin
       PRINT, ""
-      PRINT, "Missing KDP or HID fields for SWERR1 in file ", file_1CUF
+      PRINT, "Missing KDP or HID fields for SWE in file ", file_1CUF
       PRINT, ""
-  	  have_gv_swerr1 = 0  
+  	  have_swe = 0  
   endelse
 
   ; Retrieve the desired radar volumes from the radar structure
@@ -1403,12 +1403,35 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_rr_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
 ; **********
-      tocdf_gr_swerr1 = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+      tocdf_gr_swedp = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                VALUE=FLOAT_RANGE_EDGE)
-      tocdf_gr_swerr1_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+      tocdf_gr_swedp_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                       VALUE=FLOAT_RANGE_EDGE)
-      tocdf_gr_swerr1_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+      tocdf_gr_swepd_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
+
+      tocdf_gr_swe25 = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swe25_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swe25_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
+                                   
+      tocdf_gr_swe50 = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swe50_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swe50_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)                             
+
+      tocdf_gr_swe75 = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swe75_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swe75_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
+                                   
+;***********                                   
       tocdf_gr_zdr = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                 VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_zdr_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -1473,7 +1496,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_dm_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_n2_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_expected = UINTARR(numDPRrays, num_elevations_out)
-      tocdf_gr_swerr1_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_swedp_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_swe25_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_swe50_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_swe75_rejected = UINTARR(numDPRrays, num_elevations_out)
 
      ; get the indices of actual DPR footprints and create and load the 2D element
      ;   subarrays (no averaging/processing needed) with data from the product arrays
@@ -1612,11 +1638,24 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'GR_blockage_'+DPR_scantype, tocdf_gr_blockage      ; data
        NCDF_VARPUT, ncid, 'have_GR_blockage', DATA_PRESENT      ; data presence flag
    ENDIF
-   if ( have_gv_swerr1 ) then begin
-      NCDF_VARPUT, ncid, 'GR_SWERR1_'+DPR_scantype, tocdf_gr_swerr1            ; data
-       NCDF_VARPUT, ncid, 'have_GR_SWERR1', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_SWERR1_StdDev_'+DPR_scantype, tocdf_gr_swerr1_stddev
-      NCDF_VARPUT, ncid, 'GR_SWERR1_Max_'+DPR_scantype, tocdf_gr_swerr1_max   
+   if ( have_swe ) then begin
+      NCDF_VARPUT, ncid, 'have_SWE', DATA_PRESENT      ; data presence flag
+      NCDF_VARPUT, ncid, 'GR_SWEDP_'+DPR_scantype, tocdf_gr_swedp            ; data
+      NCDF_VARPUT, ncid, 'GR_SWEDP_StdDev_'+DPR_scantype, tocdf_gr_swedp_stddev
+      NCDF_VARPUT, ncid, 'GR_SWEDP_Max_'+DPR_scantype, tocdf_gr_swedp_max   
+
+      NCDF_VARPUT, ncid, 'GR_SWE25_'+DPR_scantype, tocdf_gr_swe25            ; data
+      NCDF_VARPUT, ncid, 'GR_SWE25_StdDev_'+DPR_scantype, tocdf_gr_swe25_stddev
+      NCDF_VARPUT, ncid, 'GR_SWE25_Max_'+DPR_scantype, tocdf_gr_swe25_max   
+
+      NCDF_VARPUT, ncid, 'GR_SWE50_'+DPR_scantype, tocdf_gr_swe50            ; data
+      NCDF_VARPUT, ncid, 'GR_SWE50_StdDev_'+DPR_scantype, tocdf_gr_swe50_stddev
+      NCDF_VARPUT, ncid, 'GR_SWE50_Max_'+DPR_scantype, tocdf_gr_swe50_max   
+
+      NCDF_VARPUT, ncid, 'GR_SWE75_'+DPR_scantype, tocdf_gr_swe75            ; data
+      NCDF_VARPUT, ncid, 'GR_SWE75_StdDev_'+DPR_scantype, tocdf_gr_swe75_stddev
+      NCDF_VARPUT, ncid, 'GR_SWE75_Max_'+DPR_scantype, tocdf_gr_swe75_max   
+      
    endif
 
    NCDF_VARPUT, ncid, 'n_gr_z_rejected_'+DPR_scantype, tocdf_gr_rejected
@@ -1631,7 +1670,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_nw_rejected_'+DPR_scantype, tocdf_gr_nw_rejected
    NCDF_VARPUT, ncid, 'n_gr_dm_rejected_'+DPR_scantype, tocdf_gr_dm_rejected
    NCDF_VARPUT, ncid, 'n_gr_n2_rejected_'+DPR_scantype, tocdf_gr_n2_rejected
-   NCDF_VARPUT, ncid, 'n_gr_swerr1_rejected_'+DPR_scantype, tocdf_gr_swerr1_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swedp_rejected_'+DPR_scantype, tocdf_gr_swedp_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe25_rejected_'+DPR_scantype, tocdf_gr_swe25_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe50_rejected_'+DPR_scantype, tocdf_gr_swe50_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe75_rejected_'+DPR_scantype, tocdf_gr_swe75_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected_'+DPR_scantype, tocdf_gr_expected
 
    skippedSwath:
