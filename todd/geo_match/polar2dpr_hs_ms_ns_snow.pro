@@ -1407,7 +1407,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_swedp_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                       VALUE=FLOAT_RANGE_EDGE)
-      tocdf_gr_swepd_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+      tocdf_gr_swedp_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
 
       tocdf_gr_swe25 = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
