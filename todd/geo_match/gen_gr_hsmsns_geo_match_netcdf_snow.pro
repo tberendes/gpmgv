@@ -366,7 +366,7 @@ ncdf_attput, cdfid, haveBLKvarid, '_FillValue', NO_DATA_PRESENT
 
 ; TAB 8/27/18 added new variables for snowfall water equivalent rate in the VN data using one of 
 ; the new polarimetric relationships suggested by Bukocvic et al (2017) and Pierre Kirstetter
-haveSWEvarid = ncdf_vardef(cdfid, 'have_SWE', /short)
+haveSWEvarid = ncdf_vardef(cdfid, 'have_GR_SWE', /short)
 ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
              'data exists flag for ground radar snowfall water equivalent rate'
 ncdf_attput, cdfid, haveSWEvarid, '_FillValue', NO_DATA_PRESENT

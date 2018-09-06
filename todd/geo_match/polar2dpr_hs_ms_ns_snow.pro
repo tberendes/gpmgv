@@ -1639,7 +1639,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
        NCDF_VARPUT, ncid, 'have_GR_blockage', DATA_PRESENT      ; data presence flag
    ENDIF
    if ( have_gv_swe ) then begin
-      NCDF_VARPUT, ncid, 'have_SWE', DATA_PRESENT      ; data presence flag
+      NCDF_VARPUT, ncid, 'have_GR_SWE', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_SWEDP_'+DPR_scantype, tocdf_gr_swedp            ; data
       NCDF_VARPUT, ncid, 'GR_SWEDP_StdDev_'+DPR_scantype, tocdf_gr_swedp_stddev
       NCDF_VARPUT, ncid, 'GR_SWEDP_Max_'+DPR_scantype, tocdf_gr_swedp_max   

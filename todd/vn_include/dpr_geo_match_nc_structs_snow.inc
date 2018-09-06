@@ -186,7 +186,7 @@ field_flags =  { dpr_gr_field_flags,                        $
                  have_BBstatus:            NO_DATA_PRESENT, $
                  have_qualityData:         NO_DATA_PRESENT, $
                  have_clutterStatus:       NO_DATA_PRESENT,  $
-                 have_SWE:       	NO_DATA_PRESENT  $
+                 have_GR_SWE:       	NO_DATA_PRESENT  $
                }
 
 ;field_flags_gmi =  { gmi_gr_field_flags,                           $

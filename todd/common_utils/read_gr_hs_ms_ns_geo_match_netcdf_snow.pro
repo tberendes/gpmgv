@@ -282,7 +282,7 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      fieldFlags.have_GR_N2 = have_GR_N2
      NCDF_VARGET, ncid1, 'have_GR_blockage', have_blockage
      fieldFlags.have_GR_blockage = have_blockage
-     NCDF_VARGET, ncid1, 'have_SWE', have_GR_SWE
+     NCDF_VARGET, ncid1, 'have_GR_SWE', have_GR_SWE
      fieldFlags.have_GR_SWE = have_GR_SWE
 ENDIF
 

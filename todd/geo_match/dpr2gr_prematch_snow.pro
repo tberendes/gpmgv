@@ -1079,7 +1079,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'GR_Kdp_StdDev', tocdf_gr_kdp_stddev
    NCDF_VARPUT, ncid, 'GR_Kdp_Max', tocdf_gr_kdp_max
 
-   NCDF_VARPUT, ncid, 'have_SWE', myflags.HAVE_GR_SWE
+   NCDF_VARPUT, ncid, 'have_GR_SWE', myflags.HAVE_GR_SWE
    NCDF_VARPUT, ncid, 'GR_SWEDP', tocdf_gr_swedp
    NCDF_VARPUT, ncid, 'GR_SWEDP_StdDev', tocdf_gr_swedp_stddev
    NCDF_VARPUT, ncid, 'GR_SWEDP_Max', tocdf_gr_swedp_max
