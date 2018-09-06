@@ -789,7 +789,7 @@ ncdf_attput, cdfid, BLKvarid, '_FillValue', FLOAT_RANGE_EDGE
    ncdf_attput, cdfid, gvmaxSWE25varid, 'units', 'mm/h'
    ncdf_attput, cdfid, gvmaxSWE25varid, '_FillValue', FLOAT_RANGE_EDGE
    
-   gv_SWE25_rejvarid = ncdf_vardef(cdfid, 'n_gr_SWE25_rejected', [fpdimid,eldimid], /short)
+   gv_SWE25_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe25_rejected', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_SWE25_rejvarid, 'long_name', $
              'number of bins below rain_min in GR_SWE25 average'
    ncdf_attput, cdfid, gv_SWE25_rejvarid, '_FillValue', INT_RANGE_EDGE
@@ -811,7 +811,7 @@ ncdf_attput, cdfid, BLKvarid, '_FillValue', FLOAT_RANGE_EDGE
    ncdf_attput, cdfid, gvmaxSWE50varid, 'units', 'mm/h'
    ncdf_attput, cdfid, gvmaxSWE50varid, '_FillValue', FLOAT_RANGE_EDGE
    
-   gv_SWE50_rejvarid = ncdf_vardef(cdfid, 'n_gr_SWE50_rejected', [fpdimid,eldimid], /short)
+   gv_SWE50_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe50_rejected', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_SWE50_rejvarid, 'long_name', $
              'number of bins below rain_min in GR_SWE50 average'
    ncdf_attput, cdfid, gv_SWE50_rejvarid, '_FillValue', INT_RANGE_EDGE
@@ -833,7 +833,7 @@ ncdf_attput, cdfid, BLKvarid, '_FillValue', FLOAT_RANGE_EDGE
    ncdf_attput, cdfid, gvmaxSWE75varid, 'units', 'mm/h'
    ncdf_attput, cdfid, gvmaxSWE75varid, '_FillValue', FLOAT_RANGE_EDGE
    
-   gv_SWE75_rejvarid = ncdf_vardef(cdfid, 'n_gr_SWE75_rejected', [fpdimid,eldimid], /short)
+   gv_SWE75_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe75_rejected', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_SWE75_rejvarid, 'long_name', $
              'number of bins below rain_min in GR_SWE75 average'
    ncdf_attput, cdfid, gv_SWE75_rejvarid, '_FillValue', INT_RANGE_EDGE
