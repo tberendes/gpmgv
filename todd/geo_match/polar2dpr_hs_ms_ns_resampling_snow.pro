@@ -798,7 +798,7 @@
                	  if (meantop le 1.5 ) then begin
 					  ; compute snow index 
                	      snow_index = where(gvhidvals ge 3 and gvhidvals le 7, num_snow)
-               	      notsnow_index = where(gvhidvals lt 3 or gvhidvals gt 7, num_notsnow)
+               	      notsnow_index = where( (gvhidvals lt 3 and gvhidvals gt 0) or gvhidvals gt 7, num_notsnow)
                	  	  if num_snow eq 0 then begin
                	  	  
                	  	      ; use rp rain rate for non-snow values
@@ -879,28 +879,30 @@
               		  swe75_max_gv = altstats.max
 	                  
                   
-                  endif else begin
-                  
- 	                  n_gr_swedp_points_rejected = Z_MISSING
-	                  swedp_avg_gv = Z_MISSING
-	                  swedp_stddev_gv = Z_MISSING
-	                  swedp_max_gv = Z_MISSING
-	                  
-  	                  n_gr_swe25_points_rejected = Z_MISSING
-	                  swe25_avg_gv = Z_MISSING
-	                  swe25_stddev_gv = Z_MISSING
-	                  swe25_max_gv = Z_MISSING
+                  endif
+;                  endif else begin
+;                  
+; 	                  n_gr_swedp_points_rejected = Z_MISSING
+;	                  swedp_avg_gv = Z_MISSING
+;	                  swedp_stddev_gv = Z_MISSING
+;	                  swedp_max_gv = Z_MISSING
+;	                  
+;  	                  n_gr_swe25_points_rejected = Z_MISSING
+;	                  swe25_avg_gv = Z_MISSING
+;	                  swe25_stddev_gv = Z_MISSING
+;	                  swe25_max_gv = Z_MISSING
+;
+;  	                  n_gr_swe50_points_rejected = Z_MISSING
+;	                  swe50_avg_gv = Z_MISSING
+;	                  swe50_stddev_gv = Z_MISSING
+;	                  swe50_max_gv = Z_MISSING
+;
+;  	                  n_gr_swe75_points_rejected = Z_MISSING
+;	                  swe75_avg_gv = Z_MISSING
+;	                  swe75_stddev_gv = Z_MISSING
+;	                  swe75_max_gv = Z_MISSING
+;                  endelse
 
-  	                  n_gr_swe50_points_rejected = Z_MISSING
-	                  swe50_avg_gv = Z_MISSING
-	                  swe50_stddev_gv = Z_MISSING
-	                  swe50_max_gv = Z_MISSING
-
-  	                  n_gr_swe75_points_rejected = Z_MISSING
-	                  swe75_avg_gv = Z_MISSING
-	                  swe75_stddev_gv = Z_MISSING
-	                  swe75_max_gv = Z_MISSING
-                  endelse
                ENDIF
 
 
