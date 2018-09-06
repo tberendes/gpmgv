@@ -365,7 +365,7 @@ CASE pr_or_dpr OF
     PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
     ; TAB 9/4/18
     ; SWERR varaibles
-    PTRswe=ptr_swe, $
+    PTRswedp=ptr_swedp, $
     PTRswe25=ptr_swe25, $
     PTRswe50=ptr_swe50, $
     PTRswe75=ptr_swe75, $
@@ -535,7 +535,7 @@ ENDIF
      mrmsrr=0
   ENDELSE
   haveswe = myflags.have_gr_swe
-;  IF ptr_valid(ptr_swe) THEN BEGIN
+;  IF ptr_valid(ptr_swedp) THEN BEGIN
   IF haveswe THEN BEGIN
      swedp=*ptr_swedp
      ptr_free,ptr_swedp
