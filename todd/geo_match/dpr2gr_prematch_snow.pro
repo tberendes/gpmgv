@@ -251,7 +251,7 @@
 ;    matching the 2A[DPR/Ka|Ku] file specified in the control file, but having a
 ;    different PPS Version from the 2A file.
 ; 09/04/18 Berendes, UAH
-;  - Added mods for SWERR1 variables
+;  - Added mods for SWE variables
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -578,9 +578,18 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_N2_stddev = data_GR2DPR.GR_N2_STDDEV
       tocdf_gr_N2_max = data_GR2DPR.GR_N2_MAX
       tocdf_gr_blockage = data_GR2DPR.GR_BLOCKAGE
-      tocdf_gr_swerr1 = data_GR2DPR.GR_SWERR1
-      tocdf_gr_swerr1_stddev = data_GR2DPR.GR_SWERR1_STDDEV
-      tocdf_gr_swerr1_max = data_GR2DPR.GR_SWERR1_MAX
+      tocdf_gr_swedp = data_GR2DPR.GR_SWEDP
+      tocdf_gr_swedp_stddev = data_GR2DPR.GR_SWEDP_STDDEV
+      tocdf_gr_swedp_max = data_GR2DPR.GR_SWEDP_MAX
+      tocdf_gr_swe25 = data_GR2DPR.GR_SWE25
+      tocdf_gr_swe25_stddev = data_GR2DPR.GR_SWE25_STDDEV
+      tocdf_gr_swe25_max = data_GR2DPR.GR_SWE25_MAX
+      tocdf_gr_swe50 = data_GR2DPR.GR_SWE50
+      tocdf_gr_swe50_stddev = data_GR2DPR.GR_SWE50_STDDEV
+      tocdf_gr_swe50_max = data_GR2DPR.GR_SWE50_MAX
+      tocdf_gr_swe75 = data_GR2DPR.GR_SWE75
+      tocdf_gr_swe75_stddev = data_GR2DPR.GR_SWE75_STDDEV
+      tocdf_gr_swe75_max = data_GR2DPR.GR_SWE75_MAX
       tocdf_meas_dbz = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                   VALUE=FLOAT_RANGE_EDGE)
       tocdf_corr_dbz = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -608,7 +617,10 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_dm_rejected = data_GR2DPR.N_GR_DM_REJECTED
       tocdf_gr_n2_rejected = data_GR2DPR.N_GR_N2_REJECTED
       tocdf_gr_expected = data_GR2DPR.N_GR_EXPECTED
-      tocdf_gr_swerr1_rejected = data_GR2DPR.N_GR_SWERR1_REJECTED
+      tocdf_gr_swedp_rejected = data_GR2DPR.N_GR_SWEDP_REJECTED
+      tocdf_gr_swe25_rejected = data_GR2DPR.N_GR_SWE25_REJECTED
+      tocdf_gr_swe50_rejected = data_GR2DPR.N_GR_SWE50_REJECTED
+      tocdf_gr_swe75_rejected = data_GR2DPR.N_GR_SWE75_REJECTED
       tocdf_meas_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_r_rejected = UINTARR(numDPRrays, num_elevations_out)
@@ -1067,10 +1079,19 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'GR_Kdp_StdDev', tocdf_gr_kdp_stddev
    NCDF_VARPUT, ncid, 'GR_Kdp_Max', tocdf_gr_kdp_max
 
-   NCDF_VARPUT, ncid, 'GR_SWERR1', tocdf_gr_swerr1
-    NCDF_VARPUT, ncid, 'have_GR_SWERR1', myflags.HAVE_GR_SWERR1
-   NCDF_VARPUT, ncid, 'GR_SWERR1_StdDev', tocdf_gr_swerr1_stddev
-   NCDF_VARPUT, ncid, 'GR_SWERR1_Max', tocdf_gr_swerr1_max
+   NCDF_VARPUT, ncid, 'have_SWE', myflags.HAVE_GR_SWE
+   NCDF_VARPUT, ncid, 'GR_SWEDP', tocdf_gr_swedp
+   NCDF_VARPUT, ncid, 'GR_SWEDP_StdDev', tocdf_gr_swedp_stddev
+   NCDF_VARPUT, ncid, 'GR_SWEDP_Max', tocdf_gr_swedp_max
+   NCDF_VARPUT, ncid, 'GR_SWE25', tocdf_gr_swe25
+   NCDF_VARPUT, ncid, 'GR_SWE25_StdDev', tocdf_gr_swe25_stddev
+   NCDF_VARPUT, ncid, 'GR_SWE25_Max', tocdf_gr_swe25_max
+   NCDF_VARPUT, ncid, 'GR_SWE50', tocdf_gr_swe50
+   NCDF_VARPUT, ncid, 'GR_SWE50_StdDev', tocdf_gr_swe50_stddev
+   NCDF_VARPUT, ncid, 'GR_SWE50_Max', tocdf_gr_swe50_max
+   NCDF_VARPUT, ncid, 'GR_SWE75', tocdf_gr_swe75
+   NCDF_VARPUT, ncid, 'GR_SWE75_StdDev', tocdf_gr_swe75_stddev
+   NCDF_VARPUT, ncid, 'GR_SWE75_Max', tocdf_gr_swe75_max
 
    NCDF_VARPUT, ncid, 'GR_RHOhv', tocdf_gr_rhohv
     NCDF_VARPUT, ncid, 'have_GR_RHOhv', myflags.HAVE_GR_RHOHV
@@ -1133,7 +1154,10 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_gr_dm_rejected', tocdf_gr_dm_rejected
    NCDF_VARPUT, ncid, 'n_gr_n2_rejected', tocdf_gr_n2_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected', tocdf_gr_expected
-   NCDF_VARPUT, ncid, 'n_gr_swerr1_rejected', tocdf_gr_swerr1_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swedp_rejected', tocdf_gr_swedp_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe25_rejected', tocdf_gr_swe25_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe50_rejected', tocdf_gr_swe50_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe75_rejected', tocdf_gr_swe75_rejected
    NCDF_VARPUT, ncid, 'n_dpr_meas_z_rejected', tocdf_meas_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_z_rejected', tocdf_corr_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_epsilon_rejected', tocdf_epsilon_rejected

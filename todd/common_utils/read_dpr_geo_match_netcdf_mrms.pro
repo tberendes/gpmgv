@@ -316,7 +316,10 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     gv_nw_reject_int=gv_nw_reject, gv_dm_reject_int=gv_dm_reject,             $
     gv_n2_reject_int=gv_n2_reject, gv_zdr_reject_int=gv_zdr_reject,           $
     gv_kdp_reject_int=gv_kdp_reject, gv_RHOhv_reject_int=gv_RHOhv_reject,     $
-    gv_swerr1_reject_int=gv_swerr1_reject, $
+    gv_swedp_reject_int=gv_swedp_reject, $
+    gv_swe25_reject_int=gv_swe25_reject, $
+    gv_swe50_reject_int=gv_swe50_reject, $
+    gv_swe75_reject_int=gv_swe75_reject, $
     
    ; horizontally (GV) and vertically (DPR Z, rain) averaged values at elevs.:
     dbzgv=threeDreflect, dbzraw=ZFactorMeasured, dbzcor=ZFactorCorrected,     $
@@ -371,9 +374,13 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     mrmsrqipveryhigh=mrmsrqipveryhigh, $
     
     ; snow variables
-    swerr1=swerr1, $
-;    swerr1_max=swerr1_max, $
-;    swerr1_stddev=swerr1_stddev, $
+    swedp=swedp, $
+; not using max, stddev at the moment
+;    swedp_max=swedp_max, $
+;    swedp_stddev=swedp_stddev, $
+    swe25=swe25, $
+    swe50=swe50, $
+    swe75=swe75, $
     
    ; horizontally summarized GR Hydromet Identifier category at elevs.:
     hidmrms=mrmshid,                                                             $
@@ -800,7 +807,7 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                 STRUCT=fieldFlags )
       'have_MRMS' : status=PREPARE_NCVAR( ncid1, thisncvar, have_mrms, $
                                               STRUCT=fieldFlags )
-      'have_GR_SWERR1' : status=PREPARE_NCVAR( ncid1, thisncvar, have_swerr1, $
+      'have_GR_SWE' : status=PREPARE_NCVAR( ncid1, thisncvar, have_swe, $
                                               STRUCT=fieldFlags )
       'n_gr_expected' : status=PREPARE_NCVAR( ncid1, thisncvar, gvexpect, $
                                               DIM2SORT=2, IDXSORT=idxsort )
@@ -853,7 +860,13 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                   DIM2SORT=2, IDXSORT=idxsort )
       'n_dpr_nw_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, dpr_nw_reject, $
                                                   DIM2SORT=2, IDXSORT=idxsort )
-      'n_gr_swerr1_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swerr1_reject, $
+      'n_gr_swedp_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swedp_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swe25_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swe25_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swe50_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swe50_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swe75_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swe75_reject, $
                                                  DIM2SORT=2, IDXSORT=idxsort )
       'GR_Z' : status=PREPARE_NCVAR( ncid1, thisncvar, threeDreflect, $
                                      DIM2SORT=2, IDXSORT=idxsort )
@@ -990,9 +1003,18 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'RqiPercentMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipmed )
       'RqiPercentHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqiphigh )
       'RqiPercentVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipveryhigh )
-      'GR_SWERR1' : status=PREPARE_NCVAR( ncid1, thisncvar, swerr1 )
-      'GR_SWERR1_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swerr1_max)
-      'GR_SWERR1_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swerr1_stddev)
+      'GR_SWEDP' : status=PREPARE_NCVAR( ncid1, thisncvar, swedp )
+      'GR_SWEDP_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swedp_max)
+      'GR_SWEDP_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swedp_stddev)
+      'GR_SWE25' : status=PREPARE_NCVAR( ncid1, thisncvar, swe25 )
+      'GR_SWE25_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swe25_max)
+      'GR_SWE25_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swe25_stddev)
+      'GR_SWE50' : status=PREPARE_NCVAR( ncid1, thisncvar, swe50 )
+      'GR_SWE50_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swe50_max)
+      'GR_SWE50_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swe50_stddev)
+      'GR_SWE75' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75 )
+      'GR_SWE75_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75_max)
+      'GR_SWE75_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75_stddev)
       'MRMS_HID' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmshid)
 
        ELSE : BEGIN

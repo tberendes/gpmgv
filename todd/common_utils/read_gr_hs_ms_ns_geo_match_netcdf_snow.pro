@@ -282,8 +282,8 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      fieldFlags.have_GR_N2 = have_GR_N2
      NCDF_VARGET, ncid1, 'have_GR_blockage', have_blockage
      fieldFlags.have_GR_blockage = have_blockage
-     NCDF_VARGET, ncid1, 'have_GR_SWERR1', have_GR_SWERR1
-     fieldFlags.have_GR_SWERR1 = have_GR_SWERR1
+     NCDF_VARGET, ncid1, 'have_SWE', have_GR_SWE
+     fieldFlags.have_GR_SWE = have_GR_SWE
 ENDIF
 
 
@@ -362,10 +362,22 @@ for iswa=0,2 do begin
    NCDF_VARGET, ncid1, 'DPRlongitude_'+swath[iswa], DPRlongitude
    NCDF_VARGET, ncid1, 'scanNum_'+swath[iswa], scanNum
    NCDF_VARGET, ncid1, 'rayNum_'+swath[iswa], rayNum
-   NCDF_VARGET, ncid1, 'GR_SWERR1_'+swath[iswa], GR_SWERR1
-   NCDF_VARGET, ncid1, 'GR_SWERR1_StdDev_'+swath[iswa], GR_SWERR1_StdDev
-   NCDF_VARGET, ncid1, 'GR_SWERR1_Max_'+swath[iswa], GR_SWERR1_Max
-   NCDF_VARGET, ncid1, 'n_gr_swerr1_rejected_'+swath[iswa], n_gr_swerr1_rejected
+   NCDF_VARGET, ncid1, 'GR_SWEDP_'+swath[iswa], GR_SWEDP
+   NCDF_VARGET, ncid1, 'GR_SWEDP_StdDev_'+swath[iswa], GR_SWEDP_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWEDP_Max_'+swath[iswa], GR_SWEDP_Max
+   NCDF_VARGET, ncid1, 'n_gr_swedp_rejected_'+swath[iswa], n_gr_swedp_rejected
+   NCDF_VARGET, ncid1, 'GR_SWE25_'+swath[iswa], GR_SWE25
+   NCDF_VARGET, ncid1, 'GR_SWE25_StdDev_'+swath[iswa], GR_SWE25_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWE25_Max_'+swath[iswa], GR_SWE25_Max
+   NCDF_VARGET, ncid1, 'n_gr_swe25_rejected_'+swath[iswa], n_gr_swe25_rejected
+   NCDF_VARGET, ncid1, 'GR_SWE50_'+swath[iswa], GR_SWE50
+   NCDF_VARGET, ncid1, 'GR_SWE50_StdDev_'+swath[iswa], GR_SWE50_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWE50_Max_'+swath[iswa], GR_SWE50_Max
+   NCDF_VARGET, ncid1, 'n_gr_swe50_rejected_'+swath[iswa], n_gr_swe50_rejected
+   NCDF_VARGET, ncid1, 'GR_SWE75_'+swath[iswa], GR_SWE75
+   NCDF_VARGET, ncid1, 'GR_SWE75_StdDev_'+swath[iswa], GR_SWE75_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWE75_Max_'+swath[iswa], GR_SWE75_Max
+   NCDF_VARGET, ncid1, 'n_gr_swe75_rejected_'+swath[iswa], n_gr_swe75_rejected
 
   ; copy the swath-specific data variables into anonymous structure, use
   ; TEMPORARY to avoid making a copy of the variable when loading to struct
@@ -406,9 +418,18 @@ for iswa=0,2 do begin
                  GR_RR_rainrate : TEMPORARY(GR_RR_rainrate), $
                  GR_RR_rainrate_StdDev : TEMPORARY(GR_RR_rainrate_StdDev), $
                  GR_RR_rainrate_Max : TEMPORARY(GR_RR_rainrate_Max), $
-                 GR_SWERR1 : TEMPORARY(GR_SWERR1), $
-                 GR_SWERR1_StdDev : TEMPORARY(GR_SWERR1_StdDev), $
-                 GR_SWERR1_Max : TEMPORARY(GR_SWERR1_Max), $
+                 GR_SWEDP : TEMPORARY(GR_SWEDP), $
+                 GR_SWEDP_StdDev : TEMPORARY(GR_SWEDP_StdDev), $
+                 GR_SWEDP_Max : TEMPORARY(GR_SWEDP_Max), $
+                 GR_SWE25 : TEMPORARY(GR_SWE25), $
+                 GR_SWE25_StdDev : TEMPORARY(GR_SWE25_StdDev), $
+                 GR_SWE25_Max : TEMPORARY(GR_SWE25_Max), $
+                 GR_SWE50 : TEMPORARY(GR_SWE50), $
+                 GR_SWE50_StdDev : TEMPORARY(GR_SWE50_StdDev), $
+                 GR_SWE50_Max : TEMPORARY(GR_SWE50_Max), $
+                 GR_SWE75 : TEMPORARY(GR_SWE75), $
+                 GR_SWE75_StdDev : TEMPORARY(GR_SWE75_StdDev), $
+                 GR_SWE75_Max : TEMPORARY(GR_SWE75_Max), $
                  GR_HID : TEMPORARY(GR_HID), $
                  GR_Dzero : TEMPORARY(GR_Dzero), $
                  GR_Dzero_StdDev : TEMPORARY(GR_Dzero_StdDev), $
@@ -435,7 +456,10 @@ for iswa=0,2 do begin
                  n_gr_nw_rejected : TEMPORARY(n_gr_nw_rejected), $
                  n_gr_dm_rejected : TEMPORARY(n_gr_dm_rejected), $
                  n_gr_n2_rejected : TEMPORARY(n_gr_n2_rejected), $
-                 n_gr_swerr1_rejected : TEMPORARY(n_gr_swerr1_rejected), $
+                 n_gr_swedp_rejected : TEMPORARY(n_gr_swedp_rejected), $
+                 n_gr_swe25_rejected : TEMPORARY(n_gr_swe25_rejected), $
+                 n_gr_swe50_rejected : TEMPORARY(n_gr_swe50_rejected), $
+                 n_gr_swe75_rejected : TEMPORARY(n_gr_swe75_rejected), $
                  n_gr_expected : TEMPORARY(n_gr_expected), $
                  DPRlatitude : TEMPORARY(DPRlatitude), $
                  DPRlongitude : TEMPORARY(DPRlongitude), $
