@@ -798,7 +798,7 @@
                	  if (meantop le 1.5 ) then begin
 					  ; compute snow index 
                	      snow_index = where(gvhidvals ge 3 and gvhidvals le 7, num_snow)
-               	      notsnow_index = where(gvhidvals lt 3 and gvhidvals gt 7, num_notsnow)
+               	      notsnow_index = where(gvhidvals lt 3 or gvhidvals gt 7, num_notsnow)
                	  	  if num_snow eq 0 then begin
                	  	  
                	  	      ; use rp rain rate for non-snow values
