@@ -197,7 +197,7 @@ haveZdr = data_struct.haveFlags.haveZdr
 haveKdp = data_struct.haveFlags.haveKdp
 haveRHOhv = data_struct.haveFlags.haveRHOhv
 havemrms = data_struct.haveFlags.have_mrms
-haveswerr1 = data_struct.haveFlags.have_swerr1
+haveswe = data_struct.haveFlags.have_swe
 
 havenearsurfrain = data_struct.haveFlags.have_nearsurfrain
 ; and set flag to try to filter by GR blockage if blockage data are present
@@ -243,7 +243,10 @@ Kdp = data_struct.Kdp
 RHOhv = data_struct.RHOhv
 mrmsrr = data_struct.mrmsrr
 nearsurfrain = data_struct.nearsurfrain
-swerr1 = data_struct.swerr1
+swedp = data_struct.swedp
+swe25 = data_struct.swe25
+swe50 = data_struct.swe50
+swe75 = data_struct.swe75
 IF do_GR_blockage EQ 1 THEN GR_blockage = data_struct.GR_blockage
 top = data_struct.top
 botm = data_struct.botm
@@ -1316,7 +1319,7 @@ ENDIF
                                STEP_MANUAL=step_manual
    FOR nfieldptr = 0, N_ELEMENTS(fieldData)-1 DO ptr_free, fieldData[nfieldptr]
 
-   if havemrms then begin
+   if havemrms and xxx EQ 'RR' then begin
 
 ;      fieldData = ptrarr(3,1, /allocate_heap)
 ;      fieldIDs = [['RR','RR','RR']]
@@ -1324,28 +1327,35 @@ ENDIF
 ;      thresholded = [[0,0,sayPct]]
       fieldData = ptrarr(1,3, /allocate_heap)
       fieldIDs = [['RR'],['RR'],['RR']]
-      sources = [['DPR'],['MRMS'],[siteID+gr_rr_zr]]
-      thresholded = [[0],[0],[sayPct]]
+      sources = [['DPR'],[siteID+gr_rr_zr],['MRMS']]
+;      thresholded = [[0],[sayPct],[0]]
+      thresholded = [[saypct],[sayPct],[0]]
 
       *fieldData[0] = nearsurfrain
-      *fieldData[1] = mrmsrr
-      IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[2] = gvrr_in2
+      *fieldData[1] = gvrr_in2
+      *fieldData[2] = mrmsrr
+       
+ ;     IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[2] = gvrr_in2
 
       plot_geo_match_ppi_rr_mrms_ps, fieldIDs, sources, fieldData, thresholded, $
                                ppi_comn, DO_PS=do_ps, SHOW_PPIS=show_ppis
 
       FOR nfieldptr = 0, N_ELEMENTS(fieldData)-1 DO ptr_free, fieldData[nfieldptr]
     endif
-   if haveswerr1 then begin
+   if haveswe and  xxx EQ 'RR' then begin
 
       fieldData = ptrarr(1,3, /allocate_heap)
-      fieldIDs = [['RR'],['RR'],['RR']]
-      sources = [['DPR'],['SWERR1'],[siteID+gr_rr_zr]]
-      thresholded = [[0],[0],[sayPct]]
+      fieldIDs = [['RR','RR'],['RR','RR'],['RR','RR']]
+      sources = [['DPR','SWE25'],[siteID+gr_rr_zr,'SWE50'],['SWEDP','SWE75']]
+      thresholded = [[sayPct,0],[sayPct,0],[0,0]]
 
       *fieldData[0] = nearsurfrain
-      *fieldData[1] = swerr1
-      IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[2] = gvrr_in2
+      *fieldData[1] = swe25
+      *fieldData[2] = gvrr_in2
+      *fieldData[3] = swe50
+      *fieldData[4] = swedp
+      *fieldData[5] = swe75
+;      IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[2] = gvrr_in2
 
       plot_geo_match_ppi_rr_mrms_ps, fieldIDs, sources, fieldData, thresholded, $
                                ppi_comn, DO_PS=do_ps, SHOW_PPIS=show_ppis

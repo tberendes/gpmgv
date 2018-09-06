@@ -408,8 +408,11 @@ FUNCTION fprep_dpr_geo_match_profiles_mrms, ncfilepr, heights_in, $
     PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
     
 	; TAB 9/4/18
-    PTRswerr1=ptr_swerr1, $
-;    PTRswerr1=ptr_swerr1, PTRswerr1stddev=ptr_swerr1stddev, PTRswerr1max=ptr_swerr1max, $
+    PTRswedp=ptr_swedp, $
+    PTRswe25=ptr_swe25, $
+    PTRswe50=ptr_swe50, $
+    PTRswe75=ptr_swe75, $
+;    PTRswedp=ptr_swedp, PTRswedpstddev=ptr_swedpstddev, PTRswedpmax=ptr_swedpmax, $
 
     PTRMRMSHID=ptr_MRMS_HID, $
 
@@ -675,7 +678,10 @@ if (cpstatus eq 'OK') then begin
   mrmsrqipmed=fltarr(nfp)
   mrmsrqiphigh=fltarr(nfp)
   mrmsrqipveryhigh=fltarr(nfp)
-  swerr1=fltarr(nfp)
+  swedp=fltarr(nfp)
+  swe25=fltarr(nfp)
+  swe50=fltarr(nfp)
+  swe75=fltarr(nfp)
 
   if mygeometa.num_MRMS_categories GT 0 then  MRMS_HID=intarr(nfp, mygeometa.num_MRMS_categories)
  
@@ -761,9 +767,12 @@ if (cpstatus eq 'OK') then begin
     mrmsrqipmed=mrmsrqipmed, $
     mrmsrqiphigh=mrmsrqiphigh, $
     mrmsrqipveryhigh=mrmsrqipveryhigh, $
-    swerr1=swerr1, $
-;    swerr1max=swerr1max, $
-;    swerr1stddev=swerr1stddev, $
+    swedp=swedp, $
+    swe25=swe25, $
+    swe50=swe50, $
+    swe75=swe75, $
+;    swedpmax=swedpmax, $
+;    swedpstddev=swedpstddev, $
     
     hidmrms=MRMS_HID, $
 
@@ -1059,7 +1068,10 @@ IF ( nswp GT 1 ) THEN BEGIN
 	mrmsrqipveryhighApp = mrmsrqipveryhigh
 	
 	; TAB 9/4/18
-	swerr1App = swerr1
+	swedpApp = swedp
+	swe25App = swe25
+	swe50App = swe50
+	swe75App = swe75
    
    pr_indexApp = pr_index
    bbStatusApp=bbStatus
@@ -1111,7 +1123,10 @@ IF ( nswp GT 1 ) THEN BEGIN
 	  mrmsrqiphigh = [mrmsrqiphigh,mrmsrqiphighApp]
 	  mrmsrqipveryhigh = [mrmsrqipveryhigh,mrmsrqipveryhighApp]
 	  
-	  swerr1 = [swerr1,swerr1App]
+	  swedp = [swedp,swedpApp]
+	  swe25 = [swe25,swe25App]
+	  swe50 = [swe50,swe50App]
+	  swe75 = [swe75,swe75App]
       
    ENDFOR
 ENDIF
@@ -1251,7 +1266,10 @@ mrmsrqiplow = mrmsrqiplow[idxpractual2d]
 mrmsrqipmed = mrmsrqipmed[idxpractual2d]
 mrmsrqiphigh = mrmsrqiphigh[idxpractual2d]
 mrmsrqipveryhigh = mrmsrqipveryhigh[idxpractual2d]
-swerr1 = swerr1[idxpractual2d]
+swedp = swedp[idxpractual2d]
+swe25 = swe25[idxpractual2d]
+swe50 = swe50[idxpractual2d]
+swe75 = swe75[idxpractual2d]
 nearSurfRain_Comb = nearSurfRain_Comb[idxpractual2d]
 bbStatus = bbStatus[idxpractual2d]
 clutterStatus = clutterStatus[idxpractual2d]
@@ -1452,7 +1470,10 @@ mrmsrqiplow = REFORM( mrmsrqiplow, countactual, nswp )
 mrmsrqipmed = REFORM( mrmsrqipmed, countactual, nswp )
 mrmsrqiphigh = REFORM( mrmsrqiphigh, countactual, nswp )
 mrmsrqipveryhigh = REFORM( mrmsrqipveryhigh, countactual, nswp )
-swerr1 = REFORM(swerr1, countactual, nswp )
+swedp = REFORM(swedp, countactual, nswp )
+swe25 = REFORM(swe25, countactual, nswp )
+swe50 = REFORM(swe50, countactual, nswp )
+swe75 = REFORM(swe75, countactual, nswp )
 nearSurfRain_Comb = REFORM( nearSurfRain_Comb, countactual, nswp )
 pr_index = REFORM( pr_index, countactual, nswp )
 bbStatus = REFORM( bbStatus, countactual, nswp )
@@ -1736,7 +1757,10 @@ IF PTR_VALID(ptr_mrmsrqiplow) THEN *ptr_mrmsrqiplow = mrmsrqiplow
 IF PTR_VALID(ptr_mrmsrqipmed) THEN *ptr_mrmsrqipmed = mrmsrqipmed
 IF PTR_VALID(ptr_mrmsrqiphigh) THEN *ptr_mrmsrqiphigh = mrmsrqiphigh
 IF PTR_VALID(ptr_mrmsrqipveryhigh) THEN *ptr_mrmsrqipveryhigh = mrmsrqipveryhigh
-IF PTR_VALID(ptr_swerr1) THEN *ptr_swerr1 = swerr1
+IF PTR_VALID(ptr_swedp) THEN *ptr_swedp = swedp
+IF PTR_VALID(ptr_swe25) THEN *ptr_swe25 = swe25
+IF PTR_VALID(ptr_swe50) THEN *ptr_swe50 = swe50
+IF PTR_VALID(ptr_swe75) THEN *ptr_swe75 = swe75
 
 IF PTR_VALID(ptr_MRMS_HID) AND mygeometa.num_MRMS_categories GT 0 THEN $
    *ptr_MRMS_HID = MRMS_HID

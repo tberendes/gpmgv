@@ -278,7 +278,10 @@ ptr_mrmsrrlow=ptr_new(/allocate_heap)
 ptr_mrmsrrmed=ptr_new(/allocate_heap)
 ptr_mrmsrrhigh=ptr_new(/allocate_heap)
 ptr_mrmsrrveryhigh=ptr_new(/allocate_heap)
-ptr_swerr1=ptr_new(/allocate_heap)
+ptr_swedp=ptr_new(/allocate_heap)
+ptr_swe25=ptr_new(/allocate_heap)
+ptr_swe50=ptr_new(/allocate_heap)
+ptr_swe75=ptr_new(/allocate_heap)
 ptr_rnFlag=ptr_new(/allocate_heap)
 ptr_rnType=ptr_new(/allocate_heap)
 ptr_landOcean=ptr_new(/allocate_heap)
@@ -362,7 +365,10 @@ CASE pr_or_dpr OF
     PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
     ; TAB 9/4/18
     ; SWERR varaibles
-    PTRswerr1=ptr_swerr1, $
+    PTRswe=ptr_swe, $
+    PTRswe25=ptr_swe25, $
+    PTRswe50=ptr_swe50, $
+    PTRswe75=ptr_swe75, $
     ALT_BB_HGT=alt_bb_hgt, FORCEBB=forcebb )
  END
   'DPRGMI' : BEGIN
@@ -528,14 +534,23 @@ ENDIF
      message, "No MRMS RR field in netCDF file.", /INFO
      mrmsrr=0
   ENDELSE
-  haveswerr1 = myflags.have_gr_swerr1
-;  IF ptr_valid(ptr_swerr1) THEN BEGIN
-  IF haveswerr1 THEN BEGIN
-     swerr1=*ptr_swerr1
-     ptr_free,ptr_swerr1
+  haveswe = myflags.have_gr_swe
+;  IF ptr_valid(ptr_swe) THEN BEGIN
+  IF haveswe THEN BEGIN
+     swedp=*ptr_swedp
+     ptr_free,ptr_swedp
+     swe25=*ptr_swe25
+     ptr_free,ptr_swe25
+     swe50=*ptr_swe50
+     ptr_free,ptr_swe50
+     swe75=*ptr_swe75
+     ptr_free,ptr_swe75
   ENDIF ELSE BEGIN
      message, "No MRMS RR field in netCDF file.", /INFO
-     swerr1=0
+     swedp=0
+     swe25=0
+     swe50=0
+     swe75=0
   ENDELSE
    ; initialize flag as to source of GR rain rate to use to "compute Z-R"
    have_gvrr = 0
@@ -728,7 +743,10 @@ ENDIF
     ptr_free,ptr_mrmsrrmed
     ptr_free,ptr_mrmsrrhigh
     ptr_free,ptr_mrmsrrveryhigh
-    ptr_free,ptr_swerr1    
+    ptr_free,ptr_swedp    
+    ptr_free,ptr_swe25    
+    ptr_free,ptr_swe50    
+    ptr_free,ptr_swe75    
     ptr_free,ptr_rnFlag
     ptr_free,ptr_rnType
     ptr_free,ptr_pr_index
@@ -771,7 +789,7 @@ haveIt = { have_gvrr : have_gvrr, $
            have_pia : have_pia, $
            have_nearsurfrain : havenearsurfrain, $
            have_mrms : havemrms, $
-           have_swerr1 : haveswerr1, $
+           have_swe : haveswe, $
            have_GR_blockage : have_GR_blockage }
 
 dataStruc = { haveFlags : haveIt, $
@@ -795,7 +813,10 @@ dataStruc = { haveFlags : haveIt, $
               mrmsrr : mrmsrr, $ 
               HIDcat : HIDcat, $
 ; TAB 9/4/18
-              swerr1 : swerr1, $ 
+              swedp : swedp, $ 
+              swe25 : swe25, $ 
+              swe50 : swe50, $ 
+              swe75 : swe75, $ 
               Zdr : Zdr, $
               Kdp : Kdp, $
               RHOhv : RHOhv, $
