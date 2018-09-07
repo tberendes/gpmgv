@@ -801,26 +801,26 @@
                	      notsnow_index = where( ((gvhidvals lt 3) and (gvhidvals gt 0)) or (gvhidvals gt 7), num_notsnow)
                	  	  if num_snow eq 0 then begin
                	  	  
-               	  	      ; use rp rain rate for non-snow values
-               	  	  	  n_gr_swedp_points_rejected = n_gr_rp_points_rejected
-                  		  swedp_avg_gv = rp_avg_gv
-                  		  swedp_stddev_gv = rp_stddev_gv
-                  		  swedp_max_gv = rp_max_gv
+               	  	      ; use rc rain rate for non-snow values
+               	  	  	  n_gr_swedp_points_rejected = n_gr_rc_points_rejected
+                  		  swedp_avg_gv = rc_avg_gv
+                  		  swedp_stddev_gv = rc_stddev_gv
+                  		  swedp_max_gv = rc_max_gv
                	  	      
-               	  	  	  n_gr_swe25_points_rejected = n_gr_rp_points_rejected
-                  		  swe25_avg_gv = rp_avg_gv
-                  		  swe25_stddev_gv = rp_stddev_gv
-                  		  swe25_max_gv = rp_max_gv
+               	  	  	  n_gr_swe25_points_rejected = n_gr_rc_points_rejected
+                  		  swe25_avg_gv = rc_avg_gv
+                  		  swe25_stddev_gv = rc_stddev_gv
+                  		  swe25_max_gv = rc_max_gv
                	  	      
-               	  	  	  n_gr_swe50_points_rejected = n_gr_rp_points_rejected
-                  		  swe50_avg_gv = rp_avg_gv
-                  		  swe50_stddev_gv = rp_stddev_gv
-                  		  swe50_max_gv = rp_max_gv
+               	  	  	  n_gr_swe50_points_rejected = n_gr_rc_points_rejected
+                  		  swe50_avg_gv = rc_avg_gv
+                  		  swe50_stddev_gv = rc_stddev_gv
+                  		  swe50_max_gv = rc_max_gv
                	  	      
-               	  	  	  n_gr_swe75_points_rejected = n_gr_rp_points_rejected
-                  		  swe75_avg_gv = rp_avg_gv
-                  		  swe75_stddev_gv = rp_stddev_gv
-                  		  swe75_max_gv = rp_max_gv
+               	  	  	  n_gr_swe75_points_rejected = n_gr_rc_points_rejected
+                  		  swe75_avg_gv = rc_avg_gv
+                  		  swe75_stddev_gv = rc_stddev_gv
+                  		  swe75_max_gv = rc_max_gv
                	  	      
                	  	  	  skip_swe=1
                	  	  endif
@@ -856,8 +856,8 @@
 	               	  Z = 10^(dbzvals/10)	               	  
 	               	  swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
 	                  ;swedp [notsnow_index]=Z_MISSING
-	                  ; use RP rain rate where snow is not detected
-	                  swedp [notsnow_index]=gvrpvals[notsnow_index]
+	                  ; use RC rain rate where snow is not detected
+	                  swedp [notsnow_index]=gvrcvals[notsnow_index]
 	                  
 	                  altstats=mean_stddev_max_by_rules(swedp,'RR', dpr_rain_min, $
 	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
@@ -870,7 +870,7 @@
 	                  
 	               	  swe25 = 0.101 * Z^0.413
 	                  ; use RP rain rate where snow is not detected
-	                  swe25 [notsnow_index]=gvrpvals[notsnow_index]
+	                  swe25 [notsnow_index]=gvrcvals[notsnow_index]
 	                  altstats=mean_stddev_max_by_rules(swe25,'RR', dpr_rain_min, $
 	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
            	  	  	  n_gr_swe25_points_rejected = altstats.rejects
@@ -880,7 +880,7 @@
            	  	      
 	               	  swe50 = 0.204 * Z^0.389
 	                  ; use RP rain rate where snow is not detected
-	                  swe50 [notsnow_index]=gvrpvals[notsnow_index]
+	                  swe50 [notsnow_index]=gvrcvals[notsnow_index]
 	                  altstats=mean_stddev_max_by_rules(swe50,'RR', dpr_rain_min, $
 	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
            	  	  	  n_gr_swe50_points_rejected = altstats.rejects
@@ -890,7 +890,7 @@
            	  	      
  	               	  swe75 = 0.257 * Z^0.388
 	                  ; use RP rain rate where snow is not detected
-	                  swe75 [notsnow_index]=gvrpvals[notsnow_index]
+	                  swe75 [notsnow_index]=gvrcvals[notsnow_index]
  	                  altstats=mean_stddev_max_by_rules(swe75,'RR', dpr_rain_min, $
 	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)	                              
            	  	  	  n_gr_swe75_points_rejected = altstats.rejects
