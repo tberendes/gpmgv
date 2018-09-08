@@ -1345,7 +1345,7 @@ ENDIF
    if haveswe and  xxx EQ 'RR' then begin
 
       fieldData = ptrarr(2,3, /allocate_heap)
-      fieldIDs = [['RR','RR'],['RR','RR'],['RR','RR']]
+      fieldIDs = [['RR','SW'],['RR','SW'],['SW','SW']]
       sources = [['DPR','SWE25'],[siteID+gr_rr_zr,'SWE50'],['SWEDP','SWE75']]
       thresholded = [[sayPct,0],[sayPct,0],[0,0]]
 
