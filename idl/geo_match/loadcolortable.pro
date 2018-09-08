@@ -34,6 +34,10 @@
 ; 08/15/16 by Bob Morris
 ;  - Added dRR (rain rate difference) and Tbb (brightness temperature) fields,
 ;    and added maxval/minval range checks for NW field.
+; 06/20/18 by Bob Morris
+;  - Added AGL (height above ground in km) field, using Dm scale.
+; 09/07/18 Todd Berendes
+;  - Added SW table for SWE RR
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -84,7 +88,7 @@ fieldtype = field
 if field eq 'CZ' or field eq 'ZT' then fieldtype = 'DZ'
 if field eq 'ZD' then fieldtype = 'DR'
 if field eq 'DR' or field eq 'KD' then fieldtype = 'DR or KD'
-if field eq 'D0' or field eq 'Dm' then fieldtype = 'D0 or Dm'
+if field eq 'D0' or field eq 'Dm' or field eq 'AGL' then fieldtype = 'D0 or Dm'
 if field eq 'RC' or field eq 'RP' or field eq 'RR' or field eq 'Z-R' $
    then fieldtype = 'RR'
 if field eq 'N2' then fieldtype = 'NW'
@@ -120,20 +124,50 @@ case fieldtype of
         if size(s,/n_dimensions) gt 0 then coloray[s] = 0
     end
     'SW': begin
-        color_bin_size = 2. ; m/s
-        color_offset = 1.
-        maxval = 21.
-        high_color = 12
-        rangefolded = 13
-        coloray = long(range/color_bin_size + color_offset)
-        s = where(range gt maxval)
-        if size(s,/n_dimensions) gt 0 then coloray[s] = high_color
-        if nyquist gt 0. then begin
-            s = where(range gt nyquist)
-            if size(s,/n_dimensions) gt 0 then coloray[s] = rangefolded
-        endif
-        s = where(range lt -10000.) ; bad or missing value
-        if size(s,/n_dimensions) gt 0 then coloray[s] = 0
+        color_offset = 1
+
+        ; Snow water equivalent rain rate, most of the values are below 20
+        ; use the same number of bins as regular RR plots
+        ; The values are binned as follows:
+        ; 0,.5,1,1.5,2,2.5,3,4,5,6,7,8,9,10,12,14,17,20
+
+        coloray = intarr(n_elements(range)) ; initialized with no data (=0).
+        s = where(range ge 0. and range lt .5)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset
+        s = where(range ge .5 and range lt 1.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 1
+        s = where(range ge 1.0 and range lt 1.5)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 2
+        s = where(range ge 1.5 and range lt 2.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 3
+        s = where(range ge 2.0 and range lt 2.5)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 4
+        s = where(range ge 2.5 and range lt 3.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 5
+        s = where(range ge 3.0 and range lt 4.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 6
+        s = where(range ge 4.0 and range lt 5.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 7
+        s = where(range ge 5.0 and range lt 6.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 8
+        s = where(range ge 6.0 and range lt 7.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 9
+        s = where(range ge 7.0 and range lt 8.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 10
+        s = where(range ge 8.0 and range lt 9.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 11
+        s = where(range ge 9.0 and range lt 10.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 12
+        s = where(range ge 10.0 and range lt 12.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 13
+        s = where(range ge 12.0 and range lt 14.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 14
+        s = where(range ge 14.0 and range lt 17.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 15
+        s = where(range ge 17.0 and range lt 20.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 16
+        s = where(range ge 20.0)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 17
     end
     'DR or KD': begin
         maxval = 3.
@@ -197,6 +231,18 @@ case fieldtype of
             coloray[s] = fix(range[s]/color_bin_size + color_offset)
     end
     'RR': begin
+        maxval = 80.
+        minval = 0.
+        color_bin_size = 5. ; mm/hr
+        ncolors = (maxval - minval) / color_bin_size + 1.
+        color_offset = 1. ; 0 is reserved for black.
+        coloray = long(range/color_bin_size + color_offset)
+        s = where(range le 0.) ; 0. or missing value
+        if size(s,/n_dimensions) gt 0 then coloray[s] = 0
+        s = where(range gt maxval)
+        if size(s,/n_dimensions) gt 0 then coloray[s] = ncolors
+    end
+    'SW': begin
         maxval = 80.
         minval = 0.
         color_bin_size = 5. ; mm/hr
@@ -302,7 +348,7 @@ if n_elements(field) eq 0 then field = 'DZ'
 fieldtype = field
 if field eq 'CZ' or field eq 'ZT' then fieldtype = 'DZ'
 if field eq 'ZD' then fieldtype = 'DR' ; Darwin uses ZD for DR.
-if field eq 'D0' or field eq 'Dm' then fieldtype = 'D0 or Dm'
+if field eq 'D0' or field eq 'Dm' or field eq 'AGL' then fieldtype = 'D0 or Dm'
 if field eq 'RC' or field eq 'RP' or field eq 'RR' or field eq 'Z-R' $
    then fieldtype = 'RR'
 if field eq 'N2' then fieldtype = 'NW'
@@ -349,6 +395,11 @@ case fieldtype of
       b[0:12]= [0,232,223,227,  0,  0,  1,  0,  0,  0,  0,  0,  0]
     end
     'RR': begin
+      r[0:17]= [0,102,  0, 0, 0, 0, 0, 0, 0,255,255,255,241,196,151,239,135,255]
+      g[0:17]= [0,153,153,218,109, 0,241,190,139,253,195,138,0,0, 0,  0, 35,255]
+      b[0:17]= [0,153,153,223,227,232, 1,  0,  0,  0,  0,  0,0,0, 0,255,255,255]
+    end
+    'SW': begin
       r[0:17]= [0,102,  0, 0, 0, 0, 0, 0, 0,255,255,255,241,196,151,239,135,255]
       g[0:17]= [0,153,153,218,109, 0,241,190,139,253,195,138,0,0, 0,  0, 35,255]
       b[0:17]= [0,153,153,223,227,232, 1,  0,  0,  0,  0,  0,0,0, 0,255,255,255]
