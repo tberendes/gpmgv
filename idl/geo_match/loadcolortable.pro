@@ -132,7 +132,7 @@ case fieldtype of
         ; 0,.5,1,1.5,2,2.5,3,4,5,6,7,8,9,10,12,14,17,20
 
         coloray = intarr(n_elements(range)) ; initialized with no data (=0).
-        s = where(range ge 0. and range lt .5)
+        s = where(range gt 0. and range lt .5)
         if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset
         s = where(range ge .5 and range lt 1.0)
         if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 1
