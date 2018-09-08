@@ -129,7 +129,7 @@ case fieldtype of
         ; Snow water equivalent rain rate, most of the values are below 20
         ; use the same number of bins as regular RR plots
         ; The values are binned as follows:
-        ; 0,.5,1,1.5,2,2.5,3,4,5,6,7,8,9,10,12,14,17,20
+        ; 0,.5,1,1.5,2,2.5,3,4,5,6,7,8,10,12,14,17,20
 
         coloray = intarr(n_elements(range)) ; initialized with no data (=0).
         s = where(range gt 0. and range lt .5)
@@ -154,20 +154,18 @@ case fieldtype of
         if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 9
         s = where(range ge 7.0 and range lt 8.0)
         if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 10
-        s = where(range ge 8.0 and range lt 9.0)
+        s = where(range ge 8.0 and range lt 10.0)
         if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 11
-        s = where(range ge 9.0 and range lt 10.0)
-        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 12
         s = where(range ge 10.0 and range lt 12.0)
-        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 13
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 12
         s = where(range ge 12.0 and range lt 14.0)
-        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 14
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 13
         s = where(range ge 14.0 and range lt 17.0)
-        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 15
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 14
         s = where(range ge 17.0 and range lt 20.0)
-        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 16
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 15
         s = where(range ge 20.0)
-        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 17
+        if size(s,/n_dimensions) gt 0 then coloray[s] = color_offset + 16
     end
     'DR or KD': begin
         maxval = 3.
