@@ -37,7 +37,7 @@
 ; 06/20/18 by Bob Morris
 ;  - Added AGL (height above ground in km) field, using Dm scale.
 ; 09/07/18 Todd Berendes
-;  - Added SW table for SWE RR
+;  - Added SE table for Snow water equiv RR
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -123,7 +123,7 @@ case fieldtype of
         s = where(range lt -10000.) ; bad or missing value
         if size(s,/n_dimensions) gt 0 then coloray[s] = 0
     end
-    'SW': begin
+    'SE': begin
         color_offset = 1
 
         ; Snow water equivalent rain rate, most of the values are below 20
@@ -399,7 +399,7 @@ case fieldtype of
       g[0:17]= [0,153,153,218,109, 0,241,190,139,253,195,138,0,0, 0,  0, 35,255]
       b[0:17]= [0,153,153,223,227,232, 1,  0,  0,  0,  0,  0,0,0, 0,255,255,255]
     end
-    'SW': begin
+    'SE': begin
       r[0:17]= [0,102,  0, 0, 0, 0, 0, 0, 0,255,255,255,241,196,151,239,135,255]
       g[0:17]= [0,153,153,218,109, 0,241,190,139,253,195,138,0,0, 0,  0, 35,255]
       b[0:17]= [0,153,153,223,227,232, 1,  0,  0,  0,  0,  0,0,0, 0,255,255,255]

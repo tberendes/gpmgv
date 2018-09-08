@@ -49,7 +49,7 @@
 ; 06/20/18 by Bob Morris
 ;  - Added AGL (height above ground in km) field, using DM scale.
 ; 09/07/18 Todd Berendes
-;  - Added SW table for SWE RR
+;  - Added SE table for Snow water equiv RR
 ;
 ; TO DO: Add options for height and width of colorbar.
 ;
@@ -193,7 +193,7 @@ case fieldtype of
        color2=color ;color2 = 255-color
        txtcolr = [0,0,0,color2,color2,0,0,0,0,0,0,color2,color2,color2,color2,color2,0]
     end
-    'SW': begin
+    'SE': begin
     ;0,.5,1,1.5,2,2.5,3,4,5,6,7,8,9,10,12,14,17,20
        labels = ['20+','17','14','12','10','9','8','7','6','5','4','3','2.5','2','1.5','1','0.5']
        units = 'mm/h'
