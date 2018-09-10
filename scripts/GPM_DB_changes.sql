@@ -992,3 +992,339 @@ create view collatedPRv8products as
 GRANT ALL ON TABLE collatedPRv8products TO gvoper;
 GRANT SELECT ON TABLE collatedPRv8products TO public;
 
+
+-- 11/8/2017, Morris
+-- Add the Reunion subset for the Reunion radar, for all satellites.  Todd already
+-- defined 'Reunion' in the instrument and fixed_instrument_location tables.
+
+-- First, populate the productsubset table.  Just clone from CONUS subset. 
+-- Exclude PR and GMI entries, which are not actual satellite IDs
+
+gpmgv=> select * into temp reunion_temp1 from productsubset where subset='CONUS' and sat_id not in ('PR','GMI');
+SELECT
+gpmgv=> update reunion_temp1 set subset='Reunion';
+UPDATE 13
+gpmgv=> select * from reunion_temp1;
+ sat_id | subset  
+--------+---------
+ TRMM   | Reunion
+ GPM    | Reunion
+ GCOMW1 | Reunion
+ F15    | Reunion
+ F16    | Reunion
+ F17    | Reunion
+ F18    | Reunion
+ METOPA | Reunion
+ NOAA18 | Reunion
+ NOAA19 | Reunion
+ METOPB | Reunion
+ F19    | Reunion
+ NPP    | Reunion
+(13 rows)
+
+-- Now do siteproductsubset entries.  Note that both the subset and the radar_id
+-- values should be 'Reunion', so grab the subset column a 2nd time as the radar_id
+
+gpmgv=> select *, subset as radar_id into temp reunion_temp2 from productsubset where subset='Reunion';
+SELECT
+gpmgv=> select * from reunion_temp2;
+ sat_id | subset  | radar_id 
+--------+---------+----------
+ TRMM   | Reunion | Reunion
+ GPM    | Reunion | Reunion
+ GCOMW1 | Reunion | Reunion
+ F15    | Reunion | Reunion
+ F16    | Reunion | Reunion
+ F17    | Reunion | Reunion
+ F18    | Reunion | Reunion
+ METOPA | Reunion | Reunion
+ NOAA18 | Reunion | Reunion
+ NOAA19 | Reunion | Reunion
+ METOPB | Reunion | Reunion
+ F19    | Reunion | Reunion
+ NPP    | Reunion | Reunion
+(13 rows)
+
+gpmgv=> insert into siteproductsubset select * from reunion_temp2;
+INSERT 0 13
+
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+
+-- 01/11/18, Morris
+-- get rid of duplicate TRMM products in orbit_subset_product table
+-- having both legacy and GPM-era filenames/subsets
+
+-- first, get rid of all products with the unused KORA subset - check the orbit ranges
+-- of KORA and KOREA to make sure KOREA covers the orbits where we had KORA
+
+gpmgv=> select sat_id, product_type, subset, min(orbit), max(orbit) from orbit_subset_product where subset in ('KORA','KOREA') group by 1,2,3 order by 1, 2,3;
+ sat_id | product_type | subset |  min  |  max  
+--------+--------------+--------+-------+-------
+ F16    | 2AGPROF      | KORA   | 53468 | 54358
+ F16    | 2AGPROF      | KOREA  | 48771 | 73419
+ F17    | 2AGPROF      | KORA   | 37750 | 38704
+ F17    | 2AGPROF      | KOREA  | 33052 | 57703
+ F18    | 2AGPROF      | KORA   | 22532 | 23372
+ F18    | 2AGPROF      | KOREA  | 17802 | 42437
+ F19    | 2AGPROF      | KOREA  |  3665 |  9593
+ GCOMW1 | 2AGPROF      | KORA   |  9497 | 10458
+ GCOMW1 | 2AGPROF      | KOREA  |  4648 | 30045
+ GPM    | 1CRXCAL      | KOREA  |    79 | 21991
+ GPM    | 2ADPR        | KORA   |   165 |  1078
+ GPM    | 2ADPR        | KOREA  |   150 | 21981
+ GPM    | 2AGPROF      | KORA   |    88 |  1057
+ GPM    | 2AGPROF      | KOREA  |    79 | 21966
+ GPM    | 2AKa         | KORA   |   165 |  1078
+ GPM    | 2AKa         | KOREA  |   150 | 21981
+ GPM    | 2AKu         | KORA   |   165 |  1078
+ GPM    | 2AKu         | KOREA  |   150 | 21981
+ GPM    | 2BDPRGMI     | KORA   |   165 |  1072
+ GPM    | 2BDPRGMI     | KOREA  |   150 | 21981
+ METOPA | 2AGPROF      | KOREA  | 33461 | 58245
+ METOPB | 2AGPROF      | KOREA  |  3101 | 27559
+ NOAA18 | 2AGPROF      | KOREA  | 40519 | 65143
+ NOAA19 | 2AGPROF      | KOREA  | 21362 | 45981
+ NPP    | 2AGPROF      | KOREA  | 11729 | 32139
+ TRMM   | 1C21         | KORA   | 92858 | 93836
+ TRMM   | 1C21         | KOREA  | 92796 | 98987
+ TRMM   | 2A12         | KORA   | 92857 | 93836
+ TRMM   | 2A12         | KOREA  | 92796 | 99096
+ TRMM   | 2A23         | KORA   | 92858 | 93836
+ TRMM   | 2A23         | KOREA  | 92796 | 98987
+ TRMM   | 2A25         | KORA   | 92858 | 93836
+ TRMM   | 2A25         | KOREA  | 92796 | 98987
+ TRMM   | 2AGPROF      | KORA   | 92766 | 93821
+ TRMM   | 2AGPROF      | KOREA  | 92353 | 99096
+ TRMM   | 2B31         | KORA   | 92858 | 93836
+ TRMM   | 2B31         | KOREA  | 92796 | 98987
+
+-- check the versions of KORA subsets to make sure we don't need any of them. 
+-- V07 is TRMM, but the above result shows we have KOREA for the KORA orbits.
+gpmgv=> select distinct(version) from orbit_subset_product where subset='KORA';
+ version 
+---------
+ V01E
+ V07
+ V01B
+ V01D
+ V01A
+ V01F
+(6 rows)
+
+-- now delete the KORA rows
+gpmgv=> delete from orbit_subset_product where subset='KORA';
+DELETE 1843
+
+-- find the earliest orbit with GPM-era filenames, cataloged with sat_id=TRMM and version=V07
+gpmgv=> select min(orbit) from orbit_subset_product where sat_id='TRMM' and version = 'V07';
+  min  
+-------
+ 92786
+(1 row)
+
+-- get a summary of TRMM products following the beginning of the GPM-era.  These are either tagged
+-- as version '7' or 'V07'
+
+gpmgv=> select sat_id,product_type,subset,version,count(*) from orbit_subset_product where orbit>92785 and version like '%7' group by 1,2,3,4 order by 2,1,3,4;
+ sat_id | product_type |   subset   | version | count 
+--------+--------------+------------+---------+-------
+ PR     | 1C21         | GPM_KMA    | 7       |    45
+ PR     | 1C21         | sub-GPMGV1 | 7       |    75
+ TRMM   | 1C21         | CONUS      | V07     |  1890
+ TRMM   | 1C21         | DARW       | V07     |   313
+ TRMM   | 1C21         | KOREA      | V07     |   907
+ TRMM   | 1C21         | KWAJ       | V07     |   300
+ TMI    | 2A12         | sub-GPMGV1 | 7       |    75
+ TRMM   | 2A12         | CONUS      | V07     |  2994
+ TRMM   | 2A12         | DARW       | V07     |   741
+ TRMM   | 2A12         | KOREA      | V07     |  1607
+ TRMM   | 2A12         | KWAJ       | V07     |   706
+ PR     | 2A23         | GPM_KMA    | 7       |    45
+ PR     | 2A23         | sub-GPMGV1 | 7       |    75
+ TRMM   | 2A23         | CONUS      | V07     |  1890
+ TRMM   | 2A23         | DARW       | V07     |   313
+ TRMM   | 2A23         | KOREA      | V07     |   907
+ TRMM   | 2A23         | KWAJ       | V07     |   300
+ PR     | 2A25         | GPM_KMA    | 7       |    45
+ PR     | 2A25         | sub-GPMGV1 | 7       |    75
+ TRMM   | 2A25         | CONUS      | V07     |  1890
+ TRMM   | 2A25         | DARW       | V07     |   313
+ TRMM   | 2A25         | KOREA      | V07     |   907
+ TRMM   | 2A25         | KWAJ       | V07     |   300
+ PR     | 2B31         | GPM_KMA    | 7       |    45
+ PR     | 2B31         | sub-GPMGV1 | 7       |    75
+ TRMM   | 2B31         | CONUS      | V07     |  1890
+ TRMM   | 2B31         | DARW       | V07     |   313
+ TRMM   | 2B31         | KOREA      | V07     |   907
+ TRMM   | 2B31         | KWAJ       | V07     |   300
+(29 rows)
+
+-- Noting that GPM_KMA (KOREA) is the Korean subset ID for legacy version 7 (GPM-era version V07), and
+-- sub-GPMGV1 (CONUS) is the continental US subset ID for legacy version 7 (GPM-era version V07),
+-- find the duplicate legacy products tagged with the satellite ID of 'PR'
+
+-- First, for the CONUS, grab a sample of 20 duplicate products:
+
+gpmgv=> select a.orbit, a.product_type as prod, a.sat_id as prsat, a.filename as prname, b.sat_id as trmmsat, b.filename as trmmname from orbit_subset_product a, orbit_subset_product b where a.sat_id='PR' and b.sat_id='TRMM' and a.orbit=b.orbit and a.product_type=b.product_type and a.subset='sub-GPMGV1' and b.subset='CONUS' and a.orbit>92785 and a.product_type in ('1C21','2A12', '2A23','2A25','2B31') order by 1,2 limit 20;
+ orbit | prod | prsat |                 prname                  | trmmsat |                              trmmname                               
+-------+------+-------+-----------------------------------------+---------+---------------------------------------------------------------------
+ 92789 | 1C21 | PR    | 1C21.20140301.92789.7.sub-GPMGV1.hdf.gz | TRMM    | 1C-CS-CONUS.TRMM.PR.1C21.20140301-S061444-E061931.092789.7.HDF.gz
+ 92789 | 2A23 | PR    | 2A23.20140301.92789.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A23.20140301-S061444-E061931.092789.7.HDF.gz
+ 92789 | 2A25 | PR    | 2A25.20140301.92789.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A25.20140301-S061444-E061931.092789.7.HDF.gz
+ 92789 | 2B31 | PR    | 2B31.20140301.92789.7.sub-GPMGV1.hdf.gz | TRMM    | 2B-CS-CONUS.TRMM.COMB.2B31.20140301-S061444-E061931.092789.7.HDF.gz
+ 92790 | 1C21 | PR    | 1C21.20140301.92790.7.sub-GPMGV1.hdf.gz | TRMM    | 1C-CS-CONUS.TRMM.PR.1C21.20140301-S074708-E075725.092790.7.HDF.gz
+ 92790 | 2A23 | PR    | 2A23.20140301.92790.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A23.20140301-S074708-E075725.092790.7.HDF.gz
+ 92790 | 2A25 | PR    | 2A25.20140301.92790.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A25.20140301-S074708-E075725.092790.7.HDF.gz
+ 92790 | 2B31 | PR    | 2B31.20140301.92790.7.sub-GPMGV1.hdf.gz | TRMM    | 2B-CS-CONUS.TRMM.COMB.2B31.20140301-S074708-E075725.092790.7.HDF.gz
+ 92791 | 1C21 | PR    | 1C21.20140301.92791.7.sub-GPMGV1.hdf.gz | TRMM    | 1C-CS-CONUS.TRMM.PR.1C21.20140301-S092039-E093506.092791.7.HDF.gz
+ 92791 | 2A23 | PR    | 2A23.20140301.92791.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A23.20140301-S092039-E093506.092791.7.HDF.gz
+ 92791 | 2A25 | PR    | 2A25.20140301.92791.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A25.20140301-S092039-E093506.092791.7.HDF.gz
+ 92791 | 2B31 | PR    | 2B31.20140301.92791.7.sub-GPMGV1.hdf.gz | TRMM    | 2B-CS-CONUS.TRMM.COMB.2B31.20140301-S092039-E093506.092791.7.HDF.gz
+ 92792 | 1C21 | PR    | 1C21.20140301.92792.7.sub-GPMGV1.hdf.gz | TRMM    | 1C-CS-CONUS.TRMM.PR.1C21.20140301-S105909-E111312.092792.7.HDF.gz
+ 92792 | 2A23 | PR    | 2A23.20140301.92792.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A23.20140301-S105909-E111312.092792.7.HDF.gz
+ 92792 | 2A25 | PR    | 2A25.20140301.92792.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A25.20140301-S105909-E111312.092792.7.HDF.gz
+ 92792 | 2B31 | PR    | 2B31.20140301.92792.7.sub-GPMGV1.hdf.gz | TRMM    | 2B-CS-CONUS.TRMM.COMB.2B31.20140301-S105909-E111312.092792.7.HDF.gz
+ 92793 | 1C21 | PR    | 1C21.20140301.92793.7.sub-GPMGV1.hdf.gz | TRMM    | 1C-CS-CONUS.TRMM.PR.1C21.20140301-S123657-E124936.092793.7.HDF.gz
+ 92793 | 2A23 | PR    | 2A23.20140301.92793.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A23.20140301-S123657-E124936.092793.7.HDF.gz
+ 92793 | 2A25 | PR    | 2A25.20140301.92793.7.sub-GPMGV1.hdf.gz | TRMM    | 2A-CS-CONUS.TRMM.PR.2A25.20140301-S123657-E124936.092793.7.HDF.gz
+ 92793 | 2B31 | PR    | 2B31.20140301.92793.7.sub-GPMGV1.hdf.gz | TRMM    | 2B-CS-CONUS.TRMM.COMB.2B31.20140301-S123657-E124936.092793.7.HDF.gz
+(20 rows)
+
+-- Now let's get a listing of all the duplicate legacy sub-GPMGV1 products and store to a temp table:
+
+gpmgv=> select a.filename as prname into temp prduptemp from orbit_subset_product a, orbit_subset_product b where a.sat_id='PR' and b.sat_id='TRMM' and a.orbit=b.orbit and a.product_type=b.product_type and a.subset='sub-GPMGV1' and b.subset='CONUS' and a.orbit>92785 and a.product_type in ('1C21','2A12', '2A23','2A25','2B31');
+SELECT
+gpmgv=> select count(*) from prduptemp;
+ count 
+-------
+   300
+(1 row)
+
+-- Copy the rows for all the products to be deleted into a new table:
+gpmgv=> select a.* into deleted_orb_sub_prod from orbit_subset_product a, prduptemp b where a.filename=b.prname;
+SELECT
+gpmgv=> select count(*) from deleted_orb_sub_prod;
+ count 
+-------
+   300
+(1 row)
+
+-- delete the entries for the 'duplicate' products
+gpmgv=> delete from orbit_subset_product where filename in (select prname from prduptemp);
+DELETE 300
+
+-- Now repeat the above for duplicates between GPM_KMA and KOREA
+drop table prduptemp;
+
+select a.orbit, a.product_type as prod, a.sat_id as prsat, a.filename as prname, b.sat_id as trmmsat, b.filename as trmmname from orbit_subset_product a, orbit_subset_product b where a.sat_id='PR' and b.sat_id='TRMM' and a.orbit=b.orbit and a.product_type=b.product_type and a.subset='GPM_KMA' and b.subset='KOREA' and a.orbit>92785 and a.product_type in ('1C21','2A12', '2A23','2A25','2B31') order by 1,2 limit 20;
+ orbit | prod | prsat |                prname                | trmmsat |                              trmmname                               
+-------+------+-------+--------------------------------------+---------+---------------------------------------------------------------------
+ 92797 | 1C21 | PR    | 1C21.20140301.92797.7.GPM_KMA.hdf.gz | TRMM    | 1C-CS-KOREA.TRMM.PR.1C21.20140301-S184230-E184516.092797.7.HDF.gz
+ 92797 | 2A23 | PR    | 2A23.20140301.92797.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A23.20140301-S184230-E184516.092797.7.HDF.gz
+ 92797 | 2A25 | PR    | 2A25.20140301.92797.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A25.20140301-S184230-E184516.092797.7.HDF.gz
+ 92797 | 2B31 | PR    | 2B31.20140301.92797.7.GPM_KMA.hdf.gz | TRMM    | 2B-CS-KOREA.TRMM.COMB.2B31.20140301-S184230-E184516.092797.7.HDF.gz
+ 92798 | 1C21 | PR    | 1C21.20140301.92798.7.GPM_KMA.hdf.gz | TRMM    | 1C-CS-KOREA.TRMM.PR.1C21.20140301-S202012-E202259.092798.7.HDF.gz
+ 92798 | 2A23 | PR    | 2A23.20140301.92798.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A23.20140301-S202012-E202259.092798.7.HDF.gz
+ 92798 | 2A25 | PR    | 2A25.20140301.92798.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A25.20140301-S202012-E202259.092798.7.HDF.gz
+ 92798 | 2B31 | PR    | 2B31.20140301.92798.7.GPM_KMA.hdf.gz | TRMM    | 2B-CS-KOREA.TRMM.COMB.2B31.20140301-S202012-E202259.092798.7.HDF.gz
+ 92812 | 1C21 | PR    | 1C21.20140302.92812.7.GPM_KMA.hdf.gz | TRMM    | 1C-CS-KOREA.TRMM.PR.1C21.20140302-S174648-E174939.092812.7.HDF.gz
+ 92812 | 2A23 | PR    | 2A23.20140302.92812.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A23.20140302-S174648-E174939.092812.7.HDF.gz
+ 92812 | 2A25 | PR    | 2A25.20140302.92812.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A25.20140302-S174648-E174939.092812.7.HDF.gz
+ 92812 | 2B31 | PR    | 2B31.20140302.92812.7.GPM_KMA.hdf.gz | TRMM    | 2B-CS-KOREA.TRMM.COMB.2B31.20140302-S174648-E174939.092812.7.HDF.gz
+ 92813 | 1C21 | PR    | 1C21.20140302.92813.7.GPM_KMA.hdf.gz | TRMM    | 1C-CS-KOREA.TRMM.PR.1C21.20140302-S192436-E192718.092813.7.HDF.gz
+ 92813 | 2A23 | PR    | 2A23.20140302.92813.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A23.20140302-S192436-E192718.092813.7.HDF.gz
+ 92813 | 2A25 | PR    | 2A25.20140302.92813.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A25.20140302-S192436-E192718.092813.7.HDF.gz
+ 92813 | 2B31 | PR    | 2B31.20140302.92813.7.GPM_KMA.hdf.gz | TRMM    | 2B-CS-KOREA.TRMM.COMB.2B31.20140302-S192436-E192718.092813.7.HDF.gz
+ 92814 | 1C21 | PR    | 1C21.20140302.92814.7.GPM_KMA.hdf.gz | TRMM    | 1C-CS-KOREA.TRMM.PR.1C21.20140302-S210215-E210511.092814.7.HDF.gz
+ 92814 | 2A23 | PR    | 2A23.20140302.92814.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A23.20140302-S210215-E210511.092814.7.HDF.gz
+ 92814 | 2A25 | PR    | 2A25.20140302.92814.7.GPM_KMA.hdf.gz | TRMM    | 2A-CS-KOREA.TRMM.PR.2A25.20140302-S210215-E210511.092814.7.HDF.gz
+ 92814 | 2B31 | PR    | 2B31.20140302.92814.7.GPM_KMA.hdf.gz | TRMM    | 2B-CS-KOREA.TRMM.COMB.2B31.20140302-S210215-E210511.092814.7.HDF.gz
+(20 rows)
+
+gpmgv=> select a.filename as prname into temp prduptemp from orbit_subset_product a, orbit_subset_product b where a.sat_id='PR' and b.sat_id='TRMM' and a.orbit=b.orbit and a.product_type=b.product_type and a.subset='GPM_KMA' and b.subset='KOREA' and a.orbit>92785 and a.product_type in ('1C21','2A12', '2A23','2A25','2B31');
+SELECT
+gpmgv=> select count(*) from prduptemp;
+ count 
+-------
+   180
+(1 row)
+
+-- Copy the rows for all the products to be deleted into the new table.
+-- Note that we created the deleted_orb_sub_prod table in the CONUS steps, now we have to INSERT new rows into it:
+
+gpmgv=> INSERT INTO deleted_orb_sub_prod SELECT a.* from orbit_subset_product a, prduptemp b where a.filename=b.prname;
+INSERT 0 180
+gpmgv=> select count(*) from deleted_orb_sub_prod;
+ count 
+-------
+   480
+(1 row)
+
+-- delete the entries for the 'duplicate' products
+gpmgv=> delete from orbit_subset_product where filename in (select prname from prduptemp);
+DELETE 180
+
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+
+-- 1/16/17  Morris/GPM GV - change sat_id entries of 'PR' to 'TRMM' in tables rainy100inside100,
+-- orbit_subset_product, overpass_event
+
+gpmgv=> UPDATE rainy100inside100 set sat_id='TRMM' where sat_id='PR';
+UPDATE 10555
+gpmgv=> update orbit_subset_product  set sat_id='TRMM' where sat_id='PR';
+UPDATE 158573
+gpmgv=> update overpass_event set sat_id='TRMM' where sat_id='PR';
+UPDATE 138195
+
+-- grant gvoper permissions for miscellaneous/ancillary
+-- tables so that backup can proceed witout errors - Morris, 7/5/18
+
+GRANT ALL ON maxmodelorbit TO gvoper;
+GRANT ALL ON sweep_elev_list TO gvoper;
+GRANT ALL ON sweep_elev_list_list_id_seq TO gvoper;
+GRANT ALL ON deleted_orb_sub_prod TO gvoper;
+GRANT ALL ON newinstrument TO gvoper;
+GRANT ALL ON event_meta_numeric_copy TO gvoper;
+GRANT ALL ON geo_match_product_dups TO gvoper;
+GRANT ALL ON surface_type TO gvoper;
+GRANT ALL ON rain_by_orbit_swath TO gvoper;
+GRANT ALL ON modelresort TO gvoper;
+GRANT ALL ON metaorbitstemp TO gvoper;
+GRANT ALL ON km_le_100_w_rain10 TO gvoper;
+GRANT ALL ON gvradartimeupd TO gvoper;
+GRANT ALL ON gvradartimeupd TO gvoper;
+GRANT ALL ON gvradarnewtimes TO gvoper;
+GRANT ALL ON eventnum_fileidnum TO gvoper;
+GRANT ALL ON dualpol_active TO gvoper;
+
+-- drop my various 'diff' tables/views for same reason as above
+DROP VIEW  dbzdiff_stats_merged        ;
+DROP VIEW  dbzdiff_stats_mergednewbb   ;
+DROP TABLE  zdiff_stats_2aku_v4_s2ku   ;
+DROP TABLE  zdiff_stats_2aku_v5_s2ku   ;
+DROP TABLE  zdiff_stats_dpr_v4         ;
+DROP TABLE  zdiff_stats_dpr_v4_s2ku    ;
+DROP TABLE  zdiff_stats_dpr_v5         ;
+DROP TABLE  zdiff_stats_dpr_v5_s2ku    ;
+DROP TABLE  dbzdiff_stats_default      ;
+DROP TABLE  dbzdiff_stats_defaultnewbb ;
+DROP TABLE  dbzdiff_stats_prrawcor     ;
+DROP TABLE  dbzdiff_stats_prrawcornewbb;
+DROP TABLE  dbzdiff_stats_s2ku         ;
+DROP TABLE  dbzdiff_stats_s2kunewbb    ;
+
+-- 7/6/18 - redefine VIEW collatedPRv8products to collate TRMM version 8 2APR products
+-- stored under sat_id 'TRMM' to overpass events now cataloged under sat_id 'TRMM'
+
+DROP VIEW collatedPRv8products;
+
+create view collatedPRv8products as
+ SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, a.nominal, a.subset, a.event_num, i.version, i.filename as file2apr
+   FROM eventsatsubrad_vw a
+   LEFT JOIN orbit_subset_product i ON a.orbit = i.orbit AND a.subset = i.subset AND a.sat_id = i.sat_id AND i.sat_id = 'TRMM' AND i.product_type = '2APR';
+
+GRANT ALL ON TABLE collatedPRv8products TO gvoper;
+GRANT SELECT ON TABLE collatedPRv8products TO public;
+

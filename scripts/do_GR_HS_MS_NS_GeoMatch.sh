@@ -135,7 +135,7 @@ export BIN_DIR
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
 #PPS_VERSION="V04A"        # specifies which PPS version of products to process
-PPS_VERSION="ITE113"
+PPS_VERSION="V05B"
 export PPS_VERSION
 PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
 export PARAMETER_SET
@@ -342,8 +342,8 @@ dateStart=`echo $ymdstart | awk \
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
-dateStart='2016-06-04'
-dateEnd='2016-12-01'
+dateStart='2018-04-13'
+dateEnd='2018-04-14'
 
 echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
@@ -366,6 +366,21 @@ LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
    g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' ) \
 JOIN rainy100inside100 r on (c.event_num=r.event_num) \
 WHERE g.pathname is null order by 1 ;"`
+
+echo ''
+echo "SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
+from eventsatsubrad_vw c JOIN orbit_subset_product o \
+  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
+   and o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
+   and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
+   and c.overpass_time at time zone 'UTC' > '${dateStart}' \
+   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
+LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
+   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
+   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' ) \
+JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+WHERE g.pathname is null order by 1 ;"
+echo ''
 
 #echo "2014-03-18" > $datelist   # edit/uncomment to just run a specific date
 
@@ -425,9 +440,26 @@ for thisdate in `cat $datelist`
        JOIN rainy100inside100 r on (c.event_num=r.event_num) \
      where cast(nominal at time zone 'UTC' as date) = '${thisdate}' and b.pathname is null \
      group by 1,3,4,5,6,7,8 \
-     order by c.orbit"`  | tee -a $LOG_FILE 2>&1
+     order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
 
-echo ''
+echo "select c.orbit, count(*), \
+       '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
+'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
+||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename\
+       as file2a \
+       from eventsatsubrad_vw c \
+     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
+        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
+        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
+        AND d.version = '$PPS_VERSION' \
+     left outer join geo_match_product b on \
+      ( c.event_num=b.event_num and d.version=b.pps_version \
+        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
+        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' ) \
+       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' and b.pathname is null \
+     group by 1,3,4,5,6,7,8 \
+     order by c.orbit;"
 echo "filelist:"
 cat $filelist
 echo ''
@@ -450,12 +482,17 @@ echo ''
           into temp timediftmp
           from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
 	    collate_satsubprod_1cuf c \
+            left outer join geo_match_product e on \
+              (c.radar_id=e.radar_id and c.orbit=e.orbit and \
+               c.version=e.pps_version and e.instrument_id = '${INSTRUMENT_ID}' \
+               and e.parameter_set=${PARAMETER_SET} and e.sat_id='${SAT_ID}' \
+               and e.geo_match_version=${GEO_MATCH_VERSION}) and e.scan_type='${SWATH}' \
           where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
             and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num\
             and a.orbit = ${orbit} and c.subset = '${subset}'
             and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
             and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
-            and c.version = '$PPS_VERSION' \
+            and c.version = '$PPS_VERSION' and e.pathname is null \
             AND C.FILE1CUF NOT LIKE '%rhi%' \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
@@ -480,7 +517,7 @@ echo ''
 echo ""
 echo "Output control file:"
 ls -al $outfileall
-#exit  # if uncommented, creates the control file for first date, and exits
+exit  # if uncommented, creates the control file for first date, and exits
 
     if [ -s $outfileall ]
       then

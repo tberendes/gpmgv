@@ -78,7 +78,7 @@ BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
-PPS_VERSION="V03B"        # controls which PR products we process
+PPS_VERSION="V05A"        # controls which PR products we process
 export PPS_VERSION
 PARAMETER_SET=2  # set of polar2pr parameters (polar2pr.bat file) in use
 export PARAMETER_SET
@@ -269,9 +269,9 @@ ymdstart=`offset_date $ymd -160`
 datestart=`echo $ymdstart | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 #echo $datestart
-datestart='2014-04-02'
+datestart='2015-03-05'
 echo "Running PRtoGR matchups for dates since $datestart" | tee -a $LOG_FILE
-dateEnd='2014-05-05'
+dateEnd='2015-03-21'
 
 # here's a faster query pair with the "left outer join geo_match_product"
 # connected to a simple temp table
@@ -282,7 +282,7 @@ from eventsatsubrad_vw c JOIN orbit_subset_product o \
    and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
    and c.overpass_time at time zone 'UTC' > '${datestart}' \
    and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
-AND C.RADAR_ID IN ('KDOX') \
+AND C.RADAR_ID IN ('KLWX') \
 JOIN rainy100inside100 r on (c.event_num=r.event_num) order by c.overpass_time; \
 select DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
   from tempevents c LEFT OUTER JOIN geo_match_product g \
@@ -292,7 +292,7 @@ select DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
    and g.scan_type='${SWATH}' \
  WHERE pathname is null order by 1 ;"`
 
-echo "2014-09-07" > $datelist   # edit/uncomment to just run a specific date
+#echo "2014-09-07" > $datelist   # edit/uncomment to just run a specific date
 
 echo ""
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
@@ -339,7 +339,7 @@ for thisdate in `cat $datelist`
      JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST} \
-        AND C.RADAR_ID IN ('KDOX') \
+        AND C.RADAR_ID IN ('KLWX') \
        JOIN rainy100inside100 r on (c.event_num=r.event_num) \
       where cast(nominal at time zone 'UTC' as date) = '${thisdate}' and d.version = '$PPS_VERSION'; \
      select  c.orbit, count(*), c.datestamp, c.subset, c.version, c.instrument, c.swath, c.file2a\
@@ -383,7 +383,7 @@ for thisdate in `cat $datelist`
             and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
             and e.pathname is null and c.version = '$PPS_VERSION' \
             AND C.FILE1CUF NOT LIKE '%rhi%' \
-            AND C.RADAR_ID IN ('KDOX') \
+            AND C.RADAR_ID IN ('KLWX') \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
             from timediftmp group by 1 order by 1;

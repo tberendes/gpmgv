@@ -186,4 +186,53 @@ select a.radar_id, nrain, npasses, round(((nrain*100.0)/npasses)+0.5) as percent
  .
 etc.
 
+-- GPM-specific UF and rainy stats run on 8/6/2018
+
+-- total UF files by subset
+
+gpmgv=> select subset, count(*) as n_matched from collate_sat_radar_overpass_1cuf where sat_id='GPM'  group by 1 order by 1;
+    subset    | n_matched 
+--------------+-----------
+ AKradars     |      4268
+ BrazilRadars |      1742
+ Brisbane     |        61
+ CONUS        |     39643
+ DARW         |        18
+ Guam         |       362
+ Hawaii       |       919
+ KWAJ         |       591
+ SanJuanPR    |       347
+(9 rows)
+
+-- as above, but for rain events only
+
+gpmgv=> select subset, count(*) as n_matched from collate_sat_radar_overpass_1cuf a, rainy100inside100 b where a.event_num=b.event_num and a.sat_id='GPM'  group by 1 order by 1;
+    subset    | n_matched 
+--------------+-----------
+ AKradars     |       851
+ BrazilRadars |       256
+ Brisbane     |         8
+ CONUS        |      5837
+ DARW         |         7
+ Guam         |        86
+ Hawaii       |        58
+ KWAJ         |       166
+ SanJuanPR    |        73
+(9 rows)
+
+-- total rainy events with UF files for GPM
+
+gpmgv=> select count(*) from collate_sat_radar_overpass_1cuf a, rainy100inside100 b where a.event_num=b.event_num and a.sat_id='GPM';
+ count 
+-------
+  7342
+(1 row)
+
+-- total overpass events with UF files for GPM
+
+gpmgv=> select count(*) as n_matched from collate_sat_radar_overpass_1cuf where sat_id='GPM';
+ n_matched 
+-----------
+     47951
+(1 row)
 
