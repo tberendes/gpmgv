@@ -58,6 +58,7 @@
 USER_ID=`whoami`
 case $USER_ID in
   morris ) GV_BASE_DIR=/home/morris/swdev ;;
+  tberendes ) GV_BASE_DIR=/home/tberendes/git/gpmgv/ ;;
   gvoper ) GV_BASE_DIR=/home/gvoper ;;
        * ) echo "User unknown, can't set GV_BASE_DIR!"
            exit 1 ;;
@@ -85,7 +86,7 @@ loadfile=/data/tmp/finalQC_KxxxMeta.unl
 
 rundate=`date -u +%y%m%d`
 LOG_FILE=${LOG_DIR}/catalogQCradar_Not_In_DB.${rundate}.log
-DB_LOG_FILE=${LOG_DIR}/catalogQCradarSQL.log
+DB_LOG_FILE=${LOG_DIR}/catalogQCradar_Not_In_DBSQL.log
 runtime=`date -u`
 
 umask 0002
@@ -116,7 +117,7 @@ if [ ${pgproccount} -lt 5 ]
       >> /tmp/PG_MAIL_ERROR_MSG.txt
     echo "NEED TO RESTART POSTGRESQL ON ${HOST}." >> /tmp/PG_MAIL_ERROR_MSG.txt
     mailx -s 'postgresql down on ds1-gpmgv' makofski@radar.gsfc.nasa.gov \
-      -c kenneth.r.morris@nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
+      -c todd.a.berendes@nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
     cat /tmp/PG_MAIL_ERROR_MSG.txt | tee -a $LOG_FILE
     exit 1
   else
@@ -161,7 +162,7 @@ case $type in
            1CUF )  case $2 in
                  NPOL )
                        # check the file pattern
-                        echo $pathless | egrep '(npol|NPOL)1_[0-9]{4}_[0-9]{4}_[0-9]{6}(_rhi)*\.uf*' > /dev/null
+                        echo $pathless | egrep '(npol|NPOL)1_[0-9]{4}_[0-9]{4}_[0-9]{6}(_rhi)*\.(uf|cf)*' > /dev/null
                         if [ $? = 1 ]
                           then
                             echo "Bad NPOL DP 1CUF filename: $pathless"
@@ -176,7 +177,7 @@ case $type in
                           then
                             #echo "Catalog DP file: $pathless"
                             # check the file pattern
-                            echo $pathless | egrep '[A-Z]{4}_[0-9]{4}_[0-9]{4}_[0-9]{6}\.uf*' > /dev/null
+                            echo $pathless | egrep '[A-Z]{4}_[0-9]{4}_[0-9]{4}_[0-9]{6}\.(uf|cf)*' > /dev/null
                             if [ $? = 1 ]
                               then
                                 echo "Bad DP 1CUF filename: $pathless"
@@ -188,7 +189,7 @@ case $type in
                           else
                             #echo "Catalog legacy 1CUF file: $pathless"
                             # check the file pattern
-                            echo $pathless | egrep '[0-9]{6}\.[0-9][0-9]?\.[A-Z]{4}\.[0-9]\.[0-9]{4}\.uf*' > /dev/null
+                            echo $pathless | egrep '[0-9]{6}\.[0-9][0-9]?\.[A-Z]{4}\.[0-9]\.[0-9]{4}\.(uf|cf)*' > /dev/null
                             if [ $? = 1 ]
                               then
                                 echo "Bad legacy 1CUF filename: $pathless"
@@ -283,7 +284,7 @@ rm -v $loadfile
 
 echo ""
 
-years="2015"
+years="2017"
 
 # List the directory tree recursively.  If a directory, set $strip to the
 # directory path.  If a regular file under directory $strip, then output the
@@ -293,7 +294,8 @@ years="2015"
 
 products2do=1CUF    #"1C51 1CUF level_2 raw"
 #for Kxxx in `ls $QCDATADIR`
-for Kxxx in NPOL
+#for Kxxx in NPOL
+for Kxxx in CHUVA
   do
     cd ${QCDATADIR}/${Kxxx}
     for prodtype in $products2do
