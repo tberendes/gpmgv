@@ -566,6 +566,7 @@ ls -al $outfileall
                      catalog_to_db $DBCATALOGFILE
                   else
                      echo "Skipping Cataloging of matchup file for testing..."| tee -a $LOG_FILE
+                fi
               else
                 echo "but no matchup files listed in $DBCATALOGFILE !"\
                  | tee -a $LOG_FILE
