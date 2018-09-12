@@ -171,6 +171,9 @@ export GEO_MATCH_VERSION
 
 SKIP_NEWRAIN=0   # if 1, skip call to psql with SQL_BIN to update "rainy" events
 
+# *************  UNSET THIS! *******************
+SKIP_CATALOG=1   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
+
 # If FORCE_MATCH is set to 1, ignore appstatus for date(s) and force (re)run of
 # matchups by child script do_GR_HS_MS_NS_geo_matchup4date_snow.sh:
 FORCE_MATCH=0
@@ -558,7 +561,11 @@ ls -al $outfileall
             DBCATALOGFILE=${TMP_DIR}/do_GR_HS_MS_NS_geo_matchup_catalog.${yymmdd}.txt
             if [ -s $DBCATALOGFILE ] 
               then
-                catalog_to_db $DBCATALOGFILE
+                if [ "$SKIP_CATALOG" = "0" ]
+                  then
+                     catalog_to_db $DBCATALOGFILE
+                  else
+                     echo "Skipping Cataloging of matchup file for testing..."| tee -a $LOG_FILE
               else
                 echo "but no matchup files listed in $DBCATALOGFILE !"\
                  | tee -a $LOG_FILE
