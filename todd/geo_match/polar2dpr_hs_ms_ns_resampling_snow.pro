@@ -799,6 +799,7 @@
 					  ; compute snow index 
                	      snow_index = where((gvhidvals ge 3) and (gvhidvals le 7), num_snow)
                	      notsnow_index = where( ((gvhidvals lt 3) and (gvhidvals gt 0)) or (gvhidvals gt 7), num_notsnow)
+	               	  gvkdp_z_posind = where(dbzvals ge 0 and gvkdpvals ge 0, num_gvkdp_z_posind)	               	  
                	  	  if num_snow eq 0 then begin
                	  	  
                	  	      ; use rc rain rate for non-snow values
@@ -851,28 +852,36 @@
                	  
                	  if not skip_swe then begin
                
-	               	  ; start with RC rain rates
-	                  swedp=gvrcvals
+               		  if (gvkdp_z_posind GT 0)  then begin
+		               	  ; start with RC rain rates
+		                  swedp=gvrcvals
+		                  
+		               	  ; compute swerr for snow bins using formula
+		               	  Z=dbzvals
+		               	  zposind = where(dbzvals ge 0)
+		               	  Z[zposind] = 10^(dbzvals[zposind]/10)
+		               	  swedp=gvrcvals  ; use RC rain rate where snow is not detected
+		               	  swedp[gv_z_posind] = 1.53 * gvkdpvals[gv_z_posind]^0.68 * Z[gv_z_posind]^0.29
+		               	  ;Z = 10^(dbzvals/10)	               	  
+		               	  ;swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
+		                  ;swedp [notsnow_index]=Z_MISSING
+		                  ; use RC rain rate where snow is not detected
+		                  swedp [notsnow_index]=gvrcvals[notsnow_index]
+		                  
+		                  altstats=mean_stddev_max_by_rules(swedp,'RR', dpr_rain_min, $
+		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
+		                  n_gr_swedp_points_rejected = altstats.rejects
+		                  swedp_avg_gv = altstats.mean
+		                  swedp_stddev_gv = altstats.stddev
+		                  swedp_max_gv = altstats.max
 	                  
-	               	  ; compute swerr for snow bins using formula
-	               	  Z=dbzvals
-	               	  zposind = where(dbzvals ge 0)
-	               	  Z[zposind] = 10^(dbzvals[zposind]/10)
-	               	  gv_z_posind = where(dbzvals ge 0 and gvkdpvals ge 0)	               	  
-	               	  swedp=gvrcvals  ; use RC rain rate where snow is not detected
-	               	  swedp[gv_z_posind] = 1.53 * gvkdpvals[gv_z_posind]^0.68 * Z[gv_z_posind]^0.29
-	               	  ;Z = 10^(dbzvals/10)	               	  
-	               	  ;swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
-	                  ;swedp [notsnow_index]=Z_MISSING
-	                  ; use RC rain rate where snow is not detected
-	                  swedp [notsnow_index]=gvrcvals[notsnow_index]
-	                  
-	                  altstats=mean_stddev_max_by_rules(swedp,'RR', dpr_rain_min, $
-	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
-	                  n_gr_swedp_points_rejected = altstats.rejects
-	                  swedp_avg_gv = altstats.mean
-	                  swedp_stddev_gv = altstats.stddev
-	                  swedp_max_gv = altstats.max
+	                  endif else begin
+	 	                  n_gr_swedp_points_rejected = Z_MISSING
+		                  swedp_avg_gv = Z_MISSING
+		                  swedp_stddev_gv = Z_MISSING
+		                  swedp_max_gv = Z_MISSING
+
+	                  endelse
 	                 
 	                  ; Pierre's methods
 	                  
