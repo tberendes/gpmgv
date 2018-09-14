@@ -852,7 +852,7 @@
                	  
                	  if not skip_swe then begin
                
-               		  if (gvkdp_z_posind GT 0)  then begin
+               		  if (num_gvkdp_z_posind GT 0)  then begin
 		               	  ; start with RC rain rates
 		                  swedp=gvrcvals
 		                  
