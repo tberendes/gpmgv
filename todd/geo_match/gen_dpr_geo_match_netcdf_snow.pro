@@ -104,6 +104,9 @@ FUNCTION gen_dpr_geo_match_netcdf_snow, geo_match_nc_file, numpts, elev_angles, 
 @environs.inc   ; for file prefixes, netCDF file definition version
 @dpr_params.inc  ; for the type-specific fill values
 
+; for debugging
+!EXCEPT=2
+
 ; 8/30/18 TAB updated version to 1.22 from 1.21
 GEO_MATCH_FILE_VERSION=1.22
 

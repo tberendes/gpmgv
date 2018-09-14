@@ -287,6 +287,8 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                DPR_DBZ_MIN=dpr_dbz_min, DPR_RAIN_MIN=dpr_rain_min, $
                NON_PPS_FILES=non_pps_files, DECLUTTER=declutter
 
+; for debugging
+!EXCEPT=2
 
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc

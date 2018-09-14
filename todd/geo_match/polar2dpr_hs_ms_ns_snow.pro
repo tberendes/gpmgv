@@ -148,6 +148,9 @@ PRO polar2dpr_hs_ms_ns_snow, control_file, range_threshold_km, GPM_ROOT=gpmroot,
                   DBZ_MIN=dBZ_min, DPR_RAIN_MIN=dpr_rain_min, $
                   FLAT_NCPATH=flat_ncpath, DIR_BLOCK=dir_block
 
+; for debugging
+!EXCEPT=2
+
 IF KEYWORD_SET(plot_bins) THEN BEGIN
    reply = plot_bins_bailout()
    IF reply EQ 'Y' THEN plot_bins = 0
