@@ -857,9 +857,10 @@
 	               	  ; compute swerr for snow bins using formula
 	               	  Z=dbzvals
 	               	  zposind = where(dbzvals ge 0)
-	               	  Z[zposind] = 10^(dbzvals[zposind]/10)	               	  
+	               	  Z[zposind] = 10^(dbzvals[zposind]/10)
+	               	  gv_z_posind = where(dbzvals ge 0 and gvkdpvals ge 0)	               	  
 	               	  swedp=gvrcvals  ; use RC rain rate where snow is not detected
-	               	  swedp[zposind] = 1.53 * gvkdpvals[zposind]^0.68 * Z[zposind]^0.29
+	               	  swedp[gv_z_posind] = 1.53 * gvkdpvals[gv_z_posind]^0.68 * Z[gv_z_posind]^0.29
 	               	  ;Z = 10^(dbzvals/10)	               	  
 	               	  ;swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
 	                  ;swedp [notsnow_index]=Z_MISSING
