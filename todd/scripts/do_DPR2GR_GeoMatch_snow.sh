@@ -175,6 +175,9 @@ SKIP_NEWRAIN=1
 # matchups by child script do_DPR2GR_geo_matchup4date_snow.sh:
 FORCE_MATCH=0
 
+# *************  UNSET THIS! *******************
+SKIP_CATALOG=1   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
+
 # override coded defaults with any optional user-specified values
 while getopts i:v:p:m:f option
   do
@@ -529,7 +532,12 @@ ls -al $outfileall
             DBCATALOGFILE=${TMP_DIR}/do_DPR2GR_geo_matchup_catalog.${yymmdd}.txt
             if [ -s $DBCATALOGFILE ] 
               then
-                catalog_to_db $DBCATALOGFILE
+                if [ "$SKIP_CATALOG" = "0" ]
+                  then
+                	 catalog_to_db $DBCATALOGFILE
+                  else
+                     echo "Skipping Cataloging of matchup file for testing..."| tee -a $LOG_FILE
+                fi
               else
                 echo "but no matchup files listed in $DBCATALOGFILE !"\
                  | tee -a $LOG_FILE
