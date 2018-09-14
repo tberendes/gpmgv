@@ -851,13 +851,18 @@
                	  
                	  if not skip_swe then begin
                
-	               	  ; compute swerr using formula
-	               	  
-	               	  Z = 10^(dbzvals/10)	               	  
-	               	  swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
+	               	  ; start with RC rain rates
+	                  swedp=gvrcvals
+	                  
+	               	  ; compute swerr for snow bins using formula
+	               	  Z=dbzvals
+	               	  Z[snow_index] = 10^(dbzvals[snow_index]/10)	               	  
+	               	  swedp[snow_index] = 1.53 * gvkdpvals[snow_index]^0.68 * Z[snow_index]^0.29
+	               	  ;Z = 10^(dbzvals/10)	               	  
+	               	  ;swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
 	                  ;swedp [notsnow_index]=Z_MISSING
 	                  ; use RC rain rate where snow is not detected
-	                  swedp [notsnow_index]=gvrcvals[notsnow_index]
+	                  ;swedp [notsnow_index]=gvrcvals[notsnow_index]
 	                  
 	                  altstats=mean_stddev_max_by_rules(swedp,'RR', dpr_rain_min, $
 	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
