@@ -369,8 +369,10 @@ dateStart=`echo $ymdstart | awk \
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
-dateStart='2018-02-23'
-dateEnd='2018-02-24'
+#dateStart='2018-02-23'
+#dateEnd='2018-02-24'
+dateStart='2017-11-01'
+dateEnd='2018-05-01'
 
 echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
