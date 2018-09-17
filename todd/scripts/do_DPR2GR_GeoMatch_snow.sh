@@ -176,7 +176,7 @@ SKIP_NEWRAIN=1
 FORCE_MATCH=0
 
 # *************  UNSET THIS! *******************
-SKIP_CATALOG=1   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
+SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
 
 # override coded defaults with any optional user-specified values
 while getopts i:v:p:m:f option
