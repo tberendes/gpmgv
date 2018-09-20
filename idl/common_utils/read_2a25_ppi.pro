@@ -31,17 +31,19 @@
 ;         in the event of bad SD data in an otherwise valid HDF file.
 ;       Feb 2013 - Bob Morris, GPM GV (SAIC)
 ;       - Added VERBOSE option to print file SD variables.
+;       March 2018 - Bob Morris, GPM GV (SAIC)
+;       - Added ST_STRUCT parameter to return a structure of arrays containing
+;         the individual scan_time components, as requested by David Marks.
 ;
-; EMAIL QUESTIONS OR COMMENTS TO:
-;       <Bob Morris> kenneth.r.morris@nasa.gov
-;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+; EMAIL QUESTIONS OR COMMENTS AT:
+;       https://pmm.nasa.gov/contact
 ;-
 
 function read_2a25_ppi, filename, DBZ=correctZfactor, GEOL=geolocation,    $
                    RAIN=rainrate, SURFACE_RAIN=surfaceRain, TYPE=rainType, $
                    SCAN_TIME=scan_time, FRACTIONAL=frac_orbit_num,         $
                    RANGE_BIN=rangeBinNums, RN_FLAG=rainFlag, PIA=pia,      $
-                   VERBOSE=verbose
+                   ST_STRUCT=st_struct_in, VERBOSE=verbose
 
 common sample, start_sample,sample_range,num_range,dbz_min
 
@@ -374,22 +376,57 @@ IF ( trmmversion EQ 7 ) THEN BEGIN
          return, flag
       ENDELSE
    ENDIF
-   IF N_ELEMENTS(scan_time) GT 0 THEN BEGIN
-     ; get the scanTime_sec data
+   IF N_ELEMENTS(scan_time) GT 0 OR N_ELEMENTS(st_struct_in) GT 0 THEN BEGIN
+     print, " get the scan_time data, in unix ticks and individual components"
+     ; must build from Year,Month,Day,Hour,Minute,Second,MilliSecond fields
       start = [start_sample]
       count = [sample_range]
       stride = [1]
+      IF N_ELEMENTS(scan_time) EQ 0 THEN scan_time = DBLARR(1)  ; define a value
       Catch, err_sts
       IF err_sts EQ 0 THEN BEGIN
-         sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'scanTime_sec'))
-         HDF_SD_GETDATA, sds_id, scan_time, START=start, COUNT=count, STRIDE=stride
+         Year=FIX(scan_time)
+         sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'Year'))
+         HDF_SD_GETDATA, sds_id, Year, START=start, COUNT=count, STRIDE=stride
+        ; define Month array of dimensions of Year, and initialize to 0B
+         Month=BYTE(Year) & Month[*]=0B
+         sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'Month'))
+         HDF_SD_GETDATA, sds_id, Month, START=start, COUNT=count, STRIDE=stride
+         DayOfMonth=BYTE(Year) & DayOfMonth[*]=0B
+         sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'DayOfMonth'))
+         HDF_SD_GETDATA, sds_id, DayOfMonth, START=start, COUNT=count, STRIDE=stride
+         Hour=BYTE(Year) & Hour[*]=0B
+         sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'Hour'))
+         HDF_SD_GETDATA, sds_id, Hour, START=start, COUNT=count, STRIDE=stride
+         Minute=BYTE(Year) & Minute[*]=0B
+         sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'Minute'))
+         HDF_SD_GETDATA, sds_id, Minute, START=start, COUNT=count, STRIDE=stride
+         Second=BYTE(Year) & Second[*]=0B
+         sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'Second'))
+         HDF_SD_GETDATA, sds_id, Second, START=start, COUNT=count, STRIDE=stride
+         MilliSecond=FIX(Year) & MilliSecond[*]=0
+         sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'MilliSecond'))
+         HDF_SD_GETDATA, sds_id, MilliSecond, START=start, COUNT=count, STRIDE=stride
+         MilliSecondF=MilliSecond/1000.0
+         scan_time = UNIXTIME( Year, Month, DayOfMonth, Hour, Minute, Second ) + MilliSecondF
+         IF N_ELEMENTS(st_struct_in) GT 0 THEN BEGIN
+           ; assemble the st_struct structure holding the arrays of the datetime elements
+            st_struct = {        Year : FIX(Year), $
+                                Month : FIX(Month), $
+                           DayOfMonth : FIX(DayOfMonth), $
+                                 Hour : FIX(Hour), $
+                               Minute : FIX(Minute), $
+                               Second : FIX(Second), $
+                          MilliSecond : FIX(MilliSecond) }
+            st_struct_in = st_struct
+         ENDIF
       ENDIF ELSE BEGIN
          help,!error_state,/st
          Catch, /Cancel
          print, 'hdf_sd_getdata(): err=',err_sts
          HDF_Close, fileid
          print, "In read_2a25_ppi.pro, SD error in hdf file: ", filename
-         flag = 'Bad SD: scanTime_sec'
+         flag = 'Bad SD: Scan Time field(s)'
          return, flag
       ENDELSE
    ENDIF
@@ -501,14 +538,14 @@ IF ( trmmversion EQ 6 AND $
       endelse
     ENDIF
 
-    IF N_ELEMENTS(scan_time) GT 0 THEN BEGIN
+    IF N_ELEMENTS(scan_time) GT 0 OR N_ELEMENTS(st_struct_in) GT 0 THEN BEGIN
 
-; get the scantime vdata
+; get the scan_time vdata - is time of day in unix ticks, no date info.
 
       vdata_ID = hdf_vd_find(file_handle,'scan_time')
       if ( vdata_ID EQ 0 ) then begin  ;  status checking
         print, ""
-        print, "Can't find scan_time vdata."
+        print, "In read_2a25_ppi(): Can't find scan_time vdata."
         print, ""
       endif else begin
 ;        print, ""
@@ -518,6 +555,9 @@ IF ( trmmversion EQ 6 AND $
         nscan = hdf_vd_read(vdata_H, scan_time)
         hdf_vd_detach, Vdata_H   ; Detach from the Vdata
 ;        help, scan_time
+        IF N_ELEMENTS(st_struct_in) GT 0 THEN BEGIN
+           print, "In read_2a25_ppi():  Can't build scan time structure for V6"
+        ENDIF
       endelse
     ENDIF
 

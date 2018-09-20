@@ -17,15 +17,17 @@
 ;       - Added freezingHeight to the variables able to be read from the 2A-12.
 ;       Feb. 06, 2013 - Bob Morris, GPM GV (SAIC)
 ;       - Added V7 fields: windSpeed, dataQuality, qualityFlag,
-;       landAmbiguousFlag, landScreenFlag, oceanExtendedDbase,
-;       oceanSearchRadius, sunGlintAngle,  freezingHeightIndex,
-;       clusterNumber, clusterScale
+;         landAmbiguousFlag, landScreenFlag, oceanExtendedDbase,
+;         oceanSearchRadius, sunGlintAngle,  freezingHeightIndex,
+;         clusterNumber, clusterScale
 ;       Oct. 7, 2014 - Bob Morris, GPM GV (SAIC)
 ;       - Renamed NSPECIES constant to NSPECIES_TMI
+;       01/16/17 - Bob Morris, GPM GV (SAIC)
+;       - Added ST_STRUCT parameter to return a structure of arrays containing
+;         the individual scan_time components, as requested by David Marks.
 ;
-; EMAIL QUESTIONS OR COMMENTS TO:
-;       <Bob Morris> kenneth.r.morris@nasa.gov
-;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+; EMAIL QUESTIONS OR COMMENTS AT:
+;       https://pmm.nasa.gov/contact
 ;-
 
 FUNCTION read_tmi_2a12_fields, file_2a12, $
@@ -64,6 +66,7 @@ FUNCTION read_tmi_2a12_fields, file_2a12, $
                          GEOL=geolocation, $
                          SC_LAT_LON=sc_lat_lon, $
                          SCAN_TIME=scan_time, $
+                         ST_STRUCT=st_struct, $
                          FRACTIONAL=frac_orbit_num, $
                          PRINT_ATTRIBUTES=print_attributes
 
@@ -121,6 +124,7 @@ FUNCTION read_tmi_2a12_fields, file_2a12, $
           clusterNumber = BYTARR(sample_range>1, NPIXEL_TMI, NSPECIES_TMI)
            clusterScale = FLTARR(sample_range>1, NPIXEL_TMI, NSPECIES_TMI)
               scan_time = DBLARR(sample_range>1)
+              st_struct = "scan_time structure"   ; just define anything
          frac_orbit_num = FLTARR(sample_range>1)
 
 ;        Read all fields from the uncompressed 2a12 file copy
@@ -162,6 +166,7 @@ FUNCTION read_tmi_2a12_fields, file_2a12, $
                                 GEOL=geolocation, $
                                 SC_LAT_LON=sc_lat_lon, $
                                 SCAN_TIME=scan_time, $
+                                ST_STRUCT=st_struct, $
                                 FRACTIONAL=frac_orbit_num, $
                                 PRINT_ATTRIBUTES=print_attributes )
 

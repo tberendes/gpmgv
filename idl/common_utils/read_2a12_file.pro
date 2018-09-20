@@ -85,10 +85,12 @@
 ;   freezingHeightIndex, clusterNumber, clusterScale
 ; 10/07/14  Morris/GPM GV/SAIC
 ; - Renamed NSPECIES to NSPECIES_TMI.
+; 01/16/17 - Bob Morris, GPM GV (SAIC)
+; - Added ST_STRUCT parameter to return a structure of arrays containing the
+;   individual scan_time components, as requested by David Marks.
 ;
-; EMAIL QUESTIONS OR COMMENTS TO:
-;       <Bob Morris> kenneth.r.morris@nasa.gov
-;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+; EMAIL QUESTIONS OR COMMENTS AT:
+;       https://pmm.nasa.gov/contact
 ;-
 ;===============================================================================
 
@@ -128,6 +130,7 @@ function read_2a12_file, filename, $
                          GEOL=geolocation, $
                          SC_LAT_LON=sc_lat_lon, $
                          SCAN_TIME=scan_time, $
+                         ST_STRUCT=st_struct_in, $
                          FRACTIONAL=frac_orbit_num, $
                          PRINT_ATTRIBUTES=print_attributes
 
@@ -1379,12 +1382,13 @@ IF ( trmmversion EQ 7 ) THEN BEGIN
          return, flag
       ENDELSE
    ENDIF
-   IF N_ELEMENTS(scan_time) GT 0 THEN BEGIN
+   IF N_ELEMENTS(scan_time) GT 0 OR N_ELEMENTS(st_struct_in) GT 0 THEN BEGIN
      ; get the scanTime_sec data, in unix ticks
      ; must build from Year,Month,Day,Hour,Minute,Second,MilliSecond fields
       start = [start_sample]
       count = [sample_range]
       stride = [1]
+      IF N_ELEMENTS(scan_time) EQ 0 THEN scan_time = DBLARR(1)  ; define a value
       Catch, err_sts
       IF err_sts EQ 0 THEN BEGIN
          Year=FIX(scan_time)
@@ -1409,8 +1413,19 @@ IF ( trmmversion EQ 7 ) THEN BEGIN
          MilliSecond=FIX(Year) & MilliSecond[*]=0
          sds_id=HDF_SD_SELECT(sd_id,hdf_sd_nametoindex(sd_id,'MilliSecond'))
          HDF_SD_GETDATA, sds_id, MilliSecond, START=start, COUNT=count, STRIDE=stride
-         MilliSecond=MilliSecond/1000.0
-         scan_time = UNIXTIME( Year, Month, DayOfMonth, Hour, Minute, Second ) + MilliSecond
+         MilliSecondF=MilliSecond/1000.0
+         scan_time = UNIXTIME( Year, Month, DayOfMonth, Hour, Minute, Second ) + MilliSecondF
+         IF N_ELEMENTS(st_struct_in) GT 0 THEN BEGIN
+           ; assemble the st_struct structure holding the arrays of the datetime elements
+            st_struct = {        Year : FIX(Year), $
+                                Month : FIX(Month), $
+                           DayOfMonth : FIX(DayOfMonth), $
+                                 Hour : FIX(Hour), $
+                               Minute : FIX(Minute), $
+                               Second : FIX(Second), $
+                          MilliSecond : FIX(MilliSecond) }
+            st_struct_in = st_struct
+         ENDIF
       ENDIF ELSE BEGIN
          help,!error_state,/st
          Catch, /Cancel
@@ -1565,7 +1580,7 @@ IF ( trmmversion EQ 6 AND $
       endelse
     ENDIF
 
-    IF N_ELEMENTS(scan_time) GT 0 THEN BEGIN
+    IF N_ELEMENTS(scan_time) GT 0 OR N_ELEMENTS(st_struct_in) GT 0 THEN BEGIN
 
 ; get the scantime vdata and convert to ticks
 
@@ -1590,6 +1605,20 @@ IF ( trmmversion EQ 6 AND $
         second = REFORM( scan_time[6,*] )
         dayofyear = REFORM( scan_time[8,*]*256 + scan_time[7,*] )
         scan_time = UNIXTIME( Year, Month, DayOfMonth, Hour, Minute, Second )
+        IF N_ELEMENTS(st_struct_in) GT 0 THEN BEGIN
+           ; define and initialize a MilliSecond array to all zeroes
+            MilliSecond = FIX(second)
+            MilliSecond[*] = 0
+           ; assemble the st_struct structure holding the arrays of the datetime elements
+            st_struct = {        Year : FIX(Year), $
+                                Month : FIX(Month), $
+                           DayOfMonth : FIX(DayOfMonth), $
+                                 Hour : FIX(Hour), $
+                               Minute : FIX(Minute), $
+                               Second : FIX(Second), $
+                          MilliSecond : FIX(MilliSecond) }
+            st_struct_in = st_struct
+         ENDIF
       endelse
     ENDIF
 

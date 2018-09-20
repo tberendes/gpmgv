@@ -4,110 +4,96 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; render_rr_or_z_plots.pro       - Morris/SAIC/GPM_GV     April 2015
+; render_dsd_plots.pro      Morris/SAIC/GPM_GV    May 2015
 ;
 ; DESCRIPTION
 ; -----------
-; Performs a statistical analysis of geometry-matched (D)PR and GR reflectivity
-; or rain rate from data extracted by the caller from a geo-match netCDF file,
-; optionally subset by storm outline or a fixed area, and bundled in a structure
-; passed to this routine.  If analyzing rain rate, then the rain rate for the GR
-; is taken from the geo-match data if this field is flagged as available,
-; otherwise it is derived from the volume-averaged GR reflectivity using a Z-R 
-; relationship.  (D)PR rainrate is the volume-averaged rain rate stored in the
-; netCDF file and previously derived from the 3-D rainrate in the 2A product.
-;
-; Depending on XXX, computes either mean PR-GR rainrate or Z differences for
-; each of the 3 bright band proximity levels for points within 100 km (by
-; default) of the ground radar and reports the results in a table to stdout.
-; If specified, max_range overrides the 100 km default range.  Also produces
-; graphs of the Probability Density Function of PR and GR rainrate or Z at each
-; of these 3 levels if data exists at that level, and vertical profiles of
-; mean PR and GR rainrate or Z, for each of 3 rain type categories: Any,
-; Stratiform, and Convective. Optionally produces a single frame or an
-; animation loop of GR and equivalent PR PPI images for N=elevs2show frames
-; unless hidePPIs is set. Unless hide_rntype is set to 1 (On), then PR and GR
-; footprints in the PPIs will be encoded by rain type by pattern: solid=Other,
+; Computes mean PR-GR Z, D0, and Nw differences for fixed height levels and for
+; points in the below-bright-band proximity level for points within 100 km (by
+; default) of the ground radar and reports the results in tables to stdout. 
+; If specified, max_range overrides the 100 km default range.   Also produces
+; graphs of the Probability Density Function of PR and GR Z, D0, and Nw at the
+; below-BB level if data exists at that level, and vertical profiles of
+; mean PR and GR Z, D0, and Nw for each of 3 rain type categories: Any,
+; Stratiform, and Convective. Produces scatter plots of DPR vs. GR for Z, D0,
+; and Nw for the below-BB layer for convective and stratiform rain points. Also
+; produces scatter plots of Nw vs. D0 by source (DPR and GR) and by rain type 
+; (convective and stratiform) for the below-BB level in a separate window.
+; Optionally, produces a single frame or an animation loop of GR and equivalent
+; PR PPI images for N=elevs2show frames unless hidePPIs is set.  If Z_PPIs is
+; set then only DPR and GR reflectivity PPIs are shown, otherwise DPR and GR Z,
+; D0, and NW PPIs are shown along with GR Zdr (DR), Hydrometeor ID (FH), and
+; Kdp (KD) PPIs. Unless hide_rntype is set the plotted matchup sample footprints
+; in the PPIs are encoded by rain type by fill patterns: solid=Other,
 ; vertical=Convective, horizontal=Stratiform.
 ;
 ; If PS_DIR is specified then the output is to a Postscript file under ps_dir,
 ; otherwise all output is to the screen.  When outputting to Postscript, the
-; PPI animation is still to the screen (unless hidePPIs is set) but the PDF and
-; scatter plots go to Postscript, as well as a copy of the last frame of the PPI
-; images in the animation loop. The name of the Postscript file uses the station
-; ID, datestamp, and orbit number taken from the geo_match netCDF data file.
-; If b_w is set, then Postscript output will be black and white, otherwise it's
-; in color.  If BATCH is also set with PS_DIR then the output file will be
-; created without any graphics or user prompts and the program will proceed to
-; the next case, as specified by the input parameters.
+; PPI plotting is still sent to the screen (unless hidePPIs is set) but the PDF
+; and scatter plots go only to the Postscript device along with a copy of each
+; frame of the PPI images in the static image or the animation loop.  The name
+; of the Postscript file uses the station ID, datestamp, and DPR orbit number,
+; PPS version, Instrument (Ka or Ku) and swath type taken from the geo_match
+; netCDF data file. If b_w is set, then Postscript output will be black and
+; white for the profile/PDF plots, otherwise they are plotted in color.
 ;
 ; If s2ku binary parameter is set, then the Liao/Meneghini S-to-Ku band
 ; reflectivity adjustment will be made to the GR reflectivity used to compute
-; reflectivity statistics and/or any GR rainrate derived via a Z-R relationship.
-; In all cases, if zr_force is set then a Z-R rainrate estimate will be computed
-; and used for the GR, regardless of the availability of a gr_rr field.
+; the GR rainrate.  If dzerofac is set, then the GR Dzero field will be
+; multiplied by this bias factor to make Dzero equivalent to the DPR Dm field.
 ;
-; This function is a child routine to the geo_match_3d_rr_or_z_comparisons
+; If gr_rr_field is set, then the GR rainrate field whose ID matches this value
+; will be used if available.  Otherwise the 'RR' field (DROPS estimate) will be
+; used by default if available, and if not, then a Z-R rainrate estimate will be
+; computed and used. In all cases, if zr_force is set then a Z-R rainrate
+; estimate will be computed and used, regardless of the value of gr_rr_field.
+;
+; This function is a child routine to the geo_match_3d_dsd_comparisons
 ; procedure.
 ;
 ; INTERNAL MODULES
 ; ----------------
-; 1) render_rr_or_z_plots - Main procedure called by user.  Compute statistics,
-;                           create vertical profiles, histogram, scatter plots, 
-;                           and tablulations of (D)PR-GR rainrate or reflectivity
-;                           differences, and display (D)PR and GR reflectivity
-;                           and rainrate and GR dual-pol field PPI plots in an
-;                           animation sequence.
+; 1) render_dsd_plots - Main procedure called by user.
 ;
 ; NON-SYSTEM ROUTINES CALLED
 ; --------------------------
 ; 1) z_r_rainrate()
 ; 2) calc_geo_pr_gv_meandiffs_wght_idx
-; 3) plot_scatter_by_bb_prox_ps
-; 4) plot_scatter_by_bb_prox
-; 5) plot_geo_match_ppi_anim_ps
+; 3) plot_dsd_scatter_by_raintype_ps (for postscript option) OR
+; 4) plot_dsd_scatter_by_raintype
+; 5) plot_scatter_d0_vs_nw_by_raintype_ps (for postscript option) OR
+; 6) plot_scatter_d0_vs_nw_by_raintype
+; 7) plot_geo_match_ppi_anim_ps
+;
 ;
 ; HISTORY
 ; -------
-; 04/09/15  Morris/GPM GV/SAIC
-; - Created by extracting a large block of existing code from the procedure
-;   in geo_match_3d_rr_or_z_comparisons.pro that did the statistics and
-;   created the graphical and optional Postscript/PDF output.
-; 04/17/15  Morris/GPM GV/SAIC
-; - Moved print_table_headers procedure into the top of this file so that
-;   render_rr_or_z_plots() is callable as a stand-alone function from outside
-;   of geo_match_3d_rr_or_z_comparisons.
-; - Moved pertinent prologue content here from geo_match_3d_rr_or_z_comparisons.
-; - Define and set value of s2ku at beginning of function to eliminate undefined
-;   variable error when parameter is unspecified.
-; - Make PPI copies of gvz, zraw, zcor, rain3, and gvrr here instead of passing
-;   them in through the structure.  All blanking and thresholding by percent for
-;   plotting and statistics happens within this function.
-; 04/28/15  Morris/GPM GV/SAIC
-; - Use new rr_field_used structure element to more properly indicate source of
-;   GR rain rate being evaluated.
-; 05/05/15  Morris/GPM GV/SAIC
-; - Pulled print_table_headers out as a separate source code file.  Merged the
-;   capabilities as defined in geo_match_3d_dsd_comparisons.pro with those in
-;   geo_match_3d_rr_or_z_comparisons.pro from when print_table_headers was
-;   contained in each of them.
-; 05/06/15  Morris/GPM GV/SAIC
-; - Added hidePPIs parameter to suppress PPI plotting to screen.
+; 05/01/15 Morris, GPM GV, SAIC
+; - Created from code extracted from geo_match_dsd_comparisons.pro
 ; 05/08/15  Morris/GPM GV/SAIC
 ; - Filled in logic to fully implement BATCH option with Postscript output.
 ; 05/12/15  Morris/GPM GV/SAIC
 ; - Made status value changes to support multiple storm selection by caller
 ;   and to not force exit by caller when no valid data exist to process for
-;   the current case.
-; 06/24/15  Morris/GPM GV/SAIC
-; - Added support for plotting and analyzing Combined DPRGMI matchup data.
+;   the current case.  Add orbit/GR time title to PPI plot window.
+; 06/25/15  Morris/GPM GV/SAIC
 ; - Removed ncfilepr positional parameter from call sequence, its filename
 ;   metadata is now passed in the data structure.
-; 07/16/15  Morris/GPM GV/SAIC
+; - Made changes to ppi_comn structure required for call to modified
+;   plot_geo_match_ppi_anim_ps procedure.
+; 07/17/15  Morris/GPM GV/SAIC
 ; - Added DECLUTTER parameter to support filtering of clutter-affected samples. 
-; 10/13/15  Morris/GPM GV/SAIC
-; - Minor tweak for labeling of Z-R rainrate type on PPI plot.
-; 12/9/2015 Morris, GPM GV, SAIC
+; 09/24/15, Bob Morris/GPM GV (SAIC)
+; - Changed data array variable name GR_DP_Nw to lower case to distinguish from
+;   UF ID variables.
+; - Changed passed value of GR_DM_D0 to specifically label scatter plots axes
+;   as D0, adjusted D0, or Dm.  Add as a new parameter to pass to the various
+;   plot_scatter routines.
+; - Write the UF ID of the GR D0, Dm, NW, or N2 fields in use to screen and/or
+;   Postscript file above their tablulated statistics.
+; - Changed name convention of temptext and PSFILEpdf temporary/output files.
+; 12/11/15 by Bob Morris, GPM GV (SAIC)
+; - Removed unused ALT_BB_HEIGHT keyword parameter from call sequence.
 ; - Added MAX_BLOCKAGE optional parameter to limit samples included in the
 ;   statistics by maximum allowed GR beam blockage. Only applies to matchup file
 ;   version 1.21 or later with computed beam blockage.
@@ -116,54 +102,53 @@
 ;   and first sweeps that exceeds the value of this parameter. Is only used if
 ;   MAX_BLOCKAGE is unspecified, or where no blockage information is contained
 ;   in the matchup file.
-; 05/31/16 Morris, GPM GV, SAIC
-; - Added a user prompt in the Postscript/non-batch mode to ask whether to save
-;   or delete the Postscript/PDF file for the case after viewing the PPIs.
-; - Added FILTER_BLOCKED_BY parameter to select method used to reject blockage
-;   region data when actual beam blockage data are included in the dataset: by
-;   individual samples exceeding blockage thresholds ("S"), or for the entire
-;   column above a blocked sample ("C").  Default="S".
-; 12/07/16 by Bob Morris, GPM GV (SAIC)
+; 06/06/16 by Bob Morris, GPM GV (SAIC)
+; - Added IDX_USED parameter to return the 1-D array indices of the data samples
+;   included in the statistics (scatter plots, etc.) after all data clipping and
+;   filtering has been done.
+; 12/06/16 by Bob Morris, GPM GV (SAIC)
+; - Added ability to process DPRGMI matchup type.
 ; - Modified user messages in no-data cases, and prompt text in READ statement
 ;   for subset case.
-; 01/24/17 by Bob Morris, GPM GV (SAIC)
-; - Commented out diagnostic messages in computing blockage by Z_BLOCKAGE_THRESH
-;   and disabled setting of blocked Z values for PPI plots to 59.99 dBZ.
 ; 01/26/17 by Bob Morris, GPM GV (SAIC)
-; - Moved some code blocks and added a check of whether the postscript file has
-;   been opened to prevent problems when no valid data samples are found.
+; - Added a line to reset !P.MULTI when exiting early from data types plot loop
+;   to prevent problems when no valid data samples are found.
 ; 03/24/17 Morris, GPM GV, SAIC
 ; - Added LAND_OCEAN=land_ocean keyword/value pair to filter analyzed samples by
-;   underlying surface type.  No logic added to implement this capability yet.
-; - Replaced rain rate PPIs in animation with thresholded/filtered Z PPIs, when
-;   analyzing Z.  Added thresholded Z PPIs to Z-only PPI plots when that option
-;   is active and thresholding has been done.
-; - Added exception for blanking plotted samples based on DPR rain rate when
-;   analyzing the MS scan which has no DPR RR field.
-; 09/06/17 Morris, GPM GV, SAIC
-; - Added the logic to implement LAND_OCEAN=land_ocean keyword/value parameter
-;   to filter analyzed samples by underlying surface type.  Implemented multiple
-;   parameter combined filter using flag2filter array.
+;   underlying surface type.
+; - Added FILTER_BLOCKED_BY=filter_blocked_by keyword/value pair to specify
+;   method used to filter analyzed samples by GR blockage, either By (C)olumn or
+;   by (S)ample.
+; - Implemented a combination flag2filter array to cumulatively tag samples to
+;   be filtered by multiple criteria evaluated in sequence.
+; - Added thresholded Z PPIs to Z-only PPI plots when that option is active
+;   and thresholding has been done.
+; - Implemented blanking of filtered samples in plots of Z and RR PPIs whenever
+;   filtering has occurred.
+; 08/15/17 Morris, GPM GV, SAIC
+; - Changed plot and histogramming ranges of Dm and Nw to 0.0-5.0.
 ;
 ;
-; EMAIL QUESTIONS OR COMMENTS TO:
-;       <Bob Morris> kenneth.r.morris@nasa.gov
-;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+; EMAIL QUESTIONS OR COMMENTS AT:
+;       https://pmm.nasa.gov/contact
 ;-
 ;===============================================================================
-;
 
-function render_rr_or_z_plots, xxx, looprate, elevs2show, startelev, $
-                               PPIorient, windowsize, pctabvthresh, PPIbyThresh, $
-                               gvconvective, gvstratiform, hideTotals, hide_rntype, $
-                               hidePPIs, pr_or_dpr, data_struct, PS_DIR=ps_dir, $
-                               B_W=b_w, S2KU=s2ku_in, ZR=zr_force, BATCH=batch, $
-                               MAX_RANGE=max_range, MAX_BLOCKAGE=max_blockage, $
-                               Z_BLOCKAGE_THRESH=z_blockage_thresh, $
-                               FILTER_BLOCKED_BY=filter_blocked_by, $
-                               STEP_MANUAL=step_manual, DECLUTTER=declutter_in, $
-                               LAND_OCEAN=land_ocean
+; Module 1:  render_dsd_plots
 
+function render_dsd_plots_v88, looprate, elevs2show, startelev, $
+                           PPIorient, windowsize, pctabvthresh, PPIbyThresh, $
+                           Z_PPIs, gvconvective, gvstratiform, hideTotals, $
+                           hide_rntype, hidePPIs, pr_or_dpr, data_struct, $
+                           PS_DIR=ps_dir, B_W=b_w, S2KU=s2ku_in, ZR=zr_force, $
+                           DZEROFAC=dzerofac, MAX_BLOCKAGE=max_blockage, $
+                           Z_BLOCKAGE_THRESH=z_blockage_thresh, $
+                           GR_RR_FIELD=gr_rr_field, BATCH=batch, $
+                           MAX_RANGE=max_range, SUBSET_METHOD=submeth, $
+                           MIN_FOR_SUBSET=subthresh, SAVE_DIR=save_dir, $
+                           FILTER_BLOCKED_BY=filter_blocked_by, $
+                           STEP_MANUAL=step_manual, DECLUTTER=declutter_in, $
+                           LAND_OCEAN=land_ocean, IDX_USED=idx_used
 
 ; "include" file for PR data constants
 @pr_params.inc
@@ -171,13 +156,16 @@ function render_rr_or_z_plots, xxx, looprate, elevs2show, startelev, $
 s2ku=KEYWORD_SET(s2ku_in)
 declutter=KEYWORD_SET(declutter_in)
 
+xxx = ''  ; hard code as empty for development, controls PctAbvThresh tests
+
 pctString = STRTRIM(STRING(FIX(pctabvthresh)),2)
 
-frequency = data_struct.KuKa        ; 'DPR', 'KA', or 'KU', from input GPM 2Axxx file
+frequency = data_struct.KuKa        ; 'DPR', 'KA', or 'KU', from input GPM 2Axx file
 site = data_struct.mysite.site_id
 yymmdd = data_struct.DATESTAMP      ; in YYMMDD format
 orbit = data_struct.orbit
 version = data_struct.version
+swath = data_struct.swath
 ; put the "Instrument" ID from the passed structure into its PPS designation
 CASE STRUPCASE(frequency) OF
     'KA' : freqName='Ka'
@@ -186,6 +174,11 @@ CASE STRUPCASE(frequency) OF
     ELSE : freqName=''
 ENDCASE
 
+;IF pr_or_dpr EQ 'DPR' THEN BEGIN
+;   instrument='2A'+freqName
+;ENDIF ELSE BEGIN
+;   instrument='Ku'
+;ENDELSE
 CASE pr_or_dpr OF
        'DPR' : instrument='2A'+freqName
     'DPRGMI' : instrument='CMB'
@@ -195,13 +188,19 @@ ENDCASE
 ; pull copies of all the data variables and flags out of the passed structure
 have_gvrr = data_struct.haveFlags.have_gvrr
 haveHID = data_struct.haveFlags.haveHID
+haveDm = data_struct.haveFlags.haveDm
 haveD0 = data_struct.haveFlags.haveD0
+haveNw = data_struct.haveFlags.haveNw
+haveGR_Nw = data_struct.haveFlags.haveGR_Nw
 haveZdr = data_struct.haveFlags.haveZdr
 haveKdp = data_struct.haveFlags.haveKdp
 haveRHOhv = data_struct.haveFlags.haveRHOhv
+havephase = data_struct.haveFlags.have_phase
+havephaseHeightAGL = data_struct.haveFlags.have_phaseHeightAGL
+havephaseNearSurface = data_struct.haveFlags.have_phaseNearSurface
 ; and set flag to try to filter by GR blockage if blockage data are present
 do_GR_blockage = data_struct.haveFlags.have_GR_blockage
-
+ 
 ; reset do_GR_blockage flag if set but no MAX_BLOCKAGE value is given
 IF do_GR_blockage EQ 1 AND N_ELEMENTS(max_blockage) NE 1 $
    THEN do_GR_blockage = 0
@@ -212,15 +211,15 @@ IF do_GR_blockage EQ 1 AND N_ELEMENTS(max_blockage) NE 1 $
 IF do_GR_blockage EQ 0 AND N_ELEMENTS(z_blockage_thresh) EQ 1 $
    THEN do_GR_blockage = 2
 
-blockfilter = 'S'    ; initialize blockage filter to "by Sample"
+blockfilter = 'C'    ; initialize blockage filter to "by Column" for DSD
 IF do_GR_blockage NE 0 AND N_ELEMENTS(filter_blocked_by) NE 0 THEN BEGIN
   ; set blockage filter to caller's requested type, if valid
    CASE STRUPCASE(filter_blocked_by) OF
        'S' : blockfilter = 'S'
        'C' : blockfilter = 'C'
       ELSE : BEGIN
-               message, "Unknown FILTER_BLOCKED_BY value, defaulting to S(ample).", /INFO
-               blockfilter = 'S'
+               message, "Unknown FILTER_BLOCKED_BY value, defaulting to C(olumn).", /INFO
+               blockfilter = 'C'
              END
    ENDCASE
 ENDIF
@@ -233,10 +232,28 @@ zcor = data_struct.zcor
 zcor_in = zcor                 ; for plotting as PPI
 rain3 = data_struct.rain3
 rain3_in = rain3               ; for plotting as PPI
+dpr_dm = data_struct.dpr_Dm
+dpr_dm_in = dpr_Dm
+dpr_nw = data_struct.dpr_nw
+dpr_nw_in = dpr_nw
+
+phase = data_struct.phase
+phaseNearSurface = data_struct.phaseNearSurface
+phaseHeightAGL = data_struct.phaseHeightAGL
+phase_in = phase
+phaseNearSurface_in = phaseNearSurface
+phaseHeightAGL_in = phaseHeightAGL
+
 gvrr = data_struct.gvrr
 gvrr_in = gvrr                 ; for plotting as PPI
 HIDcat = data_struct.HIDcat
 Dzero = data_struct.Dzero
+Dzero_in = Dzero
+GR_DM_D0 = data_struct.GR_DM_D0   ; for labeling scatter plot axes, may change from input
+GR_DM_D0_PPI = GR_DM_D0           ; for plotting PPIs, remains unchanged
+gr_dp_nw = data_struct.gr_dp_nw
+gr_dp_nw_in = gr_dp_nw
+GR_NW_N2 = data_struct.GR_NW_N2
 Zdr = data_struct.Zdr
 Kdp = data_struct.Kdp
 RHOhv = data_struct.RHOhv
@@ -260,7 +277,6 @@ pctgoodgv = data_struct.pctgoodgv
 pctgoodrain = data_struct.pctgoodrain
 pctgoodrrgv = data_struct.pctgoodrrgv
 clutterStatus = data_struct.clutterStatus
-
 BBparms = data_struct.BBparms
 heights = data_struct.heights
 hgtinterval = data_struct.hgtinterval
@@ -268,16 +284,15 @@ hgtinterval = data_struct.hgtinterval
 show_ppis=1   ; initialize to ON, override if PS and BATCH both are set
 status = 1    ; init to failure in case we hit errors early
 
- ; open a file to hold output stats to be appended to the Postscript file,
- ; if Postscript output is indicated
-  IF KEYWORD_SET( ps_dir ) THEN BEGIN
-     do_ps = 1
-     temptext = ps_dir + '/dbzdiffstats_temp.txt'
-     OPENW, tempunit, temptext, /GET_LUN
-    ; figure out whether to plot PPIs and prompt, or just write Postscript and 
-    ; wrap up
-     IF KEYWORD_SET( batch ) THEN show_ppis=0     ; don't display PPIs/animation
-  ENDIF ELSE do_ps = 0
+
+; open a file to hold output stats to be appended to the Postscript file,
+; if Postscript output is indicated
+IF KEYWORD_SET( ps_dir ) THEN BEGIN
+   do_ps = 1
+   IF KEYWORD_SET( batch ) THEN show_ppis=0     ; don't display PPIs/animation
+   temptext = ps_dir + '/dsd_stats_temp.txt'
+   OPENW, tempunit, temptext, /GET_LUN
+ENDIF ELSE do_ps = 0
 
 ; unilaterally override show_ppis to 0 if hidePPIs is true
 IF hidePPIs THEN show_ppis=0
@@ -290,8 +305,9 @@ IF pr_or_dpr EQ 'DPRGMI' THEN BEGIN
    ENDCASE
 ENDIF ELSE nfp = data_struct.mygeometa.num_footprints
 nswp = data_struct.mygeometa.num_sweeps
+site_lat = data_struct.mysite.site_lat
+site_lon = data_struct.mysite.site_lon
 siteID = string(data_struct.mysite.site_id)
-swath=data_struct.swath
 
 ; override flag if forcing Z-R usage
 IF KEYWORD_SET(zr_force) THEN have_gvrr = 0
@@ -492,7 +508,6 @@ IF ( pctAbvThresh GT 0.0 ) THEN BEGIN
                           AND  unfiltered GE 0.0, countgoodpct )
       endif else begin
          thresh_msg = "Thresholding by reflectivity cutoffs and by"+filterText+"."
-         IF xxx NE 'Z' then thresh_msg = thresh_msg + '  ' + gvrr_txt
          idxgoodenuff = WHERE( pctgoodpr GE pctAbvThresh $
                           AND  pctgoodgv GE pctAbvThresh $
                           AND  unfiltered GE 0.0, countgoodpct )
@@ -504,7 +519,6 @@ IF ( pctAbvThresh GT 0.0 ) THEN BEGIN
                           AND  pctgoodrain GE pctAbvThresh, countgoodpct )
       endif else begin
          thresh_msg = "Thresholding by reflectivity cutoffs only."
-         IF xxx NE 'Z' then thresh_msg = thresh_msg + '  ' + gvrr_txt
          idxgoodenuff = WHERE( pctgoodpr GE pctAbvThresh $
                           AND  pctgoodgv GE pctAbvThresh, countgoodpct )
       endelse
@@ -547,15 +561,23 @@ ENDIF ELSE BEGIN
    ENDELSE
 ENDELSE
 
-if (clipem) THEN BEGIN
-   nclipped = N_ELEMENTS(gvz) - countgoodpct
-PRINT, nclipped, " samples filtered by percent above threshold and/or clutter."
+IF (clipem) THEN BEGIN
+   nclipped = STRING( N_ELEMENTS(gvz) - countgoodpct, FORMAT='(I0)' )
+   PRINT, nclipped, " samples filtered in total."
+   print, ''
    IF have_gvrr EQ 0 THEN gvrr = z_r_rainrate(gvz[idxgoodenuff]) $  ; override empty field
       ELSE gvrr=gvrr[idxgoodenuff]   ; using scaled GR rainrate from matchup file
    gvz = gvz[idxgoodenuff]
+   gr_dp_nw = gr_dp_nw[idxgoodenuff]
+   Dzero = Dzero[idxgoodenuff]
    zraw = zraw[idxgoodenuff]
    zcor = zcor[idxgoodenuff]
    rain3 = rain3[idxgoodenuff]
+   dpr_dm = dpr_dm[idxgoodenuff]
+   dpr_nw = dpr_nw[idxgoodenuff]
+   phase = phase[idxgoodenuff]
+   phaseNearSurface = phaseNearSurface[idxgoodenuff]
+   phaseHeightAGL = phaseHeightAGL[idxgoodenuff]
    top = top[idxgoodenuff]
    botm = botm[idxgoodenuff]
    lat = lat[idxgoodenuff]
@@ -567,22 +589,30 @@ PRINT, nclipped, " samples filtered by percent above threshold and/or clutter."
    hgtcat = hgtcat[idxgoodenuff]
 ;   pr_index = pr_index[idxgoodenuff] : NO! don't clip - must be full array for PPIs
    IF ( PPIbyThresh ) THEN BEGIN
-      idx2plot=idxgoodenuff
+      idx2plot=idxgoodenuff  ;idxpractual2d[idxgoodenuff]
+      n2plot=countgoodpct
    ENDIF
 ENDIF
 
 
-; we only use unclipped arrays for PPIs, so we make full copies of these arrays
+; we only use unclipped arrays for PPIs, so we make copies of original arrays
 gvz_in2 = gvz_in
 zcor_in2 = zcor_in
 rain3_in2 = rain3_in
+gr_dp_nw_in2 = gr_dp_nw_in
+Dzero_in2 = Dzero_in
+dpr_dm_in2 = dpr_dm_in
+dpr_nw_in2 = dpr_nw_in
+phase_in2 = phase_in
+phaseHeightAGL_in2 = phaseHeightAGL_in
+phaseNearSurface_in2 = phaseNearSurface_in
 IF have_gvrr EQ 0 THEN BEGIN
    gvrr_in2 = z_r_rainrate(gvz_in)
    gvrr_in2 = REFORM( gvrr_in2, nfp, nswp)
 ENDIF ELSE gvrr_in2 = gvrr_in
 
-; optional data *blanking* based on percent completeness of the volume averages
-; for PPI plots, operating on the full arrays of gvz and zcor
+; optional data *blanking* based on filtering and/or percent completeness of the
+; volume averages for PPI plots, operating on the full arrays of gvz and zcor
 
 IF ( PPIbyThresh ) THEN BEGIN
    idx3d = LONG( gvz_in )   ; make a copy
@@ -595,24 +625,32 @@ IF ( PPIbyThresh ) THEN BEGIN
      zcor_in2[idx2blank] = 0.0
      rain3_in2[idx2blank] = 0.0
      gvrr_in2[idx2blank] = 0.0
+     gr_dp_nw_in2[idx2blank] = 0.0
+     Dzero_in2[idx2blank] = 0.0
+     dpr_dm_in2[idx2blank] = 0.0
+     dpr_nw_in2[idx2blank] = 0.0
+;     phase_in2[idx2blank] = 0
+;     phaseHeightAGL_in2[idx2blank] = 0.0
+;     phaseNearSurface_in2[idx2blank] = 0
    ENDIF
 ENDIF
 
 ; determine the non-missing points-in-common between PR and GR, data value-wise,
 ; to make sure the same points are plotted on PR and GR full/post-threshold PPIs
-IF freqName EQ 'DPR' and swath EQ 'MS' THEN BEGIN
-  ; no rain3 data in 2ADPR/MS
-   idx2blank2 = WHERE( (gvz_in2 LT 0.0) OR (zcor_in2 LE 0.0) $
-                    OR (gvrr_in2 LT 0.0), count2blank2 )
-ENDIF ELSE BEGIN 
-   idx2blank2 = WHERE( (gvz_in2 LT 0.0) OR (zcor_in2 LE 0.0) $
+idx2blank2 = WHERE( (gvz_in2 LT 0.0) OR (zcor_in2 LE 0.0) $
                     OR (rain3_in2 LT 0.0) OR (gvrr_in2 LT 0.0), count2blank2 )
-ENDELSE
 IF ( count2blank2 GT 0 ) THEN BEGIN
    gvz_in2[idx2blank2] = 0.0
    zcor_in2[idx2blank2] = 0.0
    rain3_in2[idx2blank2] = 0.0
    gvrr_in2[idx2blank2] = 0.0
+   gr_dp_nw_in2[idx2blank2] = 0.0
+   Dzero_in2[idx2blank2] = 0.0
+   dpr_dm_in2[idx2blank2] = 0.0
+   dpr_nw_in2[idx2blank2] = 0.0
+;     phase_in2[idx2blank2] = 0
+;     phaseHeightAGL_in2[idx2blank2] = 0.0
+;     phaseNearSurface_in2[idx2blank2] = 0
 ENDIF
 
 ; - - - - - - - - - - - - - - - - - - - - - - - -
@@ -643,13 +681,163 @@ num_in_BB_Cat[2] = countin
 idxnobb = WHERE( bbProx EQ 0, countnobb )
 num_in_BB_Cat[0] = countnobb
 
+IF countblo EQ 0 THEN BEGIN
+   print, ''
+   print, 'No samples in the below-bright-band layer, cannot run DSD statistics.'
+   goto, errorExit
+ENDIF
+
+; set Nw and Dm to missing for samples within/above BB
+IF countabv GT 0 THEN BEGIN
+   dpr_dm[idxabv] = Z_MISSING
+   dpr_nw[idxabv] = Z_MISSING
+   Dzero[idxabv] = Z_MISSING
+   gr_dp_nw[idxabv] = Z_MISSING
+     phase[idxabv] = 0
+     phaseHeightAGL[idxabv] = Z_MISSING
+     phaseNearSurface[idxabv] = 0
+ENDIF
+IF countin GT 0 THEN BEGIN
+   dpr_dm[idxin] = Z_MISSING
+   dpr_nw[idxin] = Z_MISSING
+   Dzero[idxin] = Z_MISSING
+   gr_dp_nw[idxin] = Z_MISSING
+     phase[idxin] = 0
+     phaseHeightAGL[idxin] = Z_MISSING
+     phaseNearSurface[idxin] = 0
+ENDIF
+
 ; build an array of sample volume depth for weighting of the layer averages and
 ; mean differences
 voldepth = (top-botm) > 0.0
 
-;minz4hist = 18.  ; not used, replaced with cutoff
-maxz4hist = 55.   ; used only for Z
+bs = 2.0
+print, "Using Z histogram bin size = ", bs
+;minz4hist = 18.  ; not used, replaced with dbzcut
+maxz4hist = 55.
+dbzcut = 10.      ; absolute DPR/GR dBZ cutoff of points to use in mean diff. calcs.
+
 IF N_ELEMENTS(max_range) NE 1 THEN rangecut = 100. ELSE rangecut = max_range
+fields2do = ['Z','D0','NW']
+; fields2do = ['RR','D0','NW']
+
+orig_device = !D.NAME
+CASE xxx OF
+   'RR' : IF (have_gvrr) THEN gr_rr_zr = ' DP RR' ELSE gr_rr_zr = ' Z-R RR'
+    'Z' : gr_rr_zr = ' Zc'
+   ELSE : gr_rr_zr = ' DSD'
+ENDCASE
+
+IF ( do_ps EQ 1 ) THEN BEGIN
+  ; set up postscript plot params. and file path/name
+   cd, ps_dir
+   b_w = keyword_set(b_w)
+   IF ( s2ku ) THEN add2nm = '_S2Ku' ELSE add2nm = ''
+   IF data_struct.is_subset THEN BEGIN
+     ; format the storm lat/lon position into a string to be added to the PS name
+      IF data_struct.storm_lat LT 0.0 THEN hemi='S' ELSE hemi='N'
+      IF data_struct.storm_lon LT 0.0 THEN ew='W' ELSE ew='E'
+      addpos='_'+STRING(ABS(data_struct.storm_lat),FORMAT='(f0.2)')+hemi+'_'+ $
+             STRING(ABS(data_struct.storm_lon),FORMAT='(f0.2)')+ew
+      add2nm = add2nm+addpos
+   ENDIF
+   PSFILEpdf = ps_dir+'/'+site+'.'+yymmdd+'.'+orbit+"."+version+'.'+pr_or_dpr+"_" $
+               +instrument+"_"+swath+'.Pct'+pctString+add2nm+'_DSD_Analysis.ps'
+   print, "Output sent to ", PSFILEpdf
+   set_plot,/copy,'ps'
+   device,filename=PSFILEpdf,/color,bits=8,/inches,xoffset=0.75,yoffset=1.2, $
+          xsize=7.,ysize=9.5
+
+   ; Set up color table
+   ;
+   common colors, r_orig, g_orig, b_orig, r_curr, g_curr, b_curr ;load color table
+   IF ( b_w EQ 0) THEN  LOADCT, 6  ELSE  LOADCT, 33
+   ncolor=255
+   red=bytarr(256) & green=bytarr(256) & blue=bytarr(256)
+   red=r_curr & green=g_curr & blue=b_curr
+   red(0)=255 & green(0)=255 & blue(0)=255
+   red(1)=115 & green(1)=115 & blue(1)=115  ; gray for GR
+   red(ncolor)=0 & green(ncolor)=0 & blue(ncolor)=0 
+   tvlct,red,green,blue
+   !P.COLOR=0 ; make the title and axis annotation black
+   !X.THICK=2 ; make the ticks and borders thicker
+   !Y.THICK=2 ; ditto
+   !P.FONT=0 ; use the device fonts supplied by postscript
+
+   IF ( b_w EQ 0) THEN BEGIN
+     PR_COLR=200
+     GV_COLR=60
+     ST_LINE=1    ; dotted for stratiform
+     CO_LINE=2    ; dashed for convective
+   ENDIF ELSE BEGIN
+     PR_COLR=ncolor
+     GV_COLR=ncolor
+     ST_LINE=0    ; solid for stratiform
+     CO_LINE=1    ; dotted for convective
+   ENDELSE
+
+   CHARadj=1.0
+   THIKadjPR=1.5
+   THIKadjGV=1.5
+   ST_THK=1
+   CO_THK=1
+ENDIF ELSE BEGIN
+  ; set up x-window plot params.
+   device, decomposed = 0
+   LOADCT, 2
+
+   IF ( pctAbvThresh GT 0.0 ) THEN BEGIN
+      IF ( pctAbvThresh EQ 100.0 ) THEN gt_ge = ' ' ELSE gt_ge = ' >='
+      CASE xxx OF
+         'Z' : wintxt = "With" + gt_ge + pctString + $
+                        "% of averaged bins above dBZ thresholds"  
+        'RR' : wintxt = "With" + gt_ge + pctString + $
+                        "% of averaged bins above rainrate threshold"
+        ELSE : wintxt = "With" + gt_ge + pctString + $
+                        "% of averaged bins above dBZ thresholds"  
+      ENDCASE
+   ENDIF ELSE BEGIN
+      wintxt = "With all non-missing "+pr_or_dpr+"/GR matched samples"
+   ENDELSE
+
+   Window, xsize=1050, ysize=700, TITLE = site+gr_rr_zr+' vs. '+instrument+'.'+ $
+           swath+"."+version+"  --  "+wintxt, RETAIN=2
+   PR_COLR=30
+   GV_COLR=70
+   ST_LINE=1    ; dotted for stratiform
+   CO_LINE=2    ; dashed for convective
+   CHARadj=2.0
+   THIKadjPR=1.0
+   THIKadjGV=1.0
+   ST_THK=3
+   CO_THK=2
+ENDELSE
+
+; arrange vertically for postscript, horizontally for on-screen
+IF do_ps THEN !P.Multi=[0,2,3,0,0] ELSE !P.Multi=[0,3,2,0,1]
+
+; ##############################################################################
+
+for field = 0,2 do begin   ; DO A BIG LOOP OVER Z, D0, NW FIELDS
+
+xxx = fields2do[field]
+IF field GT 0 THEN $
+   IF do_ps THEN !P.Multi=[6-field*2,2,3,0,0] ELSE !P.Multi=[6-field*2,3,2,0,1]
+;IF do_ps THEN IF field GT 0 THEN !P.Multi=[6-field*2,2,3,0,0]$
+;ELSE IF field GT 0 THEN !P.Multi=[6-field*2,3,2,0,1]
+IF do_ps THEN BEGIN
+   dxLgd = 0.0                         ; x-offset of legend by field #
+   dyLgd = (-1./3.)*field              ; y-offset of legend by field #
+   LgdLineX = [0.33,0.36]              ; x-endpoints of line segments in legends
+   LgdTxtX = 0.38                      ; x-start of text for above
+   ScrTxtX = 0.84                      ; x-start of Bias Score text in PDF legends
+ENDIF ELSE BEGIN
+   dxLgd = (1./3.)*field                ; x-offset of legend by field #
+   dyLgd = 0.0                          ; y-offset of legend by field #
+   LgdLineX = [0.20+dxLgd,0.23+dxLgd]   ; x-endpoints of line segments in legends
+   LgdTxtX = 0.24+dxLgd                 ; x-start of text for above
+   ScrTxtX = 0.19+dxLgd                 ; x-start of Bias Score text in PDF legends
+ENDELSE
 
 ; define a structure to hold difference statistics computed within and returned
 ; by the called function calc_geo_pr_gv_meandiffs_wght_idx()
@@ -672,42 +860,82 @@ CASE xxx OF
           xvar = gvrr
 ;          src1 = pr_or_dpr
           src2 = 'GR'
-;          field = var2
           END
     'Z' : BEGIN
           difftext='-GR Reflectivity difference statistics (dBZ) - GR Site: '
           cutoff = 10.     ; cutoff dBZ value to include in mean diff. calcs.
-          bs = 2.0         ; fixed histogram bin size, else bins by 1.0, messy
 ;          src1 = pr_or_dpr
           src2 = 'GR'
           yvar = zcor
           xvar = gvz
-;          field = xxx
+          END
+   'D0' : BEGIN
+          IF ( GR_DM_D0 EQ 'D0' ) THEN BEGIN
+             IF N_ELEMENTS( dzerofac ) EQ 1 THEN BEGIN
+                textout = 'Adjusted GR Dzero field by factor of ' + $
+                        STRING(dzerofac, FORMAT='(F0.2)') + ' to match DPR Dm.'
+               ; define GR D0 data label, indicating adjustment factor, e.g., "D0*1.05"
+                GR_DM_D0 = GR_DM_D0 + "*" + STRING(dzerofac, FORMAT='(F0.2)')
+             ENDIF ELSE BEGIN
+                textout = 'Unadjusted GR Dzero field is being compared to DPR Dm.'
+             ENDELSE
+          ENDIF ELSE textout = 'GR Dm field is being directly compared to DPR Dm.'
+          print, '' & print, '' & print, textout
+          IF (do_ps EQ 1) THEN printf, tempunit, textout
+          difftext=' Dm-GR '+GR_DM_D0+' difference statistics (mm) - GR Site: '
+          cutoff = 0.1     ; cutoff value to include in mean diff. calcs.
+          yvar = dpr_dm
+          xvar = Dzero
+;          src1 = pr_or_dpr
+          src2 = 'GR'
+          END
+   'NW' : BEGIN
+          textout = 'GR '+GR_NW_N2+' field is being directly compared to DPR Nw.'
+          print, '' & print, '' & print, textout
+          IF (do_ps EQ 1) THEN BEGIN
+             printf, tempunit, ''
+             printf, tempunit, ''
+             printf, tempunit, textout
+          ENDIF
+          difftext='-GR Nw difference statistics (log10(Nw)) - GR Site: '
+          cutoff = 0.1     ; cutoff value to include in mean diff. calcs.
+          yvar = dpr_nw
+          xvar = gr_dp_nw
+;          src1 = pr_or_dpr
+          src2 = 'GR'
           END
 ENDCASE
 
-IF pr_or_dpr EQ 'PR' THEN BEGIN
-   textout = pr_or_dpr + difftext + siteID + '   Orbit: ' + orbit + $
-             '  Version: '+version
-ENDIF ELSE BEGIN
-   textout = pr_or_dpr + ' ' + Instrument + difftext + siteID
+IF field EQ 0 THEN BEGIN
+   CASE pr_or_dpr OF
+     'PR' : textout = pr_or_dpr + difftext + siteID + '   Orbit: ' + orbit + $
+                   '  Version: '+version
+     ELSE : BEGIN
+             textout = pr_or_dpr + " " + Instrument + difftext + siteID
+             print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
+             textout = 'Orbit: '+orbit+'  Version: '+version+'  Swath Type: '+swath
+             END
+   ENDCASE
    print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
-   textout = 'Orbit: '+orbit+'  Version: '+version+'  Swath Type: '+swath
-ENDELSE
-print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
 
-textout = pr_or_dpr + ' time = ' + data_struct.mygeometa.atimeNearestApproach + $
+   textout = pr_or_dpr + ' time = ' + data_struct.mygeometa.atimeNearestApproach + $
           '   GR start time = ' + data_struct.mysweeps[0].atimeSweepStart
-print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
-textout = 'Required percent of above-threshold ' + pr_or_dpr + $
-          ' and GR bins in matched volumes >= '+pctString+"%"
-print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
-IF ( pctAbvThresh GT 0.0 ) THEN BEGIN
-   print, thresh_msg & IF (do_ps EQ 1) THEN printf, tempunit, thresh_msg
-ENDIF
-IF ( s2ku ) THEN BEGIN
-   textout = 'GR reflectivity has S-to-Ku frequency adjustments applied.'
    print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
+   textout = 'Required percent of above-threshold ' + pr_or_dpr + $
+          ' and GR bins in matched volumes >= '+pctString+"%"
+   print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
+   IF ( pctAbvThresh GT 0.0 OR altfilters EQ 1 ) THEN BEGIN
+      print, thresh_msg & IF (do_ps EQ 1) THEN printf, tempunit, thresh_msg
+   ENDIF
+   IF ( s2ku ) THEN BEGIN
+      textout = 'GR reflectivity has S-to-Ku frequency adjustments applied.'
+      print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
+   ENDIF
+;   IF N_ELEMENTS( dzerofac ) EQ 1 THEN BEGIN
+;      textout = 'Adjusted GR Dzero field by factor of ' + STRING(dzerofac, $
+;                 FORMAT='(F0.0)') + ' to match DPR DM.'
+;      print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
+;   ENDIF
 ENDIF
 
 mnprarr = fltarr(3,nhgtcats)  ; each level, for raintype all, stratiform, convective
@@ -718,16 +946,15 @@ max_hgt_w_data = 0.0
 
 ; - - - - - - - - - - - - - - - - - - - - - - - -
 
-;print_table_headers, src1, src2, field, PS_UNIT=tempunit
 print_table_headers, src1, src2, xxx, PS_UNIT=tempunit
 
 ; - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Compute a mean rainrate difference at each level
+; Compute a mean DPR-GR difference at each level for xxx field
 
 for lev2get = 0, nhgtcats-1 do begin
    havematch = 0
-   thishgt = (lev2get+1)*hgtinterval
+   thishgt = heights[lev2get]
    IF ( num_in_hgt_cat[lev2get] GT 0 ) THEN BEGIN
       flag = ''
       idx4hist = lonarr(num_in_hgt_cat[lev2get])  ; array indices used for point-to-point mean diffs
@@ -761,134 +988,48 @@ for lev2get = 0, nhgtcats-1 do begin
          textout = "No above-threshold points at height " + $
                    STRING(heights[lev2get], FORMAT='(f0.3)')
          print, textout & IF (do_ps EQ 1) THEN printf, tempunit, textout
+;         BREAK
       endelse
    ENDIF ELSE BEGIN
       print, "No points at height " + string(heights[lev2get], FORMAT='(f0.3)')
+;      BREAK
    ENDELSE
 
 endfor         ; lev2get = 0, nhgtcats-1
 
+; - - - - - - - - - - - - - - - - - - - - - - - -
 
-havePSfile = 0   ; i.e., postscript file not opened yet
-
+; Build the mean profile plot panel
 if (levsdata eq 0) then begin
    print, "No valid data levels found!"
    nframes = 0
-   goto, nextFile
+   if ( do_ps NE 1 ) THEN WDELETE, 0
+   !P.MULTI=[0,1,1]
+   goto, ppiPlots
 endif
 
-; - - - - - - - - - - - - - - - - - - - - - - - -
-
-; Build the mean RR profile plot panel
-
-orig_device = !D.NAME
-CASE xxx OF
-   'RR' : IF (have_gvrr) THEN gr_rr_zr = ' DP '+data_struct.rr_field_used $
-          ELSE gr_rr_zr = ' Z-R RR'
-    'Z' : gr_rr_zr = ' Zc'
-ENDCASE
-
-IF ( do_ps EQ 1 ) THEN BEGIN
-  ; set up postscript plot params. and file path/name
-   cd, ps_dir
-   b_w = keyword_set(b_w)
-   IF ( s2ku ) THEN add2nm = '_S2Ku' ELSE add2nm = ''
-   IF data_struct.is_subset THEN BEGIN
-     ; format the storm lat/lon position into a string to be added to the PS name
-      IF data_struct.storm_lat LT 0.0 THEN hemi='S' ELSE hemi='N'
-      IF data_struct.storm_lon LT 0.0 THEN ew='W' ELSE ew='E'
-      addpos='_'+STRING(ABS(data_struct.storm_lat),FORMAT='(f0.2)')+hemi+'_'+ $
-             STRING(ABS(data_struct.storm_lon),FORMAT='(f0.2)')+ew
-      add2nm = add2nm+addpos
-   ENDIF
-   PSFILEpdf = ps_dir+'/'+site+'.'+yymmdd+'.'+orbit+"."+version+'.'+pr_or_dpr+'_' $
-               +instrument+'_'+swath+'.Pct'+pctString+add2nm+'_'+xxx+'_PDF_SCATR.ps'
-   print, "Output sent to ", PSFILEpdf
-   set_plot,/copy,'ps'
-   device,filename=PSFILEpdf,/color,bits=8,/inches,xoffset=0.25,yoffset=2.55, $
-          xsize=8.,ysize=8.
-   havePSfile = 1
-
-   ; Set up color table
-   ;
-   common colors, r_orig, g_orig, b_orig, r_curr, g_curr, b_curr ;load color table
-   IF ( b_w EQ 0) THEN  LOADCT, 6  ELSE  LOADCT, 33
-   ncolor=255
-   red=bytarr(256) & green=bytarr(256) & blue=bytarr(256)
-   red=r_curr & green=g_curr & blue=b_curr
-   red(0)=255 & green(0)=255 & blue(0)=255
-   red(1)=115 & green(1)=115 & blue(1)=115  ; gray for GR
-   red(ncolor)=0 & green(ncolor)=0 & blue(ncolor)=0 
-   tvlct,red,green,blue
-   !P.COLOR=0 ; make the title and axis annotation black
-   !X.THICK=2 ; make the ticks and borders thicker
-   !Y.THICK=2 ; ditto
-   !P.FONT=0 ; use the device fonts supplied by postscript
-
-   IF ( b_w EQ 0) THEN BEGIN
-     PR_COLR=200
-     GV_COLR=60
-     ST_LINE=1    ; dotted for stratiform
-     CO_LINE=2    ; dashed for convective
-   ENDIF ELSE BEGIN
-     PR_COLR=ncolor
-     GV_COLR=ncolor
-     ST_LINE=0    ; solid for stratiform
-     CO_LINE=1    ; dotted for convective
-   ENDELSE
-
-   CHARadj=0.75
-   THIKadjPR=1.5
-   THIKadjGV=1.5
-   ST_THK=1
-   CO_THK=1
-ENDIF ELSE BEGIN
-  ; set up x-window plot params.
-   device, decomposed = 0
-   LOADCT, 2
-
-   IF ( pctAbvThresh GT 0.0 ) THEN BEGIN
-      IF ( pctAbvThresh EQ 100.0 ) THEN gt_ge = ' ' ELSE gt_ge = ' >='
-      CASE xxx OF
-         'Z' : wintxt = "With" + gt_ge + pctString + $
-                        "% of averaged bins above dBZ thresholds"  
-        'RR' : wintxt = "With" + gt_ge + pctString + $
-                        "% of averaged bins above rainrate threshold"
-      ENDCASE
-   ENDIF ELSE BEGIN
-      wintxt = "With all non-missing "+pr_or_dpr+"/GR matched samples"
-   ENDELSE
-
-   Window, xsize=700, ysize=700, TITLE = site+gr_rr_zr+' vs. '+instrument+'.'+ $
-           swath+"."+version+"  --  "+wintxt, RETAIN=2
-   PR_COLR=30
-   GV_COLR=70
-   ST_LINE=1    ; dotted for stratiform
-   CO_LINE=2    ; dashed for convective
-   CHARadj=1.0
-   THIKadjPR=1.0
-   THIKadjGV=1.0
-   ST_THK=3
-   CO_THK=2
-ENDELSE
-
-
-!P.Multi=[0,2,2,0,0]
-
-idxlev2plot = WHERE( levhasdata EQ 1 )
+idxlev2plot = WHERE( levhasdata EQ 1, nlevs2plot )
 h2plot = heights[idxlev2plot]
 
 ; figure out the y-axis range.  Use the greater of max_hgt_w_data*2.0
 ; and meanbb*2 as the proposed range.  Cut off at 20 km if result>20.
-prop_max_y = max_hgt_w_data*2.0 > (FIX((BBparms.meanbb*2)/1.5) + 1) *1.5
+IF field EQ 0 THEN prop_max_y = $
+   (max_hgt_w_data+2.0 > (FIX((BBparms.meanbb*2)/1.5) + 1) *1.5)<max(heights)
 
 CASE xxx OF
    'Z' : BEGIN
-           plot, [15,50], [0,20 < prop_max_y], /NODATA, COLOR=255, $
+          ; configure x-axis to cover the high end of the Z profiles,
+          ; but no less than 50 dBZ
+           zmax = MAX(mnprarr) > MAX(mngvarr)
+           xmaxplot = FIX( (zmax+5.0)/5.0 ) * 5
+           xmaxplot = xmaxplot > 50
+;           plot, [15,50], [0,20 < prop_max_y], /NODATA, COLOR=255, $
+           plot, [15,xmaxplot], [0,20 < prop_max_y], /NODATA, COLOR=255, $
              XSTYLE=1, YSTYLE=1, YTICKINTERVAL=hgtinterval, YMINOR=1, thick=1, $
              XTITLE='Level Mean Reflectivity, dBZ', YTITLE='Height Level, km', $
              CHARSIZE=1*CHARadj, BACKGROUND=0
-           xvals = [15,50]   ; x-endpoints of BB line, dBZ scale
+;           xvals = [15,50]   ; x-endpoints of BB line, dBZ scale
+           xvals = [15,xmaxplot]   ; x-endpoints of BB line, dBZ scale
          END
   'RR' : BEGIN
            plot, [0.1,150], [0,20 < prop_max_y], /NODATA, COLOR=255, $
@@ -896,6 +1037,20 @@ CASE xxx OF
              XTITLE='Level Mean Rain Rate, mm/h', YTITLE='Height Level, km', $
              CHARSIZE=1*CHARadj, BACKGROUND=0, /xlog
            xvals = [0.1,150]   ; x-endpoints of BB line, RR scale
+         END
+  'D0' : BEGIN
+           plot, [0.0,5.0], [0,20 < prop_max_y], /NODATA, COLOR=255, $
+             XSTYLE=1, YSTYLE=1, YTICKINTERVAL=hgtinterval, YMINOR=1, thick=1, $
+             XTITLE='Level Mean Drop Diameter, mm', YTITLE='Height Level, km', $
+             XMINOR=5, CHARSIZE=1*CHARadj, BACKGROUND=0
+           xvals = [0.0,5.0]   ; x-endpoints of BB line, D0 scale
+         END
+  'NW' : BEGIN
+           plot, [0.0,5.0], [0,20 < prop_max_y], /NODATA, COLOR=255, $
+             XSTYLE=1, YSTYLE=1, YTICKINTERVAL=hgtinterval, YMINOR=1, thick=1, $
+             XTITLE='Level Mean Log10(Nw)', YTITLE='Height Level, km', $
+             XMINOR=5, CHARSIZE=1*CHARadj, BACKGROUND=0
+           xvals = [0.0,5.0]   ; x-endpoints of BB line, Nw scale
          END
 ENDCASE
 
@@ -905,8 +1060,15 @@ IF (~ hideTotals) THEN BEGIN
    prmnz2plot = prmnz2plot[idxlev2plot]
    gvmnz2plot = mngvarr[0,*]
    gvmnz2plot = gvmnz2plot[idxlev2plot]
-   oplot, prmnz2plot, h2plot, COLOR=PR_COLR, thick=1*THIKadjPR
-   oplot, gvmnz2plot, h2plot, COLOR=GV_COLR, thick=1*THIKadjGV
+   IF nlevs2plot GT 1 THEN BEGIN
+     ; plot the profile lines
+      oplot, prmnz2plot, h2plot, COLOR=PR_COLR, thick=1*THIKadjPR
+      oplot, gvmnz2plot, h2plot, COLOR=GV_COLR, thick=1*THIKadjGV
+   ENDIF ELSE BEGIN
+     ; plot a symbol at the data point
+      oplot, prmnz2plot, h2plot, COLOR=PR_COLR, psym=1, symsize=2
+      oplot, gvmnz2plot, h2plot, COLOR=GV_COLR, psym=1, symsize=2
+   ENDELSE
 ENDIF
 
 ; plot the profile for stratiform rain type points
@@ -915,27 +1077,61 @@ prmnz2plot = prmnz2plot[idxlev2plot]
 gvmnz2plot = mngvarr[1,*]
 gvmnz2plot = gvmnz2plot[idxlev2plot]
 idxhavezs = WHERE( prmnz2plot GT 0.0 and gvmnz2plot GT 0.0, counthavezs )
-IF ( counthavezs GT 0 ) THEN BEGIN
-   oplot, prmnz2plot[idxhavezs], h2plot[idxhavezs], COLOR=PR_COLR, LINESTYLE=ST_LINE, thick=3*THIKadjPR
-   oplot, gvmnz2plot[idxhavezs], h2plot[idxhavezs], COLOR=GV_COLR, LINESTYLE=ST_LINE, thick=3*THIKadjGV
-ENDIF
+IF ( counthavezs GT 1 ) THEN BEGIN
+  ; plot the profile lines
+   oplot, prmnz2plot[idxhavezs], h2plot[idxhavezs], COLOR=PR_COLR, $
+          LINESTYLE=ST_LINE, thick=3*THIKadjPR
+   oplot, gvmnz2plot[idxhavezs], h2plot[idxhavezs], COLOR=GV_COLR, $
+          LINESTYLE=ST_LINE, thick=3*THIKadjGV
+ENDIF ELSE BEGIN
+   IF ( counthavezs EQ 1 ) THEN BEGIN
+     ; plot a symbol at the data point
+      oplot, prmnz2plot[idxhavezs], h2plot[idxhavezs], COLOR=PR_COLR, $
+             psym=6, symsize=1
+      oplot, gvmnz2plot[idxhavezs], h2plot[idxhavezs], COLOR=GV_COLR, $
+             psym=6, symsize=1
+   ENDIF
+ENDELSE
 
 ; plot the profile for convective rain type points
 prmnz2plot = mnprarr[2,*]
 prmnz2plot = prmnz2plot[idxlev2plot]
 gvmnz2plot = mngvarr[2,*]
 gvmnz2plot = gvmnz2plot[idxlev2plot]
-idxhavezs = WHERE( prmnz2plot GT 0.0 and gvmnz2plot GT 0.0, counthavezs )
-IF ( counthavezs GT 0 ) THEN BEGIN
-   oplot, prmnz2plot[idxhavezs], h2plot[idxhavezs], COLOR=PR_COLR, LINESTYLE=CO_LINE, thick=3*THIKadjPR
-   oplot, gvmnz2plot[idxhavezs], h2plot[idxhavezs], COLOR=GV_COLR, LINESTYLE=CO_LINE, thick=3*THIKadjGV
-ENDIF
+idxhavezc = WHERE( prmnz2plot GT 0.0 and gvmnz2plot GT 0.0, counthavezc )
+IF ( counthavezc GT 1 ) THEN BEGIN
+   oplot, prmnz2plot[idxhavezc], h2plot[idxhavezc], COLOR=PR_COLR, $
+          LINESTYLE=CO_LINE, thick=3*THIKadjPR
+   oplot, gvmnz2plot[idxhavezc], h2plot[idxhavezc], COLOR=GV_COLR, $
+          LINESTYLE=CO_LINE, thick=3*THIKadjGV
+ENDIF ELSE BEGIN
+   IF ( counthavezc EQ 1 ) THEN BEGIN
+     ; plot a symbol at the data point
+      oplot, prmnz2plot[idxhavezc], h2plot[idxhavezc], COLOR=PR_COLR, $
+             psym=4, symsize=1
+      oplot, gvmnz2plot[idxhavezc], h2plot[idxhavezc], COLOR=GV_COLR, $
+             psym=4, symsize=1
+   ENDIF
+ENDELSE
 
 ; plot the mean BB indicator line and its legend info.
 yvalsbb = [BBparms.meanbb, BBparms.meanbb]
 plots, xvals, yvalsbb, COLOR=255, LINESTYLE=2;, THICK=3*THIKadjGV
-plots, [0.29,0.33], [0.805,0.805], COLOR=255, /NORMAL, LINESTYLE=2
-XYOutS, 0.34, 0.8, 'Mean BB Hgt', COLOR=255, CHARSIZE=1*CHARadj, /NORMAL
+IF do_ps THEN BEGIN
+   dyRow = -0.333             ; y offset increment of these panels' legends
+   dxCol = 0.0                ; x offset increment of these panels' legends
+   baseY = 0.85+(dyRow*field) ; y-location of legend text following line segment samples
+   lineDY = 0.003             ; offset between legend text and its line segment sample
+   GR_dy = -0.017   ; offset between GR and matching DPR legend lines (N/A for BB line)
+ENDIF ELSE BEGIN
+   dyRow = 0.0
+   dxCol = 0.333 
+   baseY = 0.8+(dyRow*field)
+   lineDY = 0.005
+   GR_dy = -0.025
+ENDELSE
+plots, LgdLineX, [baseY+lineDY,baseY+lineDY], COLOR=255, /NORMAL, LINESTYLE=2
+xyouts, LgdTxtX, baseY, 'Mean BB Hgt', COLOR=255, CHARSIZE=0.5*CHARadj, /NORMAL
 
 ; - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -946,8 +1142,8 @@ mngvarrbb = fltarr(3,4)  ; each BB-relative level, for raintype all, stratiform,
 levhasdatabb = intarr(4) & levhasdatabb[*] = 0
 levsdatabb = 0
 bblevstr = ['Unknown', ' Below', 'Within', ' Above']
-xoff = [0.0, 0.0, -0.5, 0.0 ]  ; for positioning legend in PDFs
-yoff = [0.0, 0.0, -0.5, -0.5 ]
+xoff = [0.0, -0.5 ]  ; for positioning legend in PDFs
+yoff = [0.0, -0.5 ]
 
 ;print_table_headers, src1, src2, field, /BB, PS_UNIT=tempunit
 print_table_headers, src1, src2, xxx, /BB, PS_UNIT=tempunit
@@ -963,20 +1159,21 @@ idx4hist = idx4hist3[0,*]  ; a 1-D array for passing to function in the layer lo
 
 ; set up for known versus unknown BB proximity case
 IF bbparms.meanBB NE -99.99 THEN BEGIN
+  ; set up to do below-BB layer only
    bblevBeg = 1
-   bblevEnd = 3
-   pmultifac = 4
+   bblevEnd = 1
+   pmultifac = 2
    pmultirows = 2
 ENDIF ELSE BEGIN
    bblevBeg = 0
    bblevEnd = 0
-   pmultifac = 3
+   pmultifac = 1
    pmultirows = 2
 ENDELSE
 
 for bblev2get = bblevBeg, bblevEnd do begin
    havematch = 0
-   !P.Multi=[pmultifac-bblev2get,2,pmultirows,0,0]
+   IF do_ps THEN !P.Multi=[6-field*2-1,2,3,0,0] ELSE !P.Multi=[6-field*2-1,3,2,0,1]
    IF ( num_in_BB_cat[bblev2get] GT 0 ) THEN BEGIN
       flag = ''
       if (bblev2get eq 2) then flag = ' @ BB'
@@ -1002,6 +1199,7 @@ for bblev2get = bblevBeg, bblevEnd do begin
          rr_gv2 = xvar[idx4hist[0:diffstruc.fullcount-1]]
          type2 = rnType[idx4hist[0:diffstruc.fullcount-1]]
          bbProx2 = bbProx[idx4hist[0:diffstruc.fullcount-1]]
+
          mndifhstr = string(diffstruc.AvgDifByHist, FORMAT='(f0.3)')
          mndifstr = string(diffstruc.meandiff, diffstruc.fullcount, $
                            FORMAT='(f0.3," (",i0,")")')
@@ -1044,42 +1242,77 @@ for bblev2get = bblevBeg, bblevEnd do begin
                       xtickinterval=2,xminor=2
                 END
           'Z' : BEGIN
-                prhist = histogram(rr_pr2, min=cutoff, max=maxz4hist, binsize = bs, $
+                prhist = histogram(rr_pr2, min=dbzcut, max=maxz4hist, binsize = bs, $
                                    locations = prhiststart)
-                nxhist = histogram(rr_gv2, min=cutoff, max=maxz4hist, binsize = bs)
+                nxhist = histogram(rr_gv2, min=dbzcut, max=maxz4hist, binsize = bs)
                 plot, [15,MAX(prhiststart)],[0,FIX((MAX(prhist)>MAX(nxhist))*1.1)], $
-                      /NODATA, COLOR=255, $
+                      /NODATA, COLOR=255, CHARSIZE=1*CHARadj, $
                       XTITLE=bblevstr[bblev2get]+' BB Reflectivity, dBZ', $
                       YTITLE='Number of DPR Footprints', $
                       YRANGE=[ 0, FIX((MAX(prhist)>MAX(nxhist))*1.1) + 1 ], $
                       BACKGROUND=0
                 END
+         'D0' : BEGIN
+                prhist = histogram(rr_pr2, min=0.0, max=5.0, binsize = 0.2, $
+                                   locations = prhiststart)
+                nxhist = histogram(rr_gv2, min=0.0, max=5.0, binsize = 0.2)
+                plot, [0.0,5.0], [0,FIX((MAX(prhist)>MAX(nxhist))*1.1)], $
+                      /NODATA, COLOR=255, CHARSIZE=1*CHARadj, XSTYLE=1, $
+                      XTITLE=bblevstr[bblev2get]+' BB Mean Drop Diameter, mm', $
+                      YTITLE='Number of DPR Footprints', $
+                      YRANGE=[ 0, FIX((MAX(prhist)>MAX(nxhist))*1.1) + 1 ], $
+                      XMINOR=5, BACKGROUND=0
+                xvals = [0.0,5.0]   ; x-endpoints of BB line, D0 scale
+                END
+         'NW' : BEGIN
+                prhist = histogram(rr_pr2, min=0.0, max=5.0, binsize = 0.2, $
+                                   locations = prhiststart)
+                nxhist = histogram(rr_gv2, min=0.0, max=5.0, binsize = 0.2)
+                plot, [0.0,5.0], [0,FIX((MAX(prhist)>MAX(nxhist))*1.1)], $
+                      /NODATA, COLOR=255, CHARSIZE=1*CHARadj, $
+                      XTITLE=bblevstr[bblev2get]+' BB Mean Log10(Nw)', $
+                      YTITLE='Number of DPR Footprints', $
+                      YRANGE=[ 0, FIX((MAX(prhist)>MAX(nxhist))*1.1) + 1 ], $
+                      XMINOR=5, BACKGROUND=0
+                xvals = [0.0,5.0]   ; x-endpoints of BB line, Nw scale
+                END
          ENDCASE
          IF ( ~ hideTotals ) THEN BEGIN
             oplot, prhiststart, prhist, COLOR=PR_COLR
             oplot, prhiststart, nxhist, COLOR=GV_COLR
-            xyouts, 0.34, 0.95, pr_or_dpr+' (all)', COLOR=PR_COLR, /NORMAL, $
-                    CHARSIZE=1*CHARadj
-            plots, [0.29,0.33], [0.955,0.955], COLOR=PR_COLR, /NORMAL
-            xyouts, 0.34, 0.925, siteID+' (all)', COLOR=GV_COLR, /NORMAL, $
-                    CHARSIZE=1*CHARadj
-            plots, [0.29,0.33], [0.93,0.93], COLOR=GV_COLR, /NORMAL
+            IF do_ps THEN baseY = 0.95+(dyRow*field) ELSE baseY = 0.95+(dyRow*field)
+            xyouts, LgdTxtX, baseY, pr_or_dpr+' (all)', COLOR=PR_COLR, /NORMAL, $
+                    CHARSIZE=0.5*CHARadj
+            xyouts, LgdTxtX, baseY+GR_dy, siteID+' (all)', COLOR=GV_COLR, /NORMAL, $
+                    CHARSIZE=0.5*CHARadj
+            IF nlevs2plot NE 1 THEN BEGIN
+               ; plot sample line segments in legend
+               plots, LgdLineX, [baseY+lineDY,baseY+lineDY], COLOR=PR_COLR, /NORMAL
+               plots, LgdLineX, [baseY+lineDY,baseY+lineDY]+GR_dy, COLOR=GV_COLR, /NORMAL
+            ENDIF ELSE BEGIN
+               ; plot sample symbols in legend
+               plots, LgdLineX[1], baseY+lineDY, COLOR=PR_COLR, /NORMAL, $
+                      psym=1, symsize=1
+               plots, LgdLineX[1], baseY+lineDY+GR_dy, COLOR=GV_COLR, /NORMAL, $
+                      psym=1, symsize=1
+            ENDELSE
          ENDIF
 
          headline = pr_or_dpr+'-'+siteID+' Biases:'
-         xyouts, 0.775+xoff[bblev2get],0.925+yoff[bblev2get], headline, $
-                 COLOR=255, /NORMAL, CHARSIZE=1*CHARadj
+         IF do_ps THEN baseY = 0.95+(dyRow*field) ELSE baseY = 0.425
+         xyouts, ScrTxtX,baseY, headline, $
+                 COLOR=255, /NORMAL, CHARSIZE=0.5*CHARadj
 
          mndifline = 'Any/All: ' + mndifstr
          mndiflinec = 'Convective: ' + mndifstrc
          mndiflines = 'Stratiform: ' + mndifstrs
          mndifhline = 'By Area Mean: ' + mndifhstr
-         xyouts, 0.775+xoff[bblev2get],0.9+yoff[bblev2get], mndifline, $
-                 COLOR=255, /NORMAL, CHARSIZE=1*CHARadj
-         xyouts, 0.775+xoff[bblev2get],0.875+yoff[bblev2get], mndiflinec, $
-                 COLOR=255, /NORMAL, CHARSIZE=1*CHARadj
-         xyouts, 0.775+xoff[bblev2get],0.85+yoff[bblev2get], mndiflines, $
-                 COLOR=255, /NORMAL, CHARSIZE=1*CHARadj
+         xyouts, ScrTxtX,baseY+GR_dy, mndifline, $
+                 COLOR=255, /NORMAL, CHARSIZE=0.5*CHARadj
+         xyouts, ScrTxtX,baseY+GR_dy*2, mndiflinec, $
+                 COLOR=255, /NORMAL, CHARSIZE=0.5*CHARadj
+         xyouts, ScrTxtX,baseY+GR_dy*3, mndiflines, $
+                 COLOR=255, /NORMAL, CHARSIZE=0.5*CHARadj
 
         ; OVERLAY CONVECTIVE RAINTYPE PDFS, IF ANY POINTS
          idxconvhist= WHERE( type2 EQ RainType_convective, nconv )
@@ -1092,24 +1325,44 @@ for bblev2get = bblevBeg, bblevEnd do begin
                   nxhist = histogram( bin4gr, min=0, max=18,locations = prhiststart )
                   END
             'Z' : BEGIN
-                  prhist = histogram(rr_pr2[idxconvhist], min=cutoff, max=maxz4hist, $
+                  prhist = histogram(rr_pr2[idxconvhist], min=dbzcut, max=maxz4hist, $
                                      binsize = bs, locations = prhiststart)
-                  nxhist = histogram(rr_gv2[idxconvhist], min=cutoff, max=maxz4hist, $
+                  nxhist = histogram(rr_gv2[idxconvhist], min=dbzcut, max=maxz4hist, $
                                      binsize = bs)
+                  END
+           'D0' : BEGIN
+                  prhist = histogram(rr_pr2[idxconvhist], min=0.0, max=5.0, $
+                                     binsize = 0.2, locations = prhiststart)
+                  nxhist = histogram(rr_gv2[idxconvhist], min=0.0, max=5.0, $
+                                     binsize = 0.2)
+                  END
+           'NW' : BEGIN
+                  prhist = histogram(rr_pr2[idxconvhist], min=0.0, max=5.0, $
+                                     binsize = 0.2, locations = prhiststart)
+                  nxhist = histogram(rr_gv2[idxconvhist], min=0.0, max=5.0, $
+                                     binsize = 0.2)
                   END
            ENDCASE
            oplot, prhiststart, prhist, COLOR=PR_COLR, LINESTYLE=CO_LINE, $
                   thick=3*THIKadjPR
            oplot, prhiststart, nxhist, COLOR=GV_COLR, LINESTYLE=CO_LINE, $
                   thick=3*THIKadjGV
-           xyouts, 0.34, 0.85, pr_or_dpr+' (Conv)', COLOR=PR_COLR, /NORMAL, $
-                   CHARSIZE=1*CHARadj
-           xyouts, 0.34, 0.825, siteID+' (Conv)', COLOR=GV_COLR, /NORMAL, $
-                   CHARSIZE=1*CHARadj
-           plots, [0.29,0.33], [0.855,0.855], COLOR=PR_COLR, /NORMAL, $
-                  LINESTYLE=CO_LINE, thick=3*THIKadjPR
-           plots, [0.29,0.33], [0.83,0.83], COLOR=GV_COLR, /NORMAL, $
-                  LINESTYLE=CO_LINE, thick=3*THIKadjGV
+           IF do_ps THEN baseY = 0.884+(dyRow*field) ELSE baseY = 0.85+(dyRow*field)
+           xyouts, LgdTxtX, baseY, pr_or_dpr+' (Conv)', COLOR=PR_COLR, /NORMAL, $
+                   CHARSIZE=0.5*CHARadj
+           xyouts, LgdTxtX, baseY+GR_dy, siteID+' (Conv)', COLOR=GV_COLR, /NORMAL, $
+                   CHARSIZE=0.5*CHARadj
+           IF counthavezc NE 1 THEN BEGIN
+              plots, LgdLineX, [baseY+lineDY,baseY+lineDY], COLOR=PR_COLR, $
+                     /NORMAL, LINESTYLE=CO_LINE, thick=3*THIKadjPR
+              plots, LgdLineX, [baseY+lineDY,baseY+lineDY]+GR_dy, COLOR=GV_COLR, $
+                     /NORMAL, LINESTYLE=CO_LINE, thick=3*THIKadjGV
+           ENDIF ELSE BEGIN
+              plots, LgdLineX[1], baseY+lineDY, COLOR=PR_COLR, /NORMAL, $
+                     psym=4, symsize=1
+              plots, LgdLineX[1], baseY+lineDY+GR_dy, COLOR=GV_COLR, /NORMAL, $
+                     psym=4, symsize=1
+           ENDELSE
          ENDIF
 
         ; OVERLAY STRATIFORM RAINTYPE PDFS, IF ANY POINTS
@@ -1123,24 +1376,44 @@ for bblev2get = bblevBeg, bblevEnd do begin
                   nxhist = histogram( bin4gr, min=0, max=18,locations = prhiststart )
                   END
             'Z' : BEGIN
-                  prhist = histogram(rr_pr2[idxstrathist], min=cutoff, max=maxz4hist, $
+                  prhist = histogram(rr_pr2[idxstrathist], min=dbzcut, max=maxz4hist, $
                                      binsize = bs, locations = prhiststart)
-                  nxhist = histogram(rr_gv2[idxstrathist], min=cutoff, max=maxz4hist, $
+                  nxhist = histogram(rr_gv2[idxstrathist], min=dbzcut, max=maxz4hist, $
                                      binsize = bs)
+                  END
+           'D0' : BEGIN
+                  prhist = histogram(rr_pr2[idxstrathist], min=0.0, max=5.0, $
+                                     binsize = 0.2, locations = prhiststart)
+                  nxhist = histogram(rr_gv2[idxstrathist], min=0.0, max=5.0, $
+                                     binsize = 0.2)
+                  END
+           'NW' : BEGIN
+                  prhist = histogram(rr_pr2[idxstrathist], min=0.0, max=5.0, $
+                                     binsize = 0.2, locations = prhiststart)
+                  nxhist = histogram(rr_gv2[idxstrathist], min=0.0, max=5.0, $
+                                     binsize = 0.2)
                   END
            ENDCASE
            oplot, prhiststart, prhist, COLOR=PR_COLR, LINESTYLE=ST_LINE, $
                   thick=3*THIKadjPR
            oplot, prhiststart, nxhist, COLOR=GV_COLR, LINESTYLE=ST_LINE, $
                   thick=3*THIKadjGV
-           xyouts, 0.34, 0.9, pr_or_dpr+' (Strat)', COLOR=PR_COLR, /NORMAL, $
-                   CHARSIZE=1*CHARadj
-           xyouts, 0.34, 0.875, siteID+' (Strat)', COLOR=GV_COLR, /NORMAL, $
-                   CHARSIZE=1*CHARadj
-           plots, [0.29,0.33], [0.905,0.905], COLOR=PR_COLR, /NORMAL, $
-                  LINESTYLE=ST_LINE, thick=3*THIKadjPR
-           plots, [0.29,0.33], [0.88,0.88], COLOR=GV_COLR, /NORMAL, $
-                  LINESTYLE=ST_LINE, thick=3*THIKadjGV
+           IF do_ps THEN baseY = 0.917+(dyRow*field) ELSE baseY = 0.9+(dyRow*field)
+           xyouts, LgdTxtX, baseY, pr_or_dpr+' (Strat)', COLOR=PR_COLR, /NORMAL, $
+                   CHARSIZE=0.5*CHARadj
+           xyouts, LgdTxtX, baseY+GR_dy, siteID+' (Strat)', COLOR=GV_COLR, /NORMAL, $
+                   CHARSIZE=0.5*CHARadj
+           IF counthavezs NE 1 THEN BEGIN
+              plots, LgdLineX, [baseY+lineDY,baseY+lineDY], COLOR=PR_COLR, $
+                     /NORMAL, LINESTYLE=ST_LINE, thick=3*THIKadjPR
+              plots, LgdLineX, [baseY+lineDY,baseY+lineDY]+GR_dy, COLOR=GV_COLR, $
+                     /NORMAL, LINESTYLE=ST_LINE, thick=3*THIKadjGV
+           ENDIF ELSE BEGIN
+              plots, LgdLineX[1], baseY+lineDY, COLOR=PR_COLR, /NORMAL, $
+                     psym=6, symsize=1
+              plots, LgdLineX[1], baseY+lineDY+GR_dy, COLOR=GV_COLR, /NORMAL, $
+                     psym=6, symsize=1
+           ENDELSE
          ENDIF
  
       endif else begin
@@ -1154,29 +1427,39 @@ for bblev2get = bblevBeg, bblevEnd do begin
 
 endfor         ; bblev2get = 1,3
 
-IF ( s2ku ) THEN xyouts, 0.29, 0.775, '('+siteID+' Ku-adjusted)', COLOR=GV_COLR, $
-                 /NORMAL, CHARSIZE=1*CHARadj
+; ##############################################################################
+
+IF ( s2ku AND xxx EQ 'Z' ) THEN xyouts, LgdLineX[0], 0.775, '('+siteID+' Ku-adjusted)', COLOR=GV_COLR, $
+                 /NORMAL, CHARSIZE=0.5*CHARadj
 
 ; Write a data identification line at the bottom of the page below the PDF
 ; plots for Postscript output.  This line also goes at the top of the scatter
 ; plots, hence the name.
 
+;CASE xxx OF
+;   'RR' : IF (have_gvrr) THEN gr_rr_zr = ' DP RR' ELSE gr_rr_zr = ' Z-R RR'
+;    'Z' : gr_rr_zr = ' Zc'
+;ENDCASE
 IF ( s2ku ) THEN kutxt=' Ku-adjusted ' else kutxt=''
 IF ( pctAbvThresh GT 0.0 ) THEN BEGIN
    IF ( pctAbvThresh EQ 100.0 ) THEN gt_ge = "     " ELSE gt_ge = "    >="
    SCATITLE = site+kutxt+gr_rr_zr+' vs. '+pr_or_dpr+' '+instrument+'/'+swath+"/" $
               +version+gt_ge+pctString+"% bins above threshold"
+   SCATITLE2 = 'Dm vs. log10(Nw) for '+pr_or_dpr+' '+instrument+'/'+swath+"/" $
+              +version+' and '+site+gt_ge+pctString+"% bins above threshold"
 ENDIF ELSE BEGIN
    SCATITLE = site+kutxt+gr_rr_zr+' vs. '+pr_or_dpr+' '+instrument+'/'+swath+"/"+version $
               +" -- All non-missing pairs"
+   SCATITLE2 = 'Dm vs. log10(Nw) for '+pr_or_dpr+' '+instrument+'/'+swath+"/" $
+              +version+' and '+site+" -- All non-missing pairs"
 ENDELSE
 
 TITLE2 = "Orbit:  "+orbit+"  --  GR Start Time:  "+data_struct.mysweeps[0].atimeSweepStart
 
-IF ( do_ps EQ 1 ) THEN BEGIN
-   xyouts, 0.5, -0.07, SCATITLE, alignment=0.5, color=255, /normal, $
+IF ( do_ps EQ 1 and field EQ 2 ) THEN BEGIN
+   xyouts, 0.5, -0.04, SCATITLE, alignment=0.5, color=255, /normal, $
            charsize=1., Charthick=1.5
-   xyouts, 0.5, -0.10, TITLE2, alignment=0.5, color=255, /normal, $
+   xyouts, 0.5, -0.07, TITLE2, alignment=0.5, color=255, /normal, $
            charsize=1., Charthick=1.5
 ENDIF
 
@@ -1193,27 +1476,37 @@ IF xxx EQ 'RR' THEN BEGIN
    ENDIF
 ENDIF
 
+
+endfor   ; fields2do
+
+
 IF ( do_ps EQ 1 ) THEN BEGIN
    erase                 ; start a new page in the PS file for the stat tables
+   device,/inches,xoffset=0.25,yoffset=0.5, xsize=8.,ysize=10.
 ;   device, /landscape   ; change page setup
    FREE_LUN, tempunit    ; close the temp file for writing
    OPENR, tempunit2, temptext, /GET_LUN  ; open the temp file for reading
    statstr = ''
    fmt='(a0)'
    xtext = 0.05 & ytext = 0.95
+   pagebreak = 1  ; set up to start new page at first D0 / Dm stats table
   ; write the stats tables out to the Postscript file
    while (eof(tempunit2) ne 1) DO BEGIN
      readf, tempunit2, statstr, format=fmt
+     IF STRPOS(statstr, 'Dm') NE -1 AND pagebreak THEN BEGIN
+        erase
+        ytext = 0.95
+        pagebreak = 0
+     ENDIF
      xyouts, xtext, ytext, '!11'+statstr+'!X', /NORMAL, COLOR=255, CHARSIZE=0.667
      ytext = ytext - 0.02
    endwhile
-  ; close and delete the temp file
-   FREE_LUN, tempunit2
-   FILE_DELETE, temptext, VERBOSE=1
+   FREE_LUN, tempunit2             ; close the temp file
 ENDIF
 ; - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Build the Scatter Plots
+scatwinsize = 375
 
 IF pr_or_dpr EQ 'PR' THEN sat_instr = pr_or_dpr $
 ELSE sat_instr = pr_or_dpr+'/'+instrument+'/'+swath
@@ -1228,199 +1521,205 @@ IF ( do_ps EQ 1 ) THEN BEGIN
    erase
    device,/inches,xoffset=0.25,yoffset=0.55,xsize=8.,ysize=10.,/portrait
    samphgt = (top+botm)/2.0
-   plot_scatter_by_bb_prox_ps, PSFILEpdf, SCATITLE, siteID, yvar, xvar, $
-                            rnType, bbProx, num4hist3, idx4hist3, S2KU=s2ku, $
-                            MIN_XY=min_xy, MAX_XY=max_xy, UNITS=units, $
-                            SAT_INSTR=sat_instr, SKIP_BB=skipBB, HEIGHTS=samphgt
+   plot_dsd_scatter_by_raintype_ps, PSFILEpdf, SCATITLE, siteID, zcor, gvz, $
+                            dpr_dm, Dzero, dpr_nw, gr_dp_nw, rnType, bbProx, $
+                            num4hist3, idx4hist3, S2KU=s2ku, HEIGHTS=samphgt, $
+                            MIN_XY=min_xy, MAX_XY=max_xy, SAT_INSTR=sat_instr, $
+                            GR_DM_D0=GR_DM_D0
+   erase
+   plot_scatter_d0_vs_nw_by_raintype_ps, PSFILEpdf, SCATITLE2, siteID, dpr_dm, $
+                            Dzero, dpr_nw, gr_dp_nw, rnType, bbProx, $
+                            num4hist3, idx4hist3, SAT_INSTR=sat_instr, $
+                            HEIGHTS=samphgt, GR_DM_D0=GR_DM_D0
 ENDIF ELSE BEGIN
-   scatwinsize = windowsize > 375  ; constrain size to be 375 pixels or greater
-   plot_scatter_by_bb_prox, SCATITLE, siteID, yvar, xvar, rnType, bbProx, $
+   plot_dsd_scatter_by_raintype, SCATITLE, siteID, zcor, gvz, dpr_dm, Dzero, $
+                            dpr_nw, gr_dp_nw, rnType, bbProx, $
                             num4hist3, idx4hist3, scatwinsize, S2KU=s2ku, $
-                            MIN_XY=min_xy, MAX_XY=max_xy, UNITS=units, $
-                            SAT_INSTR=sat_instr, SKIP_BB=skipBB
+                            MIN_XY=min_xy, MAX_XY=max_xy, SAT_INSTR=sat_instr, $
+                            GR_DM_D0=GR_DM_D0
+   plot_scatter_d0_vs_nw_by_raintype, SCATITLE2, siteID, dpr_dm, Dzero, $
+                            dpr_nw, gr_dp_nw, rnType, bbProx, $
+                            num4hist3, idx4hist3, scatwinsize, $
+                            SAT_INSTR=sat_instr, GR_DM_D0=GR_DM_D0
 ENDELSE
+
+; - - - - - - - - - - - - - - - - - - - - - - - -
+
+; if IDX_USED is defined, then grab the indices of the samples included in the
+; analysis (Below-BB samples meeting all the clipping/filtering criteria)
+IF N_ELEMENTS(idx_used) NE 0 THEN BEGIN
+   if ( num4hist3[0] GT 0 ) THEN BEGIN
+      idx_used = idxgoodenuff[ idx4hist3[ 0, 0:num4hist3[0]-1 ] ]
+   endif else idx_used = -1
+ENDIF
+
+; - - - - - - - - - - - - - - - - - - - - - - - -
+
 
 SET_PLOT, orig_device
 
 ; - - - - - - - - - - - - - - - - - - - - - - - -
 
-  ; Build the PPI animation loop, if indicated.
+ppiPlots:  ; Build the PPI animation loop, if indicated.
 
 IF ( do_ps EQ 0 AND show_ppis EQ 0 ) THEN BEGIN
    nframes=0
    goto, nextFile   ; skip PPI setup/plotting
 ENDIF
 
-  ; Check that we have as many sweeps as (startelev+elevs2show); if not, adjust
-  ; elevs2show
+; Check that we have as many sweeps as (startelev+elevs2show); if not, adjust
+; elevs2show
 
-   IF (startelev LE nswp ) THEN BEGIN
-      IF (elevs2show+startelev) LE nswp THEN BEGIN
-           nframes = elevs2show
-      ENDIF ELSE BEGIN
-           nframes = nswp - (startelev + 1)
-           print, "Number of sweeps present = ", nswp
-           print, "First, Last sweep requested = ", startelev+1, ',', $
-                  startelev+elevs2show
-           print, "Number of sweeps to show (adjusted): ", nframes
-      ENDELSE
+IF (startelev LE nswp ) THEN BEGIN
+   IF (elevs2show+startelev) LE nswp THEN BEGIN
+        nframes = elevs2show
    ENDIF ELSE BEGIN
-        elevs2show = 1
-        nframes = 1
-        startelev = nswp - 1
+        nframes = nswp - (startelev + 1)
         print, "Number of sweeps present = ", nswp
-        print, "First, Last sweep requested = ", startelev+1, ',', $
-               startelev+elevs2show
-        print, "Showing only sweep number: ", startelev+1
+        print, "First, Last sweep requested = ", startelev+1, ',', startelev+elevs2show
+        print, "Number of sweeps to show (adjusted): ", nframes
    ENDELSE
+ENDIF ELSE BEGIN
+     elevs2show = 1
+     nframes = 1
+     startelev = nswp - 1
+     print, "Number of sweeps present = ", nswp
+     print, "First, Last sweep requested = ", startelev+1, ',', startelev+elevs2show
+     print, "Showing only sweep number: ", startelev+1
+ENDELSE
 
-   IF ( elevs2show EQ 0 ) THEN GOTO, nextFile
-   do_pixmap=0
-   IF ( elevs2show GT 1 ) THEN BEGIN
-      do_pixmap=1
-      retain = 0
-      print, ""
-      print, "Please wait while PPI image animation is being prepared..."
-      print, ""
-   ENDIF ELSE retain = 2
+IF ( elevs2show EQ 0 ) THEN GOTO, nextFile
+do_pixmap=0
+IF ( elevs2show GT 1 ) THEN BEGIN
+   do_pixmap=1
+   retain = 0
+   PRINT, ''
+   PRINT, "Please wait while PPI animations are being constructed..."
+   PRINT, ''
+ENDIF ELSE retain = 2
 
-   !P.MULTI=[0,1,1]
-   IF ( N_ELEMENTS(windowsize) NE 1 ) THEN windowsize = 375
-   xsize = windowsize[0]
-   ysize = xsize
-   windownum = 2
-   title = ""
+!P.MULTI=[0,1,1]
+IF ( N_ELEMENTS(windowsize) NE 1 ) THEN windowsize = 375
+xsize = windowsize[0]
+ysize = xsize
+windownum = 2
+title = TITLE2
 
-   ppi_comn = { winSize : windowsize, $
-                winNum : windownum, $
-                winTitle : TITLE2, $
-                nframes : nframes, $
-                startelev : startelev, $
-                looprate : looprate, $
-                mysweeps : data_struct.mysweeps, $
-                PPIorient : PPIorient, $
-                PPIbyThresh : PPIbyThresh, $
-                pctString : pctString, $
-                site_Lat : data_struct.mysite.site_lat, $
-                site_Lon : data_struct.mysite.site_lon, $
-                site_ID : siteID, $
-                xCorner : xCorner, $
-                yCorner : yCorner, $
-                pr_index : pr_index, $
-                num_footprints : nfp, $
-                rangeThreshold : data_struct.mygeometa.rangeThreshold, $
-                rntype4ppi : rntype4ppi }
+ppi_comn = { winSize : windowsize, $
+             winNum : windownum, $
+             winTitle : title, $
+             nframes : nframes, $
+             startelev : startelev, $
+             looprate : looprate, $
+             mysweeps : data_struct.mysweeps, $
+             PPIorient : PPIorient, $
+             PPIbyThresh : PPIbyThresh, $
+             pctString : pctString, $
+             site_Lat : site_lat, $
+             site_Lon : site_lon, $
+             site_ID : siteID, $
+             xCorner : xCorner, $
+             yCorner : yCorner, $
+             pr_index : pr_index, $
+             num_footprints : nfp, $
+             rangeThreshold : data_struct.mygeometa.rangeThreshold, $
+             rntype4ppi : rntype4ppi }
 
-  ; redefine gr_rr_zr for PPI plots.  Set to blank if plotting Z-R or else get
-  ; redundant Z-R field in label
-   IF (have_gvrr) THEN gr_rr_zr = ' DP' ELSE gr_rr_zr = ' '
-   IF pctAbvThresh GT 0.0 AND PPIbythresh THEN sayPct = 1 ELSE sayPct = 0
-   IF (haveKdp and haveZdr and haveHID) THEN BEGIN
-      fieldData = ptrarr(3,3, /allocate_heap)
-      IF xxx EQ 'Z' THEN BEGIN
-         fieldIDs = [ ['CZ','CZ','DR'], $
-                      ['CZ','CZ','FH'], $
-                      ['KD','D0','RH'] ]
-      ENDIF ELSE BEGIN
-         fieldIDs = [ ['CZ','CZ','DR'], $
-                      ['RR',data_struct.rr_field_used,'FH'], $
-                      ['KD','D0','RH'] ]
-      ENDELSE
-      sources = [ [pr_or_dpr+'/'+instrument, siteID, siteID], $
-                  [pr_or_dpr+'/'+instrument, siteID+gr_rr_zr, siteID], $
-                  [siteID,siteID,siteID] ]
-      thresholded = [ [0,0,0], $
-                      [sayPct,sayPct,0], $
-                      [0,0,0] ]
-      *fieldData[0] = zcor_in
-      *fieldData[1] = gvz_in
-      *fieldData[2] = Zdr
-      IF xxx EQ 'Z' THEN *fieldData[3] = zcor_in2 ELSE *fieldData[3] = rain3_in2
-      IF xxx EQ 'Z' THEN *fieldData[4] = gvz_in2 ELSE *fieldData[4] = gvrr_in2
-      *fieldData[5] = HIDcat
-      *fieldData[6] = Kdp
-      *fieldData[7] = Dzero
-      *fieldData[8] = RHOhv
-   ENDIF ELSE BEGIN
+IF (have_gvrr) THEN gr_rr_zr = ' DP' ELSE gr_rr_zr = ' Z-R'
+IF pctAbvThresh GT 0.0 AND PPIbythresh THEN sayPct = 1 ELSE sayPct = 0
+
+IF Z_PPIs THEN BEGIN
+   ; show only DPR and GR reflectivity PPIs
+   IF (clipem) THEN BEGIN
+     ; show both clipped and unclipped DPR and GR reflectivity PPIs
       fieldData = ptrarr(2,2, /allocate_heap)
-      IF xxx EQ 'Z' THEN BEGIN
-               fieldIDs = [['CZ','CZ'],['CZ','CZ']]
-      ENDIF ELSE BEGIN
-         fieldIDs = [ ['CZ','CZ'], ['RR',data_struct.rr_field_used] ]
-      ENDELSE
-      sources = [['PR',siteID],['PR',siteID+gr_rr_zr]]
+      fieldIDs = [['CZ','CZ'],['CZ','CZ']]
+      sources = [['PR',siteID],['PR',siteID]]
       thresholded = [[0,0],[sayPct,sayPct]]
       *fieldData[0] = zcor_in
       *fieldData[1] = gvz_in
-      IF xxx EQ 'Z' THEN *fieldData[2] = zcor_in2 ELSE *fieldData[2] = rain3_in2
-; TAB 9/4/18:
-;  I think this is a preexisting bug, changed index from 2 to 3
-;      IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[3] = gvrr_in2
-      IF xxx EQ 'Z' THEN *fieldData[3] = gvz_in2 ELSE *fieldData[3] = gvrr_in2
+      *fieldData[2] = zcor_in2
+      *fieldData[3] = gvz_in2
+   ENDIF ELSE BEGIN
+     ; show only unclipped DPR and GR reflectivity PPIs
+      fieldData = ptrarr(2, /allocate_heap)
+      fieldIDs = ['CZ','CZ']
+      sources = ['PR',siteID]
+      thresholded = [0,0]
+      *fieldData[0] = zcor_in
+      *fieldData[1] = gvz_in
    ENDELSE
+ENDIF ELSE BEGIN
+;   IF (haveKdp and haveZdr and haveHID) THEN BEGIN
+;      fieldData = ptrarr(3,3, /allocate_heap)
+;      fieldIDs = [ ['CZ','CZ','DR'], $
+;                   ['FH','Dm','NW'], $
+;                   ['KD',GR_DM_D0_PPI,'NW'] ]  ;'RH'] ]
+;      sources = [ [pr_or_dpr+'/'+instrument, siteID, siteID], $
+;                  [siteID, pr_or_dpr+'/'+instrument, pr_or_dpr+'/'+instrument], $
+;                  [siteID,siteID,siteID] ]
+;      thresholded = [ [sayPct,sayPct,0], $
+;                      [0,0,0], $
+;                      [0,0,0] ]
+;      *fieldData[0] = zcor_in2
+;      *fieldData[1] = gvz_in2
+;      *fieldData[2] = Zdr
+;      *fieldData[3] = HIDcat
+;      *fieldData[4] = dpr_dm_in
+;      *fieldData[5] = dpr_nw_in
+;      *fieldData[6] = Kdp
+;      *fieldData[7] = Dzero_in
+;      *fieldData[8] = GR_DP_NW_in  ;RHOhv
+;   ENDIF ELSE BEGIN
+      fieldData = ptrarr(2,2, /allocate_heap)
+      fieldIDs = [['CZ','CZ'],['FH','FH']]
+      sources = [['PR',siteID],['PR',siteID]]
+      thresholded = [[sayPct,sayPct],[sayPct,sayPct]]
+      *fieldData[0] = zcor_in
+      *fieldData[1] = gvz_in
+      *fieldData[2] = phase_in2
+      *fieldData[3] = HIDcat
+;   ENDELSE
+ENDELSE
 
-   plot_geo_match_ppi_anim_ps, fieldIDs, sources, fieldData, thresholded, $
-                               ppi_comn, DO_PS=do_ps, SHOW_PPIS=show_ppis, $
-                               STEP_MANUAL=step_manual
+plot_geo_match_ppi_anim_ps, fieldIDs, sources, fieldData, thresholded, $
+                            ppi_comn, SHOW_PPIS=show_ppis, DO_PS=do_ps, $
+                            STEP_MANUAL=step_manual
 
-   FOR nfieldptr = 0, N_ELEMENTS(fieldData)-1 DO ptr_free, fieldData[nfieldptr]
-
+FOR nfieldptr = 0, N_ELEMENTS(fieldData)-1 DO ptr_free, fieldData[nfieldptr]
 
 nextFile:
 
-IF ( do_ps EQ 1 AND havePSfile EQ 1 ) THEN BEGIN  ; wrap up the postscript file
+IF ( do_ps EQ 1 ) THEN BEGIN  ; wrap up the postscript file
    set_plot,/copy,'ps'
    device,/close
    SET_PLOT, orig_device
-  ; check whether we can convert it from PS to PDF, using ps2pdf utility
+  ; try to convert it from PS to PDF, using ps2pdf utility
    if !version.OS_NAME eq 'Mac OS X' then ps_util_name = 'pstopdf' $
    else ps_util_name = 'ps2pdf'
    command1 = 'which '+ps_util_name
    spawn, command1, result, errout
-   IF KEYWORD_SET( batch ) THEN BEGIN
-     ; convert to PDF if possible, or just leave PS file as-is
-      IF result NE '' THEN BEGIN
-         print, 'Converting ', PSFILEpdf, ' to PDF format.'
-         command2 = ps_util_name+ ' ' + PSFILEpdf
-         spawn, command2, result, errout
-         print, 'Removing Postscript version'
-         command3 = 'rm -v '+PSFILEpdf
-         spawn, command3, result, errout
-      ENDIF
-   ENDIF ELSE BEGIN
-     ; prompt whether to save resulting postscript/PDF file or dump it
-      reply = ""
-      READ, reply, PROMPT='Hit Return to save PS/PDF file, or D to delete: '
-      IF (STRUPCASE(reply) NE "D") AND (reply NE "") THEN BEGIN
-         PRINT, "Unknown reply, saving Postscript/PDF file."
-         reply = ""
-      ENDIF
-      IF STRUPCASE(reply) NE "D" THEN BEGIN
-         IF result NE '' THEN BEGIN
-           ; convert to PDF if possible, or just leave PS file as-is
-            print, 'Converting ', PSFILEpdf, ' to PDF format.'
-            command2 = ps_util_name+ ' ' + PSFILEpdf
-            spawn, command2, result, errout
-            print, 'Removing Postscript version'
-            command3 = 'rm -v '+PSFILEpdf
-            spawn, command3, result, errout
-         ENDIF
-      ENDIF ELSE BEGIN
-         print, 'Removing Postscript file as directed:'
-         command3 = 'rm -v '+PSFILEpdf
-         spawn, command3, result, errout
-      ENDELSE
-   ENDELSE
+   IF result NE '' THEN BEGIN
+      print, 'Converting ', PSFILEpdf, ' to PDF format.'
+      command2 = ps_util_name+ ' ' + PSFILEpdf
+      spawn, command2, result, errout
+      print, 'Removing Postscript version'
+      command3 = 'rm -v '+PSFILEpdf
+      spawn, command3, result, errout
+   ENDIF
 ENDIF
+
+; - - - - - - - - - - - - - - - - - - - - - - -
 
 something = ""
 IF (do_ps AND batch) THEN GOTO, noPPIwindow    ; skip prompt, and no PPI window 2
 
 IF (nframes LT 2 AND show_ppis) OR hidePPIs THEN BEGIN
    print, ''
+   PRINT, STRING(7B)   ; ring the bell
    IF data_struct.is_subset THEN $
       READ, something, PROMPT='Hit Return to continue with subset processing, or Q to Quit: ' $
-   ELSE READ, something, PROMPT='Hit Return to continue to next case, or Q to Quit: '
+   ELSE READ, something, PROMPT='Hit Return to continue to next case, Q to Quit: '
 ENDIF
 
 catch, wdel_err
@@ -1452,7 +1751,16 @@ if ( levsdata NE 0 ) THEN BEGIN
       print, ""
       print, !error_state.MSG
       catch, /CANCEL
-      print, "Please do not close scatter plot window manually!  Continue..."
+      print, "Please do not close Z/D0/Nw scatter plots window manually!  Continue..."
+   ENDELSE
+   catch, wdel_err
+   IF wdel_err EQ 0 THEN BEGIN
+      if ( do_ps EQ 0 ) THEN WDELETE, 4
+   ENDIF ELSE BEGIN
+      print, ""
+      print, !error_state.MSG
+      catch, /CANCEL
+      print, "Please do not close D0 vs. Nw scatter plot window manually!  Continue..."
    ENDELSE
 endif
 

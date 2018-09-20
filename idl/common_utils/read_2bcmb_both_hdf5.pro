@@ -7,7 +7,7 @@
 ;
 ; DESCRIPTION
 ; -----------
-; For a GPM 2BDPRGMI or TRMM 2BPRTMI HDF5 file, reads and parses FileHeader
+; Given the full pathname to a 2BDPRGMI HDF5 file, reads and parses FileHeader
 ; metadata attributes and all of the data groups and their included datasets. 
 ; Assembles and returns a structure mimicking the HDF file organization,
 ; containing all the data read and/or parsed.  Sub-structures for large-array
@@ -17,18 +17,11 @@
 ; NS (i.e., not in another lower group; e.g., Latitude, pia, etc.) are bundled
 ; into a structure called "DATASETS" within the MS and NS structures.
 ;
-; If only one scan type is to be read (scan2read parameter is set, or product
-; type is 2BPRTMI), then the 'Swath' member of the ignored scan's structure has
-; the string ': UNREAD' appended to the value, e.g., 'MS: UNREAD', and no other
-; members of the structure are defined for that scan type.
-;
 ; Returns -1 in case of errors.
 ;
 ; PARAMETERS
 ; ----------
-; file      -- Full pathname of the 2B-[DPRGMI|PRTMI] file to be read.  If not
-;              specified, then a file selection dialog will be presented to
-;              allow selection of a 2B file from the file system.
+; file      -- Full pathname of the 2B-DPRGMI HDF5 file to be read
 ; debug     -- Binary keyword parameter, controls output of diagnostic messages.
 ;              Default = suppress messages.
 ; read_all  -- Binary parameter.  If set, then read and return all datasets in
@@ -36,8 +29,7 @@
 ;              display and processing (subjective list).
 ; scan2read -- Limits the swath groups (scan types) read to only the group
 ;              specified by the keyword value.  Keyword is ignored if read_all
-;              is set.  Valid values are 'MS' and 'NS' (for 2BDPRGMI), or 'NS'
-;              (for 2BPRTMI).
+;              is set.
 ;
 ; HISTORY
 ; -------
@@ -53,11 +45,12 @@
 ; - Added capability to read TRMM Version 8 2BPRTMI files.
 ;
 ;
-; EMAIL QUESTIONS OR COMMENTS AT:
-;       https://pmm.nasa.gov/contact
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
 ;-
 
-FUNCTION read_2bcmb_hdf5, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2read
+FUNCTION read_2bcmb_both_hdf5, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2read
 
    outstruc = -1
 
@@ -99,10 +92,8 @@ FUNCTION read_2bcmb_hdf5, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2read
    filestruc=parse_file_header_group(ppsFileHeaderStruc)
    h5a_close, fileHeaderID
    IF (verbose1) THEN HELP, filestruc
-
-  ; the valid FileHeader ALGORITHMID identifiers are '2BCMB' (for 2BDPRGMI
-  ; products) and '2BCMCT' (for 2BPRTMI products)
    prodname=filestruc.ALGORITHMID
+
    IF prodname NE '2BCMB' AND prodname NE '2BCMBT' THEN BEGIN
       h5g_close, group_id
       h5f_close, file_id

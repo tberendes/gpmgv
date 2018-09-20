@@ -83,6 +83,8 @@
 ; 07/07/16 by Bob Morris, GPM GV (SAIC)
 ;  - Added have_Tc to gprof_gv_field_flags structure and added file_1crxcal to
 ;    input_files structure.
+; 06/20/18 by Bob Morris, GPM GV (SAIC)
+;  - Added file_2apr and file_2bprgmi to the files_meta structure.
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -264,5 +266,7 @@ files_meta  =  { input_files,                $
                  file_2Aku:     'UNDEFINED', $
                  file_2Aka:     'UNDEFINED', $
                  file_2adprgmi: 'UNDEFINED', $
+                 file_2apr:     'UNDEFINED', $
+                 file_2bprgmi:  'UNDEFINED', $
                  file_1cuf:     'UNDEFINED'  $
                }

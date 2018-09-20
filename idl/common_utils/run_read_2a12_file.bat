@@ -34,12 +34,14 @@ cloudWaterPath = FLTARR(sample_range>1, NPIXEL_TMI)
     chiSquared = INTARR(sample_range>1, NPIXEL_TMI)
            PoP = inTARR(sample_range>1, NPIXEL_TMI)
 freezingHeight = INTARR(sample_range>1, NPIXEL_TMI)
-     scan_time = DBLARR(sample_range>1)
+;     scan_time = DBLARR(sample_range>1)
+     st_struct = "scan_time structure"   ; just define anything
 frac_orbit_num = FLTARR(sample_range>1)
 
-file21_2do='/tmp/2A12.100826.72798.6.sub-GPMGV1.hdf'
-file21_2do='/tmp/2A12.20100729.72351.7.sub-GPMGV1.hdf'
-file21_2do='/home/morris/tEmP_FiLe.2A12.100122.69433.6.HDF'
+;file21_2do='/tmp/2A12.100826.72798.6.sub-GPMGV1.hdf'
+file21_2do='/tmp/2A12_CSI.20101230.74757.KWAJ.7.HDF.gz'
+;file21_2do='/tmp/2A12_CSI.101230.74757.KWAJ.6.HDF.Z'
+;file21_2do='/home/morris/tEmP_FiLe.2A12.100122.69433.6.HDF'
 ;file21_2do='/data/gpmgv/fullOrbit/2A12/2A12.100122.69433.6.HDF.Z'
 
 print_attributes = 1
@@ -70,5 +72,6 @@ status=read_tmi_2a12_fields( file21_2do, $
                        GEOL=geolocation, $
                        SC_LAT_LON=sc_lat_lon, $
                        SCAN_TIME=scan_time, $
+                       ST_STRUCT=st_struct, $
                        FRACTIONAL=frac_orbit_num, $
                        PRINT_ATTRIBUTES=print_attributes )

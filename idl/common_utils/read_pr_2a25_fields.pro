@@ -22,10 +22,12 @@
 ;       Feb 2013- Bob Morris, GPM GV (SAIC)
 ;       - Added VERBOSE option to pass along to read_2a25_ppi() to print
 ;         file SD variables.
+;       March 2018 - Bob Morris, GPM GV (SAIC)
+;       - Added ST_STRUCT parameter to return a structure of arrays containing
+;         the individual scan_time components, as requested by David Marks.
 ;
-; EMAIL QUESTIONS OR COMMENTS TO:
-;       <Bob Morris> kenneth.r.morris@nasa.gov
-;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+; EMAIL QUESTIONS OR COMMENTS AT:
+;       https://pmm.nasa.gov/contact
 ;-
 
 FUNCTION read_pr_2a25_fields, file_2a25, DBZ=dbz_2a25, RAIN=rain_2a25,   $
@@ -33,7 +35,7 @@ FUNCTION read_pr_2a25_fields, file_2a25, DBZ=dbz_2a25, RAIN=rain_2a25,   $
                               GEOL=geolocation, RANGE_BIN=rangeBinNums,  $
                               RN_FLAG=rainFlag, SCAN_TIME=scan_time,     $
                               FRACTIONAL=frac_orbit_num, PIA=pia,        $
-                              VERBOSE=verbose
+                              ST_STRUCT=st_struct, VERBOSE=verbose
 
   common sample, start_sample, sample_range, num_range, RAYSPERSCAN
 
@@ -73,13 +75,15 @@ FUNCTION read_pr_2a25_fields, file_2a25, DBZ=dbz_2a25, RAIN=rain_2a25,   $
          rainType=intarr(sample_range>1,RAYSPERSCAN)
          pia=FLTARR(3,RAYSPERSCAN,sample_range>1)
          scan_time=DBLARR(sample_range>1)
+         st_struct = "scan_time structure"   ; just define anything
 	 frac_orbit_num=FLTARR(sample_range>1)
 
          status = read_2a25_ppi( file25_2do, DBZ=dbz_2a25, RAIN=rain_2a25,       $
 	                         TYPE=rainType, SURFACE_RAIN=surfRain_2a25,      $
                                  GEOL=geolocation, RANGE_BIN=rangeBinNums,       $
                                  RN_FLAG=rainFlag, PIA=pia, SCAN_TIME=scan_time, $
-				 FRACTIONAL=frac_orbit_num, VERBOSE=verbose )
+				 FRACTIONAL=frac_orbit_num,                      $
+				 ST_STRUCT=st_struct, VERBOSE=verbose )
 
          IF status NE 'OK' THEN BEGIN
             print, "In read_pr_2a25_fields, error from read_2a25_ppi: ", status

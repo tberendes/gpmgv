@@ -153,7 +153,7 @@
 ;===============================================================================
 ;
 
-function render_rr_or_z_plots, xxx, looprate, elevs2show, startelev, $
+function render_rr_or_z_plots_v88, xxx, looprate, elevs2show, startelev, $
                                PPIorient, windowsize, pctabvthresh, PPIbyThresh, $
                                gvconvective, gvstratiform, hideTotals, hide_rntype, $
                                hidePPIs, pr_or_dpr, data_struct, PS_DIR=ps_dir, $
@@ -199,6 +199,9 @@ haveD0 = data_struct.haveFlags.haveD0
 haveZdr = data_struct.haveFlags.haveZdr
 haveKdp = data_struct.haveFlags.haveKdp
 haveRHOhv = data_struct.haveFlags.haveRHOhv
+havephase = data_struct.haveFlags.have_phase
+havephaseHeightAGL = data_struct.haveFlags.have_phaseHeightAGL
+havephaseNearSurface = data_struct.haveFlags.have_phaseNearSurface
 ; and set flag to try to filter by GR blockage if blockage data are present
 do_GR_blockage = data_struct.haveFlags.have_GR_blockage
 
@@ -240,9 +243,16 @@ Dzero = data_struct.Dzero
 Zdr = data_struct.Zdr
 Kdp = data_struct.Kdp
 RHOhv = data_struct.RHOhv
+phase = data_struct.phase
+phaseNearSurface = data_struct.phaseNearSurface
+phaseHeightAGL = data_struct.phaseHeightAGL
+phase_in = phase
+phaseNearSurface_in = phaseNearSurface
+phaseHeightAGL_in = phaseHeightAGL
 IF do_GR_blockage EQ 1 THEN GR_blockage = data_struct.GR_blockage
 top = data_struct.top
 botm = data_struct.botm
+GR_AGL = (top+botm)/2.0
 lat = data_struct.lat
 lon = data_struct.lon
 ;pia = data_struct.pia          ; not used -- yet
@@ -556,6 +566,9 @@ PRINT, nclipped, " samples filtered by percent above threshold and/or clutter."
    zraw = zraw[idxgoodenuff]
    zcor = zcor[idxgoodenuff]
    rain3 = rain3[idxgoodenuff]
+   phase = phase[idxgoodenuff]
+   phaseNearSurface = phaseNearSurface[idxgoodenuff]
+   phaseHeightAGL = phaseHeightAGL[idxgoodenuff]
    top = top[idxgoodenuff]
    botm = botm[idxgoodenuff]
    lat = lat[idxgoodenuff]
@@ -576,6 +589,9 @@ ENDIF
 gvz_in2 = gvz_in
 zcor_in2 = zcor_in
 rain3_in2 = rain3_in
+phase_in2 = phase_in
+phaseHeightAGL_in2 = phaseHeightAGL_in
+phaseNearSurface_in2 = phaseNearSurface_in
 IF have_gvrr EQ 0 THEN BEGIN
    gvrr_in2 = z_r_rainrate(gvz_in)
    gvrr_in2 = REFORM( gvrr_in2, nfp, nswp)
@@ -1315,49 +1331,47 @@ ENDIF
   ; redundant Z-R field in label
    IF (have_gvrr) THEN gr_rr_zr = ' DP' ELSE gr_rr_zr = ' '
    IF pctAbvThresh GT 0.0 AND PPIbythresh THEN sayPct = 1 ELSE sayPct = 0
-   IF (haveKdp and haveZdr and haveHID) THEN BEGIN
-      fieldData = ptrarr(3,3, /allocate_heap)
+;   IF (haveKdp and haveZdr and haveHID) THEN BEGIN
+;      fieldData = ptrarr(2,3, /allocate_heap)
+;      IF xxx EQ 'Z' THEN BEGIN
+;         fieldIDs = [ ['CZ','CZ'], $
+;                      ['FH','FH'] , $
+;                      ['AGL','AGL'] ]
+;      ENDIF ELSE BEGIN
+;         fieldIDs = [ ['CZ','CZ'], $
+;                      ['FH','FH'] , $
+;                      ['AGL','AGL'] ]
+;      ENDELSE
+;      sources = [ [pr_or_dpr+'/'+instrument, siteID], $
+;                  [pr_or_dpr+'/'+instrument, siteID], $
+;                  [pr_or_dpr+'/'+instrument, siteID] ]
+;      thresholded = [ [0,0,0], $
+;                      [sayPct,sayPct,0] ]
+;      *fieldData[0] = zcor_in
+;      *fieldData[1] = gvz_in
+;      *fieldData[2] = phase_in
+;      IF xxx EQ 'Z' THEN *fieldData[3] = HIDcat ELSE *fieldData[3] = rain3_in2
+;      IF xxx EQ 'Z' THEN *fieldData[4] = phaseHeightAGL_in ELSE *fieldData[4] = gvrr_in2
+;      *fieldData[5] = GR_AGL
+;      *fieldData[6] = Kdp
+;      *fieldData[7] = Dzero
+;      *fieldData[8] = RHOhv
+;   ENDIF ELSE BEGIN
+      fieldData = ptrarr(4, /allocate_heap)
       IF xxx EQ 'Z' THEN BEGIN
-         fieldIDs = [ ['CZ','CZ','DR'], $
-                      ['CZ','CZ','FH'], $
-                      ['KD','D0','RH'] ]
+               fieldIDs = ['CZ','CZ','FH','FH']
       ENDIF ELSE BEGIN
-         fieldIDs = [ ['CZ','CZ','DR'], $
-                      ['RR',data_struct.rr_field_used,'FH'], $
-                      ['KD','D0','RH'] ]
+         fieldIDs = ['CZ','CZ','FH','FH']
       ENDELSE
-      sources = [ [pr_or_dpr+'/'+instrument, siteID, siteID], $
-                  [pr_or_dpr+'/'+instrument, siteID+gr_rr_zr, siteID], $
-                  [siteID,siteID,siteID] ]
-      thresholded = [ [0,0,0], $
-                      [sayPct,sayPct,0], $
-                      [0,0,0] ]
+      sources = ['DPR',siteID,'DPR',siteID]
+      thresholded = [0,0, 0, 0]
       *fieldData[0] = zcor_in
       *fieldData[1] = gvz_in
-      *fieldData[2] = Zdr
-      IF xxx EQ 'Z' THEN *fieldData[3] = zcor_in2 ELSE *fieldData[3] = rain3_in2
-      IF xxx EQ 'Z' THEN *fieldData[4] = gvz_in2 ELSE *fieldData[4] = gvrr_in2
-      *fieldData[5] = HIDcat
-      *fieldData[6] = Kdp
-      *fieldData[7] = Dzero
-      *fieldData[8] = RHOhv
-   ENDIF ELSE BEGIN
-      fieldData = ptrarr(2,2, /allocate_heap)
-      IF xxx EQ 'Z' THEN BEGIN
-               fieldIDs = [['CZ','CZ'],['CZ','CZ']]
-      ENDIF ELSE BEGIN
-         fieldIDs = [ ['CZ','CZ'], ['RR',data_struct.rr_field_used] ]
-      ENDELSE
-      sources = [['PR',siteID],['PR',siteID+gr_rr_zr]]
-      thresholded = [[0,0],[sayPct,sayPct]]
-      *fieldData[0] = zcor_in
-      *fieldData[1] = gvz_in
-      IF xxx EQ 'Z' THEN *fieldData[2] = zcor_in2 ELSE *fieldData[2] = rain3_in2
-; TAB 9/4/18:
-;  I think this is a preexisting bug, changed index from 2 to 3
-;      IF xxx EQ 'Z' THEN *fieldData[2] = gvz_in2 ELSE *fieldData[3] = gvrr_in2
-      IF xxx EQ 'Z' THEN *fieldData[3] = gvz_in2 ELSE *fieldData[3] = gvrr_in2
-   ENDELSE
+      *fieldData[2] = phase_in
+      *fieldData[3] = HIDcat
+;      IF xxx EQ 'Z' THEN *fieldData[2] = phase_in ELSE *fieldData[3] = gvrr_in2
+;      IF xxx EQ 'Z' THEN *fieldData[3] = HIDcat ELSE *fieldData[2] = rain3_in2
+;   ENDELSE
 
    plot_geo_match_ppi_anim_ps, fieldIDs, sources, fieldData, thresholded, $
                                ppi_comn, DO_PS=do_ps, SHOW_PPIS=show_ppis, $

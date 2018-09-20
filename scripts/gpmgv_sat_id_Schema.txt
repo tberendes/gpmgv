@@ -1,0 +1,119 @@
+CREATE TABLE overpass_event (
+    event_num integer NOT NULL,
+    sat_id character varying(15),
+    orbit integer NOT NULL,
+    radar_id character varying(15),
+    overpass_time timestamp with time zone NOT NULL,
+    nearest_distance integer NOT NULL
+);
+ALTER TABLE ONLY overpass_event
+    ADD CONSTRAINT overpass_event_sat_id_key UNIQUE (sat_id, radar_id, orbit);
+ALTER TABLE ONLY overpass_event
+    ADD CONSTRAINT "$1" FOREIGN KEY (sat_id) REFERENCES instrument(instrument_id);
+
+CREATE TABLE productsubset (
+    sat_id character varying(15) NOT NULL,
+    subset character varying(15) NOT NULL
+);
+ALTER TABLE ONLY productsubset
+    ADD CONSTRAINT productsubset_pkey PRIMARY KEY (sat_id, subset);
+ALTER TABLE ONLY productsubset
+    ADD CONSTRAINT instr_fk FOREIGN KEY (sat_id) REFERENCES instrument(instrument_id);
+
+CREATE TABLE siteproductsubset (
+    sat_id character varying(15) NOT NULL,
+    subset character varying(15) NOT NULL,
+    radar_id character varying(15) NOT NULL
+);
+ALTER TABLE ONLY siteproductsubset
+    ADD CONSTRAINT siteproductsubset_pkey PRIMARY KEY (sat_id, subset, radar_id);
+ALTER TABLE ONLY siteproductsubset
+    ADD CONSTRAINT subset_fk FOREIGN KEY (sat_id, subset) REFERENCES productsubset(sat_id, subset);
+
+CREATE TABLE orbit_subset_product (
+    sat_id character varying(15) NOT NULL,
+    orbit integer NOT NULL,
+    product_type character varying(15) NOT NULL,
+    filedate date,
+    filename character varying(120),
+    subset character varying(15) NOT NULL,
+    version character varying(8) DEFAULT 6 NOT NULL
+);
+ALTER TABLE ONLY orbit_subset_product
+    ADD CONSTRAINT orbit_subset_product_pkey PRIMARY KEY (sat_id, subset, orbit, product_type, version);
+ALTER TABLE ONLY orbit_subset_product
+    ADD CONSTRAINT "$1" FOREIGN KEY (sat_id, subset) REFERENCES productsubset(sat_id, subset);
+
+CREATE TABLE rainy100inside100 (
+    sat_id character varying(15) NOT NULL,
+    radar_id character varying(15) NOT NULL,
+    orbit integer NOT NULL,
+    event_num integer NOT NULL,
+    overpass_time timestamp with time zone,
+    pct_overlap double precision,
+    pct_overlap_conv double precision,
+    pct_overlap_strat double precision,
+    num_overlap_rain_certain double precision
+);
+ALTER TABLE ONLY rainy100inside100
+    ADD CONSTRAINT rainy100inside100_sat_id_key UNIQUE (sat_id, radar_id, orbit);
+
+CREATE TABLE geo_match_product (
+    radar_id character varying(15) NOT NULL,
+    orbit integer NOT NULL,
+    pathname character varying(255) NOT NULL,
+    pps_version character varying(8) NOT NULL,
+    parameter_set integer NOT NULL,
+    geo_match_version double precision NOT NULL,
+    num_gr_volumes integer DEFAULT 1,
+    instrument_id character varying(15) NOT NULL,
+    sat_id character varying(15) NOT NULL,
+    scan_type character varying(5) DEFAULT 'NA'::character varying NOT NULL,
+    event_num integer
+);
+ALTER TABLE ONLY geo_match_product
+    ADD CONSTRAINT geo_match_product_pkey PRIMARY KEY (radar_id, orbit, instrument_id, sat_id, scan_type, pps_version, parameter_set, geo_match_version);
+
+CREATE TABLE geo_match_product_dups (
+    radar_id character varying(15),
+    orbit integer,
+    pathname character varying(255),
+    pps_version character varying(8),
+    parameter_set integer,
+    geo_match_version double precision,
+    num_gr_volumes integer,
+    instrument_id character varying(15),
+    sat_id character varying(15),
+    scan_type character varying(5)
+);
+
+CREATE VIEW collatecolswsub AS
+    SELECT a.orbit, a.radar_id, a.overpass_time, date_trunc('hour'::text, a.overpass_time) AS nominal, b.subset FROM overpass_event a, siteproductsubset b WHERE (((a.radar_id)::text = (b.radar_id)::text) AND ((a.sat_id)::text = (b.sat_id)::text));
+
+CREATE VIEW eventsatsubrad_vw AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, date_trunc('hour'::text, a.overpass_time) AS nominal, b.subset, a.event_num, a.nearest_distance FROM overpass_event a, siteproductsubset b WHERE (((a.radar_id)::text = (b.radar_id)::text) AND ((a.sat_id)::text = (b.sat_id)::text));
+
+CREATE VIEW collate_npol_md_1cuf AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, a.nominal, a.subset, a.event_num, a.nearest_distance, t.version, t.product_type, t.filename, COALESCE((((((g.radar_id)::text || '/'::text) || (g.filepath)::text) || '/'::text) || (g.filename)::text), 'no_1CUF_file'::text) AS file1cuf, COALESCE((g.nominal - a.overpass_time), '00:00:00'::interval) AS tdiff FROM ((eventsatsubrad_vw a LEFT JOIN orbit_subset_product t ON ((((a.orbit = t.orbit) AND ((a.subset)::text = (t.subset)::text)) AND ((a.sat_id)::text = (t.sat_id)::text)))) LEFT JOIN gvradar g ON ((((((a.overpass_time >= (g.nominal - '00:05:00'::interval)) AND (a.overpass_time <= (g.nominal + '00:05:00'::interval))) AND ((a.radar_id)::text = 'NPOL_MD'::text)) AND ((g.radar_id)::text = 'NPOL'::text)) AND ((g.product)::text ~~ '1CUF%'::text)))) WHERE ((a.radar_id)::text = 'NPOL_MD'::text);
+
+CREATE VIEW collate_npol_wa_1cuf AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, a.nominal, a.subset, a.event_num, a.nearest_distance, t.version, t.product_type, t.filename, COALESCE((((((g.radar_id)::text || '/'::text) || (g.filepath)::text) || '/'::text) || (g.filename)::text), 'no_1CUF_file'::text) AS file1cuf, COALESCE((g.nominal - a.overpass_time), '00:00:00'::interval) AS tdiff FROM ((eventsatsubrad_vw a LEFT JOIN orbit_subset_product t ON ((((a.orbit = t.orbit) AND ((a.subset)::text = (t.subset)::text)) AND ((a.sat_id)::text = (t.sat_id)::text)))) LEFT JOIN gvradar g ON ((((((a.overpass_time >= (g.nominal - '00:09:59'::interval)) AND (a.overpass_time <= (g.nominal + '00:09:59'::interval))) AND ((a.radar_id)::text = 'NPOL_WA'::text)) AND ((g.radar_id)::text = 'NPOL'::text)) AND ((g.product)::text ~~ '1CUF%'::text)))) WHERE ((a.radar_id)::text = 'NPOL_WA'::text);
+
+CREATE VIEW collate_satsubprod_1cuf AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, a.nominal, a.subset, a.event_num, a.nearest_distance, t.version, t.product_type, t.filename, COALESCE((((((a.radar_id)::text || '/'::text) || (g.filepath)::text) || '/'::text) || (g.filename)::text), 'no_1CUF_file'::text) AS file1cuf, COALESCE((g.nominal - a.overpass_time), '00:00:00'::interval) AS tdiff FROM ((eventsatsubrad_vw a LEFT JOIN orbit_subset_product t ON ((((a.orbit = t.orbit) AND ((a.subset)::text = (t.subset)::text)) AND ((a.sat_id)::text = (t.sat_id)::text)))) LEFT JOIN gvradar g ON (((((a.overpass_time >= (g.nominal - '00:05:00'::interval)) AND (a.overpass_time <= (g.nominal + '00:05:00'::interval))) AND ((a.radar_id)::text = (g.radar_id)::text)) AND ((g.product)::text ~~ '1CUF%'::text))));
+
+CREATE VIEW collate_satsubprod_1cuf_tmigprof AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, a.nominal, a.subset, a.event_num, a.nearest_distance, t.version, t.product_type, t.filename, COALESCE((((((a.radar_id)::text || '/'::text) || (g.filepath)::text) || '/'::text) || (g.filename)::text), 'no_1CUF_file'::text) AS file1cuf, COALESCE((g.nominal - a.overpass_time), '00:00:00'::interval) AS tdiff FROM ((eventsatsubrad_vw a LEFT JOIN orbit_subset_product t ON (((((a.orbit = t.orbit) AND ((a.subset)::text = (t.subset)::text)) AND ((a.sat_id)::text = 'PR'::text)) AND ((t.sat_id)::text = 'TRMM'::text)))) LEFT JOIN gvradar g ON (((((a.overpass_time >= (g.nominal - '00:05:00'::interval)) AND (a.overpass_time <= (g.nominal + '00:05:00'::interval))) AND ((a.radar_id)::text = (g.radar_id)::text)) AND ((g.product)::text ~~ '1CUF%'::text))));
+
+CREATE VIEW collatecolswsub2 AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, date_trunc('hour'::text, a.overpass_time) AS nominal, b.subset FROM overpass_event a, siteproductsubset b WHERE (((a.radar_id)::text = (b.radar_id)::text) AND ((a.sat_id)::text = (b.sat_id)::text));
+
+CREATE VIEW collatedprproductswsub AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, a.nominal, a.subset, a.event_num, d.version, d.filename AS file1c21, e.filename AS file2a23, f.filename AS file2a25, h.filename AS file2b31 FROM ((((eventsatsubrad_vw a LEFT JOIN orbit_subset_product d ON (((((a.orbit = d.orbit) AND ((a.subset)::text = (d.subset)::text)) AND ((a.sat_id)::text = (d.sat_id)::text)) AND ((d.product_type)::text = '1C21'::text)))) LEFT JOIN orbit_subset_product e ON ((((((a.orbit = e.orbit) AND ((a.subset)::text = (e.subset)::text)) AND ((a.sat_id)::text = (e.sat_id)::text)) AND ((d.version)::text = (e.version)::text)) AND ((e.product_type)::text = '2A23'::text)))) LEFT JOIN orbit_subset_product f ON ((((((a.orbit = f.orbit) AND ((a.subset)::text = (f.subset)::text)) AND ((a.sat_id)::text = (f.sat_id)::text)) AND ((d.version)::text = (f.version)::text)) AND ((f.product_type)::text = '2A25'::text)))) LEFT JOIN orbit_subset_product h ON ((((((a.orbit = h.orbit) AND ((a.subset)::text = (h.subset)::text)) AND ((a.sat_id)::text = (h.sat_id)::text)) AND ((d.version)::text = (h.version)::text)) AND ((h.product_type)::text = '2B31'::text))));
+
+CREATE VIEW collatedprtotrmmproducts AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, a.nominal, a.subset, a.event_num, d.version, d.filename AS file1c21, e.filename AS file2a23, f.filename AS file2a25, h.filename AS file2b31 FROM ((((eventsatsubrad_vw a LEFT JOIN orbit_subset_product d ON ((((((a.orbit = d.orbit) AND ((a.subset)::text = (d.subset)::text)) AND ((a.sat_id)::text = 'PR'::text)) AND ((d.sat_id)::text = 'TRMM'::text)) AND ((d.product_type)::text = '1C21'::text)))) LEFT JOIN orbit_subset_product e ON (((((((a.orbit = e.orbit) AND ((a.subset)::text = (e.subset)::text)) AND ((a.sat_id)::text = 'PR'::text)) AND ((e.sat_id)::text = 'TRMM'::text)) AND ((d.version)::text = (e.version)::text)) AND ((e.product_type)::text = '2A23'::text)))) LEFT JOIN orbit_subset_product f ON (((((((a.orbit = f.orbit) AND ((a.subset)::text = (f.subset)::text)) AND ((a.sat_id)::text = 'PR'::text)) AND ((f.sat_id)::text = 'TRMM'::text)) AND ((d.version)::text = (f.version)::text)) AND ((f.product_type)::text = '2A25'::text)))) LEFT JOIN orbit_subset_product h ON (((((((a.orbit = h.orbit) AND ((a.subset)::text = (h.subset)::text)) AND ((a.sat_id)::text = 'PR'::text)) AND ((h.sat_id)::text = 'TRMM'::text)) AND ((d.version)::text = (h.version)::text)) AND ((h.product_type)::text = '2B31'::text))));
+
+CREATE VIEW collatedprv8products AS
+    SELECT a.sat_id, a.orbit, a.radar_id, a.overpass_time, a.nominal, a.subset, a.event_num, i.version, i.filename AS file2apr FROM (eventsatsubrad_vw a LEFT JOIN orbit_subset_product i ON ((((((a.orbit = i.orbit) AND ((a.subset)::text = (i.subset)::text)) AND ((a.sat_id)::text = 'PR'::text)) AND ((i.sat_id)::text = 'TRMM'::text)) AND ((i.product_type)::text = '2APR'::text))));
+

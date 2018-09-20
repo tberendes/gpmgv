@@ -66,11 +66,13 @@
 ; 04/15/15 Morris, GPM GV, SAIC
 ; - Added STEP_MANUAL keyword parameter to do a manual step-through animation
 ;   rather than using XINTERANIMATE utility, to allow a cleaner screen capture.
+; 06/20/18 Morris, GPM GV, SAIC
+; - Cleaned up confusing logic in computing Postscript borders and offsets, did
+;   not need separate logic depending on whether nx was greater than ny.
 ;
 ;
-; EMAIL QUESTIONS OR COMMENTS TO:
-;       <Bob Morris> kenneth.r.morris@nasa.gov
-;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+; EMAIL QUESTIONS OR COMMENTS AT:
+;       https://pmm.nasa.gov/contact
 ;-
 ;===============================================================================
 ;
@@ -143,21 +145,12 @@ IF plot2ps THEN BEGIN  ; set up to plot the PPIs to the postscript file
 ;         ps_size = 10/maxdim
   ; figure out how to fit within an 8x10 inch area
   ; and the locations in which the PPIs are to be positioned
-   IF nx GT ny THEN BEGIN
-      ps_size = 10.0/nx < 7.5/ny
-      xborder = (7.5-ps_size*ny)/2.0
-      yborder = (10.0-ps_size*nx)/2.0
-      ippi_pos = indgen(nx,ny)
-      xoffsets = xborder+(ippi_pos/nx)*ps_size
-      yoffsets = yborder+(ny-(ippi_pos MOD nx))*ps_size
-   ENDIF ELSE BEGIN
-      ps_size = 10.0/ny < 7.5/nx
-      xborder = (8.0-ps_size*nx)/2.0
-      yborder = (10.0-ps_size*ny)/2.0
-      ippi_pos = indgen(nx,ny)
-      xoffsets = xborder+((ippi_pos MOD nx)*ps_size)
-      yoffsets = 10.0-yborder-(ippi_pos/nx+1)*ps_size
-   ENDELSE
+   ps_size = 10.0/ny < 7.5/nx
+   xborder = (8.0-ps_size*nx)/2.0
+   yborder = (10.0-ps_size*ny)/2.0
+   ippi_pos = indgen(nx,ny)
+   xoffsets = xborder+((ippi_pos MOD nx)*ps_size)
+   yoffsets = 10.0-yborder-(ippi_pos/nx+1)*ps_size
 ENDIF ELSE bgwhite = 0
 
 FOR ifram=0,common_data.nframes-1 DO BEGIN

@@ -289,16 +289,20 @@
 ;    available in IDL 8.0 and later.
 ;  - Added MESSAGE command to exit with error if attempting to run under IDL
 ;    versions before 8.0.
+; 06/11/18 by Bob Morris, GPM GV (SAIC)
+;  - Created from read_dpr_geo_match_netcdf.pro with addition of 3 DSD phase
+;    related variables: phase, phaseHeightAGL, phaseNearSurface.
 ; 06/20/18 by Bob Morris, GPM GV (SAIC)
 ;  - Added reading of new global variables PR_2APR_file and PR_2BPRTMI_File
 ;    and output to filesmeta struct to support PR version 8 processing.
+;
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
 ;-
 ;===============================================================================
 
-FUNCTION read_dpr_geo_match_netcdf, ncfile, DIMS_ONLY=dims_only,          $
+FUNCTION read_dpr_geo_match_netcdf_phase_v88, ncfile, DIMS_ONLY=dims_only,    $
    ; metadata structures/parameters
     matchupmeta=matchupmeta, sweepsmeta=sweepsmeta, sitemeta=sitemeta,        $
     fieldflags=fieldFlags, filesmeta=filesmeta,                               $
@@ -352,7 +356,8 @@ FUNCTION read_dpr_geo_match_netcdf, ncfile, DIMS_ONLY=dims_only,          $
     sfctype_int=LandSurfaceType, rainflag_int=FlagPrecip,                     $
     raintype_int=TypePrecip, pridx_long=rayIndex, BBstatus_int=bbstatus,      $
     piaFinal=piaFinal, heightStormTop_int=heightStormTop,                     $
-    qualityData_long=qualityData, clutterStatus_int=clutterStatus
+    qualityData_long=qualityData, clutterStatus_int=clutterStatus,            $
+    phase_int=phase, AGLphaseHgt=phaseHeightAGL, NS_phase_int=phaseNearSurface
 
 
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
@@ -610,7 +615,7 @@ FOR ncattnum = 0, N_ELEMENTS(parsed)-1 DO BEGIN
                                               /GLOBAL_ATTRIBUTE, /BYTE )
       'DPR_2BCMB_file' : status=PREPARE_NCVAR( ncid1, thisncatt, DPR_2BCMB_file_byte, $
                                                STRUCT=filesmeta, TAG='file_2bcomb', $
-                                               /GLOBAL_ATTRIBUTE, /BYTE )
+                                              /GLOBAL_ATTRIBUTE, /BYTE )
       'PR_2APR_file' : status=PREPARE_NCVAR( ncid1, thisncatt, PR_2APR_file_byte, $
                                              STRUCT=filesmeta, TAG='file_2apr', $
                                              /GLOBAL_ATTRIBUTE, /BYTE )
@@ -919,6 +924,9 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'BBstatus' : status=PREPARE_NCVAR( ncid1, thisncvar, BBstatus )
       'qualityData' : status=PREPARE_NCVAR( ncid1, thisncvar, qualityData)
       'clutterStatus' : status=PREPARE_NCVAR( ncid1, thisncvar, clutterStatus )
+      'phase' : status=PREPARE_NCVAR( ncid1, thisncvar, phase)
+      'phaseHeightAGL' : status=PREPARE_NCVAR( ncid1, thisncvar, phaseHeightAGL)
+      'phaseNearSurface' : status=PREPARE_NCVAR( ncid1, thisncvar, phaseNearSurface)
        ELSE : BEGIN
                  message, "Unknown GRtoDPR netCDF variable '"+thisncvar+"'", /INFO
                  status=1
