@@ -1586,7 +1586,7 @@ ENDIF
    mrmsrqipveryhigh=temporary(*ptr_mrmsrqipveryhigh)
    
 	; TAB 9/4/18
-    swedp=temporary(*prt_swedp)
+    swedp=temporary(*ptr_swedp)
     swe25=temporary(*ptr_swe25)
     swe50=temporary(*ptr_swe50)
     swe75=temporary(*ptr_swe75)
