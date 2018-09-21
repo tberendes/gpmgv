@@ -1766,7 +1766,7 @@ if STRUPCASE(instrument) NE 'DPR' then begin
 endif else begin
 
 	IF myflags.have_mrms EQ 1 THEN have_mrms = 1 ELSE have_mrms = 0
-	IF myflags.have_swe EQ 1 THEN have_swe = 1 ELSE have_swe = 0
+	IF myflags.have_gr_swe EQ 1 THEN have_swe = 1 ELSE have_swe = 0
 
 endelse
 
