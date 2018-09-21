@@ -44,6 +44,10 @@
 ;'BBHIST': Histogram of Difference between sample and BB heights
 ;'MRHIST': Histogram of MRMS Rain rates
 ;'DRHIST': Histogram of DPR Rain rates
+; 'SWDP' : DPR 3-D rainrate vs. GR SWEDP (snowfall water equivalent rate dual pol, Bukocvic et al 2017) rainrate
+; 'SW25' : DPR 3-D rainrate vs. GR SWE25 (GV snowfall water equivalent rate, PQPE conditional quantiles 25%) rainrate
+; 'SW50' : DPR 3-D rainrate vs. GR SWE50 (GV snowfall water equivalent rate, PQPE conditional quantiles 50%) rainrate
+; 'SW75' : DPR 3-D rainrate vs. GR SWE75 (GV snowfall water equivalent rate, PQPE conditional quantiles 75%) rainrate
 ;
 ; If an alternate field is specified in the ALTFIELD parameter (values as
 ; defined by the IDs in quotes, above), then scatter plots will be created for
@@ -821,6 +825,10 @@ IF KEYWORD_SET(batch_save) THEN buffer=1 ELSE buffer=0
 ; TAB 11/13/17 added fourth dimension for above BB convective
 
 have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               SWDP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               SW25 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               SW50 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               SW75 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 			 GRDMSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 			HGTHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 			 BBHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
@@ -854,7 +862,12 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
               RRNWP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             NWGZMXP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              PIADMP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               SWDP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               SW25 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               SW50 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+               SW75 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
+
 ; position indices/definitions of the 3 flags in the array triplets in the structure
 ; - must be identically defined in accum_scat_data.pro
 haveVar = 0   ; do we have data for the variable
@@ -1210,6 +1223,13 @@ ptr_mrmsrqipveryhigh=ptr_new(/allocate_heap)
 
 ptr_MRMS_HID=ptr_new(/allocate_heap)
 
+; TAB 9/20/18
+ptr_swedp=ptr_new(/allocate_heap)
+ptr_swe25=ptr_new(/allocate_heap)
+ptr_swe50=ptr_new(/allocate_heap)
+ptr_swe75=ptr_new(/allocate_heap)
+
+
 ;ptr_rnFlag=ptr_new(/allocate_heap)
 ptr_rnType=ptr_new(/allocate_heap)
 IF pr_or_dpr EQ 'DPR' THEN ptr_stmTopHgt=ptr_new(/allocate_heap)
@@ -1464,6 +1484,12 @@ CASE pr_or_dpr OF
        PTRmrmsrqiphigh=ptr_mrmsrqiphigh, $
        PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
        PTRMRMSHID=ptr_MRMS_HID, $
+       
+		; TAB 9/4/18
+       PTRswedp=ptr_swedp, $
+       PTRswe25=ptr_swe25, $
+       PTRswe50=ptr_swe50, $
+       PTRswe75=ptr_swe75, $
 
 	   ; TAB 7/9/18
 	   PTRtop=ptr_top, PTRbotm=ptr_botm, $
@@ -1563,6 +1589,12 @@ ENDIF
    mrmsrqiphigh=temporary(*ptr_mrmsrqiphigh)
    mrmsrqipveryhigh=temporary(*ptr_mrmsrqipveryhigh)
    
+	; TAB 9/4/18
+    swedp=temporary(*prt_swedp)
+    swe25=temporary(*ptr_swe25)
+    swe50=temporary(*ptr_swe50)
+    swe75=temporary(*ptr_swe75)
+
    ; TAB, get top and bottom height of volume
    top_ht = temporary(*ptr_top)
    botm_ht = temporary(*ptr_botm)
@@ -1731,12 +1763,14 @@ ENDIF ELSE have_RP = 0
 
 ; set up the data presence flags for the two-parameter plots
 
-; mrms not set up for DPRGMI or PR yet
+; mrms and snow SWE not set up for DPRGMI or PR yet
 if STRUPCASE(instrument) NE 'DPR' then begin
 	have_mrms = 0
+	have_swe = 0
 endif else begin
 
 	IF myflags.have_mrms EQ 1 THEN have_mrms = 1 ELSE have_mrms = 0
+	IF myflags.have_swe EQ 1 THEN have_swe = 1 ELSE have_swe = 0
 
 endelse
 
@@ -1751,6 +1785,12 @@ IF have_mrms EQ 1 THEN BEGIN
 	have_hist.GRRDSR[haveVar,*] = 1
 	have_hist.GRCDSR[haveVar,*] = 1
 	have_hist.GRPDSR[haveVar,*] = 1
+ENDIF
+IF have_swe EQ 1 THEN BEGIN
+	have_hist.SWDP[haveVar,*] = 1
+	have_hist.SW25[haveVar,*] = 1
+	have_hist.SW50[haveVar,*] = 1
+	have_hist.SW75[haveVar,*] = 1
 ENDIF
 
 IF have_NW THEN BEGIN
@@ -2157,6 +2197,13 @@ print, ''
 			  mrmsrqiphigh=mrmsrqiphigh[idxgoodenuff]
 			  mrmsrqipveryhigh=mrmsrqipveryhigh[idxgoodenuff]
           
+          endif
+          if have_swe eq 1 then begin
+          	  swedp=swedp[idxgoodenuff]
+    		  swe25=swe25[idxgoodenuff]
+    		  swe50=swe50[idxgoodenuff]
+    		  swe75=swe75[idxgoodenuff]
+          	  
           endif
           IF have_D0 EQ 1 THEN BEGIN
               GR_D0=GR_D0[idxgoodenuff]
@@ -2617,6 +2664,10 @@ endif
                 binmin2 = 1.0 & binmax2 = 6.0 & BINSPAN2 = 0.1
                 BREAK
               END
+  	   'SWDP' : 
+  	   'SW25' : 
+  	   'SW50' : 
+  	   'SW75' : 
        'RC' : 
        'RP' : 
        'RR' : BEGIN
@@ -2897,6 +2948,46 @@ endif
 ;                           (*plotDataPtrs[iPlot, raintypeBBidx]).maeACCUM
                  ENDIF ELSE countabv=0
               END
+  	   'SWDP': BEGIN
+                 IF countabv GT 0 AND have_swe THEN BEGIN
+	                scat_X = swedp[idxabv]
+	                scat_Y = DPR_RC[idxabv]                
+                    accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+                 ENDIF ELSE countabv=0
+  	   		    END
+  	   'SW25': BEGIN
+                  IF countabv GT 0 AND have_swe THEN BEGIN
+	                scat_X = swe25[idxabv]
+	                scat_Y = DPR_RC[idxabv]                
+                    accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+                 ENDIF ELSE countabv=0
+  	   		    END
+  	   'SW50': BEGIN
+                  IF countabv GT 0 AND have_swe THEN BEGIN
+	                scat_X = swe50[idxabv]
+	                scat_Y = DPR_RC[idxabv]                
+                    accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+                 ENDIF ELSE countabv=0
+  	   		    END
+  	   'SW75': BEGIN
+                  IF countabv GT 0 AND have_swe THEN BEGIN
+	                scat_X = swe75[idxabv]
+	                scat_Y = DPR_RC[idxabv]                
+                    accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+                 ENDIF ELSE countabv=0
+  	   		    END
        'RC' : BEGIN
                  IF countabv GT 0 AND have_RC THEN BEGIN
 	                scat_X = GR_RC[idxabv]
@@ -4053,6 +4144,10 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               ytitle= pr_or_dpr + ' RR (' + yunits + ')'
               BREAK
            END
+    'SWDP' : 
+    'SW25' : 
+    'SW50' : 
+    'SW75' :       
     'RC' : 
     'RP' : 
     'RR' : BEGIN
@@ -4102,15 +4197,44 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
 ;              ENDELSE
               yticknames=xticknames
               xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
-              titleLine1 = satprodtype+' '+version+" RR vs. GR "+PlotTypes(idx2do)+ $
-                           " Scatter, Mean GR-DPR Bias: "
-              pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
-              ;units='(mm/h)'
+              
              ; if rr_log then units='(log mm/h)' else units='(mm/h)'
               units='(mm/h)'
-              xtitle= 'GR '+PlotTypes(idx2do)+' '+units
               ytitle= pr_or_dpr +' '+ units
-              BREAK
+              
+ 			  CASE PlotTypes(idx2do) OF
+			   'SWDP' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWEPD "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWEDP_"+"_Scatter"
+              		xtitle= 'SWEDP '+units
+			      END
+			   'SW25' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWE25 "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE25_"+"_Scatter"
+              		xtitle= 'SWE25 '+units
+			      END
+			   'SW50' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWE50 "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE50_"+"_Scatter"
+              		xtitle= 'SWE50 '+units
+			      END
+			   'SW75' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWE75 "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE75_"+"_Scatter"
+              		xtitle= 'SWE75 '+units
+			      END
+				ELSE: BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. GR "+PlotTypes(idx2do)+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
+              		xtitle= 'GR '+PlotTypes(idx2do)+' '+units
+			      END
+				ENDCASE           
+               BREAK
            END
   'NWGZMXP' : BEGIN
                  do_MAE_1_1 = 0
@@ -5755,6 +5879,11 @@ if (ptr_valid(ptr_mrmsrqiplow) eq 1) then ptr_free,ptr_mrmsrqiplow
 if (ptr_valid(ptr_mrmsrqipmed) eq 1) then ptr_free,ptr_mrmsrqipmed
 if (ptr_valid(ptr_mrmsrqiphigh) eq 1) then ptr_free,ptr_mrmsrqiphigh
 if (ptr_valid(ptr_mrmsrqipveryhigh) eq 1) then ptr_free,ptr_mrmsrqipveryhigh
+
+if (ptr_valid(ptr_swedp) eq 1) then ptr_free,ptr_swedp
+if (ptr_valid(ptr_swe25) eq 1) then ptr_free,ptr_swe25
+if (ptr_valid(ptr_swe50) eq 1) then ptr_free,ptr_swe50
+if (ptr_valid(ptr_swe75) eq 1) then ptr_free,ptr_swe75
 
 if (ptr_valid(ptr_top) eq 1) then ptr_free,ptr_top
 if (ptr_valid(ptr_botm) eq 1) then ptr_free,ptr_botm
