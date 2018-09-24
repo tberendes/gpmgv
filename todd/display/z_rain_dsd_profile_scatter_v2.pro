@@ -628,6 +628,7 @@ PRO z_rain_dsd_profile_scatter_v2, INSTRUMENT=instrument,         $
                                     GV_CONVECTIVE=gv_convective,   $
                                     GV_STRATIFORM=gv_stratiform,   $
                                     S2KU=s2ku,                     $
+                                    SNOW=snow,                     $
                                     NAME_ADD=name_add,             $
                                     NCSITEPATH=ncsitepath,         $
                                     FILEPATTERN=filepattern,       $
@@ -814,6 +815,7 @@ DRHIST_accum2 = []
 ; LUN for writing anomaly info to file
 openw, anom_LUN, outpath + '/anomaly.txt', /GET_LUN
 openw, hail_LUN, outpath + '/hail.txt', /GET_LUN
+openw, snow_LUN, outpath + '/snow.txt', /GET_LUN
 
 ; determine whether to display the scatter plot objects or just create them
 ; in a buffer for saving in batch mode
@@ -1105,6 +1107,7 @@ IF do_dm_range EQ 1 AND do_dm_thresh EQ 1 THEN BEGIN
    GOTO, cleanUp
 ENDIF
 s2ku = KEYWORD_SET( s2ku )
+snow = KEYWORD_SET( snow )
 rr_log = KEYWORD_SET( rr_log )
 
 IF N_ELEMENTS(outpath) NE 1 THEN BEGIN
@@ -2022,6 +2025,17 @@ help, dpr_dm_range_min, dpr_dm_range_max, ndmdprgtrange
    ENDIF
 ENDIF
 
+; New snow filter
+if snow then begin
+	filterText=filterText+' Snow '
+	snow_index = where((besthid ge 3) and (besthid le 7), num_snow)
+	if num_snow gt 0 then begin
+		flag2filter[snow_index] = 1
+	endif
+
+endif
+
+
 ;-------------------------------------------------
 
 ; Optional data clipping based on echo top height (stormTopHeight) range:
@@ -2381,6 +2395,7 @@ if have_Dm then begin
       print, "Anomaly (DPR_Dm GE 3.0 AND DPR_RR GT 40): ", ncfilepr
    endif
 endif
+
 ; TAB  11/28/17 Added for Patrick Gatlin
 ; output filename for possible hail samples
 hail = where ( gvzmax GT 65 AND rntype EQ RainType_convective $
@@ -2390,6 +2405,15 @@ if num_hail GT 0 then begin
 ;   printf, hail_LUN, num_hail, " possible hail samples in ", ncfilepr
    print, num_hail,ncfilepr,format='(%"%d possible hail samples in %s")'
 endif
+
+; TAB  9/24/18 Added for Walt, new snow check
+; output filename for possible snow samples
+snow_index = where((besthid ge 3) and (besthid le 7), num_snow)
+if num_snow GT 0 then begin
+   printf, snow_LUN, num_snow,ncfilepr,format='(%"%d\,%s")'
+   print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
+endif
+
 
 ;-------------------------------------------------------------
 ; original location of this block:  needed to move up in program for Dm filtering
@@ -5711,6 +5735,8 @@ close, anom_LUN
 FREE_LUN, anom_LUN
 close, hail_LUN
 FREE_LUN, hail_LUN
+close, snow_LUN
+FREE_LUN, snow_LUN
 
 IF N_ELEMENTS(profile_save) NE 0 AND bustOut NE 1 THEN BEGIN
    ; Compute ensemble mean and StdDev of dBZ at each level from grouped data
