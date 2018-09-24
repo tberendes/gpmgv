@@ -2036,6 +2036,14 @@ if snow then begin
 
 endif
 
+; TAB  9/24/18 Added for Walt, new snow check
+; output filename for possible snow samples
+snow_index = where((besthid ge 3) and (besthid le 7), num_snow)
+if num_snow GT 0 then begin
+   printf, snow_LUN, num_snow,ncfilepr,format='(%"%d\,%s")'
+   print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
+endif
+
 
 ;-------------------------------------------------
 
@@ -2405,14 +2413,6 @@ if num_hail GT 0 then begin
    printf, hail_LUN, num_hail,ncfilepr,format='(%"%d\,%s")'
 ;   printf, hail_LUN, num_hail, " possible hail samples in ", ncfilepr
    print, num_hail,ncfilepr,format='(%"%d possible hail samples in %s")'
-endif
-
-; TAB  9/24/18 Added for Walt, new snow check
-; output filename for possible snow samples
-snow_index = where((besthid ge 3) and (besthid le 7), num_snow)
-if num_snow GT 0 then begin
-   printf, snow_LUN, num_snow,ncfilepr,format='(%"%d\,%s")'
-   print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
 endif
 
 
