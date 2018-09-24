@@ -2028,9 +2028,10 @@ ENDIF
 ; New snow filter
 if snow then begin
 	filterText=filterText+' Snow '
-	snow_index = where((besthid ge 3) and (besthid le 7), num_snow)
-	if num_snow gt 0 then begin
-		flag2filter[snow_index] = 1
+	; filter out non-snow categories
+	notsnow_index = where((besthid lt 3) or (besthid gt 7), num_notsnow)
+	if num_notsnow gt 0 then begin
+		flag2filter[notsnow_index] = 1
 	endif
 
 endif
