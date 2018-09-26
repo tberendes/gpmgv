@@ -2711,7 +2711,20 @@ endif
   	   'SWDP' :
   	   'SW25' : 
   	   'SW50' : 
-  	   'SW75' : 
+  	   'SW75' : BEGIN
+                if rr_log then begin
+                    binmin1 = 0.01  & binmin2 = 0.01
+                    binmax1 = 100.0 & binmax2 = 100.0
+                    BINSPAN1 = 0.25
+                    BINSPAN2 = 0.25
+                endif else begin
+                    binmin1 = 0.0  & binmin2 = 0.0
+                    binmax1 = 10.0 & binmax2 = 10.0
+                    BINSPAN1 = 0.2
+                    BINSPAN2 = 0.2
+                endelse
+                BREAK
+              END  	   
        'RC' : 
        'RP' : 
        'RR' : BEGIN
@@ -2749,7 +2762,6 @@ endif
                     endelse
                  ENDELSE
                  if snow_flag then begin
-                    print,'snow flag set in scaling block '
                     if rr_log then begin
 	                    binmin1 = 0.01  & binmin2 = 0.01
 	                    binmax1 = 100.0 & binmax2 = 100.0
@@ -4205,7 +4217,70 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
     'SWDP' : 
     'SW25' : 
     'SW50' : 
-    'SW75' :       
+    'SW75' :  BEGIN
+              CASE raintypeBBidx OF
+               2 : BEGIN
+                   SCAT_DATA = "Any/All Samples"
+                   END
+               1 : BEGIN
+                   SCAT_DATA = "Convective Samples"
+                   END
+               0 : BEGIN
+                   SCAT_DATA = "Stratiform Samples"
+                   END
+               ENDCASE
+               if rr_log then begin
+               		xticknames=log_ticks()
+    ;           		xticknames=log_label(8, 8)
+               endif else begin
+               		xticknames=STRING(INDGEN(10)*4, FORMAT='(I0)')
+               endelse                    
+               trim = 0    ; show low-percentage outliers
+
+              yticknames=xticknames
+              xmajor=N_ELEMENTS(xticknames) & ymajor=xmajor
+              
+             ; if rr_log then units='(log mm/h)' else units='(mm/h)'
+              units='(mm/h)'
+              ytitle= pr_or_dpr +' '+ units
+              
+ 			  CASE PlotTypes(idx2do) OF
+			   'SWDP' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWEPD "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWEDP_"+"_Scatter"
+              		xtitle= 'SWEDP '+units
+			      END
+			   'SW25' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWE25 "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE25_"+"_Scatter"
+              		xtitle= 'SWE25 '+units
+			      END
+			   'SW50' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWE50 "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE50_"+"_Scatter"
+              		xtitle= 'SWE50 '+units
+			      END
+			   'SW75' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWE75 "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE75_"+"_Scatter"
+              		xtitle= 'SWE75 '+units
+			      END
+				ELSE: BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. GR "+PlotTypes(idx2do)+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
+              		xtitle= 'GR '+PlotTypes(idx2do)+' '+units
+			      END
+				ENDCASE           
+
+    
+              BREAK
+           END
+         
     'RC' : 
     'RP' : 
     'RR' : BEGIN
@@ -4260,38 +4335,6 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               units='(mm/h)'
               ytitle= pr_or_dpr +' '+ units
               
- 			  CASE PlotTypes(idx2do) OF
-			   'SWDP' : BEGIN
-              		titleLine1 = satprodtype+' '+version+" RR vs. SWEPD "+ $
-                           " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWEDP_"+"_Scatter"
-              		xtitle= 'SWEDP '+units
-			      END
-			   'SW25' : BEGIN
-              		titleLine1 = satprodtype+' '+version+" RR vs. SWE25 "+ $
-                           " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE25_"+"_Scatter"
-              		xtitle= 'SWE25 '+units
-			      END
-			   'SW50' : BEGIN
-              		titleLine1 = satprodtype+' '+version+" RR vs. SWE50 "+ $
-                           " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE50_"+"_Scatter"
-              		xtitle= 'SWE50 '+units
-			      END
-			   'SW75' : BEGIN
-              		titleLine1 = satprodtype+' '+version+" RR vs. SWE75 "+ $
-                           " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE75_"+"_Scatter"
-              		xtitle= 'SWE75 '+units
-			      END
-				ELSE: BEGIN
-              		titleLine1 = satprodtype+' '+version+" RR vs. GR "+PlotTypes(idx2do)+ $
-                           " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
-              		xtitle= 'GR '+PlotTypes(idx2do)+' '+units
-			      END
-				ENDCASE           
                BREAK
            END
   'NWGZMXP' : BEGIN
