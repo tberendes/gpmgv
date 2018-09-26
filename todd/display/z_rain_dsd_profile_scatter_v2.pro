@@ -4233,7 +4233,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                		xticknames=log_ticks()
     ;           		xticknames=log_label(8, 8)
                endif else begin
-               		xticknames=STRING(INDGEN(10)*4, FORMAT='(I0)')
+               		xticknames=STRING(INDGEN(10), FORMAT='(I0)')
                endelse                    
                trim = 0    ; show low-percentage outliers
 
