@@ -4260,13 +4260,13 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
     'SW75' :  BEGIN
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples, <= 1.5km AGL"
+                   SCAT_DATA = "Any/All Samples <= 1.5km AGL"
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples, <= 1.5km AGL"
+                   SCAT_DATA = "Convective Samples <= 1.5km AGL"
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples, <= 1.5km AGL"
+                   SCAT_DATA = "Stratiform Samples <= 1.5km AGL"
                    END
                ENDCASE
                if rr_log then begin
