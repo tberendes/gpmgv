@@ -1107,7 +1107,7 @@ IF do_dm_range EQ 1 AND do_dm_thresh EQ 1 THEN BEGIN
    GOTO, cleanUp
 ENDIF
 s2ku = KEYWORD_SET( s2ku )
-snow = KEYWORD_SET( snow )
+snow_flag = KEYWORD_SET( snow )
 rr_log = KEYWORD_SET( rr_log )
 
 IF N_ELEMENTS(outpath) NE 1 THEN BEGIN
@@ -2026,7 +2026,7 @@ help, dpr_dm_range_min, dpr_dm_range_max, ndmdprgtrange
 ENDIF
 
 ; New snow filter
-if snow then begin
+if snow_flag then begin
 	filterText=filterText+' Snow '
 	; filter out non-snow categories
 	notsnow_index = where((besthid lt 3) or (besthid gt 7), num_notsnow)
@@ -2632,6 +2632,29 @@ endif
 ;                 ENDELSE
 ;                 BREAK
 ;              END
+      'SWDP' :
+      'SW25' :
+      'SW50' :
+      'SW75' :  BEGIN ; Don't check below BB
+                CASE raintypeBBidx OF
+                   0 : BEGIN
+                      ; accumulate stratiform rain types
+                      
+                      idxabv = WHERE( rntype EQ RainType_stratiform, countabv )
+                      END
+                   1 : BEGIN
+                      ; accumulate convective rain types
+                      idxabv = WHERE( rntype EQ RainType_convective, countabv )
+                      END
+                   2 : BEGIN
+                      ; accumulate convective rain types
+                      idxabv = WHERE( rntype EQ RainType_convective OR rntype EQ RainType_stratiform, countabv )
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
        ELSE : BEGIN
                 ; accumulate 2-D histograms of below-BB Dm/D0/Nw/N2/Rx at/below 3 km
                  CASE raintypeBBidx OF
@@ -2685,7 +2708,7 @@ endif
                 binmin2 = 1.0 & binmax2 = 6.0 & BINSPAN2 = 0.1
                 BREAK
               END
-  	   'SWDP' : 
+  	   'SWDP' : BEGIN
   	   'SW25' : 
   	   'SW50' : 
   	   'SW75' : 
@@ -2725,6 +2748,19 @@ endif
 	                    BINSPAN2 = 0.25
                     endelse
                  ENDELSE
+                 if snow_flag then begin
+                    if rr_log then begin
+	                    binmin1 = 0.01  & binmin2 = 0.01
+	                    binmax1 = 100.0 & binmax2 = 100.0
+	                    BINSPAN1 = 0.25
+	                    BINSPAN2 = 0.25
+	                endif else begin
+	                    binmin1 = 0.0  & binmin2 = 0.0
+	                    binmax1 = 10.0 & binmax2 = 10.0
+	                    BINSPAN1 = 0.2
+	                    BINSPAN2 = 0.2
+	                endelse
+                 endif
                  BREAK
               END
     'ZCNWP' : 
