@@ -3803,7 +3803,6 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                0 : BEGIN
                    ;SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
                    SCAT_DATA = "Stratiform Samples" + bb_string
-                   endelse
                    xticknames=['0.0','0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0']
                    END
               ENDCASE
