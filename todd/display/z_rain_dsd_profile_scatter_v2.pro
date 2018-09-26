@@ -778,7 +778,7 @@ IF N_ELEMENTS(ray_range) EQ 2 THEN BEGIN
 ENDIF
 
 if snow_flag then begin
-      filteraddstring = filteraddstring + '_snow_' 
+      filteraddstring = filteraddstring + '_snow' 
       filtertitlestring = filtertitlestring + 'Snow '
 endif
 
