@@ -3773,22 +3773,34 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
    do_MAE_1_1 = 1    ; flag to include/suppress MAE and the 1:1 line on plots
    bustOut=0
 
-   
+   ;Dm/D0/Nw/N2/Rx change to not print Below BB if snow
    do_plot = 1
    SWITCH PlotTypes(idx2do) OF
     'D0' : 
     'DM' : BEGIN
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+               	   if snow_flag then begin
+                   		SCAT_DATA = "Any/All Samples <= 3 km AGL"
+               	   endif else begin
+                   		SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+                   endelse
                    xticknames=['0.0','0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0']
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+               	   if snow_flag then begin
+	                   SCAT_DATA = "Convective Samples <= 3 km AGL"
+	               endif else begin
+	                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"	               
+	               endelse
                    xticknames=['0.0','0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0']
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+               	   if snow_flag then begin
+                   		SCAT_DATA = "Stratiform Samples <= 3 km AGL"
+                   endif else begin
+                   		SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   endelse
                    xticknames=['0.0','0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0']
                    END
               ENDCASE
@@ -3824,15 +3836,27 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
     'NW' : BEGIN
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+                   if snow_flag then begin
+                   		SCAT_DATA = "Any/All Samples <= 3 km AGL"
+                   endif else begin
+                   		SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+                   endelse
               ;     xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   if snow_flag then begin
+                   		SCAT_DATA = "Convective Samples <= 3 km AGL"
+                   endif else begin
+                   		SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   endelse
               ;     xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   if snow_flag then begin
+                   		SCAT_DATA = "Stratiform Samples <= 3 km AGL"
+                   endif else begin
+                   		SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   endelse
               ;     xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
                    END
               ENDCASE
@@ -4304,7 +4328,11 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_normBias = 1    ; reset flag to include normalized bias on plot
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+               	   if snow_flag then begin
+                   		SCAT_DATA = "Any/All Samples <= 3 km AGL"
+                   endif else begin
+                   		SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
+                   endelse
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
                    		xticknames=log_ticks()
@@ -4315,7 +4343,11 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+               	   if snow_flag then begin
+                   		SCAT_DATA = "Convective Samples <= 3 km AGL"
+                   endif else begin
+                   		SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+                   endelse
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
 ;                   		xticknames=log_label(8, 8)
@@ -4326,7 +4358,11 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+               	   if snow_flag then begin
+                   		SCAT_DATA = "Stratiform Samples <= 3 km AGL"
+                   endif else begin
+                   		SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+                   endelse
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
 ;                   		xticknames=log_label(8, 2)
