@@ -1068,10 +1068,10 @@ IF ( nswp GT 1 ) THEN BEGIN
 	mrmsrqipveryhighApp = mrmsrqipveryhigh
 	
 	; TAB 9/4/18
-	swedpApp = swedp
-	swe25App = swe25
-	swe50App = swe50
-	swe75App = swe75
+;	swedpApp = swedp
+;	swe25App = swe25
+;	swe50App = swe50
+;	swe75App = swe75
    
    pr_indexApp = pr_index
    bbStatusApp=bbStatus
@@ -1123,10 +1123,10 @@ IF ( nswp GT 1 ) THEN BEGIN
 	  mrmsrqiphigh = [mrmsrqiphigh,mrmsrqiphighApp]
 	  mrmsrqipveryhigh = [mrmsrqipveryhigh,mrmsrqipveryhighApp]
 	  
-	  swedp = [swedp,swedpApp]
-	  swe25 = [swe25,swe25App]
-	  swe50 = [swe50,swe50App]
-	  swe75 = [swe75,swe75App]
+;	  swedp = [swedp,swedpApp]
+;	  swe25 = [swe25,swe25App]
+;	  swe50 = [swe50,swe50App]
+;	  swe75 = [swe75,swe75App]
       
    ENDFOR
 ENDIF
