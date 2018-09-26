@@ -3780,11 +3780,11 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
 
    ;Dm/D0/Nw/N2/Rx change to not print Below BB if snow
    if check_bb_flag then begin
-   	   bb_string = ", Below Bright Band and <= 3 km AGL"
+   	   bb_plot_string = ", Below Bright Band and <= 3 km AGL"
    endif else begin
-   	   bb_string = " <= 3 km AGL"
+   	   bb_plot_string = " <= 3 km AGL"
    endelse
-   bb_string = ", Below Bright Band and"
+
    do_plot = 1
    SWITCH PlotTypes(idx2do) OF
     'D0' : 
@@ -3792,17 +3792,17 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                   ;SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                  SCAT_DATA = "Any/All Samples" + bb_string
+                  SCAT_DATA = "Any/All Samples" + bb_plot_string
                   xticknames=['0.0','0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0']
                    END
                1 : BEGIN
 	               ;SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"	               
-	               SCAT_DATA = "Convective Samples"+bb_string               
+	               SCAT_DATA = "Convective Samples"+bb_plot_string               
                    xticknames=['0.0','0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0']
                    END
                0 : BEGIN
                    ;SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    xticknames=['0.0','0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0']
                    END
               ENDCASE
@@ -3839,17 +3839,17 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               CASE raintypeBBidx OF
                2 : BEGIN
                     ;SCAT_DATA = "Any/All Samples, Below Bright Band and <= 3 km AGL"
-                    SCAT_DATA = "Any/All Samples" + bb_string
+                    SCAT_DATA = "Any/All Samples" + bb_plot_string
               ;     xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
                    END
                1 : BEGIN
                    ;SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
               ;     xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
                    END
                0 : BEGIN
                    ;SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
               ;     xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
                    END
               ENDCASE
@@ -3876,15 +3876,15 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                    yticknames=['20','25','30','35','40','45','50','55','60']
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    yticknames=['20','25','30','35','40','45','50','55','60']
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    yticknames=['15','20','25','30','35','40','45','50','55']
                    END
               ENDCASE
@@ -3910,15 +3910,15 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                    yticknames=['20','25','30','35','40','45','50','55','60']
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    yticknames=['20','25','30','35','40','45','50','55','60']
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    yticknames=['15','20','25','30','35','40','45','50','55']
                    END
               ENDCASE
@@ -3944,13 +3944,13 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN $
@@ -3972,13 +3972,13 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN $
@@ -4000,7 +4000,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
 ;                   if rr_log then begin
 ;                   		xticknames=log_ticks()
 ;                   endif else begin
@@ -4009,7 +4009,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
 ;                   if rr_log then begin
 ;                   		xticknames=log_ticks()
 ;                   endif else begin
@@ -4018,7 +4018,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
 ;                   if rr_log then begin
 ;                   		xticknames=log_ticks()
 ;                   endif else begin
@@ -4082,7 +4082,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
 ;                   if rr_log then begin
 ;                   		yticknames=log_ticks()
 ;                   endif else begin
@@ -4092,7 +4092,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
 ;                   if rr_log then begin
 ;                   		yticknames=log_ticks()
 ;                   endif else begin
@@ -4102,7 +4102,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
 ;                   if rr_log then begin
 ;                   		yticknames=log_ticks()
 ;                   endif else begin
@@ -4140,7 +4140,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                    xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
 ;                   if rr_log then begin
 ;                   		xticknames=log_ticks()
@@ -4150,7 +4150,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
 ;                   if rr_log then begin
 ;                   		xticknames=log_ticks()
@@ -4160,7 +4160,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    xticknames=STRING(INDGEN(16), FORMAT='(I0)')
 ;                   if rr_log then begin
 ;                   		xticknames=log_ticks()
@@ -4204,7 +4204,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                    yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
 ;                   if rr_log then begin
 ;                    	yticknames=log_ticks()
@@ -4214,7 +4214,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    yticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
 ;                   if rr_log then begin
 ;                   		yticknames=log_ticks()
@@ -4224,7 +4224,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    yticknames=STRING(INDGEN(16), FORMAT='(I0)')
 ;                   if rr_log then begin
 ;                   		yticknames=log_ticks()
@@ -4321,7 +4321,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_normBias = 1    ; reset flag to include normalized bias on plot
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
                    		xticknames=log_ticks()
@@ -4332,7 +4332,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    ;xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
                    if rr_log then begin
 ;                   		xticknames=log_label(8, 8)
@@ -4343,7 +4343,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    ;xticknames=STRING(INDGEN(16), FORMAT='(I0)')
                    if rr_log then begin
 ;                   		xticknames=log_label(8, 2)
@@ -4383,15 +4383,15 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                  do_MAE_1_1 = 0
                  CASE raintypeBBidx OF
                   2 : BEGIN
-                      SCAT_DATA = "Any/All Samples" + bb_string
+                      SCAT_DATA = "Any/All Samples" + bb_plot_string
                       xticknames=['20','25','30','35','40','45','50','55','60']
                       END
                   1 : BEGIN
-                      SCAT_DATA = "Convective Samples" + bb_string
+                      SCAT_DATA = "Convective Samples" + bb_plot_string
                       xticknames=['20','25','30','35','40','45','50','55','60']
                       END
                   0 : BEGIN
-                      SCAT_DATA = "Stratiform Samples" + bb_string
+                      SCAT_DATA = "Stratiform Samples" + bb_plot_string
                       xticknames=['15','20','25','30','35','40','45','50','55']
                       END
                  ENDCASE
@@ -4418,13 +4418,13 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                  do_MAE_1_1 = 0
                  CASE raintypeBBidx OF
                   2 : BEGIN
-                      SCAT_DATA = "Any/All Samples" + bb_string
+                      SCAT_DATA = "Any/All Samples" + bb_plot_string
                       END
                   1 : BEGIN
-                      SCAT_DATA = "Convective Samples" + bb_string
+                      SCAT_DATA = "Convective Samples" + bb_plot_string
                       END
                   0 : BEGIN
-                      SCAT_DATA = "Stratiform Samples" + bb_string
+                      SCAT_DATA = "Stratiform Samples" + bb_plot_string
                       END
                  ENDCASE
 ;                 IF raintypeBBidx EQ 1 THEN $
@@ -4444,13 +4444,13 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
   'EPSI' : BEGIN
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    END
               ENDCASE
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
@@ -4507,7 +4507,7 @@ print, "mrms plot...."
 ;                   END
 
               2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                     if rr_log then begin
  ;                  		yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4517,7 +4517,7 @@ print, "mrms plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    if rr_log then begin
 ;                   		yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4527,7 +4527,7 @@ print, "mrms plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    if rr_log then begin
 ;                   		yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
@@ -4559,7 +4559,7 @@ print, "GRRMRMS plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                     if rr_log then begin
                    		yticknames=log_ticks()
                    		;yticknames=log_label(8, 8)
@@ -4569,7 +4569,7 @@ print, "GRRMRMS plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4579,7 +4579,7 @@ print, "GRRMRMS plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
@@ -4611,7 +4611,7 @@ print, "GRCMRMS plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                     if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4621,7 +4621,7 @@ print, "GRCMRMS plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4631,7 +4631,7 @@ print, "GRCMRMS plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
@@ -4663,7 +4663,7 @@ print, "GRCMRMS plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                     if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4673,7 +4673,7 @@ print, "GRCMRMS plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    if rr_log then begin
                    		yticknames=log_ticks()
                    		;yticknames=log_label(8, 8)
@@ -4683,7 +4683,7 @@ print, "GRCMRMS plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
@@ -4714,7 +4714,7 @@ print, "GRRDSR plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                     if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4724,7 +4724,7 @@ print, "GRRDSR plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4734,7 +4734,7 @@ print, "GRRDSR plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
@@ -4765,7 +4765,7 @@ print, "GRCDSR plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                     if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4775,7 +4775,7 @@ print, "GRCDSR plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4785,7 +4785,7 @@ print, "GRCDSR plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
@@ -4816,7 +4816,7 @@ print, "GRPDSR plot...."
               do_MAE_1_1 = 1
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_string
+                   SCAT_DATA = "Any/All Samples" + bb_plot_string
                     if rr_log then begin
                    		;yticknames=log_label(8, 8)
                    		yticknames=log_ticks()
@@ -4826,7 +4826,7 @@ print, "GRPDSR plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_string
+                   SCAT_DATA = "Convective Samples" + bb_plot_string
                    if rr_log then begin
                    		yticknames=log_ticks()
                    		;yticknames=log_label(8, 8)
@@ -4836,7 +4836,7 @@ print, "GRPDSR plot...."
                    trim = 0    ; show low-percentage outliers
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_string
+                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
                    if rr_log then begin
                    		;yticknames=log_label(8, 2)
                    		yticknames=log_ticks()
