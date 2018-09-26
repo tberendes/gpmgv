@@ -4257,25 +4257,25 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
 			   'SWDP' : BEGIN
               		titleLine1 = satprodtype+' '+version+" RR vs. SWEPD "+ $
                            " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWEDP_"+"_Scatter"
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWEDP"+"_Scatter"
               		xtitle= 'SWEDP '+units
 			      END
 			   'SW25' : BEGIN
               		titleLine1 = satprodtype+' '+version+" RR vs. SWE25 "+ $
                            " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE25_"+"_Scatter"
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE25"+"_Scatter"
               		xtitle= 'SWE25 '+units
 			      END
 			   'SW50' : BEGIN
               		titleLine1 = satprodtype+' '+version+" RR vs. SWE50 "+ $
                            " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE50_"+"_Scatter"
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE50"+"_Scatter"
               		xtitle= 'SWE50 '+units
 			      END
 			   'SW75' : BEGIN
               		titleLine1 = satprodtype+' '+version+" RR vs. SWE75 "+ $
                            " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE75_"+"_Scatter"
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE75"+"_Scatter"
               		xtitle= 'SWE75 '+units
 			      END
 				ENDCASE           
