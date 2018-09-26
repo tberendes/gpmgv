@@ -2673,17 +2673,31 @@ endif
                       END
                   2 : BEGIN
                       ; accumulate any/all rain types below the BB at/below 3 km
-                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1, countabv )
+                      if snow_flag then begin
+                      	idxabv = WHERE(hgtcat LE 1, countabv )
+                      endif else begin
+                      	idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1, countabv )
+                      endelse
                       END
                   1 : BEGIN
                       ; accumulate convective rain type below the BB at/below 3 km
-                      idxabv = WHERE( BBprox EQ 0 AND rntype EQ RainType_convective $
+                      if snow_flag then begin
+                      	 idxabv = WHERE( BBprox EQ 0 AND rntype EQ RainType_convective $
                                       AND hgtcat LE 1, countabv )
+                      endif else begin
+                      	 idxabv = WHERE( rntype EQ RainType_convective $
+                                      AND hgtcat LE 1, countabv )                      
+                      endelse
                       END
                   0 : BEGIN
                       ; accumulate stratiform rain type below the BB at/below 3 km
-                      idxabv = WHERE( BBprox EQ 0 AND rntype EQ RainType_stratiform $
+                      if snow_flag then begin
+                      	 idxabv = WHERE( rntype EQ RainType_stratiform $
                                       AND hgtcat LE 1, countabv )
+                      endif else begin
+                      	 idxabv = WHERE( BBprox EQ 0 AND rntype EQ RainType_stratiform $
+                                      AND hgtcat LE 1, countabv )
+                      endelse
                       END
                  ENDCASE
 ;                 IF raintypeBBidx EQ 1 THEN BEGIN
