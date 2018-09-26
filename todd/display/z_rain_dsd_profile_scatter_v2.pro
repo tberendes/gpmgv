@@ -2749,6 +2749,7 @@ endif
                     endelse
                  ENDELSE
                  if snow_flag then begin
+                    print,'snow flag set in scaling block '
                     if rr_log then begin
 	                    binmin1 = 0.01  & binmin2 = 0.01
 	                    binmax1 = 100.0 & binmax2 = 100.0
