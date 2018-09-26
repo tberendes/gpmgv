@@ -2708,7 +2708,7 @@ endif
                 binmin2 = 1.0 & binmax2 = 6.0 & BINSPAN2 = 0.1
                 BREAK
               END
-  	   'SWDP' : BEGIN
+  	   'SWDP' :
   	   'SW25' : 
   	   'SW50' : 
   	   'SW75' : 
