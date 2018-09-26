@@ -664,6 +664,11 @@ PRO z_rain_dsd_profile_scatter_v2, INSTRUMENT=instrument,         $
 ; "include" file for PR data constants
 @pr_params.inc
 
+; set filter flags
+s2ku = KEYWORD_SET( s2ku )
+snow_flag = KEYWORD_SET( snow )
+rr_log = KEYWORD_SET( rr_log )
+
 IF FLOAT(!version.release) lt 8.1 THEN message, "Requires IDL 8.1 or later."
 ; TAB 12/4/17 make this a parameter if we want to be permanent
 do_RR_DM_curve_fit = 0
@@ -771,6 +776,12 @@ IF N_ELEMENTS(ray_range) EQ 2 THEN BEGIN
       filtertitlestring = filtertitlestring + 'Outer ' + STRING(ray_range[1],ray_range[0],format='(I0,"-",I0)')
    ENDELSE
 ENDIF
+
+if snow_flag then begin
+      filteraddstring = filteraddstring + '_snow_' 
+      filtertitlestring = filtertitlestring + 'Snow '
+endif
+
 
 ; TAB 11/14/17 added accumulator for HID
 ; indexed by raintypeBBidx and 11 categories 
@@ -1106,9 +1117,6 @@ IF do_dm_range EQ 1 AND do_dm_thresh EQ 1 THEN BEGIN
             +"  Quitting.", /INFO
    GOTO, cleanUp
 ENDIF
-s2ku = KEYWORD_SET( s2ku )
-snow_flag = KEYWORD_SET( snow )
-rr_log = KEYWORD_SET( rr_log )
 
 IF N_ELEMENTS(outpath) NE 1 THEN BEGIN
    outpath='/data/tmp'
@@ -2027,10 +2035,6 @@ ENDIF
 
 ; New snow filter
 if snow_flag then begin
-	filterText=filterText+' Snow '
-	filteraddstring = filteraddstring + '_snow_'
-    filtertitlestring = filtertitlestring + 'Snow '
-	
 	; filter out non-snow categories
 	notsnow_index = where((besthid lt 3) or (besthid gt 7), num_notsnow)
 	if num_notsnow gt 0 then begin
