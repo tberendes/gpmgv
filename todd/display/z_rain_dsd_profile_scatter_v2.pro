@@ -2028,12 +2028,14 @@ ENDIF
 ; New snow filter
 if snow_flag then begin
 	filterText=filterText+' Snow '
+	filteraddstring = filteraddstring + '_snow_'
+    filtertitlestring = filtertitlestring + 'Snow '
+	
 	; filter out non-snow categories
 	notsnow_index = where((besthid lt 3) or (besthid gt 7), num_notsnow)
 	if num_notsnow gt 0 then begin
 		flag2filter[notsnow_index] = 1
 	endif
-
 endif
 
 ; TAB  9/24/18 Added for Walt, new snow check
@@ -2635,7 +2637,7 @@ endif
       'SWDP' :
       'SW25' :
       'SW50' :
-      'SW75' :  BEGIN ; Don't check below BB
+      'SW75' :  BEGIN ; Don't check below BB, just < 1.5km, should already be that way in the data
                 CASE raintypeBBidx OF
                    0 : BEGIN
                       ; accumulate stratiform rain types
@@ -4323,6 +4325,9 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                    endelse                    
                    END
               ENDCASE
+              if snow_flag and not rr_log then begin
+                    xticknames=STRING(INDGEN(11), FORMAT='(I0)')
+              endif
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
 ;                 SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
 ;                 xticknames=STRING(INDGEN(16)*4, FORMAT='(I0)')
