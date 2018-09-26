@@ -4278,12 +4278,6 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE75_"+"_Scatter"
               		xtitle= 'SWE75 '+units
 			      END
-				ELSE: BEGIN
-              		titleLine1 = satprodtype+' '+version+" RR vs. GR "+PlotTypes(idx2do)+ $
-                           " Scatter, Mean GR-DPR Bias: "
-              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
-              		xtitle= 'GR '+PlotTypes(idx2do)+' '+units
-			      END
 				ENDCASE           
 
     
@@ -4346,6 +4340,11 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
              ; if rr_log then units='(log mm/h)' else units='(mm/h)'
               units='(mm/h)'
               ytitle= pr_or_dpr +' '+ units
+              
+              titleLine1 = satprodtype+' '+version+" RR vs. GR "+PlotTypes(idx2do)+ $
+                   " Scatter, Mean GR-DPR Bias: "
+              pngpre=pr_or_dpr+'_'+version+"_RR_vs_GR_"+PlotTypes(idx2do)+"_Scatter"
+              xtitle= 'GR '+PlotTypes(idx2do)+' '+units
               
                BREAK
            END
