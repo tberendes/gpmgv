@@ -2640,15 +2640,15 @@ endif
                    0 : BEGIN
                       ; accumulate stratiform rain types
                       
-                      idxabv = WHERE( rntype EQ RainType_stratiform, countabv )
+                      idxabv = WHERE( rntype EQ RainType_stratiform AND hgtcat LT 1, countabv )
                       END
                    1 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE( rntype EQ RainType_convective, countabv )
+                      idxabv = WHERE( rntype EQ RainType_convective AND hgtcat LT 1, countabv )
                       END
                    2 : BEGIN
                       ; accumulate convective rain types
-                      idxabv = WHERE( rntype EQ RainType_convective OR rntype EQ RainType_stratiform, countabv )
+                      idxabv = WHERE( (rntype EQ RainType_convective OR rntype EQ RainType_stratiform)  AND hgtcat LT 1, countabv )
                       END
                 ELSE: BEGIN
                       END
@@ -4220,13 +4220,13 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
     'SW75' :  BEGIN
               CASE raintypeBBidx OF
                2 : BEGIN
-                   SCAT_DATA = "Any/All Samples"
+                   SCAT_DATA = "Any/All Samples, <= 1.5km AGL"
                    END
                1 : BEGIN
-                   SCAT_DATA = "Convective Samples"
+                   SCAT_DATA = "Convective Samples, <= 1.5km AGL"
                    END
                0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples"
+                   SCAT_DATA = "Stratiform Samples, <= 1.5km AGL"
                    END
                ENDCASE
                if rr_log then begin
