@@ -3765,7 +3765,12 @@ trim = 1   ; flag whether to suppress low percentage bins in plots
 do_normBias = 0    ; flag whether to include normalized bias on plot
 
 ptr2do = plotDataPtrs[idx2do, raintypeBBidx]
-BB_string = '_BelowBB'
+
+if not check_bb_flag then $ 
+	BB_string = "" $
+else $
+	BB_string = '_BelowBB'
+	
 ; Have to check both that data were read for the variable(s), and that
 ; histogram data were accumulated for this instance before attempting the plot
 ; TAB 11/14/17 changed conditon to allow the HID histogram without checking have_hist structure
@@ -5491,8 +5496,6 @@ print, "GRPDSR plot...."
 
    	goto, plot_skipped1
    endif
-
-   if check_bb_flag then BB_string = ""
 
    PRINT, ''
    PRINT, '' 
