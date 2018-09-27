@@ -3790,7 +3790,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
    bustOut=0
 
    ;Dm/D0/Nw/N2/Rx change to not print Below BB if snow
-   if check_bb_flag[idx2d0] then begin
+   if check_bb_flag[idx2do] then begin
    	   bb_plot_string = ", Below Bright Band and <= 3 km AGL"
    endif else begin
    	   bb_plot_string = " <= 3 km AGL"
