@@ -2479,10 +2479,13 @@ endif
    endfor
 
   ;# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-   check_bb_flag=1
+  ; main plot loop
+  
    IF do_scatr EQ 1 THEN BEGIN
    FOR iplot = 0, nPlots-1 DO BEGIN
+    ; Added to suppress BB check if needed for a given plot type
+    check_bb_flag=1
+
 ;   trim = 1   ; flag whether to suppress low percentage bins in plots
 ;   for raintypeBBidx = 0, 2 do begin
 ; TAB 11/10/17 added fourth raintypeBBidx for convective above BB within 3 height bins for Z plots only 
@@ -2668,6 +2671,9 @@ endif
                END
        ELSE : BEGIN
                 ; accumulate 2-D histograms of below-BB Dm/D0/Nw/N2/Rx at/below 3 km
+                
+                 if snow_flag then check_bb_flag=0
+                 
                  CASE raintypeBBidx OF
                   3 : BEGIN
                       ; if plot type is 3 and not a Z plot, skip plot 
@@ -2677,7 +2683,6 @@ endif
                       ; accumulate any/all rain types below the BB at/below 3 km
                       if snow_flag then begin
                       	idxabv = WHERE(hgtcat LE 1, countabv )
-                      	check_bb_flag=0
                       endif else begin
                       	idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1, countabv )
                       endelse
@@ -2685,7 +2690,6 @@ endif
                   1 : BEGIN
                       ; accumulate convective rain type below the BB at/below 3 km
                       if snow_flag then begin
-                      	 check_bb_flag=0
                       	 idxabv = WHERE( BBprox EQ 0 AND rntype EQ RainType_convective $
                                       AND hgtcat LE 1, countabv )
                       endif else begin
@@ -2696,7 +2700,6 @@ endif
                   0 : BEGIN
                       ; accumulate stratiform rain type below the BB at/below 3 km
                       if snow_flag then begin
-                       	 check_bb_flag=0
                        	 idxabv = WHERE( rntype EQ RainType_stratiform $
                                       AND hgtcat LE 1, countabv )
                       endif else begin
