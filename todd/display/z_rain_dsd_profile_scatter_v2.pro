@@ -2481,10 +2481,13 @@ endif
   ;# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ; main plot loop
   
+   check_bb_flag=INTARR[nPlots]
+   
    IF do_scatr EQ 1 THEN BEGIN
    FOR iplot = 0, nPlots-1 DO BEGIN
     ; Added to suppress BB check if needed for a given plot type
-    check_bb_flag=1
+    
+    check_bb_flag[iplot]=1
 
 ;   trim = 1   ; flag whether to suppress low percentage bins in plots
 ;   for raintypeBBidx = 0, 2 do begin
@@ -2646,7 +2649,7 @@ endif
       'SW25' :
       'SW50' :
       'SW75' :  BEGIN ; Don't check below BB, just < 1.5km, should already be that way in the data
-      			check_bb_flag=0
+      			check_bb_flag[iplot]=0
                 CASE raintypeBBidx OF
                    0 : BEGIN
                       ; accumulate stratiform rain types
@@ -2672,7 +2675,7 @@ endif
        ELSE : BEGIN
                 ; accumulate 2-D histograms of below-BB Dm/D0/Nw/N2/Rx at/below 3 km
                 
-                 if snow_flag then check_bb_flag=0
+                 if snow_flag then check_bb_flag[iplot]=0
                  
                  CASE raintypeBBidx OF
                   3 : BEGIN
@@ -3769,7 +3772,7 @@ do_normBias = 0    ; flag whether to include normalized bias on plot
 
 ptr2do = plotDataPtrs[idx2do, raintypeBBidx]
 
-if not check_bb_flag then $ 
+if not check_bb_flag[idx2do] then $ 
 	BB_string = "" $
 else $
 	BB_string = '_BelowBB'
@@ -3787,7 +3790,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
    bustOut=0
 
    ;Dm/D0/Nw/N2/Rx change to not print Below BB if snow
-   if check_bb_flag then begin
+   if check_bb_flag[idx2d0] then begin
    	   bb_plot_string = ", Below Bright Band and <= 3 km AGL"
    endif else begin
    	   bb_plot_string = " <= 3 km AGL"
