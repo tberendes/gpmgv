@@ -2481,7 +2481,7 @@ endif
   ;# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ; main plot loop
   
-   check_bb_flag=INTARR[nPlots]
+   check_bb_flag=INTARR(nPlots)
    
    IF do_scatr EQ 1 THEN BEGIN
    FOR iplot = 0, nPlots-1 DO BEGIN
