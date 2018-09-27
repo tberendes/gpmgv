@@ -5492,6 +5492,7 @@ print, "GRPDSR plot...."
    	goto, plot_skipped1
    endif
 
+   if check_bb_flag then BB_string = ""
 
    PRINT, ''
    PRINT, '' 
