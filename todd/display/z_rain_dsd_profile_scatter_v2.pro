@@ -2036,10 +2036,7 @@ ENDIF
 ; New snow filter
 if snow_flag then begin
 	; filter out non-snow categories
-;	notsnow_index = where((besthid lt 3) or (besthid gt 7), num_notsnow)
-	notsnow_index = where((besthid lt 3) or (besthid gt 7) $
-	   and minpctcombined GE pctAbvThreshF $
-	   and GR_blockage GT max_blockage AND gvz GT 0.0, num_notsnow)
+	notsnow_index = where((besthid lt 3) or (besthid gt 7), num_notsnow)
 	if num_notsnow gt 0 then begin
 		flag2filter[notsnow_index] = 1
 	endif
@@ -2050,7 +2047,10 @@ endif
 
 ; TAB  9/24/18 Added for Walt, new snow check
 ; output filename for possible snow samples
-snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1), num_snow)
+;snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1), num_snow)
+snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
+	   and minpctcombined GE pctAbvThreshF $
+	   and GR_blockage GT max_blockage AND gvz GT 0.0, num_snow)
 if num_snow GT 0 then begin
    printf, snow_LUN, num_snow,ncfilepr,format='(%"%d\,%s")'
    print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
