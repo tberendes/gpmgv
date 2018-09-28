@@ -2061,10 +2061,10 @@ print, 'total swedp count '+ STRING(numswedp)
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1), numswedp)
 print, 'swedp snow count '+ STRING(numswedp)
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
-  and minpctcombined GE pctAbvThreshF and GR_blockage LE max_blockag, numswedp)
+  and GR_blockage LE max_blockage, numswedp)
 print, 'swedp snow filtered by blockage'+ STRING(numswedp)
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
-  and minpctcombined GE pctAbvThreshF, numswedp)
+   and GR_blockage LE max_blockage and minpctcombined GE pctAbvThreshF, numswedp)
 print, 'swedp snow filtered by blockage and pctAbv count  '+ STRING(numswedp)
 
 ;-------------------------------------------------
