@@ -874,50 +874,63 @@
 		                  swedp_avg_gv = altstats.mean
 		                  swedp_stddev_gv = altstats.stddev
 		                  swedp_max_gv = altstats.max
-	                  
+	
+		                  ; Pierre's methods
+		                  
+		                  swe25=gvrcvals
+		               	  swe25[zposind] = 0.101 * Z[zposind]^0.413
+		                  ; use RP rain rate where snow is not detected
+		                  swe25 [notsnow_index]=gvrcvals[notsnow_index]
+		                  altstats=mean_stddev_max_by_rules(swe25,'RR', dpr_rain_min, $
+		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
+	           	  	  	  n_gr_swe25_points_rejected = altstats.rejects
+	              		  swe25_avg_gv = altstats.mean
+	              		  swe25_stddev_gv = altstats.stddev
+	              		  swe25_max_gv = altstats.max
+	           	  	      
+	           	  	      swe50=gvrcvals
+		               	  swe50[zposind] = 0.204 * Z[zposind]^0.389
+		                  ; use RP rain rate where snow is not detected
+		                  swe50 [notsnow_index]=gvrcvals[notsnow_index]
+		                  altstats=mean_stddev_max_by_rules(swe50,'RR', dpr_rain_min, $
+		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
+	           	  	  	  n_gr_swe50_points_rejected = altstats.rejects
+	              		  swe50_avg_gv = altstats.mean
+	              		  swe50_stddev_gv = altstats.stddev
+	              		  swe50_max_gv = altstats.max
+	           	  	      
+	            	  	  swe75=gvrcvals
+	 	               	  swe75[zposind] = 0.257 * Z[zposind]^0.388
+		                  ; use RP rain rate where snow is not detected
+		                  swe75 [notsnow_index]=gvrcvals[notsnow_index]
+	 	                  altstats=mean_stddev_max_by_rules(swe75,'RR', dpr_rain_min, $
+		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)	                              
+	           	  	  	  n_gr_swe75_points_rejected = altstats.rejects
+	              		  swe75_avg_gv = altstats.mean
+	              		  swe75_stddev_gv = altstats.stddev
+	              		  swe75_max_gv = altstats.max
+
 	                  endif else begin
 	 	                  n_gr_swedp_points_rejected = Z_MISSING
 		                  swedp_avg_gv = Z_MISSING
 		                  swedp_stddev_gv = Z_MISSING
 		                  swedp_max_gv = Z_MISSING
 
-	                  endelse
-	                 
-	                  ; Pierre's methods
-	                  
-	                  swe25=gvrcvals
-	               	  swe25[zposind] = 0.101 * Z[zposind]^0.413
-	                  ; use RP rain rate where snow is not detected
-	                  swe25 [notsnow_index]=gvrcvals[notsnow_index]
-	                  altstats=mean_stddev_max_by_rules(swe25,'RR', dpr_rain_min, $
-	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
-           	  	  	  n_gr_swe25_points_rejected = altstats.rejects
-              		  swe25_avg_gv = altstats.mean
-              		  swe25_stddev_gv = altstats.stddev
-              		  swe25_max_gv = altstats.max
-           	  	      
-           	  	      swe50=gvrcvals
-	               	  swe50[zposind] = 0.204 * Z[zposind]^0.389
-	                  ; use RP rain rate where snow is not detected
-	                  swe50 [notsnow_index]=gvrcvals[notsnow_index]
-	                  altstats=mean_stddev_max_by_rules(swe50,'RR', dpr_rain_min, $
-	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
-           	  	  	  n_gr_swe50_points_rejected = altstats.rejects
-              		  swe50_avg_gv = altstats.mean
-              		  swe50_stddev_gv = altstats.stddev
-              		  swe50_max_gv = altstats.max
-           	  	      
-            	  	  swe75=gvrcvals
- 	               	  swe75[zposind] = 0.257 * Z[zposind]^0.388
-	                  ; use RP rain rate where snow is not detected
-	                  swe75 [notsnow_index]=gvrcvals[notsnow_index]
- 	                  altstats=mean_stddev_max_by_rules(swe75,'RR', dpr_rain_min, $
-	                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)	                              
-           	  	  	  n_gr_swe75_points_rejected = altstats.rejects
-              		  swe75_avg_gv = altstats.mean
-              		  swe75_stddev_gv = altstats.stddev
-              		  swe75_max_gv = altstats.max
-	                  
+	           	  	  	  n_gr_swe25_points_rejected = Z_MISSING
+	              		  swe25_avg_gv = Z_MISSING
+	              		  swe25_stddev_gv = Z_MISSING
+	              		  swe25_max_gv = Z_MISSING
+
+	           	  	  	  n_gr_swe50_points_rejected = Z_MISSING
+	              		  swe50_avg_gv = Z_MISSING
+	              		  swe50_stddev_gv = Z_MISSING
+	              		  swe50_max_gv = Z_MISSING
+
+	           	  	  	  n_gr_swe75_points_rejected = Z_MISSING
+	              		  swe75_avg_gv = Z_MISSING
+	              		  swe75_stddev_gv = Z_MISSING
+	              		  swe75_max_gv = Z_MISSING
+	                  endelse	                 	                  
                   
                   endif
 ;                  endif else begin
