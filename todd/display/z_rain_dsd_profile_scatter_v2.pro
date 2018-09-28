@@ -2036,10 +2036,16 @@ ENDIF
 ; New snow filter
 if snow_flag then begin
 	; filter out non-snow categories
-	notsnow_index = where((besthid lt 3) or (besthid gt 7), num_notsnow)
+;	notsnow_index = where((besthid lt 3) or (besthid gt 7), num_notsnow)
+	notsnow_index = where((besthid lt 3) or (besthid gt 7) $
+	   and minpctcombined GE pctAbvThreshF $
+	   and GR_blockage GT max_blockage AND gvz GT 0.0, num_notsnow)
 	if num_notsnow gt 0 then begin
 		flag2filter[notsnow_index] = 1
 	endif
+	
+	; filter for pct above thresh:  minpctcombined GE pctAbvThreshF
+	; filter for GR blockage:  GR_blockage GT max_blockage AND gvz GT 0.0
 endif
 
 ; TAB  9/24/18 Added for Walt, new snow check
