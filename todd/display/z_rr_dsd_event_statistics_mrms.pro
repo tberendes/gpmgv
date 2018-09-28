@@ -43,11 +43,14 @@
 ;  DPR_Z_ADJUST=0.0
 ;  GR_Z_ADJUST=''
 ;  MAX_RANGE=100
+;  MAX_BLOCKAGE=1.0
+;  Z_BLOCKAGE_THRESH=3.0
 ;  SHOW_THRESH_PPI=1
 ;  Z_ONLY_PPI=0
 ;  GV_CONVECTIVE=0
 ;  GV_STRATIFORM=0
 ;  ALT_BB_HGT=''
+;  FORCEBB=0
 ;  HIDE_TOTALS=0
 ;  HIDE_RNTYPE=0
 ;  HIDE_PPIS=0
@@ -57,6 +60,9 @@
 ;  S2KU=0
 ;  USE_ZR=0
 ;  DZERO_ADJ=1.05
+;  GR_RR_FIELD='RR'
+;  GR_DM_FIELD='DM'
+;  GR_NW_FIELD='NW'
 ;  RECALL_NCPATH=0
 ;  SUBSET_METHOD=''
 ;  MIN_FOR_SUBSET=20.     (default value depends on subset_method)
@@ -91,7 +97,9 @@
 ;   and call to geo_match_3d_comparisons.
 ; - Fixed name of max_blockage variable in call to geo_match_3d_comparisons.
 ; - Added missing Z_ONLY_PPI=0 line in prologue documentation of control file.
-;
+; 09/12/17 Morris, GPM GV, SAIC
+; - Documentation only.  Added missing parameters in sample control file listing
+;   in prologue.
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact

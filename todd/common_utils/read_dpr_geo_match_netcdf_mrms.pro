@@ -292,6 +292,8 @@
 ; 06/20/18 by Bob Morris, GPM GV (SAIC)
 ;  - Added reading of new global variables PR_2APR_file and PR_2BPRTMI_File
 ;    and output to filesmeta struct to support PR version 8 processing.
+; 09/04/18 Berendes, UAH
+;  - Added mods for SWE variables
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:

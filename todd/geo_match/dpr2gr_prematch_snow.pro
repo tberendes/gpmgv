@@ -1640,13 +1640,17 @@ WHILE NOT (EOF(lun0)) DO BEGIN
         ; remove the uncompressed file copy
          command3 = "rm -v " + ncfile1
          spawn, command3
-         IF (status EQ 1) then GOTO, bailOut
+         ; TAB 9/18/18 changed this to continue to next GR file instead of bailing
+         IF (status EQ 1) then GOTO, nextGRfile
+;         IF (status EQ 1) then GOTO, bailOut
       endif else begin
          print, 'Cannot copy/unzip netCDF file: ', gr_netcdf_file
          print, cpstatus
          command3 = "rm -v " + ncfile1
          spawn, command3
-         goto, bailOut
+         ; TAB 9/18/18 changed this to continue to next GR file instead of bailing
+         IF (status EQ 1) then GOTO, nextGRfile
+         ;goto, bailOut
       endelse
 
       for iscan = 0, N_ELEMENTS(DPR_SCANS)-1 DO BEGIN

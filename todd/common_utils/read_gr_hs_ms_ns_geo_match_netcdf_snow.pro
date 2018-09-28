@@ -54,6 +54,8 @@
 ; -------
 ; 02/29/2016  Morris/SAIC/GPM-GV
 ; - Created from read_dprgmi_geo_match_netcdf.pro.
+; 09/04/18 Berendes, UAH
+;  - Added mods for SWE variables
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
