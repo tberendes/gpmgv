@@ -2044,7 +2044,7 @@ endif
 
 ; TAB  9/24/18 Added for Walt, new snow check
 ; output filename for possible snow samples
-snow_index = where((besthid ge 3) and (besthid le 7), num_snow)
+snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1), num_snow)
 if num_snow GT 0 then begin
    printf, snow_LUN, num_snow,ncfilepr,format='(%"%d\,%s")'
    print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
@@ -4297,7 +4297,7 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               
  			  CASE PlotTypes(idx2do) OF
 			   'SWDP' : BEGIN
-              		titleLine1 = satprodtype+' '+version+" RR vs. SWEPD "+ $
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWEDP "+ $
                            " Scatter, Mean GR-DPR Bias: "
               		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWEDP"+"_Scatter"
               		xtitle= 'SWEDP '+units
