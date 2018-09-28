@@ -2046,15 +2046,16 @@ endif
 ; TAB  9/24/18 Added for Walt, new snow check
 ; output filename for possible snow samples
 ;snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1), num_snow)
-snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
-	   and minpctcombined GE pctAbvThreshF $
-	   and GR_blockage LE max_blockage AND gvz GT 0.0, num_snow)
-	; filter for pct above thresh:  minpctcombined GE pctAbvThreshF
-	; filter for GR blockage:  GR_blockage GT max_blockage AND gvz GT 0.0
-if num_snow GT 0 then begin
-   printf, snow_LUN, num_snow,ncfilepr,format='(%"%d\,%s")'
-   print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
-endif
+
+;snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
+;	   and minpctcombined GE pctAbvThreshF $
+;	   and GR_blockage LE max_blockage AND gvz GT 0.0, num_snow)
+;	; filter for pct above thresh:  minpctcombined GE pctAbvThreshF
+;	; filter for GR blockage:  GR_blockage GT max_blockage AND gvz GT 0.0
+;if num_snow GT 0 then begin
+;   printf, snow_LUN, num_snow,ncfilepr,format='(%"%d\,%s")'
+;   print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
+;endif
 
 swedp_index = where(swedp gt 0, numswedp)
 print, 'total swedp count '+ STRING(numswedp)
@@ -2066,6 +2067,7 @@ print, 'swedp snow filtered by blockage'+ STRING(numswedp)
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
    and GR_blockage LE max_blockage and minpctcombined GE pctAbvThreshF, numswedp)
 print, 'swedp snow filtered by blockage and pctAbv count  '+ STRING(numswedp)
+printf, snow_LUN, numswedp,ncfilepr,format='(%"%d\,%s")'
 
 ;-------------------------------------------------
 
