@@ -2056,6 +2056,8 @@ if num_snow GT 0 then begin
    print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
 endif
 
+swedp_index = where(swdp gt 0, numswedp)
+print, 'swedp count '+ STRING(numswedp)
 
 ;-------------------------------------------------
 
