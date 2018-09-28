@@ -2056,7 +2056,7 @@ if num_snow GT 0 then begin
    print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
 endif
 
-swedp_index = where(swedp gt 0, numswedp)
+swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1), numswedp)
 print, 'swedp count '+ STRING(numswedp)
 
 ;-------------------------------------------------
