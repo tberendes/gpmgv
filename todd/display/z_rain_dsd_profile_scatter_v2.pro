@@ -2041,8 +2041,6 @@ if snow_flag then begin
 		flag2filter[notsnow_index] = 1
 	endif
 	
-	; filter for pct above thresh:  minpctcombined GE pctAbvThreshF
-	; filter for GR blockage:  GR_blockage GT max_blockage AND gvz GT 0.0
 endif
 
 ; TAB  9/24/18 Added for Walt, new snow check
@@ -2050,7 +2048,9 @@ endif
 ;snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1), num_snow)
 snow_index = where((besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
 	   and minpctcombined GE pctAbvThreshF $
-	   and GR_blockage GT max_blockage AND gvz GT 0.0, num_snow)
+	   and GR_blockage LE max_blockage AND gvz GT 0.0, num_snow)
+	; filter for pct above thresh:  minpctcombined GE pctAbvThreshF
+	; filter for GR blockage:  GR_blockage GT max_blockage AND gvz GT 0.0
 if num_snow GT 0 then begin
    printf, snow_LUN, num_snow,ncfilepr,format='(%"%d\,%s")'
    print, num_snow,ncfilepr,format='(%"%d possible snow samples in %s")'
