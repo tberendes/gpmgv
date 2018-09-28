@@ -2059,7 +2059,7 @@ endif
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1), numswedp)
 print, 'swedp count '+ STRING(numswedp)
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
-  and GR_blockage LE max_blockage and minpctcombined GE pctAbvThreshF, numswedp)
+  and minpctcombined GE pctAbvThreshF, numswedp)
 print, 'filtered by blockage and pctAbv swedp count '+ STRING(numswedp)
 
 ;-------------------------------------------------
