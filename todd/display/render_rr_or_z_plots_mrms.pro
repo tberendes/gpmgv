@@ -141,7 +141,14 @@
 ;   is active and thresholding has been done.
 ; - Added exception for blanking plotted samples based on DPR rain rate when
 ;   analyzing the MS scan which has no DPR RR field.
+; 09/06/17 Morris, GPM GV, SAIC
+; - Added the logic to implement LAND_OCEAN=land_ocean keyword/value parameter
+;   to filter analyzed samples by underlying surface type.  Implemented multiple
+;   parameter combined filter using flag2filter array.
 ;
+; 09/20/18 Berendes, UAH
+; - Added Bob's changes from 9/6/17 into this version which includes mods for 
+;   MRMS RR plots and Snow equivalent RR plots
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -348,6 +355,14 @@ hide_rntype = KEYWORD_SET( hide_rntype )
 IF hide_rntype THEN rnType4ppi[*] = 3
 
 ;-------------------------------------------------
+ 
+; Define and/or reset filter flag variables if doing blockage, clutter, or 
+; surface type filtering
+IF do_GR_blockage NE 0 OR KEYWORD_SET(declutter) $
+   OR N_ELEMENTS( land_ocean ) EQ 1 THEN BEGIN
+      flag2filter = INTARR( SIZE(gvz, /DIMENSIONS) )
+      filterText=''
+ENDIF ;ELSE filterText='N/A'
 
 ; identify and filter out GR-beam-blocked samples if a method is active
 
@@ -376,63 +391,114 @@ IF do_GR_blockage NE 0 THEN BEGIN
                               countblok, ' of ', countchk
                      END
              ENDCASE
-             IF countblok GT 0 THEN BEGIN
-               ; set the z samples and GR percentgood values to "MISSING" for all
-               ; samples that exceed allowed blockage, and set the plottable Z
-               ; values to 59.99 dBZ so they stand out
-                gvz[idxblok] = -11.
-                zcor[idxblok] = -11.
-                gvz_in[idxblok] = 59.99
-                zcor_in[idxblok] = 59.99
-                if have_gvrr AND xxx EQ 'RR' then begin
-                   pctgoodrrgv[idxblok] = -11.
-                endif else begin
-                   pctgoodgv[idxblok] = -11.
-                endelse
-             ENDIF
+; TAB 9/20/18 not sure what this is about, Bob deleted it in his revised version
+;             IF countblok GT 0 THEN BEGIN
+;               ; set the z samples and GR percentgood values to "MISSING" for all
+;               ; samples that exceed allowed blockage, and set the plottable Z
+;               ; values to 59.99 dBZ so they stand out
+;                gvz[idxblok] = -11.
+;                zcor[idxblok] = -11.
+;               gvz_in[idxblok] = 59.99
+;               zcor_in[idxblok] = 59.99
+;               if have_gvrr AND xxx EQ 'RR' then begin
+;                  pctgoodrrgv[idxblok] = -11.
+;               endif else begin
+;                  pctgoodgv[idxblok] = -11.
+;               endelse
+;            ENDIF
              END
          2 : BEGIN
              ; check the difference between the two lowest sweep Z values for
              ; a drop-off in the lowest sweep that indicates beam blockage
              print, ''
              print, "FILTERING BY BLOCKAGE FROM Z DROPOFF >", z_blockage_thresh
-             idxblok = WHERE(gvz[idxchk,1]-gvz[idxchk,0] GT z_blockage_thresh, $
-                             countblok)
-             IF countblok GT 0 THEN BEGIN
-              ; compute the sample ranges and azimuths and report on blockages found
-              ; (DIAGNOSTIC ONLY, COMMENTING OUT FOR BASELINE)
-;                xcenter=MEAN(xCorner, DIM=1)
-;                ycenter=MEAN(yCorner, DIM=1)
-;                rangectr = SQRT(xcenter*xcenter+ycenter*ycenter)
-;                azctr = (atan(ycenter, xcenter)/!DTOR+360.) mod 360.
-;                print, "Ranges: ", rangectr[idxchk[idxblok],0]
-;                print, "Azimuths: ", azctr[idxchk[idxblok],0]
-;                print, "Diffs 2-1: ", gvz[idxchk[idxblok],1]-gvz[idxchk[idxblok],0]
-               ; - Set the z columns and GR percentgood values to "MISSING" for all
-               ;   columns where lowest sweep shows blockage
-               ; - Set the plottable Z values to 59.99 dBZ so they stand out (disabled)
-                gvz[idxchk[idxblok],*] = -11.
-                zcor[idxchk[idxblok],*] = -11.
-;                gvz_in[idxchk[idxblok],*] = 59.99   ; disable in baseline
-;                zcor_in[idxchk[idxblok],*] = 59.99  ; disable in baseline
-                if have_gvrr AND xxx EQ 'RR' then begin
-                   pctgoodrrgv[idxchk[idxblok],*] = -11.
-                endif else begin
-                   pctgoodgv[idxchk[idxblok],*] = -11.
-                endelse
-;                print, "Diffs 3-2: ", gvz[idxchk[idxblok],2]-gvz[idxchk[idxblok],1]
-;                gvz[idxchk[idxblok],0] = 59.99
-             ENDIF
+             idxcol = WHERE(gvz[idxchk,1]-gvz[idxchk,0] GT z_blockage_thresh, $
+                            countblok)
              print, 'Columns excluded based on blockage: ', countblok, ' of ', countchk
+             IF countblok GT 0 THEN BEGIN
+               ; define an array of indices for all points
+                idxall = LINDGEN(SIZE(gvz, /DIMENSIONS))
+                IF blockfilter EQ 'C' THEN BEGIN
+                  ; tag the entire column above the blockage if by-column is specified
+                   idxblok = idxall[idxchk[idxcol],*]
+                ENDIF ELSE BEGIN
+                  ; just tag the lowest level with blockages
+                   idxblok = idxall[idxchk[idxcol],0]
+                ENDELSE
+             ENDIF
              END
          ELSE : message, "Undefined or illegal do_GR_blockage value."
       ENDCASE
+     ; define flag for the samples to be excluded if we found any blockage
+      IF N_ELEMENTS(countblok) NE 0 THEN BEGIN
+;         flag2filter = INTARR( SIZE(gvz, /DIMENSIONS) )
+;         filterText=''
+         IF countblok GT 0 THEN BEGIN
+            flag2filter[idxblok] = 1
+            filterText=filterText+' GR_blockage'
+         ENDIF
+      ENDIF      
    endif
 ENDIF ELSE BEGIN
    print, ''
    print, 'No filtering by GR blockage.'
 ENDELSE
+
 ;-------------------------------------------------
+
+; identify samples not meeting the clutter threshold, if option is active
+
+IF KEYWORD_SET(declutter) THEN BEGIN
+   print, 'Clipping by clutter criterion.'
+  ; define index array that flags clutter-affected samples - automatically
+  ; flags entire columns since clutter value is replicated over all levels
+   idxcluttered = WHERE(clutterStatus GE 10, countCluttered)
+  ; set any additional position flags in flag2filter to exclude by clutter criterion
+   IF N_ELEMENTS(countCluttered) NE 0 THEN BEGIN
+      IF ( countCluttered GT 0 ) THEN BEGIN
+         flag2filter[idxcluttered] = 1
+         filterText=filterText+' Clutter'
+      ENDIF
+   ENDIF
+ENDIF
+
+;-------------------------------------------------
+
+; identify samples not matching the surface type criterion, if option is active
+
+IF N_ELEMENTS( land_ocean ) EQ 1 THEN BEGIN
+   print, 'Clipping by surface type criterion.'
+  ; define index array that flags samples not in requested category
+  ; - flags entire columns since surface type value is replicated over all levels
+   idxNotMyType = WHERE( landOcean NE land_ocean, countNotMyType)
+  ; set any additional position flags in flag2filter to exclude by clutter criterion
+   IF N_ELEMENTS(countNotMyType) NE 0 THEN BEGIN
+      IF ( countNotMyType GT 0 ) THEN BEGIN
+         flag2filter[idxNotMyType] = 1
+         filterText=filterText+' Land/Ocean Category'
+      ENDIF
+   ENDIF
+ENDIF
+
+;-------------------------------------------------
+
+IF ( N_ELEMENTS(flag2filter) NE 0) THEN BEGIN
+  ; define an array that flags samples that passed filtering tests
+   unfiltered = pctgoodpr < pctgoodgv ;minpctcombined
+  ; set filter-flagged samples to a negative value to exclude them in clipping
+   idxfiltered = WHERE(flag2filter EQ 1, countfiltered)
+   totalpts = N_ELEMENTS(unfiltered)
+   print, "Filtered ",countfiltered," of ",totalpts, " based on"+filterText
+   ;stop
+   IF countfiltered GT 0 THEN BEGIN
+     ; set samples excluded by filter criteria to a negative value and set
+     ; flag to indicate filtering is needed
+      unfiltered[idxfiltered] = -66.6
+      altfilters = 1
+   ENDIF ELSE altfilters = 0
+ENDIF ELSE altfilters = 0
+
+; - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; optional data *clipping* based on percent completeness of the volume averages:
 ; Decide which PR and GR points to include, based on percent of expected points
@@ -441,64 +507,72 @@ ENDELSE
 ; 'completeness' of the volume averages.
 
 clipem=0
+minpctcombined = pctgoodpr < pctgoodgv
+
 IF ( pctAbvThresh GT 0.0 ) THEN BEGIN
     ; clip to the 'good' points, where 'pctAbvThresh' fraction of bins in average
     ; were above threshold
-   IF KEYWORD_SET(declutter) THEN BEGIN
-     ; also clip to uncluttered samples
+   IF altfilters EQ 1 THEN BEGIN
+     ; also clip to unfiltered samples
       if have_gvrr AND xxx EQ 'RR' then begin
-         thresh_msg = "Thresholding by rain rate cutoff and uncluttered Z.  " + gvrr_txt
+         thresh_msg = "Thresholding by rain rate cutoff and by"+filterText+".  " + gvrr_txt
          idxgoodenuff = WHERE( pctgoodrrgv GE pctAbvThresh $
                           AND  pctgoodrain GE pctAbvThresh $
-                          AND  clutterStatus LT 10, countgoodpct )
+                          AND  unfiltered GE 0.0, countgoodpct )
       endif else begin
-         IF xxx EQ 'Z' THEN thresh_msg = "Thresholding by reflectivity cutoffs and uncluttered Z." $
-         ELSE thresh_msg = "Thresholding by reflectivity cutoffs and uncluttered Z.  " + gvrr_txt
+         thresh_msg = "Thresholding by reflectivity cutoffs and by"+filterText+"."
+         IF xxx NE 'Z' then thresh_msg = thresh_msg + '  ' + gvrr_txt
          idxgoodenuff = WHERE( pctgoodpr GE pctAbvThresh $
                           AND  pctgoodgv GE pctAbvThresh $
-                          AND  clutterStatus LT 10, countgoodpct )
+                          AND  unfiltered GE 0.0, countgoodpct )
       endelse
    ENDIF ELSE BEGIN
       if have_gvrr AND xxx EQ 'RR' then begin
-         thresh_msg = "Thresholding by rain rate cutoff.  " + gvrr_txt
+         thresh_msg = "Thresholding by rain rate cutoff only.  " + gvrr_txt
          idxgoodenuff = WHERE( pctgoodrrgv GE pctAbvThresh $
                           AND  pctgoodrain GE pctAbvThresh, countgoodpct )
       endif else begin
-         IF xxx EQ 'Z' THEN thresh_msg = "Thresholding by reflectivity cutoffs." $
-         ELSE thresh_msg = "Thresholding by reflectivity cutoffs.  " + gvrr_txt
+         thresh_msg = "Thresholding by reflectivity cutoffs only."
+         IF xxx NE 'Z' then thresh_msg = thresh_msg + '  ' + gvrr_txt
          idxgoodenuff = WHERE( pctgoodpr GE pctAbvThresh $
                           AND  pctgoodgv GE pctAbvThresh, countgoodpct )
       endelse
    ENDELSE
    IF ( countgoodpct GT 0 ) THEN BEGIN
       clipem = 1
-      idx2plot=idxgoodenuff
    ENDIF ELSE BEGIN
-       IF KEYWORD_SET(declutter) THEN $
-          print, "No points meeting both ",xxx, $
-                 " Percent Above Threshold and uncluttered criteria." $
-       ELSE $
-          print, "No complete-volume points based on ",xxx," Percent Above Threshold."
+       print, "No complete-volume points based on ",xxx," Percent Above Threshold."
        goto, errorExit
    ENDELSE
 ENDIF ELSE BEGIN
-  ; clip to where reflectivity is for uncluttered samples only, if indicated
-   IF KEYWORD_SET(declutter) THEN BEGIN
-      idxgoodenuff = WHERE( clutterStatus LT 10, countgoodpct )
+  ; clip to where reflectivity is for unfiltered samples only, if indicated
+   IF altfilters EQ 1 THEN BEGIN
+      if have_gvrr AND xxx EQ 'RR' then $
+         idxgoodenuff = WHERE( pctgoodrrgv GE 0.0 $
+                          AND  pctgoodrain GE 0.0 $
+                          AND  unfiltered GE 0.0, countgoodpct ) $
+      else idxgoodenuff = WHERE( pctgoodpr GE 0.0 $
+                            AND  pctgoodgv GE 0.0 $
+                            AND  unfiltered GE 0.0, countgoodpct )
       IF ( countgoodpct GT 0 ) THEN BEGIN
          clipem = 1
-         idx2plot=idxgoodenuff
+         thresh_msg = "Filtering by"+filterText+" criteria."
       ENDIF ELSE BEGIN
-         print, "No complete-volume uncluttered points."
+         print, "No points meeting both ",xxx," Percent Above Threshold and filtering criteria."
          goto, errorExit
       ENDELSE
    ENDIF ELSE BEGIN
-     ; pctAbvThresh is 0 and declutter flag is unset, take/plot ALL non-bogus points
+     ; pctAbvThresh is 0 and altfilters flag is unset, take/plot ALL non-bogus points
+      thresh_msg = "Taking all valid samples."
+     ; create needed fields
       IF have_gvrr EQ 0 THEN gvrr = z_r_rainrate(gvz) $    ; override empty field
          ELSE gvrr=gvrr   ; using scaled GR rainrate from matchup file
       IF ( PPIbyThresh ) THEN BEGIN
-         idx2plot=WHERE( pctgoodpr GE 0.0 AND  pctgoodgv GE 0.0, countactual2d )
+         idx2plot=WHERE( pctgoodpr GE 0.0 AND pctgoodgv GE 0.0, countactual2d )
       ENDIF
+     ; define idxgoodenuff in case we need it for IDX_USED evaluation
+      idxgoodenuff = WHERE( pctgoodpr GE 0.0 $
+                       AND  pctgoodgv GE 0.0, countgoodpct )
    ENDELSE
 ENDELSE
 
@@ -1317,6 +1391,7 @@ ENDIF
    plot_geo_match_ppi_anim_ps, fieldIDs, sources, fieldData, thresholded, $
                                ppi_comn, DO_PS=do_ps, SHOW_PPIS=show_ppis, $
                                STEP_MANUAL=step_manual
+
    FOR nfieldptr = 0, N_ELEMENTS(fieldData)-1 DO ptr_free, fieldData[nfieldptr]
 
    if havemrms and xxx EQ 'RR' then begin
