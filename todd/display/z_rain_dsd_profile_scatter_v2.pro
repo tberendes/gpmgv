@@ -2067,7 +2067,13 @@ print, 'swedp snow filtered by blockage'+ STRING(numswedp)
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
    and GR_blockage LE max_blockage and minpctcombined GE pctAbvThreshF, numswedp)
 print, 'swedp snow filtered by blockage and pctAbv count  '+ STRING(numswedp)
-printf, snow_LUN, numswedp,ncfilepr,format='(%"%d\,%s")'
+
+swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
+  and GR_blockage LE max_blockage andrntype EQ RainType_convective, num_conv_snow)
+swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
+  and GR_blockage LE max_blockage andrntype EQ RainType_stratiform, num_strat_snow)
+
+printf, snow_LUN, numswedp,ncfilepr,num_conv,num_strat,format='(%"%d\,%s\,%d\,%d")'
 
 ;-------------------------------------------------
 
@@ -2831,17 +2837,27 @@ endif
     'ZCNWP' : 
     'ZCNWG' : BEGIN
                 ; accumulate 2-D histogram of reflectivity vs. Nw
-                 IF raintypeBBidx GE 1 THEN BEGIN
-                 ;   binmin1 = 2.0 & binmin2 = 20.0
-                    binmin1 = 1.0 & binmin2 = 20.0
-                    binmax1 = 6.0 & binmax2 = 60.0
-                 ENDIF ELSE BEGIN
-                 ;   binmin1 = 2.0 & binmin2 = 15.0
-                    binmin1 = 1.0 & binmin2 = 15.0
-                    binmax1 = 6.0 & binmax2 = 55.0
-                 ENDELSE
-                 BINSPAN1 = 0.1
-                 BINSPAN2 = 1.0
+                if snow_flag then begin
+                ;************ fix scales for snow for all "Z" plots 12 - 45 dbz
+                     binmin1 = 1.0 & binmin2 = 15.0
+                     binmax1 = 6.0 & binmax2 = 55.0
+	                 BINSPAN1 = 0.1
+	                 BINSPAN2 = 1.0
+                
+                endif else begin
+                
+	                 IF raintypeBBidx GE 1 THEN BEGIN
+	                 ;   binmin1 = 2.0 & binmin2 = 20.0
+	                    binmin1 = 1.0 & binmin2 = 20.0
+	                    binmax1 = 6.0 & binmax2 = 60.0
+	                 ENDIF ELSE BEGIN
+	                 ;   binmin1 = 2.0 & binmin2 = 15.0
+	                    binmin1 = 1.0 & binmin2 = 15.0
+	                    binmax1 = 6.0 & binmax2 = 55.0
+	                 ENDELSE
+	                 BINSPAN1 = 0.1
+	                 BINSPAN2 = 1.0
+                 endelse
                  BREAK
               END
     'NWDMP' : 
