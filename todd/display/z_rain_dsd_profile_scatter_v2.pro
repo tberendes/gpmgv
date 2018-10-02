@@ -2069,9 +2069,9 @@ swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat
 print, 'swedp snow filtered by blockage and pctAbv count  '+ STRING(numswedp)
 
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
-  and GR_blockage LE max_blockage andrntype EQ RainType_convective, num_conv_snow)
+  and GR_blockage LE max_blockage and rntype EQ RainType_convective, num_conv_snow)
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
-  and GR_blockage LE max_blockage andrntype EQ RainType_stratiform, num_strat_snow)
+  and GR_blockage LE max_blockage and rntype EQ RainType_stratiform, num_strat_snow)
 
 printf, snow_LUN, numswedp,ncfilepr,num_conv,num_strat,format='(%"%d\,%s\,%d\,%d")'
 
