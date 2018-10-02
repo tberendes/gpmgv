@@ -861,7 +861,10 @@
 		               	  zposind = where(dbzvals ge 0)
 		               	  Z[zposind] = 10^(dbzvals[zposind]/10)
 		               	  swedp=gvrcvals  ; use RC rain rate where snow is not detected
-		               	  swedp[gvkdp_z_posind] = 1.53 * gvkdpvals[gvkdp_z_posind]^0.68 * Z[gvkdp_z_posind]^0.29
+		               	  ; original equation
+		               	  ;swedp[gvkdp_z_posind] = 1.53 * gvkdpvals[gvkdp_z_posind]^0.68 * Z[gvkdp_z_posind]^0.29
+		               	  ; fixed equation 10/2/18
+		               	  swedp[gvkdp_z_posind] = 1.48 * gvkdpvals[gvkdp_z_posind]^0.61 * Z[gvkdp_z_posind]^0.33
 		               	  ;Z = 10^(dbzvals/10)	               	  
 		               	  ;swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
 		                  ;swedp [notsnow_index]=Z_MISSING
