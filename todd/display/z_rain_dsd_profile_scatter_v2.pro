@@ -2073,7 +2073,7 @@ swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat
 swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat LT 1) $
   and GR_blockage LE max_blockage and rntype EQ RainType_stratiform, num_strat_snow)
 
-printf, snow_LUN, numswedp,ncfilepr,num_conv,num_strat,format='(%"%d\,%s\,%d\,%d")'
+printf, snow_LUN, numswedp,ncfilepr,num_conv_snow,num_strat_snow,format='(%"%d\,%s\,%d\,%d")'
 
 ;-------------------------------------------------
 
