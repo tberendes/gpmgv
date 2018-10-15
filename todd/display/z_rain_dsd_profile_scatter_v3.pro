@@ -4973,7 +4973,7 @@ print, "GRPDSR plot...."
     ; Z cases
     ELSE : BEGIN
     		   if snow_flag then begin
-              	  	xticknames=['12','16','20','24','28','32','40','44']
+              	  xticknames=['12','16','20','24','28','32','40','44']
  	              CASE raintypeBBidx OF
 	               3 : BEGIN
 	                   SCAT_DATA = "Convective Samples, Above Bright Band (3 lyrs)"
@@ -4985,10 +4985,13 @@ print, "GRPDSR plot...."
 	                   END
 	               1 : BEGIN
 	                   SCAT_DATA = "Convective Samples, Below Bright Band"
+	                   END
+	               0 : BEGIN
+	                   SCAT_DATA = "Stratiform Samples, Above Bright Band"
 	                   BB_string = '_AboveBB'
 	                   END
 	              ENDCASE
-               endif else begin
+              endif else begin
     		  
 	              CASE raintypeBBidx OF
 	 ;  TAB 11/10/17 added convective samples above BB
