@@ -2843,10 +2843,10 @@ endif
     'ZCNWG' : BEGIN
                 ; accumulate 2-D histogram of reflectivity vs. Nw
                 if snow_flag then begin
-                ;************ fix scales for snow for all "Z" plots 12 - 45 dbz
+                ;************ fix scales for snow for all "Z" plots 12 - 44 dbz
                 ; bin2 values are for Z
                      binmin1 = 1.0 & binmin2 = 12.0
-                     binmax1 = 6.0 & binmax2 = 45.0
+                     binmax1 = 6.0 & binmax2 = 44.0
 	                 BINSPAN1 = 0.1
 	                 BINSPAN2 = 1.0
                 
@@ -2975,9 +2975,9 @@ endif
        'ZM' : BEGIN
                 ; accumulate 2-D histogram of reflectivity
                  if snow_flag then begin 
-                ;************ fix scales for snow for all "Z" plots 12 - 45 dbz
+                ;************ fix scales for snow for all "Z" plots 12 - 44 dbz
                     binmin1 = 12.0 & binmin2 = 12.0
-                    binmax1 = 45.0 & binmax2 = 45.0
+                    binmax1 = 44.0 & binmax2 = 44.0
  	                BINSPAN1 = 1.0
 	                BINSPAN2 = 1.0
                 
@@ -3934,30 +3934,37 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
            END
  'ZCNWP' : BEGIN
               do_MAE_1_1 = 0
-              CASE raintypeBBidx OF
-               2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_plot_string
-                   yticknames=['20','25','30','35','40','45','50','55','60']
-                   END
-               1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_plot_string
-                   yticknames=['20','25','30','35','40','45','50','55','60']
-                   END
-               0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
-                   yticknames=['15','20','25','30','35','40','45','50','55']
-                   END
-              ENDCASE
-;              IF raintypeBBidx EQ 1 THEN BEGIN
-;                 SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-;                 yticknames=['20','25','30','35','40','45','50','55','60']
-;              ENDIF ELSE BEGIN
-;                 SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-;                 yticknames=['15','20','25','30','35','40','45','50','55']
-;              ENDELSE
-              xticknames=['1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
-              ; xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
-              xmajor=N_ELEMENTS(xticknames) & ymajor=N_ELEMENTS(yticknames)
+              if snow_flag then begin
+              	  yticknames=['12','16','20','24','28','32','40','44']
+              endif else begin
+	              CASE raintypeBBidx OF
+	               2 : BEGIN
+	                   SCAT_DATA = "Any/All Samples" + bb_plot_string
+	                   yticknames=['20','25','30','35','40','45','50','55','60']
+	                   END
+	               1 : BEGIN
+	                   SCAT_DATA = "Convective Samples" + bb_plot_string
+	                   yticknames=['20','25','30','35','40','45','50','55','60']
+	                   END
+	               0 : BEGIN
+	                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
+	                   yticknames=['15','20','25','30','35','40','45','50','55']
+	                   END
+	              ENDCASE
+	;              IF raintypeBBidx EQ 1 THEN BEGIN
+	;                 SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+	;                 yticknames=['20','25','30','35','40','45','50','55','60']
+	;              ENDIF ELSE BEGIN
+	;                 SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+	;                 yticknames=['15','20','25','30','35','40','45','50','55']
+	;              ENDELSE
+	              
+              endelse
+              
+	          xticknames=['1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
+	          ; xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
+	          xmajor=N_ELEMENTS(xticknames) & ymajor=N_ELEMENTS(yticknames)
+	          
               titleLine1 = satprodtype+' '+version+" Zc vs. Nw Scatter"
               pngpre=pr_or_dpr+'_'+version+"_Zc_vs_Nw_Scatter"
               xunits='log(Nw)'
@@ -3968,27 +3975,32 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
            END
  'ZCNWG' : BEGIN
               do_MAE_1_1 = 0
-              CASE raintypeBBidx OF
-               2 : BEGIN
-                   SCAT_DATA = "Any/All Samples" + bb_plot_string
-                   yticknames=['20','25','30','35','40','45','50','55','60']
-                   END
-               1 : BEGIN
-                   SCAT_DATA = "Convective Samples" + bb_plot_string
-                   yticknames=['20','25','30','35','40','45','50','55','60']
-                   END
-               0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
-                   yticknames=['15','20','25','30','35','40','45','50','55']
-                   END
-              ENDCASE
-;              IF raintypeBBidx EQ 1 THEN BEGIN
-;                 SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
-;                 yticknames=['20','25','30','35','40','45','50','55','60']
-;              ENDIF ELSE BEGIN
-;                 SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
-;                 yticknames=['15','20','25','30','35','40','45','50','55']
-;              ENDELSE
+
+              if snow_flag then begin
+              	  yticknames=['12','16','20','24','28','32','40','44']
+              endif else begin
+	              CASE raintypeBBidx OF
+	               2 : BEGIN
+	                   SCAT_DATA = "Any/All Samples" + bb_plot_string
+	                   yticknames=['20','25','30','35','40','45','50','55','60']
+	                   END
+	               1 : BEGIN
+	                   SCAT_DATA = "Convective Samples" + bb_plot_string
+	                   yticknames=['20','25','30','35','40','45','50','55','60']
+	                   END
+	               0 : BEGIN
+	                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
+	                   yticknames=['15','20','25','30','35','40','45','50','55']
+	                   END
+	              ENDCASE
+	;              IF raintypeBBidx EQ 1 THEN BEGIN
+	;                 SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
+	;                 yticknames=['20','25','30','35','40','45','50','55','60']
+	;              ENDIF ELSE BEGIN
+	;                 SCAT_DATA = "Stratiform Samples, Below Bright Band and <= 3 km AGL"
+	;                 yticknames=['15','20','25','30','35','40','45','50','55']
+	;              ENDELSE
+			  endelse
               ;  xticknames=['2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
               xticknames=['1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0']
               xmajor=N_ELEMENTS(xticknames) & ymajor=N_ELEMENTS(yticknames)
@@ -4441,20 +4453,24 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
            END
   'NWGZMXP' : BEGIN
                  do_MAE_1_1 = 0
-                 CASE raintypeBBidx OF
-                  2 : BEGIN
-                      SCAT_DATA = "Any/All Samples" + bb_plot_string
-                      xticknames=['20','25','30','35','40','45','50','55','60']
-                      END
-                  1 : BEGIN
-                      SCAT_DATA = "Convective Samples" + bb_plot_string
-                      xticknames=['20','25','30','35','40','45','50','55','60']
-                      END
-                  0 : BEGIN
-                      SCAT_DATA = "Stratiform Samples" + bb_plot_string
-                      xticknames=['15','20','25','30','35','40','45','50','55']
-                      END
-                 ENDCASE
+              	 if snow_flag then begin
+              	  	xticknames=['12','16','20','24','28','32','40','44']
+              	 endif else begin
+	                 CASE raintypeBBidx OF
+	                  2 : BEGIN
+	                      SCAT_DATA = "Any/All Samples" + bb_plot_string
+	                      xticknames=['20','25','30','35','40','45','50','55','60']
+	                      END
+	                  1 : BEGIN
+	                      SCAT_DATA = "Convective Samples" + bb_plot_string
+	                      xticknames=['20','25','30','35','40','45','50','55','60']
+	                      END
+	                  0 : BEGIN
+	                      SCAT_DATA = "Stratiform Samples" + bb_plot_string
+	                      xticknames=['15','20','25','30','35','40','45','50','55']
+	                      END
+	                 ENDCASE
+                 endelse
 ;                 IF raintypeBBidx EQ 1 THEN BEGIN
 ;                    SCAT_DATA = "Convective Samples, Below Bright Band and <= 3 km AGL"
 ;                    xticknames=['20','25','30','35','40','45','50','55','60']
@@ -4923,28 +4939,33 @@ print, "GRPDSR plot...."
            END
     ; Z cases
     ELSE : BEGIN
-              CASE raintypeBBidx OF
- ;  TAB 11/10/17 added convective samples above BB
-               3 : BEGIN
-                   SCAT_DATA = "Convective Samples, Above Bright Band (3 lyrs)"
-                   xticknames=['20','25','30','35','40','45','50','55','60','65']
-                   BB_string = '_AboveBB_3lyrs'
-                   END
-               2 : BEGIN
-                   SCAT_DATA = "Any/All Samples, Above Bright Band"
-                   xticknames=['20','25','30','35','40','45','50','55','60','65']
-                   BB_string = '_AboveBB'
-                   END
-               1 : BEGIN
-                   SCAT_DATA = "Convective Samples, Below Bright Band"
-                   xticknames=['20','25','30','35','40','45','50','55','60','65']
-                   END
-               0 : BEGIN
-                   SCAT_DATA = "Stratiform Samples, Above Bright Band"
-                   xticknames=['15','20','25','30','35','40','45']
-                   BB_string = '_AboveBB'
-                   END
-              ENDCASE
+    		   if snow_flag then begin
+              	  	xticknames=['12','16','20','24','28','32','40','44']
+               endif else begin
+    		  
+	              CASE raintypeBBidx OF
+	 ;  TAB 11/10/17 added convective samples above BB
+	               3 : BEGIN
+	                   SCAT_DATA = "Convective Samples, Above Bright Band (3 lyrs)"
+	                   xticknames=['20','25','30','35','40','45','50','55','60','65']
+	                   BB_string = '_AboveBB_3lyrs'
+	                   END
+	               2 : BEGIN
+	                   SCAT_DATA = "Any/All Samples, Above Bright Band"
+	                   xticknames=['20','25','30','35','40','45','50','55','60','65']
+	                   BB_string = '_AboveBB'
+	                   END
+	               1 : BEGIN
+	                   SCAT_DATA = "Convective Samples, Below Bright Band"
+	                   xticknames=['20','25','30','35','40','45','50','55','60','65']
+	                   END
+	               0 : BEGIN
+	                   SCAT_DATA = "Stratiform Samples, Above Bright Band"
+	                   xticknames=['15','20','25','30','35','40','45']
+	                   BB_string = '_AboveBB'
+	                   END
+	              ENDCASE
+              endelse
 ;              IF raintypeBBidx EQ 1 THEN BEGIN
 ;                 SCAT_DATA = "Convective Samples, Below Bright Band"
 ;                 xticknames=['20','25','30','35','40','45','50','55','60','65']
@@ -4953,6 +4974,7 @@ print, "GRPDSR plot...."
 ;                 xticknames=['15','20','25','30','35','40','45']
 ;                 BB_string = '_AboveBB'
 ;              ENDELSE
+
               IF PlotTypes(idx2do) EQ 'ZM' THEN DPRtxt=' Zmeas ' ELSE DPRtxt=' Zcor '
               yticknames=xticknames
               ;IF N_ELEMENTS(bins4scat) EQ 1 THEN BINSPAN = bins4scat ELSE BINSPAN = 2.0
