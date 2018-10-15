@@ -3936,6 +3936,17 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               do_MAE_1_1 = 0
               if snow_flag then begin
               	  yticknames=['12','16','20','24','28','32','40','44']
+	              CASE raintypeBBidx OF
+	               2 : BEGIN
+ 	                   SCAT_DATA = "Any/All Samples" + bb_plot_string
+	                   END
+	               1 : BEGIN
+	                   SCAT_DATA = "Convective Samples" + bb_plot_string
+ 	                   END
+	               0 : BEGIN
+	                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
+	                   END
+	              ENDCASE
               endif else begin
 	              CASE raintypeBBidx OF
 	               2 : BEGIN
@@ -3978,7 +3989,18 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
 
               if snow_flag then begin
               	  yticknames=['12','16','20','24','28','32','40','44']
-              endif else begin
+	              CASE raintypeBBidx OF
+	               2 : BEGIN
+	                   SCAT_DATA = "Any/All Samples" + bb_plot_string
+ 	                   END
+	               1 : BEGIN
+	                   SCAT_DATA = "Convective Samples" + bb_plot_string
+	                   END
+	               0 : BEGIN
+	                   SCAT_DATA = "Stratiform Samples" + bb_plot_string
+ 	                   END
+	              ENDCASE
+             endif else begin
 	              CASE raintypeBBidx OF
 	               2 : BEGIN
 	                   SCAT_DATA = "Any/All Samples" + bb_plot_string
@@ -4455,7 +4477,18 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                  do_MAE_1_1 = 0
               	 if snow_flag then begin
               	  	xticknames=['12','16','20','24','28','32','40','44']
-              	 endif else begin
+	                 CASE raintypeBBidx OF
+	                  2 : BEGIN
+	                      SCAT_DATA = "Any/All Samples" + bb_plot_string
+ 	                      END
+	                  1 : BEGIN
+	                      SCAT_DATA = "Convective Samples" + bb_plot_string
+ 	                      END
+	                  0 : BEGIN
+	                      SCAT_DATA = "Stratiform Samples" + bb_plot_string
+	                      END
+	                 ENDCASE
+               	 endif else begin
 	                 CASE raintypeBBidx OF
 	                  2 : BEGIN
 	                      SCAT_DATA = "Any/All Samples" + bb_plot_string
@@ -4941,6 +4974,20 @@ print, "GRPDSR plot...."
     ELSE : BEGIN
     		   if snow_flag then begin
               	  	xticknames=['12','16','20','24','28','32','40','44']
+ 	              CASE raintypeBBidx OF
+	               3 : BEGIN
+	                   SCAT_DATA = "Convective Samples, Above Bright Band (3 lyrs)"
+ 	                   BB_string = '_AboveBB_3lyrs'
+	                   END
+	               2 : BEGIN
+	                   SCAT_DATA = "Any/All Samples, Above Bright Band"
+ 	                   BB_string = '_AboveBB'
+	                   END
+	               1 : BEGIN
+	                   SCAT_DATA = "Convective Samples, Below Bright Band"
+	                   BB_string = '_AboveBB'
+	                   END
+	              ENDCASE
                endif else begin
     		  
 	              CASE raintypeBBidx OF
