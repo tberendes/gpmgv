@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>rsl_get_volume</title>
+</head>
+<body>
+<h2>rsl_get_volume</h2>
+<p>
+This function returns a volume structure containing data for the requested
+field. if field ID is omitted, the first volume in the radar structure is returned.
+If no volume can be found for a given field ID, the function returns -1.
+
+<h3>Syntax</h3>
+<i>volume</i> = <b>rsl_get_volume</b>(<i>radarstruct</i> [, <i>fieldID</i>])
+
+<h3>Inputs</h3>
+<table>
+<tr align=left valign=top>
+  <td width="15%"><b>radarstruct</b></td>
+  <td>a radar structure.</td>
+</tr>
+<tr align=left valign=top>
+  <td><b>fieldID</b></td>
+  <td>can be either a string containing the radar
+    <a href="volume_header.html#field_types">field type</a>, for example, 'DZ'
+    (reflectivity), or a subscript of the volume array (0 to <i>nvols</i>-1).
+    If omitted, the first volume in the radar structure is returned.
+  </td>
+</tr>
+</table>
+
+<h3>Example 1</h3>
+
+Get the first volume in the radar structure.<br>
+<pre>
+    v = rsl_get_volume(radar)
+</pre>
+This is equivalent to<br>
+<pre>
+    v = rsl_get_volume(radar, 0)
+</pre>
+<h3>Example 2</h3>
+
+Get the QC'ed Reflectivity volume, if it exists.<br>
+<pre>
+    v = rsl_get_volume(radar, 'cz')
+    ; Make sure v is valid structure.
+    if  n_tags(v) gt 0 then . . .
+</pre>
+
+<h3>Example 3</h3>
+
+Get the second volume in the radar structure.<br>
+<pre>
+    v = rsl_get_volume(radar, 1)
+</pre>
+</body>
+</html>

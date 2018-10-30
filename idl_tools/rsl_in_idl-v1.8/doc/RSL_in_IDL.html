@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>RSL in IDL for PMM GV Data</title>
+</head>
+<body bgcolor="#FFFFFF">
+
+<h1 id="top" align="center">RSL in IDL for PMM GV Data</h1>
+<hr>
+<table width="100%">
+<tr align="center">
+  <td width="24%">Version 1.8</td>
+  <td width="40%">May 10, 2017</td>
+  <td width="36%">Type of Change: <a href="../CHANGES.txt">Improvement</a></td>
+</tr>
+</table>
+
+<hr>
+<table width="100%">
+<tr>
+<td>
+<ul><h3>
+<li><a href="whatsnew.html">What's New</a>
+<li><a href="#Intro">Introduction</a>
+<li><a href="#Formats">Data Formats</a>
+<li><a href="#Radarstruct">The Radar Structure</a>
+<li><a href="#AccessStruct">Accessing Structure Contents</a>
+<li><a href="#UsingFunctions">Using Functions to Access Structures</a>
+<li><a href="#ReadWrite">Reading and Writing Data</a>
+<li><a href="#RadarImages">Making Radar Images</a>
+</h3></ul>
+</td>
+<td valign="top">
+<ul><h3>
+<li><a href="Install.html">Installing</a>
+<li><a href="rsl_routines.html">Routines</a>
+<li><a href="rsl_structures.html">Structures</a>
+<li><a href="ftp://trmm-fc.gsfc.nasa.gov/software/rsl_in_idl-v1.8.tar"><font color="#009900">Download</font></a>
+</h3></ul>
+</td>
+</tr>
+</table>
+<hr>
+
+<h2><a name="Intro">Introduction</a></h2>
+RSL in IDL is a package of routines for working with
+<a href="http://trmm-fc.gsfc.nasa.gov/trmm_gv/index.html"> PMM Ground Validation</a>
+radar data.  The programs and data structures are modeled on the
+C-based <a href="http://trmm-fc.gsfc.nasa.gov/trmm_gv/software/rsl/index.html">
+Radar Software Library (RSL)</a>, but are written in the
+Interactive Data Language (IDL).
+The idea is to provide the utility of RSL in an IDL environment.
+<p>
+To use this package, you must have access to IDL, which is available from
+Exelis Visual Information Solutions (www.excelisvis.com).
+<h2><a name="Formats">Data Formats</a></h2>
+RSL in IDL reads the following formats:
+<ul>
+    <li>CfRadial
+    <li>Universal Format (UF)
+    <li>NEXRAD WSR-88D Level II
+    <li>SIGMET Raw Product
+    <li>TSDIS 1C-51 HDF
+</ul>
+RSL in IDL writes the following formats:
+<ul>
+    <li>CfRadial
+    <li>UF
+</ul>
+
+<h2><a name="Radarstruct">The Radar Structure</a></h2>
+As in RSL, the primary data object is the
+<a href="radarstruct.html">radar structure</a>,
+which provides a
+consistent interface for a variety of radar formats.
+
+This is the structure returned by
+<a href="rsl_anyformat_to_radar.html">rsl_anyformat_to_radar</a>, the generic
+function for reading a raw radar data file.
+
+The IDL version of the radar structure
+is essentially the same as its C language counterpart, so users of RSL should
+find it familiar. The most important difference in the IDL version is that data
+is stored directly in floating point format, so functions for packing and
+unpacking data are no longer needed.
+
+
+<!-- TODO: make a link to each structure named in following paragraphs. -->
+
+<p>
+The radar structure is designed to represent a radar volume scan. It is a
+hierarchical organization of nested structures which represent the individual
+sweeps, rays, range bins, and data fields of the volume scan.
+At the top of the hierarchy, radar is made up of volumes, where there is one
+volume for each radar field. Volumes are then made up of sweeps, sweeps contain
+rays, and rays contain the actual data.
+The hierarchy is accomplished by having each structure contain an array
+of structures of the next object descending in the hierarchy.
+Each structure also contains a header which holds information about that part
+of the radar scan which it represents. The sweep header, for example, contains
+the elevation angle and the number of rays for that sweep.
+
+<p>
+We can examine the radar structure using IDL's <b>help</b>
+command with the <b>structures</b> keyword.
+Let's suppose we have a volume scan of WSR-88D Level II data
+in a file called NEXRAD.dat.
+To read the file into a radar structure named <i>radar</i>, we enter the
+following at the IDL prompt ("IDL&gt;"):
+<pre>
+IDL&gt; radar = rsl_anyformat_to_radar('NEXRAD.dat')
+</pre>
+
+Now we can display the structure by entering the command
+<pre>
+IDL&gt; help, /structures, radar
+</pre>
+IDL prints the following:
+<pre>
+** Structure &lt;817bd74&gt;, 2 tags, length=99362364, data length=99026114, refs=1:
+   H               STRUCT    -&gt; &lt;Anonymous&gt; Array[1]
+   VOLUME          STRUCT    -&gt; &lt;Anonymous&gt; Array[3]
+</pre>
+We see that the radar structure contains two members, as mentioned earlier.
+These are
+<ul>
+  <li>H, the header structure</li>
+  <li>VOLUME, the array of volume structures</li>
+</ul>
+To display the volume structure:
+<pre>
+IDL&gt; help, /str, radar.volume
+** Structure &lt;817b7ac&gt;, 2 tags, length=33120744, data length=33008662, refs=2:
+   H               STRUCT    -&gt; &lt;Anonymous&gt; Array[1]
+   SWEEP           STRUCT    -&gt; &lt;Anonymous&gt; Array[20]
+</pre>
+<p>
+The sweep:
+<pre>
+IDL&gt; help, /str, radar.volume.sweep
+** Structure &lt;81c46dc&gt;, 2 tags, length=1656036, data length=1650432, refs=2:
+   H               STRUCT    -&gt; &lt;Anonymous&gt; Array[1]
+   RAY             STRUCT    -&gt; &lt;Anonymous&gt; Array[400]
+</pre>
+<p>
+And the ray:
+<pre>
+IDL&gt; help, /str, radar.volume.sweep.ray
+** Structure &lt;81c04bc&gt;, 2 tags, length=4140, data length=4126, refs=2:
+   H               STRUCT    -&gt; &lt;Anonymous&gt; Array[1]
+   RANGE           FLOAT     Array[1000]
+</pre>
+Notice that <b>range</b> in the ray structure is not an array
+of structures, but a floating point array. Each element of <b>range</b>
+represents a range bin, and contains either the value returned at that range, or
+an indicator of missing data.
+
+The size of the actual range bin can be found in
+the ray header, along with other information about the ray and data.
+The value used to indicate missing data is contained in the
+<a href="volume_header.html">volume header</a> in the member named
+<b>no_data_flag</b>.
+
+<h2><a name="AccessStruct">Accessing Structure Contents</a></h2>
+
+To get data for a particular field, you form a structure reference consisting
+of the volume containing that field, followed by the sweep, and ray.  
+To determine the fields present in our volume scan, we look at
+<a href="volume_header.html#field_types"><b>field_type</b></a> in the volume
+headers.  To print the <b>field_type</b> from all our volume headers, we enter
+the following at the IDL prompt:
+<pre>
+IDL&gt; print, radar.volume.h.field_type
+</pre>
+IDL prints
+<pre>
+DZ VR SW
+</pre>
+We could also use the function
+<a href="rsl_get_fields.html">rsl_get_fields</a>, which returns a string
+array containing the fields:
+<pre>
+IDL&gt; fields = rsl_get_fields(radar)
+IDL&gt; print, fields
+DZ VR SW
+</pre>
+<p>
+The first field, DZ, is reflectivity. To copy the reflectivity
+data for the first ray of the first sweep into a separate array, we enter the
+following:
+<pre>
+IDL&gt; nbins = radar.volume[0].sweep[0].ray[0].h.nbins
+IDL&gt; refl = radar.volume[0].sweep[0].ray[0].range[0:nbins-1]
+IDL&gt; help, refl
+REFL            FLOAT     = Array[460]
+</pre>
+Notice we used the value of
+<b>nbins</b> from the ray header in our subscript range. This is the true number
+of range bins in the ray, as opposed to the total number of array elements
+in <b>range</b>, which is 1000. In cases where you want to loop through parts
+of the radar structure, it is necessary to know the number of items of each
+object, and this information is supplied in the headers.
+Each header has a member which stores the number
+of items of the next object in the hierarchy. These are<br>
+<pre>
+radar.h.nvolumes
+volume.h.nsweeps
+sweep.h.nrays
+ray.h.nbins
+</pre>
+
+<h2><a name="UsingFunctions">Using Functions to Access Structures</a></h2>
+Functions are provided as in RSL to select substructures of the radar
+structure.
+<p>
+The function <a href="rsl_get_volume.html">rsl_get_volume</a> returns a volume structure which contains all of the
+sweeps in the volume scan for a particular field.
+The following will return the volume structure for the reflectivity field.
+<pre>
+    vol = rsl_get_volume(radar,'<a href="volume_header.html#field_types">dz</a>')
+</pre>
+<p>
+Once we have a volume, we can use <a href="rsl_get_sweep.html">rsl_get_sweep</a>
+to select a sweep.
+To get the first sweep (base scan), enter:
+<pre>
+    sweep = rsl_get_sweep(vol)
+</pre>
+An optional argument is provided to select the sweep by elevation, as well as
+keywords for selection by either sweep number or array index. See the
+function discription <a href="rsl_get_sweep.html">rsl_get_sweep</a> for details.
+<p>
+<a href="rsl_get_ray_from_sweep.html">Rsl_get_ray_from_sweep</a>
+can be used to return a particular ray as a structure. This will return the ray
+with azimuth closest to 140 degrees:
+<pre>
+    ray = rsl_get_ray_from_sweep(sweep, 140.)
+</pre>
+<p>
+<a href="rsl_get_ray.html">Rsl_get_ray</a> can return a ray from a
+volume structure, skipping the step of retrieving a sweep. The following will
+return the same ray retrieved in the previous example:
+<pre>
+    ray = rsl_get_ray(vol, 0., 140.)
+</pre>
+<p>
+For the functions presented in these examples, only the first argument is
+required. Omitted arguments default to the first item of whatever is being
+retrieved. For example, entering
+<pre>
+    ray = rsl_get_ray(vol)
+</pre>
+<p>
+will return the first ray of the first sweep in <b>vol</b>.
+
+<h2><a name="ReadWrite">Reading and Writing Data</a></h2>
+To read a radar file into the radar structure, use
+<a href="rsl_anyformat_to_radar.html">rsl_anyformat_to_radar</a>:
+<pre>
+    radar = rsl_anyformat_to_radar(filename)
+</pre>
+To write a radar structure to a file in Universal Format, use the procedure
+<a href="rsl_radar_to_uf.html">rsl_radar_to_uf</a>. The following writes the
+radar structure to the file specified in the variable <b>uffile</b>:
+<pre>
+    rsl_radar_to_uf, radar, uffile
+</pre>
+To write a compressed (<b>gzip</b>) UF file, use the procedure
+<a href="rsl_radar_to_uf_gzip.html">rsl_radar_to_uf_gzip</a>:
+<pre>
+    rsl_radar_to_uf_gzip, radar, uffile
+</pre>
+The suffix ".gz" will automatically be added to the given file name if necessary.
+
+<h2><a name="RadarImages">Making Radar Images</a></h2>
+The procedure <a href="rsl_plotsweep_from_radar.html">rsl_plotsweep_from_radar</a> plots the radar image for a sweep.
+The following will plot the base scan:
+<pre>
+    rsl_plotsweep_from_radar, radar
+</pre>
+<hr>
+Send questions or comments to gsfc-rsl-help@lists.nasa.gov.
+<div align="center"><a href="#top">Top</a></div>

@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Ray Header Structure</title>
+</head>
+<body>
+
+<h2>Ray Header Structure</h2>
+
+<table cellpadding="0" cellspacing="2" border="0" width="100%">
+<tr align=left valign=top>
+    <th align=left width=20%>Member</th>
+    <th align=left width=15%>Type</th>
+    <th align=left>Description</th>
+</tr>
+<tr align=left valign=top>
+  <td>month</td>
+  <td>int</td>
+  <td>Date for this ray: month (1-12). (Date and time are in UTC.)</td>
+</tr>
+<tr align=left valign=top>
+  <td>day</td>
+  <td>int</td>
+  <td>Date for this ray: day (1-31).</td>
+</tr>
+<tr align=left valign=top>
+  <td>year</td>
+  <td>int</td>
+  <td>Date for this ray: year (eg. 1993).</td>
+</tr>
+<tr align=left valign=top>
+  <td>hour</td>
+  <td>int</td>
+  <td>Time for this ray: hour (0-23).</td>
+</tr>
+<tr align=left valign=top>
+  <td>minute</td>
+  <td>int</td>
+  <td>Time for this ray: minute (0-59).</td>
+</tr>
+<tr align=left valign=top>
+  <td>sec</td>
+  <td>float</td>
+  <td>Time for this ray: second + fraction of second.</td>
+</tr>
+<tr align=left valign=top>
+  <td>unam_rng</td>
+  <td>float</td>
+  <td>Unambiguous range (km).</td>
+</tr>
+<tr align=left valign=top>
+  <td>azimuth</td>
+  <td>float</td>
+  <td>Azimuth angle (degrees).  Angles range from 0 to 360 degrees, increasing
+      clockwise, with 0 being north.
+  </td>
+</tr>
+<tr align=left valign=top>
+  <td>ray_num</td>
+  <td>int</td>
+  <td>Number of ray within sweep (first = 1).</td>
+</tr>
+<tr align=left valign=top>
+  <td>elev</td>
+  <td>float</td>
+  <td>Elevation angle (degrees).</td>
+</tr>
+<tr align=left valign=top>
+  <td>elev_num</td>
+  <td>int</td>
+  <td>Elevation number within volume scan (first = 1).</td>
+</tr>
+<tr align=left valign=top>
+  <td>range_bin1</td>
+  <td>int</td>
+  <td>Range to first gate (meters).</td>
+</tr>
+<tr align=left valign=top>
+  <td>gate_size</td>
+  <td>int</td>
+  <td>Data gate size (meters).</td>
+</tr>
+<tr align=left valign=top>
+  <td>vel_res</td>
+  <td>float</td>
+  <td>Doppler velocity resolution.</td>
+</tr>
+<tr align=left valign=top>
+  <td>sweep_rate</td>
+  <td>float</td>
+  <td>Sweep rate. Full sweeps/minute.</td>
+</tr>
+<tr align=left valign=top>
+  <td>prf</td>
+  <td>int</td>
+  <td>Pulse repitition frequency, in Hz.</td>
+</tr>
+<tr align=left valign=top>
+  <td>azim_rate</td>
+  <td>float</td>
+  <td>Sweep rate in degrees/second.</td>
+</tr>
+<tr align=left valign=top>
+  <td>fix_angle</td>
+  <td>float</td>
+  <td>Elevation angle for sweep (degrees).</td>
+</tr>
+<tr align=left valign=top>
+  <td>pitch</td>
+  <td>float</td>
+  <td>Pitch angle.</td>
+</tr>
+<tr align=left valign=top>
+  <td>roll</td>
+  <td>float</td>
+  <td>Roll angle.</td>
+</tr>
+<tr align=left valign=top>
+  <td>heading</td>
+  <td>float</td>
+  <td>Heading.</td>
+</tr>
+<tr align=left valign=top>
+  <td>pitch_rate</td>
+  <td>float</td>
+  <td>(deg/sec)</td>
+</tr>
+<tr align=left valign=top>
+  <td>roll_rate</td>
+  <td>float</td>
+  <td>(deg/sec)</td>
+</tr>
+<tr align=left valign=top>
+  <td>heading_rate</td>
+  <td>float</td>
+  <td>(deg/sec)</td>
+</tr>
+<tr align=left valign=top>
+  <td>lat</td>
+  <td>float</td>
+  <td>Latitude (degrees)</td>
+</tr>
+<tr align=left valign=top>
+  <td>lon</td>
+  <td>float</td>
+  <td>Longitude (degrees)</td>
+</tr>
+<tr align=left valign=top>
+  <td>alt</td>
+  <td>int</td>
+  <td>Altitude (m)</td>
+</tr>
+<tr align=left valign=top>
+  <td>rvc</td>
+  <td>float</td>
+  <td>Radial velocity correction (m/sec)</td>
+</tr>
+<tr align=left valign=top>
+  <td>vel_east</td>
+  <td>float</td>
+  <td>Platform velocity to the east (m/sec) (negative for west)</td>
+</tr>
+<tr align=left valign=top>
+  <td>vel_north</td>
+  <td>float</td>
+  <td>Platform velocity to the north (m/sec) (negative for south)</td>
+</tr>
+<tr align=left valign=top>
+  <td>vel_up</td>
+  <td>float</td>
+  <td>Platform velocity toward up (m/sec) (negative for down)</td>
+</tr>
+<tr align=left valign=top>
+  <td>pulse_count</td>
+  <td>int</td>
+  <td>Pulses used in a single dwell time.</td>
+</tr>
+<tr align=left valign=top>
+  <td>pulse_width</td>
+  <td>float</td>
+  <td>Pulse width (micro-sec).</td>
+</tr>
+<tr align=left valign=top>
+  <td>beam_width</td>
+  <td>float</td>
+  <td>Beamwidth in degrees.</td>
+</tr>
+<tr align=left valign=top>
+  <td>frequency</td>
+  <td>float</td>
+  <td>Bandwidth GHz.</td>
+</tr>
+<tr align=left valign=top>
+  <td>wavelength</td>
+  <td>float</td>
+  <td>Wavelength (meters).</td>
+</tr>
+<tr align=left valign=top>
+  <td>nyq_vel</td>
+  <td>float</td>
+  <td>Nyquist velocity (m/s).</td>
+</tr>
+<tr align=left valign=top>
+  <td>nbins</td>
+  <td>int</td>
+  <td>Number of array elements for 'Range'.</td>
+</tr>
+</table>
+
+</body>
+</html>

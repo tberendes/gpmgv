@@ -1,0 +1,51 @@
+<html>
+<head>
+<title>rsl_which_struct</title>
+</head>
+<body>
+<h2>rsl_which_struct</h2>
+This function returns the name of the rsl structure given as argument.
+If argument isn't an RSL structure, an empty string is returned.
+<h3>Syntax</h3>
+<table>
+<tr valign=top>
+<td><i>result</i></td>
+<td> = </td>
+<td> rsl_which_struct(<i>structure</i>) </td>
+</table>
+<h3>Arguments</h3>
+<table>
+<tr valign=top>
+<td width=140>structure</td>
+<td>One of the structures radar, volume, sweep, or ray.</td>
+</tr>
+</table>
+<h3>Return value</h3>
+Return value is one of the following strings:
+<pre>
+    'RADAR' 
+    'VOLUME'
+    'SWEEP'
+    'RAY'
+    '' (Empty string)
+</pre>
+
+<h3>Example</h3>
+The function <strong>rsl_vslice</strong> can take either a radar structure or
+volume structure as argument.  The following condensed section of code
+illustrates the use of <strong>rsl_which_struct</strong> to determine the
+structure.
+
+<pre>
+structype = rsl_which_struct(radar_or_vol)
+if structype eq 'RADAR' then begin
+    vol = rsl_get_volume(radar_or_vol, field)
+endif else if structype eq 'VOLUME' then begin
+    vol = radar_or_vol
+endif else begin
+    print,'Arg 1 must be either radar or volume structure.'
+endelse
+</pre>
+
+</body>
+</html>

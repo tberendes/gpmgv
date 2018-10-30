@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>rsl_add_volume</title>
+</head>
+<body>
+<h2>rsl_add_volume</h2>
+This procedure adds a new volume to an existing radar structure.
+
+<p>Note: the value of <tt>radar.h.nvolumes</tt> is incremented by this procedure.
+<p>
+<h3>Syntax</h3>
+<table>
+<tr valign=top>
+<td>
+  rsl_add_volume,
+</td>
+<td>
+  <i>radar</i>
+    [,&nbsp;<i>new_volume</i>]
+    [,&nbsp;FIELD=<i>string</i>]
+</td>
+</tr>
+</table>
+<h3>Arguments</h3>
+<table>
+<tr valign=top>
+<td width=140>radar</td>
+<td>A radar structure.</td>
+</tr>
+<tr valign=top>
+<td width=140>new_volume</td>
+<td>Volume structure to be added to the radar structure. If not given, a new
+volume containing initialized values is created in the radar structure.</td>
+</tr>
+</table>
+<h3>Keywords</h3>
+<table>
+<tr valign=top>
+  <td width=140>FIELD
+  </td>
+  <td>
+     String naming new field.  This replaces the field type in
+     the new volume header and sweep headers.
+  </td>
+</tr>
+</table>
+
+<h3>Examples</h3>
+
+<h4>Example 1</h4>
+Copy volume from radar, modify data, then add the modified volume to radar.
+<pre>
+; Copy an existing volume.
+vol = rsl_get_volume(radar,'dz')
+
+; Modify data in vol.
+vol.sweep.ray.range = . . .
+
+; Add vol to radar structure, naming the new field 'FZ'.
+rsl_add_volume, radar, vol, field='FZ'
+</pre>
+<h4>Example 2</h4>
+Add a volume to radar first, then store data.
+<pre>
+; Add new volume to radar, and name the new field 'FZ'.
+rsl_add_volume, radar, field='FZ'
+   
+; Modify data in new volume.
+newvol = radar.h.nvolumes - 1
+radar.volume[newvol].sweep.ray.range = . . .
+</pre>
+
+<h3>See Also</h3>
+<a href="rsl_changefield.html">rsl_changefield</a>
+
+</body>
+</html>

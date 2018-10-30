@@ -1,0 +1,37 @@
+<html>
+<head>
+<title>rsl_radar_to_cfradial</title>
+</head>
+<body>
+<h2>rsl_radar_to_cfradial</h2>
+ 
+<pre>
+ This procedure writes data from the radar structure to a file in CfRadial format.
+
+ Syntax:
+     rsl_radar_to_cfradial, radar [, cfradfile] [, FIELDS=fields] [, /GZIP],
+         [, /DAT1D] [, /DAT2D]
+
+ Arguments:
+     radar:     a Radar data structure.
+     cfradfile: an optional argument containing the name of the CfRadial file.
+         If the the file name ends in '.gz', the file is compressed with
+         'gzip'.  If this argument is omitted, a file name is constructed in
+         the form: cfrad.SITE_YYYYMMDD_HHMMSS.nc.
+
+ Keywords:
+     FIELDS:
+         String array containing the fields to be written to the output
+         file.  Default is all fields.  Fields are in the form of the
+         two-character field names used by RSL, such as 'DZ', 'VR', etc.
+     DAT1D:
+         Set this keyword to store data fields into CfRadial in 1-D arrays.  By
+         default, function determines appropriate dimensions.
+     DAT2D:
+         Set this keyword to store data fields into CfRadial in 2-D arrays.  By
+         default, function determines appropriate dimensions.
+     GZIP: 
+         Set this keyword to compress the CfRadial file with 'gzip'.
+</pre>
+</body>
+</html>
