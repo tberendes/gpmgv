@@ -41,7 +41,8 @@ cd, PRO_DIR
 ; dir_gv_nc = ''
 ;VERSION2MATCH='ITE109'
 ;VERSION2MATCH='V04A'
-VERSION2MATCH='V05A'
+;VERSION2MATCH='V05A'
+VERSION2MATCH='V06A'
  gr_nc_version = '1_1'
  plot_PPIs = 0
  scores = 0

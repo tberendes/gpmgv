@@ -157,7 +157,8 @@ export BIN_DIR
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
 #PPS_VERSION="V04A"        # specifies which PPS version of products to process
-PPS_VERSION="V05A"
+#PPS_VERSION="V05A"
+PPS_VERSION="V06A"
 export PPS_VERSION
 PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
 export PARAMETER_SET
