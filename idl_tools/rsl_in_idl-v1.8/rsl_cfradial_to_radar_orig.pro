@@ -180,38 +180,42 @@ endcase
 end
 
 
-function get_selected_fields, varnames, selected_fields, nfields
+function get_selected_fields, varnames, selfields, nfields
 
-; This function finds CfRadial variables for the given selected fields.
-; Field names may be given in two-character RSL (UF) style, for example, "VR"
-; instead of "VEL".  Name search is case-insensitive.
+; This function finds CfRadial variables corresponding to the selected fields
+; given in "selfields".  It allows field names to be in RSL style (for example,
+; VR instead of VEL), and does case-insensitive matching.
 ;
-; Function returns a string array of CfRadial variable names corresponding
-; to selected fields.
+; Function returns a string array containing the names of the corresponding
+; CfRadial variables.
 ;
 ; Arguments:
 ;     varnames:
-;         A string array containing the variable names to be searched.
-;     selected_fields:
+;         A string array containing the names of all variables in CfRadial file.
+;     selfields:
 ;         A string array of user-selected fields.
 ;     nfields:
 ;         Output argument giving the number of selected fields found.
 ;
+; Return value:
+;     Function returns a string array of CfRadial variable names corresponding
+;     to selected fields.
+;
 
-nfields = n_elements(selected_fields)
+nfields = n_elements(selfields)
 cfrfields = strarr(nfields)
 
 j = 0
 for i = 0, nfields-1 do begin
     found = 0
-    thisfield = selected_fields[i]
+    thisfield = selfields[i]
     loc = where(strmatch(varnames,thisfield,/fold),count)
     if count gt 0 then begin
         cfrfields[j] = varnames[loc[0]]
         j++
         found = 1
     endif else begin
-        ; If field is two-character style, search for corresponding CfRadial
+        ; If field is two-character RSL style, search for corresponding CfRadial
         ; name.
         if strlen(thisfield) eq 2 then begin
             name = rslfield_to_cfrfield(thisfield,count)
@@ -241,40 +245,42 @@ function get_cfr_field_varnames, cfid
 ; This function returns an array containing the names of all field data
 ; variables found in the CfRadial file.
 
-; Get dimension IDs relating to field variables.
-quiet_prev = !quiet
-!quiet = 1 ; no messages while reading variables.
-timedim = ncdf_dimid(cfid, 'time')
-rangedim = ncdf_dimid(cfid, 'range')
-n_pointsdim = ncdf_dimid(cfid, 'n_points') 
-!quiet = quiet_prev
-
-; It is a field variable if
-;   variable is 2-D and dimensions are time and range
-;   or
-;   variable is 1-D and dimension is n_points
-
 info = ncdf_inquire(cfid)
-maxfields = 64
-names = strarr(maxfields)
-j = 0
-for i = 0, info.nvars-1 do begin
-    is_field = 0
-    varinfo = ncdf_varinq(cfid,i)
-    if varinfo.ndims eq 2 then begin
-        n = where(varinfo.dim eq timedim or varinfo.dim eq rangedim, $
-            count)
-        if count eq 2 then is_field = 1
-    endif else begin
-        if n_pointsdim gt -1 and varinfo.ndims eq 1 and $
-            varinfo.dim[0] eq n_pointsdim then is_field = 1
-    endelse
-    if is_field then begin
-        names[j] = varinfo.name
-        j = j + 1
-    endif
+; Get dimension IDs relating to field variables.
+for i=0,info.ndims-1 do begin
+    ncdf_diminq,cfid,i,dname,dsize
+    if dname eq 'time' then timedim = i
+    if dname eq 'range' then rangedim = i
+    if dname eq 'n_points' then n_pointsdim = i
 endfor
 
+if n_elements(n_pointsdim) gt 0 then field_ndims = 1 else field_ndims = 2
+
+names = strarr(32)
+j = 0
+for i = 0, info.nvars-1 do begin
+    varinfo = ncdf_varinq(cfid,i)
+    this_varname = varinfo.name
+    if field_ndims eq 2 then begin
+        if varinfo.ndims eq 2 then begin
+            found = 0
+            n = where(varinfo.dim eq timedim, count)
+            found = found + count
+            n = where(varinfo.dim eq rangedim, count)
+            found = found + count
+            if found eq 2 then begin
+                names[j] = this_varname
+                j = j + 1
+            endif
+        endif
+    endif else begin
+        n = where(varinfo.dim eq n_pointsdim, count)
+        if count eq 1 then begin
+            names[j] = this_varname
+            j = j + 1
+        endif
+    endelse
+endfor
 names = names[0:j-1]
 return, names
 end
@@ -490,9 +496,6 @@ if nfields eq 0 then begin
     if delete_on_close then spawn, 'rm ' + filename
     return, noradar
 endif
-if n_elements(fields) gt 0 then begin
-    cfrfields = get_selected_fields(cfrfields, fields, nfields)
-endif
 rslfields = cfrfields_to_rslfields(cfrfields)
 
 radar = rsl_new_radar(nfields, nsweeps, maxrays, rangedim)
@@ -582,7 +585,7 @@ endif
 reads, starttime_string, year, month, day, hour, minute, second, $
     format='(I4,5(X,I2))'
 starttime_julday = julday(month, day, year, hour, minute, second)
-sec_to_day = 1.d/86400.d
+sec_to_dayfrac = 1.d/86400.d
 
 if not quiet then print, format='($,"Loading sweep")'
 
@@ -664,7 +667,7 @@ for ifield = 0, nfields-1 do begin
         endelse
         ; If first field, load ray headers for all fields this sweep.
         if ifield eq 0 then begin
-            raytime = time[sttray:endray] * sec_to_day + starttime_julday
+            raytime = time[sttray:endray] * sec_to_dayfrac + starttime_julday
             caldat,raytime,month,day,year,hour,minute,second
             lastray=endray-sttray
             radar.volume.sweep[iswp].ray[0:lastray].h.month = month
