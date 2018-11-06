@@ -65,9 +65,7 @@ IF ( N_ELEMENTS(uf_field) EQ 0 ) THEN BEGIN
        			  field1 = 'CZ' 
                 END
        'DARW' : BEGIN
-       ; originally this was CZ, DZ in DARW CPOL is actually corrected
- ;                 field1 = 'CZ' 
-                  field1 = 'DZ'
+                  field1 = 'CZ' 
                 END
        'RMOR' : BEGIN
                   field1 = 'CZ' & mnem1 = 'PROPOG_COR'

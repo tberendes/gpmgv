@@ -864,6 +864,16 @@
 		               	  ; original equation
 		               	  ;swedp[gvkdp_z_posind] = 1.53 * gvkdpvals[gvkdp_z_posind]^0.68 * Z[gvkdp_z_posind]^0.29
 		               	  ; fixed equation 10/2/18
+;Todd- this is a screw up on my part……………………
+;I should have given you this equation for the S(KDP, Z)
+;
+;S = 1.48 * KDP^0.61 * Z^0.33
+;
+;Note that the multiplier and exponents are slightly different than what you are currently using.    But, we need to use this one.    
+;My guess is that there should not be a huge difference, but,…….
+;Can you just insert this fix and re run what you just did?  I’m really sorry…………………..
+;Cheers,
+;Walt
 		               	  swedp[gvkdp_z_posind] = 1.48 * gvkdpvals[gvkdp_z_posind]^0.61 * Z[gvkdp_z_posind]^0.33
 		               	  ;Z = 10^(dbzvals/10)	               	  
 		               	  ;swedp = 1.53 * gvkdpvals^0.68 * Z^0.29

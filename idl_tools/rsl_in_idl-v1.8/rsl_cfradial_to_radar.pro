@@ -49,7 +49,7 @@
 ;***************************************************************************
 ;
 
-function cfrfields_to_rslfields, cfrfields
+function cfrfields_to_rslfields, cfrfields, site_name
 
 ; Convert CfRadial field names to RSL field names.
 ;
@@ -89,7 +89,11 @@ for i = 0, nfields-1 do begin
         'HCLASS': rslfields[i] = 'HC'
         'SQI':    rslfields[i] = 'SQ'
         ; Some variations.
-        'REFLECTIVITY': rslfields[i] = 'DZ'
+        'REFLECTIVITY': begin
+            ; Todd Berendes, UAH, 11/6/18
+            ; Hack for DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
+            if site_name eq 'Gunn_Pt' then rslfields[i] = 'CZ' else rslfields[i] = 'DZ'
+         end
         'CORRECTED_REFLECTIVITY': rslfields[i] = 'CZ'
         'VELOCITY': rslfields[i] = 'VR'
         'CORRECTED_VELOCITY': rslfields[i] = 'VE'
@@ -493,7 +497,7 @@ endif
 if n_elements(fields) gt 0 then begin
     cfrfields = get_selected_fields(cfrfields, fields, nfields)
 endif
-rslfields = cfrfields_to_rslfields(cfrfields)
+rslfields = cfrfields_to_rslfields(cfrfields, site_name)
 
 radar = rsl_new_radar(nfields, nsweeps, maxrays, rangedim)
 
