@@ -104,6 +104,12 @@ for i = 0, nfields-1 do begin
         'CROSS_CORRELATION_RATIO': rslfields[i] = 'RH'
         'SPECIFIC_DIFFERENTIAL_PHASE': rslfields[i] = 'KD'
         'HYDROCLASS': rslfields[i] = 'HC'
+        ; new values for DARW CPOL data
+        'RADAR_ECHO_CLASSIFICATION' : rslfields[i] = 'FH'
+        'CORRECTED_DIFFERENTIAL_REFLECTIVITY' : rslfields[i] = 'DR'
+        'CORRECTED_DIFFERENTIAL_PHASE' : rslfields[i] = 'PH'
+        'CORRECTED_SPECIFIC_DIFFERENTIAL_PHASE' : rslfields[i] = 'KD'
+        'RADAR_ESTIMATED_RAIN_RATE'  : rslfields[i] = 'RR'
         else: begin
             rslfields[i] = cfrfields[i]
         end
