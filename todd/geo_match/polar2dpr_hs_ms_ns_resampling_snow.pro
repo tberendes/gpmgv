@@ -854,12 +854,15 @@
                
                		  if (num_gvkdp_z_posind GT 0)  then begin
 		               	  ; start with RC rain rates
-		               	  if have_gv_rc then rainvals=gvrcvals
-		               	  else if have_gv_rp then rainvals=gvrpvals
-		               	  else if have_gv_rr then rainvals=gvrrvals
-		               	  else begin
+		               	  if have_gv_rc then begin
+		               	  	rainvals=gvrcvals
+		               	  endif else if have_gv_rp then begin
+		               	  	rainvals=gvrpvals
+		               	  endif else if have_gv_rr then begin 
+		               	  	rainvals=gvrrvals
+		               	  endif else begin
 		               	  	   PRINT, "Error no Rain Rate values, skipping this event!
-         						GOTO, nextGRfile
+         					   GOTO, nextGRfile
 		               	  endelse
 		               	  
 		                  swedp=rainvals
