@@ -113,6 +113,12 @@ ENDIF ELSE BEGIN
              'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP
              ELSE : field1 = uf_field
           ENDCASE
+       ENDIF ELSE IF siteID EQ 'DARW' THEN BEGIN
+           CASE uf_field OF
+             'RP' : field1 = 'RR'         ; CPOL/CP2 RR maps to RP in matchups
+             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP       
+             ELSE : field1 = uf_field
+           ENDCASE
        ENDIF ELSE field1 = uf_field
     ENDIF ELSE BEGIN
        message, 'UF_FIELD must be single, non-empty value!', /INFO
@@ -129,7 +135,7 @@ IF ( countvols EQ 1 ) THEN BEGIN
    RETURN, volnum
 ENDIF ELSE BEGIN
    print, ""
-   message, "Valid volnume not found for site ID '" +siteID+ "', field '" $
+   message, "Valid volume not found for site ID '" +siteID+ "', field '" $
             +field1+ "'", /INFO
    print, "Available fields: ", fields
    print, ""
