@@ -90,6 +90,11 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
       ENDIF ELSE BEGIN
         ; compute volume-weighted average in data space
          avg_gv = TOTAL(data2avg * wgts2avg) / TOTAL(wgts2avg)
+		IF CHECK_MATH() NE 0 THEN BEGIN
+			PRINT, 'Math error mean_stddev_max_by_rules'
+			print, 'field ', field, 'goodthresh ', goodthresh, 'badthresh ', badthresh, $
+                                   ,'no_data_value ', no_data_value
+		ENDIF
       ENDELSE
      ; compute max and standard deviation of good GR gates in data space
       max_gv = MAX(data2avg)
