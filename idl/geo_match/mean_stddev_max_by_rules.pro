@@ -58,11 +58,17 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
                  bad_idx = WHERE( data LT badthresh, countGVbad )
                  break
                END
-     'RHOHV' :
-     'DZERO' :
-        'NW' : BEGIN
+     'RHOHV' : BEGIN
                  good_idx = WHERE( data GT goodthresh, countGVgood )
                  bad_idx = WHERE( data LE badthresh, countGVbad )
+                 break
+               END
+     'DZERO' : 
+        'NW' : BEGIN
+        		 ; added sanity check to filter out very large values
+        		 ; 9.9e36 and Inf found in DARW CPOL data files
+                 good_idx = WHERE( data GT goodthresh and data LT 32000, countGVgood )
+                 bad_idx = WHERE( data LE badthresh or data GE 32000, countGVbad )
                  break
                END
         ELSE : message, "Unknown field identifier: "+field
