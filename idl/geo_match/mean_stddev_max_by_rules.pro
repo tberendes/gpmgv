@@ -97,6 +97,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 			PRINT, 'Math error mean_stddev_max_by_rules'
 			print, 'field ', field, ' goodthresh ', goodthresh, ' badthresh ', badthresh, $
                                    ' no_data_value ', no_data_value
+            print, ' TOTAL(data2avg * wgts2avg) ', TOTAL(data2avg * wgts2avg)
             print, ' TOTAL(wgts2avg) ', TOTAL(wgts2avg)
 
 ; Enable automatic printing of subsequent math errors:
