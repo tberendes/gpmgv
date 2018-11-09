@@ -103,8 +103,8 @@ ENDIF ELSE BEGIN
    ; get the volume for the caller-specified field
     IF ( N_ELEMENTS(uf_field) EQ 1 AND uf_field NE '' ) THEN BEGIN
       ; translate to the alternate UF IDs for DARW/CPOL and CP2
-       IF siteID EQ 'DARW' OR siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
-;       IF siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
+;       IF siteID EQ 'DARW' OR siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
+       IF siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
           CASE uf_field OF
              'FH' : field1 = 'HC'
              'DR' : field1 = 'ZD'
@@ -113,14 +113,14 @@ ENDIF ELSE BEGIN
              'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP
              ELSE : field1 = uf_field
           ENDCASE
-       ENDIF ELSE field1 = uf_field
-;       ENDIF ELSE IF siteID EQ 'DARW' THEN BEGIN
-;           CASE uf_field OF
-;             'RP' : field1 = 'RR'         ; CPOL/CP2 RR maps to RP in matchups
-;             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP       
-;             ELSE : field1 = uf_field
-;           ENDCASE
 ;       ENDIF ELSE field1 = uf_field
+       ENDIF ELSE IF siteID EQ 'DARW' THEN BEGIN
+           CASE uf_field OF
+             'RP' : field1 = 'RR'         ; CPOL/CP2 RR maps to RP in matchups
+             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP       
+             ELSE : field1 = uf_field
+           ENDCASE
+       ENDIF ELSE field1 = uf_field
     ENDIF ELSE BEGIN
        message, 'UF_FIELD must be single, non-empty value!', /INFO
        print, "UF_FIELD as requested: '", uf_field, "'"

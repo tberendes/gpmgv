@@ -95,20 +95,20 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
          avg_gv = 10.*ALOG10(z_avg_gv)
       ENDIF ELSE BEGIN
 ; Disable automatic printing of subsequent math errors:
-!EXCEPT=0
+;!EXCEPT=0
 
         ; compute volume-weighted average in data space
          avg_gv = TOTAL(data2avg * wgts2avg) / TOTAL(wgts2avg)
-		IF CHECK_MATH() NE 0 THEN BEGIN
-			PRINT, 'Math error mean_stddev_max_by_rules'
-			print, 'field ', field, ' goodthresh ', goodthresh, ' badthresh ', badthresh, $
-                                   ' no_data_value ', no_data_value
-            print, ' TOTAL(data2avg * wgts2avg) ', TOTAL(data2avg * wgts2avg)
-            print, ' TOTAL(wgts2avg) ', TOTAL(wgts2avg)
-
+;		IF CHECK_MATH() NE 0 THEN BEGIN
+;			PRINT, 'Math error mean_stddev_max_by_rules'
+;			print, 'field ', field, ' goodthresh ', goodthresh, ' badthresh ', badthresh, $
+;                                   ' no_data_value ', no_data_value
+;            print, ' TOTAL(data2avg * wgts2avg) ', TOTAL(data2avg * wgts2avg)
+;            print, ' TOTAL(wgts2avg) ', TOTAL(wgts2avg)
+;
 ; Enable automatic printing of subsequent math errors:
-!EXCEPT=2
-		ENDIF
+;!EXCEPT=2
+;		ENDIF
       ENDELSE
      ; compute max and standard deviation of good GR gates in data space
       max_gv = MAX(data2avg)
