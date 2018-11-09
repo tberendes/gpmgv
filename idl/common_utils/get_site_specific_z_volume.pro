@@ -103,8 +103,8 @@ ENDIF ELSE BEGIN
    ; get the volume for the caller-specified field
     IF ( N_ELEMENTS(uf_field) EQ 1 AND uf_field NE '' ) THEN BEGIN
       ; translate to the alternate UF IDs for DARW/CPOL and CP2
-;       IF siteID EQ 'DARW' OR siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
-       IF siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
+       IF siteID EQ 'DARW' OR siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
+;       IF siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
           CASE uf_field OF
              'FH' : field1 = 'HC'
              'DR' : field1 = 'ZD'
