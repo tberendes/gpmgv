@@ -93,7 +93,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 		IF CHECK_MATH() NE 0 THEN BEGIN
 			PRINT, 'Math error mean_stddev_max_by_rules'
 			print, 'field ', field, 'goodthresh ', goodthresh, 'badthresh ', badthresh, $
-                                   ,'no_data_value ', no_data_value
+                                   'no_data_value ', no_data_value
 		ENDIF
       ENDELSE
      ; compute max and standard deviation of good GR gates in data space
