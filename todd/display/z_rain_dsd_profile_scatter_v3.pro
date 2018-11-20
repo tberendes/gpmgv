@@ -542,6 +542,7 @@ aptr = (ptrData_array)[plotIndex,raintypeBBidx]
         ; -- restrict the samples to those where both scat_X and scat_Y are within
         ;    the histogram bounds or else we can get some bad scat_X values included
         ;    in the gvzmeanByBin calculations, as we learned the hard way.
+        ; assumes DPR values are always in "Y" axis
          y2do = scat_Y[idx_XY]
          x2do = scat_X[idx_XY]
          zhist1dpr=HISTOGRAM(y2do, MIN=binmin2, MAX=binmax2, BINSIZE=BINSPAN2, $
