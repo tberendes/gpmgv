@@ -2723,11 +2723,11 @@ endif
                   1 : BEGIN
                       ; accumulate convective rain type below the BB at/below 3 km
                       if snow_flag then begin
+                       	 idxabv = WHERE( rntype EQ RainType_convective $
+                                      AND hgtcat LE 1, countabv )                      
+                      endif else begin
                       	 idxabv = WHERE( BBprox EQ 0 AND rntype EQ RainType_convective $
                                       AND hgtcat LE 1, countabv )
-                      endif else begin
-                      	 idxabv = WHERE( rntype EQ RainType_convective $
-                                      AND hgtcat LE 1, countabv )                      
                       endelse
                       END
                   0 : BEGIN
