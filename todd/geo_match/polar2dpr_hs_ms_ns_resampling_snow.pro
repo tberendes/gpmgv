@@ -116,9 +116,13 @@
          ENDIF
       ENDFOR
       IF azsign EQ 0 THEN BEGIN
-         PRINT, "Error computing sweep direction, skipping this event!
-         GOTO, nextGRfile
+;         PRINT, "Error computing sweep direction, skipping this event!
+;         GOTO, nextGRfile
+         PRINT, "Error computing sweep direction, skipping this elevation, writing missing values...
+         skip_elev = 1
+         goto, skip_sweep
       ENDIF
+      skip_elev = 0
 
      ; Compute the leading edge of each ray as the mean center azimuth of it
      ; and the next ray, if the azimuth step is nominal.  Otherwise, use the
@@ -445,6 +449,9 @@
      ; (horizontally) and within the vertical layer defined by the GV radar
      ; beam top/bottom:
 
+    ; come here if sweep is missing and write out missing values at end of this loop
+	skip_sweep:
+
       FOR jpr=0, numDPRrays-1 DO BEGIN
         ; init output variables defined/set in loop/if
          writeMISSING = 1
@@ -467,8 +474,11 @@
          n_gr_swe75_points_rejected = 0UL     ; # of above that are missing swe
          dpr_gates_expected = 0UL      ; # of above that are below GV RR cutoff
 
-         dpr_index = dpr_master_idx[jpr]
-
+	     if skip_elev NE 1 then $
+         	dpr_index = dpr_master_idx[jpr]
+	     else $
+	     	dpr_index = -3 ; cause to fall into missing data block later
+	     	
          IF ( dpr_index GE 0 AND dpr_echoes[jpr] NE 0B ) THEN BEGIN
             raydpr = dpr_ray_num[jpr]
             scandpr = dpr_scan_num[jpr]
