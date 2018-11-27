@@ -474,7 +474,7 @@
          n_gr_swe75_points_rejected = 0UL     ; # of above that are missing swe
          dpr_gates_expected = 0UL      ; # of above that are below GV RR cutoff
 
-	     if skip_elev NE 1 then $
+	     if skip_elev NE 1 $
          	dpr_index = dpr_master_idx[jpr]
 	     else $
 	     	dpr_index = -3 ; cause to fall into missing data block later
