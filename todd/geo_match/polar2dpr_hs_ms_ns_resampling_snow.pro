@@ -118,6 +118,7 @@
       IF azsign EQ 0 THEN BEGIN
 ;         PRINT, "Error computing sweep direction, skipping this event!
 ;         GOTO, nextGRfile
+; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
          PRINT, "Error computing sweep direction, skipping this elevation, writing missing values...
          skip_elev = 1
          goto, skip_sweep
@@ -449,6 +450,7 @@
      ; (horizontally) and within the vertical layer defined by the GV radar
      ; beam top/bottom:
 
+; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
     ; come here if sweep is missing and write out missing values at end of this loop
 	skip_sweep:
 
@@ -474,6 +476,7 @@
          n_gr_swe75_points_rejected = 0UL     ; # of above that are missing swe
          dpr_gates_expected = 0UL      ; # of above that are below GV RR cutoff
 
+; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
 	     if skip_elev NE 1 then begin
          	dpr_index = dpr_master_idx[jpr]
 	     endif else begin
@@ -1245,6 +1248,7 @@
                           tocdf_top_hgt[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_botm_hgt[jpr,ielev] = FLOAT_OFF_EDGE
                        END
+; TAB 11/27/18 This is where bad sweeps in DARW data should be handled
               ELSE  :  BEGIN
                       ; data internal issues, set science values to missing
                           tocdf_gr_dbz[jpr,ielev] = Z_MISSING

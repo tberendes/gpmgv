@@ -91,7 +91,7 @@ for i = 0, nfields-1 do begin
         ; Some variations.
         'REFLECTIVITY': begin
             ; Todd Berendes, UAH, 11/6/18
-            ; Hack for DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
+            ;  DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
             if site_name eq 'Gunn_Pt' then rslfields[i] = 'CZ' else rslfields[i] = 'DZ'
          end
         'CORRECTED_REFLECTIVITY': rslfields[i] = 'CZ'
