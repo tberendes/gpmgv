@@ -474,11 +474,12 @@
          n_gr_swe75_points_rejected = 0UL     ; # of above that are missing swe
          dpr_gates_expected = 0UL      ; # of above that are below GV RR cutoff
 
-	     if skip_elev NE 1 $
+	     if skip_elev NE 1 then begin
          	dpr_index = dpr_master_idx[jpr]
-	     else $
+	     endif else begin
 	     	dpr_index = -3 ; cause to fall into missing data block later
-	     	
+	     endelse
+	     
          IF ( dpr_index GE 0 AND dpr_echoes[jpr] NE 0B ) THEN BEGIN
             raydpr = dpr_ray_num[jpr]
             scandpr = dpr_scan_num[jpr]
