@@ -108,6 +108,8 @@ for i = 0, nfields-1 do begin
         'RADAR_ECHO_CLASSIFICATION' : rslfields[i] = 'FH'
         'CORRECTED_DIFFERENTIAL_REFLECTIVITY' : rslfields[i] = 'DR'
         'CORRECTED_DIFFERENTIAL_PHASE' : rslfields[i] = 'PH'
+        ; TAB 12/06/18 
+        ; don't use their KDP, use the one Jason computed and added as "KDP" to the file
         'CORRECTED_SPECIFIC_DIFFERENTIAL_PHASE' : rslfields[i] = 'KD'
         'RADAR_ESTIMATED_RAIN_RATE'  : rslfields[i] = 'RR'
         else: begin
@@ -539,6 +541,12 @@ endif else unambiguous_range = fltarr(timedim) ; Missing, fill with 0's.
 loc = where(varnames eq 'pulse_width', count)
 if count gt 0 then ncdf_varget,cfid,'pulse_width',pulse_width $
     else pulse_width = fltarr(timedim)
+; TAB 12/6/18 Hack for missing value in DARW CPOL files
+if site_name eq 'Gunn_Pt' then begin
+	if pulse_width[0] lt 0 then pulse_width[*]= 1.02E-6
+endif
+
+
 loc = where(varnames eq 'scan_rate', count)
 if count gt 0 then ncdf_varget,cfid,'scan_rate',azim_rate $
     else azim_rate = fltarr(timedim)
@@ -737,6 +745,11 @@ if count gt 0 then ncdf_varget,cfid,'radar_beam_width_h',beam_width_h $
 loc = where(varnames eq 'radar_beam_width_v', count)
 if count gt 0 then ncdf_varget,cfid,'radar_beam_width_v',beam_width_v $
     else beam_width_v = beam_width_h
+; TAB 12/6/18 Hack for missing value in DARW CPOL files
+if site_name eq 'Gunn_Pt' then begin
+	if beam_width_h lt 0 then beam_width_h= 0.92
+	if beam_width_v lt 0 then beam_width_v= 0.92
+endif
 radar.volume.sweep.h.beam_width = beam_width_h
 radar.volume.sweep.h.horz_half_bw = beam_width_h/2.
 radar.volume.sweep.h.vert_half_bw = beam_width_v/2.
