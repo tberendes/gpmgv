@@ -109,8 +109,8 @@ for i = 0, nfields-1 do begin
         'CORRECTED_DIFFERENTIAL_REFLECTIVITY' : rslfields[i] = 'DR'
         'CORRECTED_DIFFERENTIAL_PHASE' : rslfields[i] = 'PH'
         ; TAB 12/06/18 
-        ; don't use their KDP, use the one Jason computed and added as "KDP" to the file
-        'CORRECTED_SPECIFIC_DIFFERENTIAL_PHASE' : rslfields[i] = 'KD'
+        ; for CPOL, don't use their KDP, use the one Jason computed with DROPS2 and added as "KDP" to the file
+        ;'CORRECTED_SPECIFIC_DIFFERENTIAL_PHASE' : rslfields[i] = 'KD'
         'RADAR_ESTIMATED_RAIN_RATE'  : rslfields[i] = 'RR'
         else: begin
             rslfields[i] = cfrfields[i]
