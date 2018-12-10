@@ -3105,7 +3105,9 @@ endif
   	   'SWDP': BEGIN
                  IF countabv GT 0 AND have_swe THEN BEGIN
 	                scat_X = swedp[idxabv]
-	                scat_Y = DPR_RC[idxabv]                
+	                ; DPR rain rate is always DPR_RR, others are just copies
+;	                scat_Y = DPR_RC[idxabv]                
+	                scat_Y = DPR_RR[idxabv]                
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -3115,7 +3117,7 @@ endif
   	   'SW25': BEGIN
                   IF countabv GT 0 AND have_swe THEN BEGIN
 	                scat_X = swe25[idxabv]
-	                scat_Y = DPR_RC[idxabv]                
+	                scat_Y = DPR_RR[idxabv]                
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -3125,7 +3127,7 @@ endif
   	   'SW50': BEGIN
                   IF countabv GT 0 AND have_swe THEN BEGIN
 	                scat_X = swe50[idxabv]
-	                scat_Y = DPR_RC[idxabv]                
+	                scat_Y = DPR_RR[idxabv]                
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
@@ -3135,7 +3137,7 @@ endif
   	   'SW75': BEGIN
                   IF countabv GT 0 AND have_swe THEN BEGIN
 	                scat_X = swe75[idxabv]
-	                scat_Y = DPR_RC[idxabv]                
+	                scat_Y = DPR_RR[idxabv]                
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
                                      plotDataPtrs, have_Hist, PlotTypes, $
