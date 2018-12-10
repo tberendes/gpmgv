@@ -2573,23 +2573,25 @@ endif
                BREAK 
                END
      'GRDMSH' : BEGIN ; only do for all below BB
-     		; GR_Dmstddev
-			;GR Dm standard deviation histogram (below BB)
-                CASE raintypeBBidx OF
-                   0 : BEGIN
-                      ; accumulate stratiform rain types below the BB at/below 3 km
-                      idxabv = WHERE( GR_Dmstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1 $
-                        AND rntype EQ RainType_stratiform, countabv )
-                      END
-                   1 : BEGIN
-                      ; accumulate convective rain types below the BB at/below 3 km
-                      idxabv = WHERE( GR_Dmstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1 $
-                      	AND rntype EQ RainType_convective, countabv )
-                      END
-                ELSE: BEGIN
-                      END
-                  ENDCASE
-               BREAK 
+     		if myflags.have_GR_Dm EQ 1 then begin
+	     		; GR_Dmstddev
+				;GR Dm standard deviation histogram (below BB)
+	                CASE raintypeBBidx OF
+	                   0 : BEGIN
+	                      ; accumulate stratiform rain types below the BB at/below 3 km
+	                      idxabv = WHERE( GR_Dmstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+	                        AND rntype EQ RainType_stratiform, countabv )
+	                      END
+	                   1 : BEGIN
+	                      ; accumulate convective rain types below the BB at/below 3 km
+	                      idxabv = WHERE( GR_Dmstddev GE 0.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+	                      	AND rntype EQ RainType_convective, countabv )
+	                      END
+	                ELSE: BEGIN
+	                      END
+	                  ENDCASE
+	           endif
+	           BREAK 
                END
        'GRZSH' : BEGIN ; do for convective above BB and all below BB
        		; gvzstddev
@@ -3430,8 +3432,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                 ELSE: BEGIN
                       END
                   ENDCASE
-               BREAK 
-               END
+                END
      'BBHIST' : BEGIN ; Don't stratify on height
                 CASE raintypeBBidx OF
                    0 : BEGIN
@@ -3452,7 +3453,6 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                 ELSE: BEGIN
                       END
                   ENDCASE
-               BREAK 
                END
      'MRHIST' : BEGIN ; Don't stratify on height
    				IF have_mrms EQ 0 OR countabv eq 0 THEN break
@@ -3480,7 +3480,6 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                 ELSE: BEGIN
                       END
                   ENDCASE
-               BREAK 
                END
      'DRHIST' : BEGIN ; Don't stratify on height
    				IF have_mrms EQ 0 OR countabv eq 0 THEN break
@@ -3507,23 +3506,24 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                 ELSE: BEGIN
                       END
                   ENDCASE
-               BREAK 
                END
       'GRDMSH' : BEGIN ; only do for all below BB
-               CASE raintypeBBidx OF
-                   0 : BEGIN
-                      ; accumulate stratiform at/below 3 km
-                      if countabv gt 0 then $
-                      	  GRDMSH_below_s = [GRDMSH_below_s, GR_Dmstddev[idxabv]]
-                      END
-                   1 : BEGIN
-                      ; accumulate convective at/below 3 km
-                      if countabv gt 0 then $
-                          GRDMSH_below_c = [GRDMSH_below_c, GR_Dmstddev[idxabv]]
-                      END
-                ELSE: BEGIN
-                      END
-                  ENDCASE
+      		   if myflags.have_GR_Dm EQ 1 then begin
+	               CASE raintypeBBidx OF
+	                   0 : BEGIN
+	                      ; accumulate stratiform at/below 3 km
+	                      if countabv gt 0 then $
+	                      	  GRDMSH_below_s = [GRDMSH_below_s, GR_Dmstddev[idxabv]]
+	                      END
+	                   1 : BEGIN
+	                      ; accumulate convective at/below 3 km
+	                      if countabv gt 0 then $
+	                          GRDMSH_below_c = [GRDMSH_below_c, GR_Dmstddev[idxabv]]
+	                      END
+	                ELSE: BEGIN
+	                      END
+	                  ENDCASE
+               endif 
                END
        'GRZSH' : BEGIN ; do for convective above BB and all below BB
      		;GR Z standard deviation histogram (above & below BB)
