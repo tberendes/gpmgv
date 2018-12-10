@@ -3654,7 +3654,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
 ;  					mrms_rr = mrmsrrveryhigh[*,0]
 ;                    idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and mrms_rr GT 0.0 and rqi ge 95 ,count )
 
-  				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
+  				IF countabv GT 0 AND have_mrms EQ 1 AND have_RR EQ 1 THEN BEGIN
   					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]
   					mrms_rr = mrmsrrveryhigh[idxabv]
                     idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
@@ -3674,7 +3674,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
               END
   'GRCMRMS' : BEGIN
 
-  				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
+  				IF countabv GT 0 AND have_mrms EQ 1  AND have_RC EQ 1 THEN BEGIN
   					near_sfc_gr_rc = near_sfc_gr_rc[idxabv]
   					mrms_rr = mrmsrrveryhigh[idxabv]
                     idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
@@ -3691,7 +3691,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
               END
   'GRPMRMS' : BEGIN
 
-  				IF countabv GT 0 AND have_mrms EQ 1 THEN BEGIN
+  				IF countabv GT 0 AND have_mrms EQ 1 AND have_RP EQ 1  THEN BEGIN
   					near_sfc_gr_rp = near_sfc_gr_rp[idxabv]
   					mrms_rr = mrmsrrveryhigh[idxabv]
                     idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and mrms_rr GE 0.0 and rqi ge 95 ,count )
@@ -3707,59 +3707,65 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                  ENDIF
               END
   'GRRDSR' : BEGIN
+  			 
 ;;   					near_sfc_gr_rr = GR_RR_orig[*,1] ; choose second scan above surface
 ;   					near_sfc_gr_rr = GR_RR_orig[*,0] ; choose lowest scan above surface
 ;  					ns_rr = nearSurfRain[*,0]
 ;                   idxnonzero=WHERE(near_sfc_gr_rr GT 0.0 and ns_rr GT 0.0,count )
-
-  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]  					
-  					ns_rr = nearSurfRain[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and ns_rr GE 0.0,count )
-                    if count gt 0 then begin 
-                       scat_X = near_sfc_gr_rr[idxnonzero]
-                       scat_Y = ns_rr[idxnonzero]
-;                       scat_Y = nearSurfRain[idxnonzero]
-;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
-;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
-                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
-                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
-                                     plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+					if have_RR EQ 1 then begin
+	  					near_sfc_gr_rr = near_sfc_gr_rr[idxabv]  					
+	  					ns_rr = nearSurfRain[idxabv]
+	                    idxnonzero=WHERE(near_sfc_gr_rr GE 0.0 and ns_rr GE 0.0,count )
+	                    if count gt 0 then begin 
+	                       scat_X = near_sfc_gr_rr[idxnonzero]
+	                       scat_Y = ns_rr[idxnonzero]
+	;                       scat_Y = nearSurfRain[idxnonzero]
+	;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
+	                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+	                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+	                                     plotDataPtrs, have_Hist, PlotTypes, $
+	                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+	                    endif
                     endif
               END
   'GRCDSR' : BEGIN
 
-  					near_sfc_gr_rc = near_sfc_gr_rc[idxabv]  					
-  					ns_rr = nearSurfRain[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and ns_rr GE 0.0,count )
-                    if count gt 0 then begin 
-                       scat_X = near_sfc_gr_rc[idxnonzero]
-                       scat_Y = ns_rr[idxnonzero]
-;                       scat_Y = nearSurfRain[idxnonzero]
-;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
-;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
-                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
-                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
-                                     plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+					if have_RC EQ 1 then begin
+	  					near_sfc_gr_rc = near_sfc_gr_rc[idxabv]  					
+	  					ns_rr = nearSurfRain[idxabv]
+	                    idxnonzero=WHERE(near_sfc_gr_rc GE 0.0 and ns_rr GE 0.0,count )
+	                    if count gt 0 then begin 
+	                       scat_X = near_sfc_gr_rc[idxnonzero]
+	                       scat_Y = ns_rr[idxnonzero]
+	;                       scat_Y = nearSurfRain[idxnonzero]
+	;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
+	                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+	                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+	                                     plotDataPtrs, have_Hist, PlotTypes, $
+	                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+	                    endif
                     endif
               END
   'GRPDSR' : BEGIN
 
-  					near_sfc_gr_rp = near_sfc_gr_rp[idxabv]  					
-  					ns_rr = nearSurfRain[idxabv]
-                    idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and ns_rr GE 0.0,count )
-                    if count gt 0 then begin 
-                       scat_X = near_sfc_gr_rp[idxnonzero]
-                       scat_Y = ns_rr[idxnonzero]
-;                       scat_Y = nearSurfRain[idxnonzero]
-;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
-;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
-                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
-                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
-                                     plotDataPtrs, have_Hist, PlotTypes, $
-                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
-                    endif
+					if have_RP EQ 1 then begin
+	  					near_sfc_gr_rp = near_sfc_gr_rp[idxabv]  					
+	  					ns_rr = nearSurfRain[idxabv]
+	                    idxnonzero=WHERE(near_sfc_gr_rp GE 0.0 and ns_rr GE 0.0,count )
+	                    if count gt 0 then begin 
+	                       scat_X = near_sfc_gr_rp[idxnonzero]
+	                       scat_Y = ns_rr[idxnonzero]
+	;                       scat_Y = nearSurfRain[idxnonzero]
+	;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[0]=rr_log
+	;	                   axis_scale.(PlotHash(PlotTypes(iplot)))[1]=rr_log
+	                       accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+	                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+	                                     plotDataPtrs, have_Hist, PlotTypes, $
+	                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+	                    endif
+                    endif 
               END
       ENDCASE
    endfor
