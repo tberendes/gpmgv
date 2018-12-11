@@ -808,7 +808,29 @@
                IF have_gv_swe THEN BEGIN
                	  
                	  skip_swe=0
-               	  ; process only process matchups that are below 1.5km
+        	  	  ; use rain rate (prefer rc) for non-snow values
+               	  ; start with RC rain rates
+               	  if have_gv_rc then begin
+               	  	rain_rej=n_gr_rc_points_rejected
+               	  	rain_avg=rc_avg_gv
+          		    rain_stddev = rc_stddev_gv
+          		    rain_max = rc_max_gv
+               	  endif else if have_gv_rp then begin
+               	  	rain_rej=n_gr_rp_points_rejected
+               	  	rain_avg=rp_avg_gv
+          		    rain_stddev = rp_stddev_gv
+          		    rain_max = rp_max_gv
+               	  endif else if have_gv_rr then begin 
+               	  	rain_rej=n_gr_rr_points_rejected
+               	  	rain_avg=rr_avg_gv
+          		    rain_stddev = rr_stddev_gv
+          		    rain_max = rr_max_gv
+               	  endif else begin
+               	  	   PRINT, "Error no Rain Rate values, skipping this event!
+ 					   GOTO, nextGRfile
+               	  endelse
+ 
+               	  ; process only matchups that are below 1.5km
                	  if (meantop le 1.5 ) then begin
 					  ; compute snow index 
                	      snow_index = where((gvhidvals ge 3) and (gvhidvals le 7), num_snow)
@@ -816,29 +838,6 @@
 	               	  gvkdp_z_posind = where(dbzvals ge 0 and gvkdpvals ge 0, num_gvkdp_z_posind)	               	  
                	  	  if num_snow eq 0 then begin
                	  	  
-               	  	      ; use rc rain rate for non-snow values
-               	  	      
-		               	  ; start with RC rain rates
-		               	  if have_gv_rc then begin
-		               	  	rain_rej=n_gr_rc_points_rejected
-		               	  	rain_avg=rc_avg_gv
-                  		    rain_stddev = rc_stddev_gv
-                  		    rain_max = rc_max_gv
-		               	  endif else if have_gv_rp then begin
-		               	  	rain_rej=n_gr_rp_points_rejected
-		               	  	rain_avg=rp_avg_gv
-                  		    rain_stddev = rp_stddev_gv
-                  		    rain_max = rp_max_gv
-		               	  endif else if have_gv_rr then begin 
-		               	  	rain_rej=n_gr_rr_points_rejected
-		               	  	rain_avg=rr_avg_gv
-                  		    rain_stddev = rr_stddev_gv
-                  		    rain_max = rr_max_gv
-		               	  endif else begin
-		               	  	   PRINT, "Error no Rain Rate values, skipping this event!
-         					   GOTO, nextGRfile
-		               	  endelse
-		               	  
                	  	  	  n_gr_swedp_points_rejected = rain_rej
                   		  swedp_avg_gv = rain_avg
                   		  swedp_stddev_gv = rain_stddev
