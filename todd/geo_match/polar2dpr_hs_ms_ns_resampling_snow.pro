@@ -888,64 +888,30 @@
                	  
                	  if not skip_swe then begin
                
-               		  if (num_gvkdp_z_posind GT 0)  then begin
-		               	  ; start with RC rain rates
-		                  ; use RC rain rate (prefered, then RP, and RR) where snow is not detected
-		               	  if have_gv_rc then begin
-		               	  	rainvals=gvrcvals
-		               	  endif else if have_gv_rp then begin
-		               	  	rainvals=gvrpvals
-		               	  endif else if have_gv_rr then begin 
-		               	  	rainvals=gvrrvals
-		               	  endif else begin
-		               	  	   PRINT, "Error no Rain Rate values, skipping this event!
-         					   GOTO, nextGRfile
-		               	  endelse
-		               	  
-		                  swedp=rainvals
-		                  
-		               	  ; compute swerr for snow bins using formula
-		               	  Z=dbzvals
-		               	  zposind = where(dbzvals ge 0)
-		               	  Z[zposind] = 10^(dbzvals[zposind]/10)
-		               	  swedp=rainvals  ; use RC rain rate where snow is not detected
-		               	  ; original equation
-		               	  ;swedp[gvkdp_z_posind] = 1.53 * gvkdpvals[gvkdp_z_posind]^0.68 * Z[gvkdp_z_posind]^0.29
-		               	  ; fixed equation 10/2/18
-;Todd- this is a screw up on my part……………………
-;I should have given you this equation for the S(KDP, Z)
-;
-;S = 1.48 * KDP^0.61 * Z^0.33
-;
-;Note that the multiplier and exponents are slightly different than what you are currently using.    But, we need to use this one.    
-;My guess is that there should not be a huge difference, but,…….
-;Can you just insert this fix and re run what you just did?  I’m really sorry…………………..
-;Cheers,
-;Walt
-		               	  swedp[gvkdp_z_posind] = 1.48 * gvkdpvals[gvkdp_z_posind]^0.61 * Z[gvkdp_z_posind]^0.33
-		               	  ;Z = 10^(dbzvals/10)	               	  
-		               	  ;swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
-		                  ;swedp [notsnow_index]=Z_MISSING
-		                  ; use RC rain rate (prefered, then RP, and RR) where snow is not detected
-; don't need since we start with rainrate
-;		                  if num_notsnow gt 0 then $
-;		                  	  	swedp [notsnow_index]=rainvals[notsnow_index]
-		                  
-		                  altstats=mean_stddev_max_by_rules(swedp,'RR', dpr_rain_min, $
-		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
-		                  n_gr_swedp_points_rejected = altstats.rejects
-		                  swedp_avg_gv = altstats.mean
-		                  swedp_stddev_gv = altstats.stddev
-		                  swedp_max_gv = altstats.max
-	
+	               	  ; start with RC rain rates
+	                  ; use RC rain rate (prefered, then RP, and RR) where snow is not detected
+	               	  if have_gv_rc then begin
+	               	  	rainvals=gvrcvals
+	               	  endif else if have_gv_rp then begin
+	               	  	rainvals=gvrpvals
+	               	  endif else if have_gv_rr then begin 
+	               	  	rainvals=gvrrvals
+	               	  endif else begin
+	               	  	   PRINT, "Error no Rain Rate values, skipping this event!
+     					   GOTO, nextGRfile
+	               	  endelse
+		              Z=dbzvals
+		              zposind = where(Z ge 0, num_zposind)
+		              if num_zposind gt 0 then begin
+		                  Z[zposind] = 10^(Z[zposind]/10)
+		              
 		                  ; Pierre's methods
 		                  
 		                  swe25=rainvals
 		               	  swe25[zposind] = 0.101 * Z[zposind]^0.413
 		                  ; use rain rate where snow is not detected
-; don't need since we start with rainrate
-;		                  if num_notsnow gt 0 then $
-;		                  		swe25 [notsnow_index]=rainvals[notsnow_index]
+		                  if num_notsnow gt 0 then $
+		                  		swe25 [notsnow_index]=rainvals[notsnow_index]
 		                  altstats=mean_stddev_max_by_rules(swe25,'RR', dpr_rain_min, $
 		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
 	           	  	  	  n_gr_swe25_points_rejected = altstats.rejects
@@ -956,9 +922,8 @@
 	           	  	      swe50=rainvals
 		               	  swe50[zposind] = 0.204 * Z[zposind]^0.389
 		                  ; use RP rain rate where snow is not detected
-; don't need since we start with rainrate
-;		                  if num_notsnow gt 0 then $
-;		                  		swe50 [notsnow_index]=rainvals[notsnow_index]
+		                  if num_notsnow gt 0 then $
+		                  		swe50 [notsnow_index]=rainvals[notsnow_index]
 		                  altstats=mean_stddev_max_by_rules(swe50,'RR', dpr_rain_min, $
 		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
 	           	  	  	  n_gr_swe50_points_rejected = altstats.rejects
@@ -969,15 +934,53 @@
 	            	  	  swe75=rainvals
 	 	               	  swe75[zposind] = 0.257 * Z[zposind]^0.388
 		                  ; use RP rain rate where snow is not detected
-; don't need since we start with rainrate
-;		                  if num_notsnow gt 0 then $
-;		                  		swe75 [notsnow_index]=rainvals[notsnow_index]
+		                  if num_notsnow gt 0 then $
+		                  		swe75 [notsnow_index]=rainvals[notsnow_index]
 	 	                  altstats=mean_stddev_max_by_rules(swe75,'RR', dpr_rain_min, $
 		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)	                              
 	           	  	  	  n_gr_swe75_points_rejected = altstats.rejects
 	              		  swe75_avg_gv = altstats.mean
 	              		  swe75_stddev_gv = altstats.stddev
 	              		  swe75_max_gv = altstats.max
+	              		  		              
+	               		  if (num_gvkdp_z_posind GT 0)  then begin
+			               	  
+			               	  ; compute swerr for snow bins using formula
+			               	  swedp=rainvals  ; use rain rate where snow is not detected
+			               	  ; original equation
+			               	  ;swedp[gvkdp_z_posind] = 1.53 * gvkdpvals[gvkdp_z_posind]^0.68 * Z[gvkdp_z_posind]^0.29
+			               	  ; fixed equation 10/2/18
+	;Todd- this is a screw up on my part……………………
+	;I should have given you this equation for the S(KDP, Z)
+	;
+	;S = 1.48 * KDP^0.61 * Z^0.33
+	;
+	;Note that the multiplier and exponents are slightly different than what you are currently using.    But, we need to use this one.    
+	;My guess is that there should not be a huge difference, but,…….
+	;Can you just insert this fix and re run what you just did?  I’m really sorry…………………..
+	;Cheers,
+	;Walt
+			               	  swedp[gvkdp_z_posind] = 1.48 * gvkdpvals[gvkdp_z_posind]^0.61 * Z[gvkdp_z_posind]^0.33
+			               	  ;Z = 10^(dbzvals/10)	               	  
+			               	  ;swedp = 1.53 * gvkdpvals^0.68 * Z^0.29
+			                  ;swedp [notsnow_index]=Z_MISSING
+			                  ; use RC rain rate (prefered, then RP, and RR) where snow is not detected
+			                  ; set any non-snow values back to rain values
+			                  if num_notsnow gt 0 then $
+			                  	  	swedp [notsnow_index]=rainvals[notsnow_index]
+			                  
+			                  altstats=mean_stddev_max_by_rules(swedp,'RR', dpr_rain_min, $
+			                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
+			                  n_gr_swedp_points_rejected = altstats.rejects
+			                  swedp_avg_gv = altstats.mean
+			                  swedp_stddev_gv = altstats.stddev
+			                  swedp_max_gv = altstats.max
+		                  endif else begin
+	               	  	  	  n_gr_swedp_points_rejected = rain_rej
+	                  		  swedp_avg_gv = rain_avg
+	                  		  swedp_stddev_gv = rain_stddev
+	                  		  swedp_max_gv = rain_max
+		                  endelse
 
 	                  endif else begin
 	 	                  n_gr_swedp_points_rejected = Z_MISSING
@@ -1000,8 +1003,7 @@
 	              		  swe75_stddev_gv = Z_MISSING
 	              		  swe75_max_gv = Z_MISSING
 	                  endelse	                 	                  
-                  
-                  endif
+                  endif ; not skip_swe
 ;                  endif else begin
 ;                  
 ; 	                  n_gr_swedp_points_rejected = Z_MISSING
@@ -1025,7 +1027,7 @@
 ;	                  swe75_max_gv = Z_MISSING
 ;                  endelse
 
-               ENDIF
+               ENDIF ; have_gv_swe
 
 
 
