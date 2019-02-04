@@ -575,7 +575,7 @@ echo ''
 	            a.radar_id, date_trunc('second', a.overpass_time at time zone 'UTC') as ovrptime, \
 	            extract(EPOCH from date_trunc('second', a.overpass_time)) as ovrpticks, \
 	            b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
-	          into temp timediftmp
+	          into temp timediftmp \
 	          from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
 		    collate_satsubprod_1cuf c \
 	            left outer join geo_match_product e on \
@@ -585,18 +585,19 @@ echo ''
 	               and e.geo_match_version=${GEO_MATCH_VERSION}) and e.scan_type='${SWATH}' \
 	          where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
 	            and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num\
-	            and a.orbit = ${orbit} and c.subset = '${subset}'
-	            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
+	            and a.orbit = ${orbit} and c.subset = '${subset}' \
+	            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}' \
 	            and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
 	            and c.version = '$PPS_VERSION' and e.pathname is null \
-	            AND C.FILE1CUF NOT LIKE '%rhi%' \
-	          order by 3,9;
+	          order by 3,9; \
 	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
-	            from timediftmp group by 1 order by 1;
+	            from timediftmp group by 1 order by 1; \
 	          select a.event_num, a.orbit, a.radar_id, a.ovrptime, a.ovrpticks, \
-	                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b
+	                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b \
 	                 where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
 	        | tee -a $LOG_FILE 2>&1
+# this was at end of middle where clause, caused error in control file
+#	            AND C.FILE1CUF NOT LIKE '%rhi%' \
 
 	else
     # don't check for previous runs
@@ -604,7 +605,7 @@ echo ''
 	            a.radar_id, date_trunc('second', a.overpass_time at time zone 'UTC') as ovrptime, \
 	            extract(EPOCH from date_trunc('second', a.overpass_time)) as ovrpticks, \
 	            b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
-	          into temp timediftmp
+	          into temp timediftmp \
 	          from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
 		    collate_satsubprod_1cuf c \
 	            left outer join geo_match_product e on \
@@ -614,19 +615,20 @@ echo ''
 	               and e.geo_match_version=${GEO_MATCH_VERSION}) and e.scan_type='${SWATH}' \
 	          where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
 	            and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num\
-	            and a.orbit = ${orbit} and c.subset = '${subset}'
+	            and a.orbit = ${orbit} and c.subset = '${subset}' \
 	            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
 	            and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
 	            and c.version = '$PPS_VERSION' \
-	            AND C.FILE1CUF NOT LIKE '%rhi%' \
-	          order by 3,9;
+	          order by 3,9; \
 	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
-	            from timediftmp group by 1 order by 1;
+	            from timediftmp group by 1 order by 1; \
 	          select a.event_num, a.orbit, a.radar_id, a.ovrptime, a.ovrpticks, \
-	                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b
+	                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b \
 	                 where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
 	        | tee -a $LOG_FILE 2>&1
 # Check LEFT OUTER clause...    
+# this was at end of middle where clause, caused error in control file
+#	            AND C.FILE1CUF NOT LIKE '%rhi%' \
 	
     fi
 #        date | tee -a $LOG_FILE 2>&1

@@ -30,6 +30,8 @@
 ;  - Added GV_UF_DM_FIELD and GV_UF_N2_FIELD tag/values to dprgmi_gr_field_flags
 ;    structure, and added have_GR_Dm and have_GR_N2 tag/values to
 ;    dprgmi_gr_field_flags structure, for version 1.3 files.
+; 02/04/19 by Todd Berendes
+;  - added have_GR_SWE
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -116,7 +118,8 @@ field_flags =  { dprgmi_gr_field_flags,                        $
                  have_BBheight:            NO_DATA_PRESENT, $
                  have_TypePrecip:          NO_DATA_PRESENT, $
                  have_FlagPrecip:          NO_DATA_PRESENT, $
-                 have_clutterStatus:       NO_DATA_PRESENT  $
+                 have_clutterStatus:       NO_DATA_PRESENT,  $
+                 have_GR_SWE:       	NO_DATA_PRESENT  $
                }
 
 files_meta  =  { dprgmi_gr_input_files,    $
