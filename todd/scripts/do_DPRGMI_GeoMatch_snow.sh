@@ -362,6 +362,23 @@ else
 	order by 1 ;"`
 fi
 
+# hardcode datelist to specific dates
+#echo "2014-03-18" > $datelist   # edit/uncomment to just run a specific date
+#echo "2015-07-18 2017-10-24 2017-12-01 2017-12-05 2018-01-05 2018-01-25 2018-02-10 2018-02-25 2018-03-06" > $datelist
+
+#echo "2017-11-29" > $datelist
+#echo "2015-07-18" > $datelist
+
+#echo "2014-12-29" > $datelist
+#echo "2014-04-01" > $datelist
+#echo "2015-03-02" > $datelist
+#echo "2015-02-19" > $datelist
+
+#echo "2015-01-08" > $datelist
+echo "2014-12-29" > $datelist
+
+#cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
+
 echo " "
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE
