@@ -403,7 +403,7 @@ while read thisdate
    # append manner to 'outfileall', which is run-date-specific.
     filelist=${TMP_DIR}/COMB_filelist4geoMatch_temp.txt
     outfile=${TMP_DIR}/COMB_files_sites4geoMatch_temp.txt
-    outfileall=${CTL_DIR}/COMB_files_sites4geoMatch.${yymmdd}.txt
+    outfileall=${CTL_DIR}/COMB_files_sites4geoMatch_snow.${yymmdd}.txt
 
     if [ -s $outfileall ]
       then
