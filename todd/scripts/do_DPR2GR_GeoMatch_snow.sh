@@ -153,7 +153,7 @@ rundate=`date -u +%y%m%d`
 LOG_FILE=${LOG_DIR}/do_DPR2GR_GeoMatch_snow.${rundate}.log
 export rundate
 
-PPS_VERSION="V05A"         # specifies default PPS version of products to process
+PPS_VERSION="V06A"         # specifies default PPS version of products to process
 export PPS_VERSION
 PARAMETER_SET=2  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
 export PARAMETER_SET
@@ -396,6 +396,12 @@ from eventsatsubrad_vw c JOIN orbit_subset_product o \
 JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 
 #echo "2014-03-19" > $datelist   # edit/uncomment to just run a specific date
+#echo "2015-01-08" > $datelist   # edit/uncomment to just run a specific date
+#echo "2015-01-06" > $datelist   # edit/uncomment to just run a specific date
+
+#cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
+
+echo "2014-12-29" > $datelist
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE
