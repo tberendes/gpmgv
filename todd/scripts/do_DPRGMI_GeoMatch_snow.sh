@@ -117,7 +117,8 @@ TMP_DIR=/data/tmp
 export TMP_DIR
 LOG_DIR=/data/logs
 export LOG_DIR
-BIN_DIR=${GV_BASE_DIR}/scripts/matchup
+#BIN_DIR=${GV_BASE_DIR}/scripts/matchup
+BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
