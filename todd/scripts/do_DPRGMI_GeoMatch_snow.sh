@@ -379,7 +379,7 @@ fi
 # 2014-12-29 has both Reunion and Darw
 #echo "2014-12-29" > $datelist
 
-echo "2015-03-02" > $datelist
+echo "2015-02-19" > $datelist
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
 
