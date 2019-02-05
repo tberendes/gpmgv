@@ -143,7 +143,7 @@ if [ $# != 1 ]
 fi
 
 THISRUN=$1
-CONTROLFILE=${CTL_DIR}/COMB_files_sites4geoMatch.${THISRUN}.txt
+CONTROLFILE=${CTL_DIR}/COMB_files_sites4geoMatch_snow.${THISRUN}.txt
 THISRUN=`echo $CONTROLFILE | cut -f2 -d'.'`
 LOG_FILE=${LOG_DIR}/do_DPRGMI_geo_matchup4date_snow.${THISRUN}.log
 echo "Processing matchups for control file ${CONTROLFILE}" | tee $LOG_FILE
@@ -239,7 +239,7 @@ if [ -s $CONTROLFILE ]   # legacy if check, moved error logic to top of script
    # must be identically defined here and in do_DPRGMI_GeoMatch.sh and
    # do_DPRGMI_GeoMatch_from_ControlFiles.sh
 
-    DBCATALOGFILE=${TMP_DIR}/do_DPRGMI_geo_matchup_catalog.${THISRUN}.txt
+    DBCATALOGFILE=${TMP_DIR}/do_DPRGMI_geo_matchup_catalog_snow.${THISRUN}.txt
     grep 'GRtoDPR' $LOG_FILE | grep ${THISRUN} > $DBCATALOGFILE
     if [ -s $DBCATALOGFILE ]
       then
