@@ -109,7 +109,8 @@
 
 #GV_BASE_DIR=/home/morris/swdev   # set/exported by caller
 BIN_DIR=${GV_BASE_DIR}/scripts
-IDL_PRO_DIR=${GV_BASE_DIR}/idl/geo_match  #changed for operational (user gvoper)
+#IDL_PRO_DIR=${GV_BASE_DIR}/idl/geo_match  #changed for operational (user gvoper)
+IDL_PRO_DIR=${GV_BASE_DIR}/geo_match  #changed for operational (user gvoper)
 export IDL_PRO_DIR                # IDL polar2dprgmi_snow_V.bat needs this
 IDL=/usr/local/bin/idl
 #DATA_DIR=/data/gpmgv
