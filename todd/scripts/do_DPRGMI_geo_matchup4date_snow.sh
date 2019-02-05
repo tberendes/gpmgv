@@ -102,7 +102,7 @@
 #                         file to be run by IDL.
 #                       - Changed IDL_PRO_DIR to ${GV_BASE_DIR}/idl/geo_match
 #                         for user gvoper.
-#  2/4/2019   Morris    - modified to create new snow water equivalent fields
+#  2/4/2019   Berendes    - modified to create new snow water equivalent fields
 #
 ################################################################################
 

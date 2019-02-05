@@ -79,7 +79,8 @@
 
 # set up the default and override configuration parameters
 
-#USER_ID=`whoami`
+USER_ID=`whoami`
+
 #if [ "$USER_ID" = "morris" ]
 #  then
 #    GV_BASE_DIR=/home/morris/swdev
