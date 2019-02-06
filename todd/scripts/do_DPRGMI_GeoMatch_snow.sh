@@ -341,8 +341,8 @@ if [ "FORCE_MATCH" = "0" ]
 	         and g.PARAMETER_SET=${PARAMETER_SET} \
 	         and g.geo_match_version=${GEO_MATCH_VERSION} )
 	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
-	 WHERE g.pathname is null order by 1 ;"`
-#	 WHERE pathname is null order by 1 ;"`
+	 WHERE pathname is null order by 1 ;"`
+#	 WHERE g.pathname is null order by 1 ;"`
 
 else 
     # don't check for previous runs, leave off g.pathname is null clause
