@@ -173,7 +173,7 @@ ITE_or_Operational=`echo $PPS_VERSION | cut -c1`
 export ITE_or_Operational
 
 rundate=`date -u +%y%m%d`
-LOG_FILE=${LOG_DIR}/doDPRGMIGeoMatch4NewRainCases.${PPS_VERSION}.${rundate}.log
+LOG_FILE=${LOG_DIR}/doDPRGMIGeoMatch4NewRainCases_snow.${PPS_VERSION}.${rundate}.log
 
 umask 0002
 
@@ -314,7 +314,8 @@ dateStart=`echo $ymdstart | awk \
 # last V04A ingest
 #dateStart='2017-03-16'
 #dateEnd='2017-04-10'
-#dateStart='2014-03-01'
+dateStart='2014-03-01'
+dateEnd='2019-02-06'
 
 echo "Running GRtoDPRGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
 
@@ -379,7 +380,7 @@ fi
 # 2014-12-29 has both Reunion and Darw
 #echo "2014-12-29" > $datelist
 
-echo "2015-02-19" > $datelist
+#echo "2015-02-19" > $datelist
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
 
@@ -590,7 +591,7 @@ fi
            # extract the pathnames of the matchup files created this run, and 
            # catalog them in the geo_matchup_product table.  The following file
            # must be identically defined here and in do_DPRGMI_matchup4date.sh
-            DBCATALOGFILE=${TMP_DIR}/do_DPRGMI_geo_matchup_catalog.${yymmdd}.txt
+            DBCATALOGFILE=${TMP_DIR}/do_DPRGMI_geo_matchup_catalog_snow.${yymmdd}.txt
             if [ -s $DBCATALOGFILE ] 
               then
                 catalog_to_db  $DBCATALOGFILE
