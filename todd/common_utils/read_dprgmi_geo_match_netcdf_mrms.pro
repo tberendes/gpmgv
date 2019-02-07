@@ -659,7 +659,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       mrmsrqiphigh : TEMPORARY(mrmsrqiphigh), $
       mrmsrqipveryhigh : TEMPORARY(mrmsrqipveryhigh), $
       mrmshid: TEMPORARY(mrmshid)]
-      tempstruc = [tempstruc, mrmsstruc]
+      tempstruc = {tempstruc, mrmsstruc}
    endif
    
    if have_GR_SWE eq 1 then begin
@@ -677,7 +677,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       swe75 : TEMPORARY(swe75), $
       swe75_max : TEMPORARY(swe75_max), $
       swe75_stddev : TEMPORARY(swe75_stddev)]
-      tempstruc = [tempstruc, swestruc]
+      tempstruc = {tempstruc, swestruc}
    
    endif
 
