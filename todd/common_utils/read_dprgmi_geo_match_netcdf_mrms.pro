@@ -315,7 +315,7 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      ENDIF
      IF ncversion GE 1.31 THEN BEGIN
      	Result = NCDF_VARID(ncid1, 'have_mrms')
-     	print, 'result = '+Result
+     	print, 'result = ',Result
      	if Result ne 0 then begin
         	NCDF_VARGET, ncid1, 'have_mrms', have_mrms
         	fieldFlags.have_mrms = have_mrms
