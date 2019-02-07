@@ -341,6 +341,36 @@ FUNCTION fprep_dprgmi_geo_match_profiles_mrms, ncfilepr, heights_in, KUKA=KuKaIn
     PTRlandOcean_int=ptr_landOcean, PTRpridx_long=ptr_pr_index, $
     PTRstmTopHgt=ptr_stmTopHgt, $
 
+   ; MRMS RR variables
+    PTRmrmsrrlow=ptr_mrmsrrlow, $
+    PTRmrmsrrmed=ptr_mrmsrrmed, $
+    PTRmrmsrrhigh=ptr_mrmsrrhigh, $
+    PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
+   ; MRMS guage ratio variables
+    PTRmrmsgrlow=ptr_mrmsgrlow, $
+    PTRmrmsgrmed=ptr_mrmsgrmed, $
+    PTRmrmsgrhigh=ptr_mrmsgrhigh, $
+    PTRmrmsgrveryhigh=ptr_mrmsgrveryhigh, $
+   ; MRMS precip type histogram variables
+    PTRmrmsptlow=ptr_mrmsptlow, $
+    PTRmrmsptmed=ptr_mrmsptmed, $
+    PTRmrmspthigh=ptr_mrmspthigh, $
+    PTRmrmsptveryhigh=ptr_mrmsptveryhigh, $
+   ; MRMS RQI percent variables
+    PTRmrmsrqiplow=ptr_mrmsrqiplow, $
+    PTRmrmsrqipmed=ptr_mrmsrqipmed, $
+    PTRmrmsrqiphigh=ptr_mrmsrqiphigh, $
+    PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
+    
+	; TAB 2/6/19 SWE variables
+    PTRswedp=ptr_swedp, $
+    PTRswe25=ptr_swe25, $
+    PTRswe50=ptr_swe50, $
+    PTRswe75=ptr_swe75, $
+;    PTRswedp=ptr_swedp, PTRswedpstddev=ptr_swedpstddev, PTRswedpmax=ptr_swedpmax, $
+
+    PTRMRMSHID=ptr_MRMS_HID, $
+
    ; derived/computed variables
     PTRtop=ptr_top, PTRbotm=ptr_botm, PTRlat=ptr_lat, PTRlon=ptr_lon, $
     PTRxCorners=ptr_xCorner, PTRyCorners=ptr_yCorner, PTRbbProx=ptr_bbProx, $
@@ -370,7 +400,7 @@ FUNCTION fprep_dprgmi_geo_match_profiles_mrms, ncfilepr, heights_in, KUKA=KuKaIn
 @dpr_params.inc
 
 ; include file for DPRGMI structure definitions
-@dprgmi_geo_match_nc_structs.inc
+@dprgmi_geo_match_nc_structs_mrms.inc
 
 status = 1   ; init return status to FAILED
 
@@ -492,7 +522,7 @@ if (cpstatus eq 'OK') then begin
  ; read the file
    CATCH, error
    IF error EQ 0 THEN BEGIN
-      status = read_dprgmi_geo_match_netcdf( ncfile1, matchupmeta=mygeometa, $
+      status = read_dprgmi_geo_match_netcdf_mrms( ncfile1, matchupmeta=mygeometa, $
         sweepsmeta=mysweeps, sitemeta=mysite, fieldflags=myflags, $
         filesmeta=myfiles, DATA_MS=data_MS, DATA_NS=data_NS )
    ENDIF ELSE BEGIN
@@ -629,6 +659,38 @@ if (cpstatus eq 'OK') then begin
   rayNum=dataCmb.rayNum
   xcorner=dataCmb.xCorners
   ycorner=dataCmb.yCorners
+  
+  ; TAB 2/6/19 new stuff for mrms and snow
+  
+  if myflags.have_mrms eq 1 then begin
+    mrmsrrlow=dataCmb.mrmsrrlow
+    mrmsrrmed=dataCmb.mrmsrrmed
+    mrmsrrhigh=dataCmb.mrmsrrhigh
+    mrmsrrveryhigh=dataCmb.mrmsrrveryhigh
+    mrmsgrlow=dataCmb.mrmsgrlow
+    mrmsgrmed=dataCmb.mrmsgrmed
+    mrmsgrhigh=dataCmb.mrmsgrhigh
+    mrmsgrveryhigh=dataCmb.mrmsgrveryhigh
+    mrmsptlow=dataCmb.mrmsptlow
+    mrmsptmed=dataCmb.mrmsptmed
+    mrmspthigh=dataCmb.mrmspthigh
+    mrmsptveryhigh=dataCmb.mrmsptveryhigh
+    mrmsrqiplow=dataCmb.mrmsrqiplow
+    mrmsrqipmed=dataCmb.mrmsrqipmed
+    mrmsrqiphigh=dataCmb.mrmsrqiphigh
+    mrmsrqipveryhigh=dataCmb.mrmsrqipveryhigh
+    MRMS_HID=dataCmb.MRMS_HID
+    
+  endif
+  
+  if myflags.have_GR_SWE eq 1 then begin
+	; TAB 2/6/19 SWE variables
+    swedp=dataCmb.swedp
+    swe25=dataCmb.swe25
+    swe50=dataCmb.swe50
+    swe75=dataCmb.swe75
+;    PTRswedp=ptr_swedp, PTRswedpstddev=ptr_swedpstddev, PTRswedpmax=ptr_swedpmax, $
+  endif 
 
  ; deal with the nKuKa dimension in MS swath.  Extract either the Ku or Ka
  ; subarray depending on idxKuKa
@@ -982,6 +1044,30 @@ dpr_lon = dpr_lon[idxpractual2d]
 rnType = rnType[idxpractual2d]
 landOceanFlag = landOceanFlag[idxpractual2d]
 nearSurfRain = nearSurfRain[idxpractual2d]
+if myflags.have_mrms eq 1 then begin
+	mrmsrrlow = mrmsrrlow[idxpractual2d]
+	mrmsrrmed = mrmsrrmed[idxpractual2d]
+	mrmsrrhigh = mrmsrrhigh[idxpractual2d]
+	mrmsrrveryhigh = mrmsrrveryhigh[idxpractual2d]
+	mrmsgrlow = mrmsgrlow[idxpractual2d]
+	mrmsgrmed = mrmsgrmed[idxpractual2d]
+	mrmsgrhigh = mrmsgrhigh[idxpractual2d]
+	mrmsgrveryhigh = mrmsgrveryhigh[idxpractual2d]
+	mrmsptlow = mrmsptlow[idxpractual2d]
+	mrmsptmed = mrmsptmed[idxpractual2d]
+	mrmspthigh = mrmspthigh[idxpractual2d]
+	mrmsptveryhigh = mrmsptveryhigh[idxpractual2d]
+	mrmsrqiplow = mrmsrqiplow[idxpractual2d]
+	mrmsrqipmed = mrmsrqipmed[idxpractual2d]
+	mrmsrqiphigh = mrmsrqiphigh[idxpractual2d]
+	mrmsrqipveryhigh = mrmsrqipveryhigh[idxpractual2d]
+endif
+if myflags.have_GR_SWE eq 1 then begin
+	swedp = swedp[idxpractual2d]
+	swe25 = swe25[idxpractual2d]
+	swe50 = swe50[idxpractual2d]
+	swe75 = swe75[idxpractual2d]
+endif
 clutterStatus = clutterStatus[idxpractual2d]
 BBHeight = BBHeight[idxpractual2d]
 pr_index = pr_index[idxpractual2d]
@@ -1115,6 +1201,30 @@ dpr_lon = REFORM( dpr_lon, countactual, nswp )
 rnType = REFORM( rnType, countactual, nswp )
 landOceanFlag = REFORM( landOceanFlag, countactual, nswp )
 nearSurfRain = REFORM( nearSurfRain, countactual, nswp )
+if myflags.have_mrms eq 1 then begin
+	mrmsrrlow = REFORM( mrmsrrlow, countactual, nswp )
+	mrmsrrmed = REFORM( mrmsrrmed, countactual, nswp )
+	mrmsrrhigh = REFORM( mrmsrrhigh, countactual, nswp )
+	mrmsrrveryhigh = REFORM( mrmsrrveryhigh, countactual, nswp )
+	mrmsgrlow = REFORM( mrmsgrlow, countactual, nswp )
+	mrmsgrmed = REFORM( mrmsgrmed, countactual, nswp )
+	mrmsgrhigh = REFORM( mrmsgrhigh, countactual, nswp )
+	mrmsgrveryhigh = REFORM( mrmsgrveryhigh, countactual, nswp )
+	mrmsptlow = REFORM( mrmsptlow, countactual, nswp )
+	mrmsptmed = REFORM( mrmsptmed, countactual, nswp )
+	mrmspthigh = REFORM( mrmspthigh, countactual, nswp )
+	mrmsptveryhigh = REFORM( mrmsptveryhigh, countactual, nswp )
+	mrmsrqiplow = REFORM( mrmsrqiplow, countactual, nswp )
+	mrmsrqipmed = REFORM( mrmsrqipmed, countactual, nswp )
+	mrmsrqiphigh = REFORM( mrmsrqiphigh, countactual, nswp )
+	mrmsrqipveryhigh = REFORM( mrmsrqipveryhigh, countactual, nswp )
+endif
+if myflags.have_GR_SWE eq 1 then begin
+	swedp = REFORM(swedp, countactual, nswp )
+	swe25 = REFORM(swe25, countactual, nswp )
+	swe50 = REFORM(swe50, countactual, nswp )
+	swe75 = REFORM(swe75, countactual, nswp )
+endif
 pr_index = REFORM( pr_index, countactual, nswp )
 clutterStatus = REFORM( clutterStatus, countactual, nswp )
 BBHeight = REFORM( BBHeight, countactual, nswp )
@@ -1358,6 +1468,31 @@ IF PTR_VALID(ptr_dpr_lon) THEN *ptr_dpr_lon = dpr_lon
 IF PTR_VALID(ptr_pia) THEN *ptr_pia = pia
 IF PTR_VALID(ptr_stmTopHgt) THEN *ptr_stmTopHgt = stmTopHgt
 IF PTR_VALID(ptr_nearSurfRain) THEN *ptr_nearSurfRain = nearSurfRain
+
+IF PTR_VALID(ptr_mrmsrrlow) THEN *ptr_mrmsrrlow = mrmsrrlow
+IF PTR_VALID(ptr_mrmsrrmed) THEN *ptr_mrmsrrmed = mrmsrrmed
+IF PTR_VALID(ptr_mrmsrrhigh) THEN *ptr_mrmsrrhigh = mrmsrrhigh
+IF PTR_VALID(ptr_mrmsrrveryhigh) THEN *ptr_mrmsrrveryhigh = mrmsrrveryhigh
+IF PTR_VALID(ptr_mrmsgrlow) THEN *ptr_mrmsgrlow = mrmsgrlow
+IF PTR_VALID(ptr_mrmsgrmed) THEN *ptr_mrmsgrmed = mrmsgrmed
+IF PTR_VALID(ptr_mrmsgrhigh) THEN *ptr_mrmsgrhigh = mrmsgrhigh
+IF PTR_VALID(ptr_mrmsgrveryhigh) THEN *ptr_mrmsgrveryhigh = mrmsgrveryhigh
+IF PTR_VALID(ptr_mrmsptlow) THEN *ptr_mrmsptlow = mrmsptlow
+IF PTR_VALID(ptr_mrmsptmed) THEN *ptr_mrmsptmed = mrmsptmed
+IF PTR_VALID(ptr_mrmspthigh) THEN *ptr_mrmspthigh = mrmspthigh
+IF PTR_VALID(ptr_mrmsptveryhigh) THEN *ptr_mrmsptveryhigh = mrmsptveryhigh
+IF PTR_VALID(ptr_mrmsrqiplow) THEN *ptr_mrmsrqiplow = mrmsrqiplow
+IF PTR_VALID(ptr_mrmsrqipmed) THEN *ptr_mrmsrqipmed = mrmsrqipmed
+IF PTR_VALID(ptr_mrmsrqiphigh) THEN *ptr_mrmsrqiphigh = mrmsrqiphigh
+IF PTR_VALID(ptr_mrmsrqipveryhigh) THEN *ptr_mrmsrqipveryhigh = mrmsrqipveryhigh
+IF PTR_VALID(ptr_swedp) THEN *ptr_swedp = swedp
+IF PTR_VALID(ptr_swe25) THEN *ptr_swe25 = swe25
+IF PTR_VALID(ptr_swe50) THEN *ptr_swe50 = swe50
+IF PTR_VALID(ptr_swe75) THEN *ptr_swe75 = swe75
+
+IF PTR_VALID(ptr_MRMS_HID) AND mygeometa.num_MRMS_categories GT 0 THEN $
+   *ptr_MRMS_HID = MRMS_HID
+
 IF PTR_VALID(ptr_rnType) THEN *ptr_rnType = rnType
 IF PTR_VALID(ptr_landOcean) THEN *ptr_landOcean = landOceanFlag
 IF PTR_VALID(ptr_clutterStatus) THEN *ptr_clutterStatus=clutterStatus

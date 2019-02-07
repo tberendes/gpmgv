@@ -374,7 +374,7 @@ CASE pr_or_dpr OF
  END
   'DPRGMI' : BEGIN
     PRINT, "INSTRUMENT: ", pr_or_dpr
-    status = fprep_dprgmi_geo_match_profiles( ncfilepr, heights, $
+    status = fprep_dprgmi_geo_match_profiles_mrms( ncfilepr, heights, $
     KUKA=KuKa, SCANTYPE=swath, PCT_ABV_THRESH=pctAbvThresh, S2KU=s2ku, $
     PTRfieldflags=ptr_fieldflags, PTRgeometa=ptr_geometa, $
     PTRsweepmeta=ptr_sweepmeta, PTRsitemeta=ptr_sitemeta, $
@@ -395,6 +395,18 @@ CASE pr_or_dpr OF
     PTRpctgoodrpgv=ptr_pctgoodrpgv, PTRpctgoodrrgv=ptr_pctgoodrrgv, $
     PTRpctgoodDprDm=ptr_pctgoodDprDm, PTRpctgoodDprNw=ptr_pctgoodDprNw, $
     PTRclutterStatus=ptr_clutterStatus, BBPARMS=BBparms, $
+    ; TAB 2/6/19
+    ; MRMS radar variables
+    PTRmrmsrrlow=ptr_mrmsrrlow, $
+    PTRmrmsrrmed=ptr_mrmsrrmed, $
+    PTRmrmsrrhigh=ptr_mrmsrrhigh, $
+    PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
+    ; TAB 9/4/18
+    ; SWERR varaibles
+    PTRswedp=ptr_swedp, $
+    PTRswe25=ptr_swe25, $
+    PTRswe50=ptr_swe50, $
+    PTRswe75=ptr_swe75, $
     ALT_BB_HGT=alt_bb_hgt, FORCEBB=forcebb )
  END
 ENDCASE

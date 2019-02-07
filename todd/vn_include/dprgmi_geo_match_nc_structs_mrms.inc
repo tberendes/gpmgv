@@ -80,6 +80,8 @@ matchup_meta = { dprgmi_geo_match_meta,                        $
                  DPR_Version:           '',                    $
 ;                 GMI_Version:           '',                    $
                  nc_file_version:       0.0                    $
+                 num_MRMS_categories:    0,                     $
+                 MRMS_Mask_categories:       ''                    $
                }
 
 sweeps_meta =  { gr_sweep_meta,                           $
@@ -119,6 +121,7 @@ field_flags =  { dprgmi_gr_field_flags,                        $
                  have_TypePrecip:          NO_DATA_PRESENT, $
                  have_FlagPrecip:          NO_DATA_PRESENT, $
                  have_clutterStatus:       NO_DATA_PRESENT,  $
+                 have_mrms:       		NO_DATA_PRESENT,  $
                  have_GR_SWE:       	NO_DATA_PRESENT  $
                }
 

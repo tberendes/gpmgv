@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; read_dprgmi_geo_match_netcdf.pro         Morris/SAIC/GPM_GV      August 2014
+; read_dprgmi_geo_match_netcdf_mrms.pro         Morris/SAIC/GPM_GV      August 2014
 ;
 ; DESCRIPTION
 ; -----------
@@ -78,7 +78,7 @@
 ;-
 ;===============================================================================
 
-FUNCTION read_dprgmi_geo_match_netcdf, ncfile, matchupmeta=matchupmeta, $
+FUNCTION read_dprgmi_geo_match_netcdf_mrms, ncfile, matchupmeta=matchupmeta, $
     sweepsmeta=sweepsmeta, sitemeta=sitemeta, fieldflags=fieldFlags, $
     filesmeta=filesmeta, DATA_MS=data_MS, DATA_NS=data_NS
 
@@ -232,6 +232,19 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.nc_file_version = ncversion
      ncdf_attget, ncid1, 'DPR_Version', DPR_vers_byte, /global
      matchupmeta.DPR_Version = STRING(DPR_vers_byte)
+
+     IF ncversion GE 1.31 THEN BEGIN    
+    	NCDF_ATTGET, ncid1, 'MRMS_Mask_categories', mrmshid, /global
+      	MRMS_dimid = NCDF_DIMID(ncid1, 'mrms_mask')
+      	if MRMS_dimid ge 0 then begin
+     		NCDF_DIMINQ, ncid1, MRMS_dimid, MRMSDIMNAME, mrmscats
+     		matchupmeta.num_MRMS_categories = mrmscats
+      	endif else begin
+       		print,'No MRMS categories in data file'
+        	matchupmeta.num_MRMS_categories = 0;
+     	endelse
+     ENDIF
+     
 ENDIF
 
 
@@ -311,6 +324,22 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
         fieldFlags.have_GR_Dm = have_GR_Dm
         NCDF_VARGET, ncid1, 'have_GR_N2', have_GR_N2
         fieldFlags.have_GR_N2 = have_GR_N2
+     ENDIF
+     IF ncversion GE 1.31 THEN BEGIN
+     	Result = NCDF_VARID(ncid1, 'have_mrms')
+     	if Result ne 0 then begin
+        	NCDF_VARGET, ncid1, 'have_mrms', have_mrms
+        	fieldFlags.have_mrms = have_mrms
+        endif else begin
+        	fieldFlags.have_mrms = 0
+        endelse
+     	Result = NCDF_VARID(ncid1, 'have_GR_SWE')
+     	if Result ne 0 then begin
+        	NCDF_VARGET, ncid1, 'have_GR_SWE', have_GR_SWE
+        	fieldFlags.have_GR_SWE = have_GR_SWE
+        endif else begin
+        	fieldFlags.have_GR_SWE = 0
+        endelse
      ENDIF
      IF ncversion GT 1.1 THEN BEGIN
         NCDF_VARGET, ncid1, 'have_GR_blockage', have_blockage
@@ -472,6 +501,44 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       stormTopAltitude = TEMPORARY( temp_stormTopAltitude )
    ENDELSE
 
+; TAB 2/6/19 New SWE and MRMS stuff
+   if have_mrms eq 1 then begin
+      NCDF_VARGET, ncid1, 'PrecipMeanLow_'+swath[iswa], mrmsrrlow 
+      NCDF_VARGET, ncid1, 'PrecipMeanMed_'+swath[iswa],mrmsrrmed 
+      NCDF_VARGET, ncid1, 'PrecipMeanHigh_'+swath[iswa], mrmsrrhigh 
+      NCDF_VARGET, ncid1, 'PrecipMeanVeryHigh_'+swath[iswa], mrmsrrveryhigh 
+      NCDF_VARGET, ncid1, 'GuageRatioMeanLow_'+swath[iswa], mrmsgrlow 
+      NCDF_VARGET, ncid1, 'GuageRatioMeanMed_'+swath[iswa], mrmsgrmed 
+      NCDF_VARGET, ncid1, 'GuageRatioMeanHigh_'+swath[iswa], mrmsgrhigh 
+      NCDF_VARGET, ncid1, 'GuageRatioMeanVeryHigh_'+swath[iswa], mrmsgrveryhigh 
+      NCDF_VARGET, ncid1, 'MaskLow_'+swath[iswa], mrmsptlow 
+      NCDF_VARGET, ncid1, 'MaskMed_'+swath[iswa], mrmsptmed 
+      NCDF_VARGET, ncid1, 'MaskHigh_'+swath[iswa], mrmspthigh 
+      NCDF_VARGET, ncid1, 'MaskVeryHigh_'+swath[iswa], mrmsptveryhigh 
+      NCDF_VARGET, ncid1, 'RqiPercentLow_'+swath[iswa], mrmsrqiplow 
+      NCDF_VARGET, ncid1, 'RqiPercentMed_'+swath[iswa], mrmsrqipmed 
+      NCDF_VARGET, ncid1, 'RqiPercentHigh_'+swath[iswa], mrmsrqiphigh 
+      NCDF_VARGET, ncid1, 'RqiPercentVeryHigh_'+swath[iswa], mrmsrqipveryhigh 
+      ;NCDF_VARGET, ncid1, 'MRMS_HID_'+swath[iswa], mrmshid   	  
+   endif
+   
+   if have_GR_SWE eq 1 then begin
+   
+       NCDF_VARGET, ncid1, 'GR_SWEDP_'+swath[iswa], swedp 
+       NCDF_VARGET, ncid1, 'GR_SWEDP_Max_'+swath[iswa], swedp_max
+       NCDF_VARGET, ncid1, 'GR_SWEDP_StdDev_'+swath[iswa], swedp_stddev
+       NCDF_VARGET, ncid1, 'GR_SWE25_'+swath[iswa], swe25 
+       NCDF_VARGET, ncid1, 'GR_SWE25_Max_'+swath[iswa], swe25_max
+       NCDF_VARGET, ncid1, 'GR_SWE25_StdDev_'+swath[iswa], swe25_stddev
+       NCDF_VARGET, ncid1, 'GR_SWE50_'+swath[iswa], swe50 
+       NCDF_VARGET, ncid1, 'GR_SWE50_Max_'+swath[iswa], swe50_max
+       NCDF_VARGET, ncid1, 'GR_SWE50_StdDev_'+swath[iswa], swe50_stddev
+       NCDF_VARGET, ncid1, 'GR_SWE75_'+swath[iswa], swe75 
+       NCDF_VARGET, ncid1, 'GR_SWE75_Max_'+swath[iswa], swe75_max
+       NCDF_VARGET, ncid1, 'GR_SWE75_StdDev_'+swath[iswa], swe75_stddev
+   
+   endif
+
   ; copy the swath-specific data variables into anonymous structure, use
   ; TEMPORARY to avoid making a copy of the variable when loading to struct
    tempstruc = { Year : TEMPORARY(Year), $
@@ -572,6 +639,48 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  n_correctedReflectFactor_rejected : $
                     TEMPORARY(n_correctedReflectFactor_rejected), $
                  n_dpr_expected : TEMPORARY(n_dpr_expected) }
+                 
+   if have_mrms eq 1 then begin
+   	  tempstruc = [tempstruc, $
+      mrmsrrlow : TEMPORARY(mrmsrrlow), $
+      mrmsrrmed : TEMPORARY(mrmsrrmed), $
+      mrmsrrhigh : TEMPORARY(mrmsrrhigh), $
+      mrmsrrveryhigh : TEMPORARY(mrmsrrveryhigh), $
+      mrmsgrlow : TEMPORARY(mrmsgrlow), $
+      mrmsgrmed : TEMPORARY(mrmsgrmed), $
+      mrmsgrhigh : TEMPORARY(mrmsgrhigh), $
+      mrmsgrveryhigh : TEMPORARY(mrmsgrveryhigh), $
+      mrmsptlow : TEMPORARY(mrmsptlow), $
+      mrmsptmed : TEMPORARY(mrmsptmed), $
+      mrmspthigh : TEMPORARY(mrmspthigh), $
+      mrmsptveryhigh : TEMPORARY(mrmsptveryhigh), $
+      mrmsrqiplow : TEMPORARY(mrmsrqiplow), $
+      mrmsrqipmed : TEMPORARY(mrmsrqipmed), $
+      mrmsrqiphigh : TEMPORARY(mrmsrqiphigh), $
+      mrmsrqipveryhigh : TEMPORARY(mrmsrqipveryhigh), $
+      mrmshid: TEMPORARY(mrmshid)]
+   
+   endif
+   
+   if have_GR_SWE eq 1 then begin
+   
+      tempstruc = [tempstruc, $
+      swedp : TEMPORARY(swedp), $
+      swedp_max : TEMPORARY(swedp_max), $
+      swedp_stddev : TEMPORARY(swedp_stddev), $
+      swe25 : TEMPORARY(swe25), $
+      swe25_max : TEMPORARY(swe25_max), $
+      swe25_stddev : TEMPORARY(swe25_stddev), $
+      swe50 : TEMPORARY(swe50), $
+      swe50_max : TEMPORARY(swe50_max), $
+      swe50_stddev : TEMPORARY(swe50_stddev), $
+      swe75 : TEMPORARY(swe75), $
+      swe75_max : TEMPORARY(swe75_max), $
+      swe75_stddev : TEMPORARY(swe75_stddev)]
+   
+   endif
+
+
 
   ; copy the structure to a unique-named variable if user defined the matching
   ; keyword variable, using TEMPORARY to avoid making a copy of the structure
