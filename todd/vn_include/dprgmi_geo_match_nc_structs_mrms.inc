@@ -79,7 +79,7 @@ matchup_meta = { dprgmi_geo_match_meta,                        $
 ;                 GR2GMI_dBZ_min:        FLOAT_RANGE_EDGE,      $
                  DPR_Version:           '',                    $
 ;                 GMI_Version:           '',                    $
-                 nc_file_version:       0.0                    $
+                 nc_file_version:       0.0,                    $
                  num_MRMS_categories:    0,                     $
                  MRMS_Mask_categories:       ''                    $
                }
