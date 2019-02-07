@@ -232,18 +232,6 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.nc_file_version = ncversion
      ncdf_attget, ncid1, 'DPR_Version', DPR_vers_byte, /global
      matchupmeta.DPR_Version = STRING(DPR_vers_byte)
-
-     IF ncversion GE 1.31 THEN BEGIN    
-    	NCDF_ATTGET, ncid1, 'MRMS_Mask_categories', mrmshid, /global
-      	MRMS_dimid = NCDF_DIMID(ncid1, 'mrms_mask')
-      	if MRMS_dimid ge 0 then begin
-     		NCDF_DIMINQ, ncid1, MRMS_dimid, MRMSDIMNAME, mrmscats
-     		matchupmeta.num_MRMS_categories = mrmscats
-      	endif else begin
-       		print,'No MRMS categories in data file'
-        	matchupmeta.num_MRMS_categories = 0;
-     	endelse
-     ENDIF
      
 ENDIF
 
@@ -331,9 +319,21 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
         	NCDF_VARGET, ncid1, 'have_mrms', have_mrms
         	fieldFlags.have_mrms = have_mrms
         	print,'have_mrms = 1'
+	    	NCDF_ATTGET, ncid1, 'MRMS_Mask_categories', mrmshid, /global
+	      	MRMS_dimid = NCDF_DIMID(ncid1, 'mrms_mask')
+	      	if MRMS_dimid ge 0 then begin
+	     		NCDF_DIMINQ, ncid1, MRMS_dimid, MRMSDIMNAME, mrmscats
+	     		matchupmeta.num_MRMS_categories = mrmscats
+	      	endif else begin
+	       		print,'No MRMS categories in data file'
+	        	matchupmeta.num_MRMS_categories = 0;
+	     		matchupmeta.num_MRMS_categories = ''
+	     	endelse
         endif else begin
         	fieldFlags.have_mrms = 0
        	    print,'have_mrms = 0'
+     		matchupmeta.num_MRMS_categories = ''
+     		matchupmeta.num_MRMS_categories = 0
         endelse
      	Result = NCDF_VARID(ncid1, 'have_GR_SWE')
      	if Result ne 0 then begin
