@@ -641,7 +641,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  n_dpr_expected : TEMPORARY(n_dpr_expected) }
                  
    if have_mrms eq 1 then begin
-   	  tempstruc = [tempstruc, $
+   	  mrmsstruc = [$
       mrmsrrlow : TEMPORARY(mrmsrrlow), $
       mrmsrrmed : TEMPORARY(mrmsrrmed), $
       mrmsrrhigh : TEMPORARY(mrmsrrhigh), $
@@ -659,12 +659,12 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       mrmsrqiphigh : TEMPORARY(mrmsrqiphigh), $
       mrmsrqipveryhigh : TEMPORARY(mrmsrqipveryhigh), $
       mrmshid: TEMPORARY(mrmshid)]
-   
+      tempstruc = [tempstruc, mrmsstruc]
    endif
    
    if have_GR_SWE eq 1 then begin
    
-      tempstruc = [tempstruc, $
+      swestruc = [$
       swedp : TEMPORARY(swedp), $
       swedp_max : TEMPORARY(swedp_max), $
       swedp_stddev : TEMPORARY(swedp_stddev), $
@@ -677,6 +677,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       swe75 : TEMPORARY(swe75), $
       swe75_max : TEMPORARY(swe75_max), $
       swe75_stddev : TEMPORARY(swe75_stddev)]
+      tempstruc = [tempstruc, swestruc]
    
    endif
 
