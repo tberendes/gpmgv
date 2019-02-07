@@ -314,7 +314,11 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
         fieldFlags.have_GR_N2 = have_GR_N2
      ENDIF
      IF ncversion GE 1.31 THEN BEGIN
-     	Result = NCDF_VARID(ncid1, 'have_mrms')
+     
+  	    ; check for variable, but reset netcdf error if it is not found
+        Result = NCDF_VARID(ncid1, 'have_mrms')
+        CATCH, error
+        Catch, /Cancel
      	print, 'result = ',Result
      	if Result ge 0 then begin
         	NCDF_VARGET, ncid1, 'have_mrms', have_mrms
@@ -337,6 +341,8 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      		matchupmeta.num_MRMS_categories = 0
         endelse
      	Result = NCDF_VARID(ncid1, 'have_GR_SWE')
+        CATCH, error
+        Catch, /Cancel
      	if Result ge 0 then begin
         	NCDF_VARGET, ncid1, 'have_GR_SWE', have_GR_SWE
         	fieldFlags.have_GR_SWE = have_GR_SWE
