@@ -330,8 +330,10 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      	if Result ne 0 then begin
         	NCDF_VARGET, ncid1, 'have_mrms', have_mrms
         	fieldFlags.have_mrms = have_mrms
+        	print,'have_mrms = 1'
         endif else begin
         	fieldFlags.have_mrms = 0
+       	    print,'have_mrms = 0'
         endelse
      	Result = NCDF_VARID(ncid1, 'have_GR_SWE')
      	if Result ne 0 then begin
