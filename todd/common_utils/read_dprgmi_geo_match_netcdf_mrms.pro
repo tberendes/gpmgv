@@ -315,15 +315,17 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      ENDIF
      IF ncversion GE 1.31 THEN BEGIN
      
+     	NCDF_LIST, file, /VARIABLES, vname=varlist ; ,/QUIET
+     	Result = where(varlist eq 'have_mrms')
+         ;@@@@@@@@@@@@@@@@@@@@@@@@ figure out catch stuff to cancel error
   	    ; check for variable, but reset netcdf error if it is not found
-        CATCH, error
-        if error eq 0 then begin
-        	Result = NCDF_VARID(ncid1, 'have_mrms')
-        endif else begin
-        	Catch, /Cancel
-        endelse
-        Catch, /Cancel
-        
+;        CATCH, error
+;        if error eq 0 then begin
+;        	Result = NCDF_VARID(ncid1, 'have_mrms')
+;        endif else begin
+;        	Catch, /Cancel
+;        endelse
+;        Catch, /Cancel
      	print, 'result = ',Result
      	if Result ge 0 then begin
         	NCDF_VARGET, ncid1, 'have_mrms', have_mrms
@@ -346,13 +348,14 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      		matchupmeta.num_MRMS_categories = 0
         endelse
         
-        CATCH, error
-        if error eq 0 then begin
-     		Result = NCDF_VARID(ncid1, 'have_GR_SWE')
-     	endif else begin
-        	Catch, /Cancel
-        endelse
-        Catch, /Cancel
+     	Result = where(varlist eq 'have_GR_SWE')
+;        CATCH, error
+;        if error eq 0 then begin
+;     		Result = NCDF_VARID(ncid1, 'have_GR_SWE')
+ ;    	endif else begin
+ ;       	Catch, /Cancel
+ ;       endelse
+ ;       Catch, /Cancel
         
      	if Result ge 0 then begin
         	NCDF_VARGET, ncid1, 'have_GR_SWE', have_GR_SWE
