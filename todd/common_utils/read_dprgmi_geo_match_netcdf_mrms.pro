@@ -587,7 +587,8 @@ p_cnt = p_cnt+1
 
   ; copy the swath-specific data variables into anonymous structure, use
   ; TEMPORARY to avoid making a copy of the variable when loading to struct
-   tempstruc = { Year : TEMPORARY(Year), $
+;   tempstruc = { Year : TEMPORARY(Year), $
+    tempstruc = { Year : TEMPORARY(Year), $
                  Month : TEMPORARY(Month), $
                  DayOfMonth : TEMPORARY(DayOfMonth), $
                  Hour : TEMPORARY(Hour), $
@@ -686,6 +687,23 @@ p_cnt = p_cnt+1
                     TEMPORARY(n_correctedReflectFactor_rejected), $
                  n_dpr_expected : TEMPORARY(n_dpr_expected) }
                  
+   if fieldFlags.have_GR_SWE eq 1 then begin  
+;      tempstruc = {tempstruc, $
+      swestruc = {swedp : TEMPORARY(swedp), $
+      swedp_max : TEMPORARY(swedp_max), $
+      swedp_stddev : TEMPORARY(swedp_stddev), $
+      swe25 : TEMPORARY(swe25), $
+      swe25_max : TEMPORARY(swe25_max), $
+      swe25_stddev : TEMPORARY(swe25_stddev), $
+      swe50 : TEMPORARY(swe50), $
+      swe50_max : TEMPORARY(swe50_max), $
+      swe50_stddev : TEMPORARY(swe50_stddev), $
+      swe75 : TEMPORARY(swe75), $
+      swe75_max : TEMPORARY(swe75_max), $
+      swe75_stddev : TEMPORARY(swe75_stddev)}
+      tempstruc = create_struct(tempstruc,swestruc)
+   endif
+
    if fieldFlags.have_mrms eq 1 then begin
 ;   	  tempstruc = { tempstruc, $
    	  mrmsstruc = {mrmsrrlow : TEMPORARY(mrmsrrlow), $
@@ -706,27 +724,10 @@ p_cnt = p_cnt+1
       mrmsrqipveryhigh : TEMPORARY(mrmsrqipveryhigh), $
       mrmshid: TEMPORARY(mrmshid)}
 ;      tempstruc = {tempstruc, mrmsstruc}
+      tempstruc = create_struct(tempstruc,mrmsstruc)
 
-      tempstruc = [tempstruc, mrmsstruc]
    endif
    
-   if fieldFlags.have_GR_SWE eq 1 then begin  
-;      tempstruc = {tempstruc, $
-      swestruc = {swedp : TEMPORARY(swedp), $
-      swedp_max : TEMPORARY(swedp_max), $
-      swedp_stddev : TEMPORARY(swedp_stddev), $
-      swe25 : TEMPORARY(swe25), $
-      swe25_max : TEMPORARY(swe25_max), $
-      swe25_stddev : TEMPORARY(swe25_stddev), $
-      swe50 : TEMPORARY(swe50), $
-      swe50_max : TEMPORARY(swe50_max), $
-      swe50_stddev : TEMPORARY(swe50_stddev), $
-      swe75 : TEMPORARY(swe75), $
-      swe75_max : TEMPORARY(swe75_max), $
-      swe75_stddev : TEMPORARY(swe75_stddev)}
-      tempstruc = [tempstruc, swestruc]
-   
-   endif
 
 
 
