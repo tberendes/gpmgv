@@ -687,8 +687,8 @@ p_cnt = p_cnt+1
                  n_dpr_expected : TEMPORARY(n_dpr_expected) }
                  
    if fieldFlags.have_mrms eq 1 then begin
-   	  tempstruc = { tempstruc, $
-   	  mrmsrrlow : TEMPORARY(mrmsrrlow), $
+;   	  tempstruc = { tempstruc, $
+   	  mrmsstruc = {mrmsrrlow : TEMPORARY(mrmsrrlow), $
       mrmsrrmed : TEMPORARY(mrmsrrmed), $
       mrmsrrhigh : TEMPORARY(mrmsrrhigh), $
       mrmsrrveryhigh : TEMPORARY(mrmsrrveryhigh), $
@@ -706,12 +706,13 @@ p_cnt = p_cnt+1
       mrmsrqipveryhigh : TEMPORARY(mrmsrqipveryhigh), $
       mrmshid: TEMPORARY(mrmshid)}
 ;      tempstruc = {tempstruc, mrmsstruc}
+
+      tempstruc = [tempstruc, mrmsstruc]
    endif
    
-   if fieldFlags.have_GR_SWE eq 1 then begin
-   
-      tempstruc = {tempstruc, $
-      swedp : TEMPORARY(swedp), $
+   if fieldFlags.have_GR_SWE eq 1 then begin  
+;      tempstruc = {tempstruc, $
+      swestruc = {swedp : TEMPORARY(swedp), $
       swedp_max : TEMPORARY(swedp_max), $
       swedp_stddev : TEMPORARY(swedp_stddev), $
       swe25 : TEMPORARY(swe25), $
@@ -723,7 +724,7 @@ p_cnt = p_cnt+1
       swe75 : TEMPORARY(swe75), $
       swe75_max : TEMPORARY(swe75_max), $
       swe75_stddev : TEMPORARY(swe75_stddev)}
- ;     tempstruc = {tempstruc, swestruc}
+      tempstruc = [tempstruc, swestruc]
    
    endif
 
