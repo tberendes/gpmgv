@@ -437,7 +437,7 @@ p_cnt = p_cnt+1
       GR_RP_rainrate_Max = TEMPORARY( temp_rainrate )
    endelse
 print, 'debug ', p_cnt
-p_cnt = p_cnt+1
+p_cnt = p_cnt+1 ;3
    NCDF_VARGET, ncid1, 'GR_HID_'+swath[iswa], GR_HID
    NCDF_VARGET, ncid1, 'GR_Dzero_'+swath[iswa], GR_Dzero
    NCDF_VARGET, ncid1, 'GR_Dzero_StdDev_'+swath[iswa], GR_Dzero_StdDev
@@ -463,7 +463,7 @@ p_cnt = p_cnt+1
       GR_N2_Max = TEMPORARY( temp_dsd )
    ENDELSE
 print, 'debug ', p_cnt
-p_cnt = p_cnt+1
+p_cnt = p_cnt+1 ;4
    if ncversion gt 1.1 then begin
       NCDF_VARGET, ncid1, 'GR_blockage_'+swath[iswa], GR_blockage
    endif else begin
@@ -488,7 +488,7 @@ p_cnt = p_cnt+1
    NCDF_VARGET, ncid1, 'n_gr_dzero_rejected_'+swath[iswa], n_gr_dzero_rejected
    NCDF_VARGET, ncid1, 'n_gr_nw_rejected_'+swath[iswa], n_gr_nw_rejected
 print, 'debug ', p_cnt
-p_cnt = p_cnt+1
+p_cnt = p_cnt+1 ;5
    IF ncversion GE 1.3 THEN BEGIN
       NCDF_VARGET, ncid1, 'n_gr_dm_rejected_'+swath[iswa], n_gr_dm_rejected
       NCDF_VARGET, ncid1, 'n_gr_n2_rejected_'+swath[iswa], n_gr_n2_rejected
@@ -541,10 +541,10 @@ p_cnt = p_cnt+1
       stormTopAltitude = TEMPORARY( temp_stormTopAltitude )
    ENDELSE
 print, 'debug ', p_cnt
-p_cnt = p_cnt+1
+p_cnt = p_cnt+1 ;7
 
 ; TAB 2/6/19 New SWE and MRMS stuff
-   if have_mrms eq 1 then begin
+   if fieldFlags.have_mrms eq 1 then begin
       NCDF_VARGET, ncid1, 'PrecipMeanLow_'+swath[iswa], mrmsrrlow 
       NCDF_VARGET, ncid1, 'PrecipMeanMed_'+swath[iswa],mrmsrrmed 
       NCDF_VARGET, ncid1, 'PrecipMeanHigh_'+swath[iswa], mrmsrrhigh 
@@ -566,7 +566,7 @@ p_cnt = p_cnt+1
 print, 'debug ', p_cnt
 p_cnt = p_cnt+1
   
-   if have_GR_SWE eq 1 then begin
+   if fieldFlags.have_GR_SWE eq 1 then begin
    
        NCDF_VARGET, ncid1, 'GR_SWEDP_'+swath[iswa], swedp 
        NCDF_VARGET, ncid1, 'GR_SWEDP_Max_'+swath[iswa], swedp_max
@@ -686,7 +686,7 @@ p_cnt = p_cnt+1
                     TEMPORARY(n_correctedReflectFactor_rejected), $
                  n_dpr_expected : TEMPORARY(n_dpr_expected) }
                  
-   if have_mrms eq 1 then begin
+   if fieldFlags.have_mrms eq 1 then begin
    	  tempstruc = { tempstruc, $
    	  mrmsrrlow : TEMPORARY(mrmsrrlow), $
       mrmsrrmed : TEMPORARY(mrmsrrmed), $
@@ -708,7 +708,7 @@ p_cnt = p_cnt+1
 ;      tempstruc = {tempstruc, mrmsstruc}
    endif
    
-   if have_GR_SWE eq 1 then begin
+   if fieldFlags.have_GR_SWE eq 1 then begin
    
       tempstruc = {tempstruc, $
       swedp : TEMPORARY(swedp), $
