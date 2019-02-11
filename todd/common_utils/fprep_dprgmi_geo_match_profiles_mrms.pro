@@ -1469,29 +1469,34 @@ IF PTR_VALID(ptr_pia) THEN *ptr_pia = pia
 IF PTR_VALID(ptr_stmTopHgt) THEN *ptr_stmTopHgt = stmTopHgt
 IF PTR_VALID(ptr_nearSurfRain) THEN *ptr_nearSurfRain = nearSurfRain
 
-IF PTR_VALID(ptr_mrmsrrlow) THEN *ptr_mrmsrrlow = mrmsrrlow
-IF PTR_VALID(ptr_mrmsrrmed) THEN *ptr_mrmsrrmed = mrmsrrmed
-IF PTR_VALID(ptr_mrmsrrhigh) THEN *ptr_mrmsrrhigh = mrmsrrhigh
-IF PTR_VALID(ptr_mrmsrrveryhigh) THEN *ptr_mrmsrrveryhigh = mrmsrrveryhigh
-IF PTR_VALID(ptr_mrmsgrlow) THEN *ptr_mrmsgrlow = mrmsgrlow
-IF PTR_VALID(ptr_mrmsgrmed) THEN *ptr_mrmsgrmed = mrmsgrmed
-IF PTR_VALID(ptr_mrmsgrhigh) THEN *ptr_mrmsgrhigh = mrmsgrhigh
-IF PTR_VALID(ptr_mrmsgrveryhigh) THEN *ptr_mrmsgrveryhigh = mrmsgrveryhigh
-IF PTR_VALID(ptr_mrmsptlow) THEN *ptr_mrmsptlow = mrmsptlow
-IF PTR_VALID(ptr_mrmsptmed) THEN *ptr_mrmsptmed = mrmsptmed
-IF PTR_VALID(ptr_mrmspthigh) THEN *ptr_mrmspthigh = mrmspthigh
-IF PTR_VALID(ptr_mrmsptveryhigh) THEN *ptr_mrmsptveryhigh = mrmsptveryhigh
-IF PTR_VALID(ptr_mrmsrqiplow) THEN *ptr_mrmsrqiplow = mrmsrqiplow
-IF PTR_VALID(ptr_mrmsrqipmed) THEN *ptr_mrmsrqipmed = mrmsrqipmed
-IF PTR_VALID(ptr_mrmsrqiphigh) THEN *ptr_mrmsrqiphigh = mrmsrqiphigh
-IF PTR_VALID(ptr_mrmsrqipveryhigh) THEN *ptr_mrmsrqipveryhigh = mrmsrqipveryhigh
-IF PTR_VALID(ptr_swedp) THEN *ptr_swedp = swedp
-IF PTR_VALID(ptr_swe25) THEN *ptr_swe25 = swe25
-IF PTR_VALID(ptr_swe50) THEN *ptr_swe50 = swe50
-IF PTR_VALID(ptr_swe75) THEN *ptr_swe75 = swe75
+if myflags.have_mrms eq 1 then begin
 
-IF PTR_VALID(ptr_MRMS_HID) AND mygeometa.num_MRMS_categories GT 0 THEN $
-   *ptr_MRMS_HID = MRMS_HID
+	IF PTR_VALID(ptr_mrmsrrlow) THEN *ptr_mrmsrrlow = mrmsrrlow
+	IF PTR_VALID(ptr_mrmsrrmed) THEN *ptr_mrmsrrmed = mrmsrrmed
+	IF PTR_VALID(ptr_mrmsrrhigh) THEN *ptr_mrmsrrhigh = mrmsrrhigh
+	IF PTR_VALID(ptr_mrmsrrveryhigh) THEN *ptr_mrmsrrveryhigh = mrmsrrveryhigh
+	IF PTR_VALID(ptr_mrmsgrlow) THEN *ptr_mrmsgrlow = mrmsgrlow
+	IF PTR_VALID(ptr_mrmsgrmed) THEN *ptr_mrmsgrmed = mrmsgrmed
+	IF PTR_VALID(ptr_mrmsgrhigh) THEN *ptr_mrmsgrhigh = mrmsgrhigh
+	IF PTR_VALID(ptr_mrmsgrveryhigh) THEN *ptr_mrmsgrveryhigh = mrmsgrveryhigh
+	IF PTR_VALID(ptr_mrmsptlow) THEN *ptr_mrmsptlow = mrmsptlow
+	IF PTR_VALID(ptr_mrmsptmed) THEN *ptr_mrmsptmed = mrmsptmed
+	IF PTR_VALID(ptr_mrmspthigh) THEN *ptr_mrmspthigh = mrmspthigh
+	IF PTR_VALID(ptr_mrmsptveryhigh) THEN *ptr_mrmsptveryhigh = mrmsptveryhigh
+	IF PTR_VALID(ptr_mrmsrqiplow) THEN *ptr_mrmsrqiplow = mrmsrqiplow
+	IF PTR_VALID(ptr_mrmsrqipmed) THEN *ptr_mrmsrqipmed = mrmsrqipmed
+	IF PTR_VALID(ptr_mrmsrqiphigh) THEN *ptr_mrmsrqiphigh = mrmsrqiphigh
+	IF PTR_VALID(ptr_mrmsrqipveryhigh) THEN *ptr_mrmsrqipveryhigh = mrmsrqipveryhigh
+	IF PTR_VALID(ptr_MRMS_HID) AND mygeometa.num_MRMS_categories GT 0 THEN $
+	   *ptr_MRMS_HID = MRMS_HID
+endif
+  
+if myflags.have_GR_SWE eq 1 then begin
+	IF PTR_VALID(ptr_swedp) THEN *ptr_swedp = swedp
+	IF PTR_VALID(ptr_swe25) THEN *ptr_swe25 = swe25
+	IF PTR_VALID(ptr_swe50) THEN *ptr_swe50 = swe50
+	IF PTR_VALID(ptr_swe75) THEN *ptr_swe75 = swe75
+endif
 
 IF PTR_VALID(ptr_rnType) THEN *ptr_rnType = rnType
 IF PTR_VALID(ptr_landOcean) THEN *ptr_landOcean = landOceanFlag
