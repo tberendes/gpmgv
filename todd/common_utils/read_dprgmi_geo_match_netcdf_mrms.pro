@@ -346,6 +346,7 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
        	    print,'have_mrms = 0'
      		matchupmeta.num_MRMS_categories = ''
      		matchupmeta.num_MRMS_categories = 0
+     		print,'have_mrms not present'
         endelse
         
      	Result = where(varlist eq 'have_GR_SWE')
@@ -360,10 +361,12 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      	if Result ge 0 then begin
         	NCDF_VARGET, ncid1, 'have_GR_SWE', have_GR_SWE
         	fieldFlags.have_GR_SWE = have_GR_SWE
+       		print,"found swe"
         endif else begin
         	fieldFlags.have_GR_SWE = 0
+       		print,"missing swe"
         endelse
-     ENDIF
+      ENDIF
      IF ncversion GT 1.1 THEN BEGIN
         NCDF_VARGET, ncid1, 'have_GR_blockage', have_blockage
         fieldFlags.have_GR_blockage = have_blockage

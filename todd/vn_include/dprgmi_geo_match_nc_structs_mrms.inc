@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; dprgmi_geo_match_nc_structs.inc          Morris/SAIC/GPM_GV      August 2014
+; dprgmi_geo_match_nc_structs_mrms.inc          Morris/SAIC/GPM_GV      August 2014
 ;
 ; DESCRIPTION
 ; -----------
