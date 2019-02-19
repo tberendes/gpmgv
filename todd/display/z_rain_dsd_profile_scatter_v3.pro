@@ -1794,7 +1794,7 @@ ENDIF ELSE have_RP = 0
 ; set up the data presence flags for the two-parameter plots
 
 ; mrms and snow SWE not set up for DPRGMI or PR yet
-if STRUPCASE(instrument) NE 'DPR' then begin
+if STRUPCASE(instrument) EQ 'PR' then begin
 	have_mrms = 0
 	have_swe = 0
 endif else begin
