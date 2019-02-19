@@ -405,7 +405,8 @@ JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
 
-echo "2014-12-29" > $datelist
+# darw test
+#echo "2014-12-29" > $datelist
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE

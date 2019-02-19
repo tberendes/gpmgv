@@ -460,7 +460,8 @@ echo ''
 
 #echo "2015-01-08" > $datelist
 
-echo "2014-12-29" > $datelist
+# darwin test:
+#echo "2014-12-29" > $datelist
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
 
