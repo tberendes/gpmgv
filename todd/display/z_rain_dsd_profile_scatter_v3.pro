@@ -1553,6 +1553,25 @@ CASE pr_or_dpr OF
        PTRpctgooddmgv=ptr_pctgooddmgv, PTRpctgoodn2gv=ptr_pctgoodn2gv, $
        BBPARMS=BBparms, BB_RELATIVE=bb_relative, ALT_BB_HGT=alt_bb_file, $
        PTRGVMODEHID=ptr_BestHID, PTRGVHID=ptr_HID, $
+       
+       ; TAB 2/18/19
+       ; MRMS radar variables
+       PTRmrmsrrlow=ptr_mrmsrrlow, $
+       PTRmrmsrrmed=ptr_mrmsrrmed, $
+       PTRmrmsrrhigh=ptr_mrmsrrhigh, $
+       PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
+
+       PTRmrmsrqiplow=ptr_mrmsrqiplow, $
+       PTRmrmsrqipmed=ptr_mrmsrqipmed, $
+       PTRmrmsrqiphigh=ptr_mrmsrqiphigh, $
+       PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
+       PTRMRMSHID=ptr_MRMS_HID, $
+       
+		; TAB 2/18/19
+       PTRswedp=ptr_swedp, $
+       PTRswe25=ptr_swe25, $
+       PTRswe50=ptr_swe50, $
+       PTRswe75=ptr_swe75, $
        FORCEBB=forcebb, RAY_RANGE=ray_range )
 
        have_SAT_DSD = 1   ; we always have DPRGMI DSD parameters
