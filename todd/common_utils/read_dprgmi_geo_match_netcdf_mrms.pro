@@ -377,9 +377,6 @@ ENDIF
 
 ; get the science/geometry/time data for each swath type to be read
 
-p_cnt=1
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1
 
 for iswa=0,N_ELEMENTS(swath)-1 do begin
    message, "Reading swath "+swath[iswa], /INFO
@@ -411,8 +408,6 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'GR_RHOhv_'+swath[iswa], GR_RHOhv
    NCDF_VARGET, ncid1, 'GR_RHOhv_StdDev_'+swath[iswa], GR_RHOhv_StdDev
    NCDF_VARGET, ncid1, 'GR_RHOhv_Max_'+swath[iswa], GR_RHOhv_Max
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1
    if ncversion gt 1.0 then begin
       NCDF_VARGET, ncid1, 'GR_RC_rainrate_'+swath[iswa], GR_RC_rainrate
       NCDF_VARGET, ncid1, 'GR_RC_rainrate_StdDev_'+swath[iswa], GR_RC_rainrate_StdDev
@@ -436,8 +431,6 @@ p_cnt = p_cnt+1
       GR_RP_rainrate_StdDev = temp_rainrate
       GR_RP_rainrate_Max = TEMPORARY( temp_rainrate )
    endelse
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1 ;3
    NCDF_VARGET, ncid1, 'GR_HID_'+swath[iswa], GR_HID
    NCDF_VARGET, ncid1, 'GR_Dzero_'+swath[iswa], GR_Dzero
    NCDF_VARGET, ncid1, 'GR_Dzero_StdDev_'+swath[iswa], GR_Dzero_StdDev
@@ -462,8 +455,6 @@ p_cnt = p_cnt+1 ;3
       GR_N2_StdDev = temp_dsd
       GR_N2_Max = TEMPORARY( temp_dsd )
    ENDELSE
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1 ;4
    if ncversion gt 1.1 then begin
       NCDF_VARGET, ncid1, 'GR_blockage_'+swath[iswa], GR_blockage
    endif else begin
@@ -487,8 +478,6 @@ p_cnt = p_cnt+1 ;4
    NCDF_VARGET, ncid1, 'n_gr_hid_rejected_'+swath[iswa], n_gr_hid_rejected
    NCDF_VARGET, ncid1, 'n_gr_dzero_rejected_'+swath[iswa], n_gr_dzero_rejected
    NCDF_VARGET, ncid1, 'n_gr_nw_rejected_'+swath[iswa], n_gr_nw_rejected
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1 ;5
    IF ncversion GE 1.3 THEN BEGIN
       NCDF_VARGET, ncid1, 'n_gr_dm_rejected_'+swath[iswa], n_gr_dm_rejected
       NCDF_VARGET, ncid1, 'n_gr_n2_rejected_'+swath[iswa], n_gr_n2_rejected
@@ -523,8 +512,6 @@ p_cnt = p_cnt+1 ;5
    NCDF_VARGET, ncid1, 'pia_'+swath[iswa], pia
    NCDF_VARGET, ncid1, 'n_correctedReflectFactor_rejected_'+swath[iswa], n_correctedReflectFactor_rejected
    NCDF_VARGET, ncid1, 'n_dpr_expected_'+swath[iswa], n_dpr_expected
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1
    if ncversion gt 1.2 then begin
       NCDF_VARGET, ncid1, 'clutterStatus_'+swath[iswa], clutterStatus
    endif else begin
@@ -540,8 +527,6 @@ p_cnt = p_cnt+1
       ELSE temp_stormTopAltitude[*,*] = FLOAT_RANGE_EDGE
       stormTopAltitude = TEMPORARY( temp_stormTopAltitude )
    ENDELSE
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1 ;7
 
 ; TAB 2/6/19 New SWE and MRMS stuff
    if fieldFlags.have_mrms eq 1 then begin
@@ -563,8 +548,6 @@ p_cnt = p_cnt+1 ;7
       NCDF_VARGET, ncid1, 'RqiPercentVeryHigh_'+swath[iswa], mrmsrqipveryhigh 
       ;NCDF_VARGET, ncid1, 'MRMS_HID_'+swath[iswa], mrmshid   	  
    endif
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1
   
    if fieldFlags.have_GR_SWE eq 1 then begin
    
@@ -582,8 +565,6 @@ p_cnt = p_cnt+1
        NCDF_VARGET, ncid1, 'GR_SWE75_StdDev_'+swath[iswa], swe75_stddev
    
    endif
-print, 'debug ', p_cnt
-p_cnt = p_cnt+1
 
   ; copy the swath-specific data variables into anonymous structure, use
   ; TEMPORARY to avoid making a copy of the variable when loading to struct
