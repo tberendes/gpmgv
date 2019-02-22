@@ -661,6 +661,9 @@ PRO z_rain_dsd_profile_scatter_v3, INSTRUMENT=instrument,         $
                                     Z_FILTER_CONV=zfilterconv,       $
                                     Z_FILTER_TYPE=zfilterinput,       $
                                     ET_RANGE=et_range, $
+                                    LAT_RANGE=lat_range, $
+                                    LON_RANGE=lon_range, $
+                                    CSV_DUMP=csv_dump, $
                                     RR_LOG=rr_log
 
 ; "include" file for structs returned by read_geo_match_netcdf()
@@ -672,6 +675,28 @@ PRO z_rain_dsd_profile_scatter_v3, INSTRUMENT=instrument,         $
 s2ku = KEYWORD_SET( s2ku )
 snow_flag = KEYWORD_SET( snow )
 rr_log = KEYWORD_SET( rr_log )
+csv_dump = KEYWORD_SET( csv_dump )
+
+latlon_filter=0
+min_lon = -180.0
+min_lat = -90.0
+max_lon = 180.0
+max_lat = 90.0
+IF N_ELEMENTS(lat_range) GT 0 N_ELEMENTS(lon_range) GT 0 THEN BEGIN
+	if N_ELEMENTS(lat_range) NE 2 then begin
+		message,"Error:  lat_range must be 2 element array"
+		goto, errorExit2
+	endif
+	if N_ELEMENTS(lon_range) NE 2 then begin
+		message,"Error:  lon_range must be 2 element array"
+		goto, errorExit2
+	endif
+	min_lat = lat_range[0]
+	max_lat = lat_range[1]
+	min_lon = lon_range[0]
+	max_lon = lon_range[1]
+	latlon_filter=1
+ENDIF
 
 IF FLOAT(!version.release) lt 8.1 THEN message, "Requires IDL 8.1 or later."
 ; TAB 12/4/17 make this a parameter if we want to be permanent
@@ -1240,6 +1265,10 @@ ptr_swe25=ptr_new(/allocate_heap)
 ptr_swe50=ptr_new(/allocate_heap)
 ptr_swe75=ptr_new(/allocate_heap)
 
+; TAB 2/20/19
+ptr_prlat=ptr_new(/allocate_heap)
+ptr_prlon=ptr_new(/allocate_heap)
+
 
 ;ptr_rnFlag=ptr_new(/allocate_heap)
 ptr_rnType=ptr_new(/allocate_heap)
@@ -1505,6 +1534,9 @@ CASE pr_or_dpr OF
 	   ; TAB 7/9/18
 	   PTRtop=ptr_top, PTRbotm=ptr_botm, $
 	   
+	   ; TAB 2/20/19
+	   PTRprlat=ptr_prlat, PTRprlon=ptr_prlon, $
+	   
        PTRrainflag_int=ptr_rnFlag, PTRraintype_int=ptr_rnType, PTRbbProx=ptr_bbProx, $
        PTRhgtcat=ptr_hgtcat, PTRdist=ptr_dist,PTRbbHgt=ptr_bbHeight,  $
        PTRpctgoodpr=ptr_pctgoodpr, PTRpctgoodrain=ptr_pctgoodrain, $
@@ -1572,6 +1604,10 @@ CASE pr_or_dpr OF
        PTRswe25=ptr_swe25, $
        PTRswe50=ptr_swe50, $
        PTRswe75=ptr_swe75, $
+ 
+ 	   ; TAB 2/20/19
+	   PTRprlat=ptr_prlat, PTRprlon=ptr_prlon, $
+ 
        FORCEBB=forcebb, RAY_RANGE=ray_range )
 
        have_SAT_DSD = 1   ; we always have DPRGMI DSD parameters
@@ -1624,7 +1660,11 @@ ENDIF
     swe25=temporary(*ptr_swe25)
     swe50=temporary(*ptr_swe50)
     swe75=temporary(*ptr_swe75)
-
+    
+	; TAB 2/20/19
+    prlat=temporary(*ptr_prlat)
+    prlon=temporary(*ptr_prlon)
+ 
    ; TAB, get top and bottom height of volume
    top_ht = temporary(*ptr_top)
    botm_ht = temporary(*ptr_botm)
@@ -1897,11 +1937,18 @@ blockfilter = 'C'    ; initialize blockage filter to "by Column"
 ;-------------------------------------------------
 ; TAB 7/27/17 added Z thresholding check
 ; Define and/or reset filter flag variables if doing blockage, Dm, Z, or ET thresholding
-IF do_GR_blockage NE 0 OR do_dm_thresh EQ 1 OR do_dm_range EQ 1  $
-   OR N_ELEMENTS( et_range_m ) EQ 2 OR zfilter_type NE 'none' THEN BEGIN
-      flag2filter = INTARR( SIZE(gvz, /DIMENSIONS) )
-      filterText=''
-ENDIF
+
+;IF do_GR_blockage NE 0 OR do_dm_thresh EQ 1 OR do_dm_range EQ 1  $
+;   OR N_ELEMENTS( et_range_m ) EQ 2 OR zfilter_type NE 'none' THEN BEGIN
+ ;     flag2filter = INTARR( SIZE(gvz, /DIMENSIONS) )
+ ;     filterText=''
+;ENDIF
+
+
+; set up flag arrays all the time now
+; TAB 2-20-19 added to reset text between files
+flag2filter = INTARR( SIZE(gvz, /DIMENSIONS) )
+filterText=''
 
 ; identify GR-beam-blocked samples if a method is active
 
@@ -2194,8 +2241,8 @@ print, ''
 ;stop
       IF countfiltered GT 0 THEN unfiltered[idxfiltered] = -66.6
       IF ( pctAbvThreshF GT 0.0 ) THEN BEGIN
-         IF countfiltered GT 0 THEN filterText = ' and by ' + filterText
-         print, 'Clipping by PercentAboveThreshold' + filterText
+;         IF countfiltered GT 0 THEN filterText = ' and by ' + filterText
+         print, 'Clipping by PercentAboveThreshold and by ' + filterText
         ; clip to the 'good' points, where 'pctAbvThreshF' fraction of bins in average
         ; were above threshold AND filter flag is not set
          idxgoodenuff = WHERE( minpctcombined GE pctAbvThreshF $
@@ -2238,6 +2285,10 @@ print, ''
  		  botm_ht = botm_ht[idxgoodenuff]
  		  ; convert bbheight from MSL to AGL and from m to km
  		  bbHeight = (bbHeight[idxgoodenuff] / 1000.0) - site_elev
+ 
+ ; TAB 2/20/19
+          prlat = prlat[idxgoodenuff]
+          prlon = prlon[idxgoodenuff]
  
 ; 		  print, 'site_elev ',site_elev
 ; 		  print, 'bbHeight ', bbHeight
@@ -6188,6 +6239,10 @@ if (ptr_valid(ptr_swedp) eq 1) then ptr_free,ptr_swedp
 if (ptr_valid(ptr_swe25) eq 1) then ptr_free,ptr_swe25
 if (ptr_valid(ptr_swe50) eq 1) then ptr_free,ptr_swe50
 if (ptr_valid(ptr_swe75) eq 1) then ptr_free,ptr_swe75
+
+; tab 2/20/19
+if (ptr_valid(ptr_prlat) eq 1) then ptr_free,ptr_prlat
+if (ptr_valid(ptr_prlon) eq 1) then ptr_free,ptr_prlon
 
 if (ptr_valid(ptr_top) eq 1) then ptr_free,ptr_top
 if (ptr_valid(ptr_botm) eq 1) then ptr_free,ptr_botm
