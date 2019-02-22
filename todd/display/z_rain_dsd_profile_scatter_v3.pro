@@ -682,7 +682,7 @@ min_lon = -180.0
 min_lat = -90.0
 max_lon = 180.0
 max_lat = 90.0
-IF N_ELEMENTS(lat_range) GT 0 N_ELEMENTS(lon_range) GT 0 THEN BEGIN
+IF N_ELEMENTS(lat_range) GT 0 OR N_ELEMENTS(lon_range) GT 0 THEN BEGIN
 	if N_ELEMENTS(lat_range) NE 2 then begin
 		message,"Error:  lat_range must be 2 element array"
 		goto, errorExit2
