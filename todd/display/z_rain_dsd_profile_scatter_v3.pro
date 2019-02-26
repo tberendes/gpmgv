@@ -2131,7 +2131,7 @@ if latlon_filter then begin
 	if num_outofbox gt 0 then begin
 		flag2filter[outofbox_index] = 1
 	endif
-	latlon_box_str = STRING(min_lat,max_lat,min_lon,max_lon, FORMAT='(lat [",5.2f,5.2f"] lon [",5.2f,5.2f,"]")')
+	latlon_box_str = STRING(min_lat,max_lat,min_lon,max_lon, FORMAT='(lat [",F5.2,F5.2"] lon [",F5.2,F5.2,"]")')
     filterText=filterText+' '+latlon_box_str 
 
 endif
@@ -2170,6 +2170,7 @@ swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat
   and rntype EQ RainType_stratiform, num_strat_snow)
 
 printf, snow_LUN, numswedp,num_conv_snow,num_strat_snow,ncfilepr,format='(%"%d\,%d\,%d\,%s")'
+
 
 ;-------------------------------------------------
 
@@ -2609,12 +2610,11 @@ endif
   			fp_ind = csv_index[i]
  			printf, csv_dump_LUN, nearest_approach_time,prlat[fp_ind],prlon[fp_ind], $
  			botm_ht[fp_ind],top_ht[fp_ind],nearSurfRain[fp_ind],DPR_RR[fp_ind],$
- 			swedp[fp_ind],swe25[fp_ind],swe50[fp_ind],swe75[fp_ind] $
+ 			swedp[fp_ind],swe25[fp_ind],swe50[fp_ind],swe75[fp_ind], $
  			format='(%"%s\,%5.2f\,%5.2f\,%d\,%d\,%5.2f\,%5.2f\,%5.2f\,%5.2f\,%5.2f\,%5.2f")'
   		endfor
   
   endif
-  
   ;# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ; main plot loop
   
