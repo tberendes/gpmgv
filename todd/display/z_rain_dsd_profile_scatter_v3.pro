@@ -2617,7 +2617,8 @@ endif
 		ENDIF ELSE IF myflags.have_GR_RP_rainrate EQ 1 THEN BEGIN
 		     gv_rainrate = GR_RP		
 		ENDIF ELSE IF myflags.have_GR_RR_rainrate EQ 1 THEN BEGIN
-		     gv_rainrate = GR_RR		
+		     gv_rainrate = GR_RR	
+		ENDIF ELSE begin	
 		ENDELSE
 ;  		csv_index = WHERE( BBprox EQ 0 AND hgtcat LT 1) ; height < 1.5 km and below BB
   		csv_index = WHERE( hgtcat LT 1) ; height < 1.5 km
