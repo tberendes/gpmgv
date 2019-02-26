@@ -2129,7 +2129,11 @@ if latlon_filter then begin
 	; filter out any footprints outside of lat/lon box
 ;	print, 'prlat ', prlat
 ;	print, 'prlon ', prlon
-	outofbox_index = where((prlat<min_lat) or (prlat>max_lat) or (prlon<min_lon) or (prlon>max_lon), num_outofbox)
+
+ 
+ 	inbox_index = where((prlat GE min_lat) AND (prlat LE max_lat) AND (prlon GE min_lon) AND (prlon LE max_lon), num_inbox,COMPLEMENT=outofbox_index, NCOMPLEMENT=num_outofbox)
+ 
+; 	outofbox_index = where((prlat<min_lat) or (prlat>max_lat) or (prlon<min_lon) or (prlon>max_lon), num_outofbox)
 	if num_outofbox gt 0 then begin
 		flag2filter[outofbox_index] = 1
 	endif
