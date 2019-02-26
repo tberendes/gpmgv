@@ -2619,7 +2619,7 @@ endif
  			printf, csv_dump_LUN, nearest_approach_time,prlat[fp_ind],prlon[fp_ind], $
  			botm_ht[fp_ind],top_ht[fp_ind],nearSurfRain[fp_ind],DPR_RR[fp_ind],$
  			swedp[fp_ind],swe25[fp_ind],swe50[fp_ind],swe75[fp_ind], $
- 			format='(%"%s\,%8.2f\,%8.2f\,%8.2\,%8.2\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f")'
+ 			format='(%"%s\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f")'
   		endfor
   
   endif
