@@ -863,7 +863,7 @@ printf, snow_LUN, 'snow_samples,conv,strat,filename'
 if csv_dump then begin
 	openw, csv_dump_LUN, outpath + '/snow_volumes.txt', /GET_LUN
 	; print header line for columns
-  	printf, csv_dump_LUN, 'nearest_approach_time,lat,lon,botm_ht,top_ht,sat_sfc_rr,sat_rr,swedp,swe25,swe50,swe75'
+  	printf, csv_dump_LUN, 'nearest_approach_time,lat,lon,hgtcat,botm_ht,top_ht,bbHeight,gr_rainrate,sat_sfc_rr,sat_rr,swedp,swe25,swe50,swe75'
 endif
 
 ; determine whether to display the scatter plot objects or just create them
@@ -2612,14 +2612,22 @@ endif
 
   ; do CSV dump of snow volumes
   if csv_dump then begin
+		IF myflags.have_GR_RC_rainrate EQ 1 THEN BEGIN
+		     gv_rainrate = GR_RC
+		ENDIF ELSE IF myflags.have_GR_RP_rainrate EQ 1 THEN BEGIN
+		     gv_rainrate = GR_RP		
+		ENDIF ELSE IF myflags.have_GR_RR_rainrate EQ 1 THEN BEGIN
+		     gv_rainrate = GR_RR		
+		ENDELSE
 ;  		csv_index = WHERE( BBprox EQ 0 AND hgtcat LT 1) ; height < 1.5 km and below BB
   		csv_index = WHERE( hgtcat LT 1) ; height < 1.5 km
   		for i=0,n_elements(csv_index)-1 do begin
   			fp_ind = csv_index[i]
  			printf, csv_dump_LUN, nearest_approach_time,prlat[fp_ind],prlon[fp_ind], $
- 			botm_ht[fp_ind],top_ht[fp_ind],nearSurfRain[fp_ind],DPR_RR[fp_ind],$
+ 			hgtcat[fp_ind],botm_ht[fp_ind],top_ht[fp_ind],bbHeight[fp_ind], $
+ 			gv_rainrate[fp_ind],nearSurfRain[fp_ind],DPR_RR[fp_ind],$
  			swedp[fp_ind],swe25[fp_ind],swe50[fp_ind],swe75[fp_ind], $
- 			format='(%"%s\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f")'
+ 			format='(%"%s\,%8.2f\,%8.2f\,%d\,%8.2f\,%8.2f\,%8.2f\%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f")'
   		endfor
   
   endif
