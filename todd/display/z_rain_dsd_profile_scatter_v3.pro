@@ -2612,7 +2612,8 @@ endif
 
   ; do CSV dump of snow volumes
   if csv_dump then begin
-  		csv_index = WHERE( BBprox EQ 0 AND hgtcat LT 1) ; height < 1.5 km and below BB
+;  		csv_index = WHERE( BBprox EQ 0 AND hgtcat LT 1) ; height < 1.5 km and below BB
+  		csv_index = WHERE( hgtcat LT 1) ; height < 1.5 km
   		for i=0,n_elements(csv_index)-1 do begin
   			fp_ind = csv_index[i]
  			printf, csv_dump_LUN, nearest_approach_time,prlat[fp_ind],prlon[fp_ind], $
