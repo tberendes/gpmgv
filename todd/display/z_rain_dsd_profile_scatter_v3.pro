@@ -2133,7 +2133,8 @@ if latlon_filter then begin
 	if num_outofbox gt 0 then begin
 		flag2filter[outofbox_index] = 1
 	endif
-	latlon_box_str = STRING(min_lat,max_lat,min_lon,max_lon, FORMAT='("lat [",F5.2,",", F5.2,"] lon [",F5.2,",",F5.2,"]")')
+	print, 'filtered lat/lon ',num_outofbox,' out of ', n_elements(prlat)
+	latlon_box_str = STRING(min_lat,max_lat,min_lon,max_lon, FORMAT='("lat [",F6.2,",", F6.2,"] lon [",F6.2,",",F6.2,"]")')
     filterText=filterText+' '+latlon_box_str 
 
 endif
