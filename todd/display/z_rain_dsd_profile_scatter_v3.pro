@@ -2127,8 +2127,8 @@ endif
 ; New lat/lon filter
 if latlon_filter then begin
 	; filter out any footprints outside of lat/lon box
-	print, 'prlat ', prlat
-	print, 'prlon ', prlon
+;	print, 'prlat ', prlat
+;	print, 'prlon ', prlon
 	outofbox_index = where((prlat<min_lat) or (prlat>max_lat) or (prlon<min_lon) or (prlon>max_lon), num_outofbox)
 	if num_outofbox gt 0 then begin
 		flag2filter[outofbox_index] = 1
