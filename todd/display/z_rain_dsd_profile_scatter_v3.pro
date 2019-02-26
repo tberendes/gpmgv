@@ -857,6 +857,15 @@ openw, anom_LUN, outpath + '/anomaly.txt', /GET_LUN
 openw, hail_LUN, outpath + '/hail.txt', /GET_LUN
 openw, snow_LUN, outpath + '/snow.txt', /GET_LUN
 
+; print header line for columns
+printf, snow_LUN, 'snow_samples,conv,strat,filename'
+
+if csv_dump then begin
+	openw, csv_dump_LUN, outpath + '/snow_volumes.txt', /GET_LUN
+	; print header line for columns
+  	printf, csv_dump_LUN, 'nearest_approach_time,lat,lon,botm_ht,top_ht,sat_sfc_rr,sat_rr,swedp,swe25,swe50,swe75'
+endif
+
 ; determine whether to display the scatter plot objects or just create them
 ; in a buffer for saving in batch mode
 IF KEYWORD_SET(batch_save) THEN buffer=1 ELSE buffer=0
@@ -1913,6 +1922,7 @@ blockfilter = 'C'    ; initialize blockage filter to "by Column"
    
    siteID = string(mysite.site_id)
    nsweeps = mygeometa.num_sweeps
+   nearest_approach_time=mygeometa.atimeNearestApproach
 
 ;=========================================================================
 
@@ -2110,8 +2120,22 @@ if snow_flag then begin
 	if num_notsnow gt 0 then begin
 		flag2filter[notsnow_index] = 1
 	endif
+    filterText=filterText+' Snow only '
 	
 endif
+
+; New lat/lon filter
+if latlon_filter then begin
+	; filter out any footprints outside of lat/lon box
+	outofbox_index = where((prlat<min_lat) or (prlat>max_lat) or (prlon<min_lon) or (prlon>max_lon), num_outofbox)
+	if num_outofbox gt 0 then begin
+		flag2filter[outofbox_index] = 1
+	endif
+	latlon_box_str = STRING(min_lat,max_lat,min_lon,max_lon, FORMAT='(lat [",F5.2,F5.2"] lon [",f5.2,F5.2,"]")')
+    filterText=filterText+' '+latlon_box_str 
+
+endif
+
 
 ; TAB  9/24/18 Added for Walt, new snow check
 ; output filename for possible snow samples
@@ -2145,7 +2169,7 @@ swedp_index = where(swedp gt 0 and (besthid ge 3) and (besthid le 7) and (hgtcat
   and GR_blockage LE max_blockage and minpctcombined GE pctAbvThreshF $
   and rntype EQ RainType_stratiform, num_strat_snow)
 
-printf, snow_LUN, numswedp,ncfilepr,num_conv_snow,num_strat_snow,format='(%"%d\,%s\,%d\,%d")'
+printf, snow_LUN, numswedp,num_conv_snow,num_strat_snow,ncfilepr,format='(%"%d\,%d\,%d\,%s")'
 
 ;-------------------------------------------------
 
@@ -2578,6 +2602,19 @@ endif
       ENDIF
    endfor
 
+  ; do CSV dump of snow volumes
+  if csv_dump then begin
+  		csv_index = WHERE( BBprox EQ 0 AND hgtcat LT 1) ; height < 1.5 km and below BB
+  		for i=0,n_elements(csv_index)-1 do begin
+  			fp_ind = csv_index[i]
+ 			printf, csv_dump_LUN, nearest_approach_time,prlat[fp_ind],prlon[fp_ind], $
+ 			botm_ht[fp_ind],top_ht[fp_ind],nearSurfRain[fp_ind],DPR_RR[fp_ind],$
+ 			swedp[fp_ind],swe25[fp_ind],swe50[fp_ind],swe75[fp_ind] $
+ 			format='(%"%s\,%f5.2\,%f5.2\,%d\,%d\,%f5.2\,%f5.2\,%f5.2\,%f5.2\,%f5.2\,%f5.2")'
+  		endfor
+  
+  endif
+  
   ;# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ; main plot loop
   
@@ -6070,6 +6107,10 @@ close, hail_LUN
 FREE_LUN, hail_LUN
 close, snow_LUN
 FREE_LUN, snow_LUN
+if csv_dump then begin
+	close, csv_dump_LUN
+	FREE_LUN, csv_dump_LUN
+endif
 
 IF N_ELEMENTS(profile_save) NE 0 AND bustOut NE 1 THEN BEGIN
    ; Compute ensemble mean and StdDev of dBZ at each level from grouped data
