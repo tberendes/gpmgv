@@ -863,7 +863,7 @@ printf, snow_LUN, 'snow_samples,conv,strat,filename'
 if csv_dump then begin
 	openw, csv_dump_LUN, outpath + '/snow_volumes.txt', /GET_LUN
 	; print header line for columns
-  	printf, csv_dump_LUN, 'nearest_approach_time,lat,lon,botm_ht,top_ht,bbHeight,gr_rainrate,sat_sfc_rr,sat_rr,swedp,swe25,swe50,swe75'
+  	printf, csv_dump_LUN, 'nearest_approach_time,lat,lon,botm_ht,top_ht,bbHeight,gr_rainrate,sat_nearsfc_rr,sat_rr,swedp,swe25,swe50,swe75'
 endif
 
 ; determine whether to display the scatter plot objects or just create them
