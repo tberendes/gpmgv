@@ -2621,7 +2621,7 @@ endif
 		ENDIF ELSE begin	
 		ENDELSE
 ;  		csv_index = WHERE( BBprox EQ 0 AND hgtcat LT 1, csv_cnt) ; height < 1.5 km and below BB
-  		csv_index = WHERE( hgtcat LT 1) ; height < 1.5 km
+  		csv_index = WHERE( hgtcat LT 1, csv_cnt) ; height < 1.5 km
   		
   		print, 'csv_index', csv_index
   		if csv_cnt gt 0 then begin
