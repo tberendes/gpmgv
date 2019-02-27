@@ -2622,8 +2622,11 @@ endif
 		ENDELSE
 ;  		csv_index = WHERE( BBprox EQ 0 AND hgtcat LT 1) ; height < 1.5 km and below BB
   		csv_index = WHERE( hgtcat LT 1) ; height < 1.5 km
+  		
+  		print, 'csv_index', csv_index
   		for i=0,n_elements(csv_index)-1 do begin
   			fp_ind = csv_index[i]
+  			print, 'fp_ind ',fp_ind
  			printf, csv_dump_LUN, nearest_approach_time,prlat[fp_ind],prlon[fp_ind], $
  			hgtcat[fp_ind],botm_ht[fp_ind],top_ht[fp_ind],bbHeight[fp_ind], $
  			gv_rainrate[fp_ind],nearSurfRain[fp_ind],DPR_RR[fp_ind],$
