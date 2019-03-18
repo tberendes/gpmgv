@@ -920,7 +920,7 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
               RRNWP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             NWGZMXP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              PIADMP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
-		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+;		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 		    ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
 
@@ -3220,7 +3220,7 @@ endif
 
       ENDSWITCH
 
-	 print, 'plot type: ',  PlotTypes(iplot)
+;	 print, 'plot type: ',  PlotTypes(iplot)
      ; extract the samples to include in the scatter plots, if variable is
      ; available and there are qualifying points from above
       CASE PlotTypes(iplot) OF
