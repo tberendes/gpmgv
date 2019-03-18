@@ -48,6 +48,7 @@
 ; 'SW25' : DPR 3-D rainrate vs. GR SWE25 (GV snowfall water equivalent rate, PQPE conditional quantiles 25%) rainrate
 ; 'SW50' : DPR 3-D rainrate vs. GR SWE50 (GV snowfall water equivalent rate, PQPE conditional quantiles 50%) rainrate
 ; 'SW75' : DPR 3-D rainrate vs. GR SWE75 (GV snowfall water equivalent rate, PQPE conditional quantiles 75%) rainrate
+; note, all "SW*" plots are only valid for heights < 1.5 km
 ;
 ; If an alternate field is specified in the ALTFIELD parameter (values as
 ; defined by the IDs in quotes, above), then scatter plots will be created for
@@ -848,6 +849,12 @@ MRHIST_accum2 = []
 DRHIST_accum0 = []
 DRHIST_accum1 = []
 DRHIST_accum2 = []
+ZDRABVH_accum0 = []
+ZDRABVH_accum1 = []
+ZDRABVH_accum2 = []
+
+ZDRBLWH_accum = []
+
 ;'MRHIST': Histogram of MRMS Rain rates
 ;'DRHIST': Histogram of DPR Rain rates
 ;
@@ -863,7 +870,7 @@ printf, snow_LUN, 'snow_samples,conv,strat,filename'
 if csv_dump then begin
 	openw, csv_dump_LUN, outpath + '/snow_volumes.txt', /GET_LUN
 	; print header line for columns
-  	printf, csv_dump_LUN, 'nearest_approach_time,lat,lon,botm_ht,top_ht,bbHeight,gr_rainrate,sat_nearsfc_rr,sat_rr,swedp,swe25,swe50,swe75'
+  	printf, csv_dump_LUN, 'nearest_approach_time,orbitnum,lat,lon,botm_ht,top_ht,bbHeight,gr_rainrate,sat_nearsfc_rr,sat_rr,swedp,swe25,swe50,swe75'
 endif
 
 ; determine whether to display the scatter plot objects or just create them
@@ -913,6 +920,8 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
               RRNWP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             NWGZMXP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              PIADMP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+		    ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
 
 ; position indices/definitions of the 3 flags in the array triplets in the structure
@@ -1297,6 +1306,9 @@ IF z2do EQ 'D0' THEN GRlabelAdd = '*1.05' ELSE GRlabelAdd = ''
 ptr_GR_DP_Dzero=ptr_new(/allocate_heap)
 ; ptr_GR_DP_Dzeromax=ptr_new(/allocate_heap)
 ; ptr_GR_DP_Dzerostddev=ptr_new(/allocate_heap)
+; TAB 3/13/19 added PTRGVZDRMEAN
+ptr_GR_DP_ZDR=ptr_new(/allocate_heap)
+
 ptr_DprDm=ptr_new(/allocate_heap)
 ptr_pctgooddzerogv=ptr_new(/allocate_heap)
 ptr_pctgoodDprDm=ptr_new(/allocate_heap)
@@ -1595,6 +1607,10 @@ CASE pr_or_dpr OF
        BBPARMS=BBparms, BB_RELATIVE=bb_relative, ALT_BB_HGT=alt_bb_file, $
        PTRGVMODEHID=ptr_BestHID, PTRGVHID=ptr_HID, $
        
+       ; TAB 3/13/19
+       PTRGVZDRMEAN=ptr_GR_DP_Zdr, PTRGVZDRMAX=ptr_GR_DP_Zdrmax,$
+       PTRGVZDRSTDDEV=ptr_GR_DP_Zdrstddev, $
+       
        ; TAB 2/18/19
        ; MRMS radar variables
        PTRmrmsrrlow=ptr_mrmsrrlow, $
@@ -1769,6 +1785,12 @@ IF myflags.have_GR_Dzero EQ 1 and have_SAT_DSD EQ 1 THEN BEGIN
 ;                 GR_D0max[idxD0pos] = GR_D0max[idxD0pos]*1.05
               endif
 ENDIF ELSE have_D0 = 0
+
+; TAB 3/13/19
+IF myflags.have_GR_Zdr EQ 1 THEN BEGIN
+              have_Zdr = 1
+              GR_ZDR=temporary(*ptr_GR_DP_Zdr)
+ENDIF ELSE have_Zdr = 0
 
 IF myflags.have_GR_Dm EQ 1 and have_SAT_DSD EQ 1 THEN BEGIN
               have_Dm = 1
@@ -2362,6 +2384,9 @@ print, ''
     		  swe75=swe75[idxgoodenuff]
           	  
           endif
+          IF have_Zdr EQ 1 THEN BEGIN
+              GR_ZDR=GR_ZDR[idxgoodenuff]
+          ENDIF
           IF have_D0 EQ 1 THEN BEGIN
               GR_D0=GR_D0[idxgoodenuff]
 ;              GR_D0max=GR_D0max[idxgoodenuff]
@@ -2629,7 +2654,7 @@ endif
 	  		for i=0,csv_cnt-1 do begin
 	  			fp_ind = csv_index[i]
 ;	  			print, 'fp_ind ',fp_ind
-	 			printf, csv_dump_LUN, nearest_approach_time,prlat[fp_ind],prlon[fp_ind], $
+	 			printf, csv_dump_LUN, nearest_approach_time,orbitnum,prlat[fp_ind],prlon[fp_ind], $
 	 			botm_ht[fp_ind],top_ht[fp_ind],bbHeight[fp_ind], $
 	 			gv_rainrate[fp_ind],nearSurfRain[fp_ind],DPR_RR[fp_ind],$
 	 			swedp[fp_ind],swe25[fp_ind],swe50[fp_ind],swe75[fp_ind], $
@@ -2683,6 +2708,30 @@ endif
                   ENDCASE
                BREAK 
                END
+;      'ZDRABVH' :  BEGIN 
+;                CASE raintypeBBidx OF ; need stratiform above only
+;                   3 : BEGIN
+;                     ; accumulate stratiform rain types 
+;                      idxabv = WHERE( BBprox EQ 0 AND hgtcat LE 1 AND rntype EQ RainType_stratiform, countabv )
+;                      END
+;                ELSE: BEGIN
+;                      END
+;                  ENDCASE
+;               BREAK 
+;               END
+      'ZDRBLWH' :  BEGIN 
+             	CASE raintypeBBidx OF
+                    0 : BEGIN
+                      ; accumulate stratiform rain types below the BB at/below 3 km
+                      idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+                        AND rntype EQ RainType_stratiform and hgtcat eq BBparms.BB_HgtLo - 1, countabv )
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
+
      'BBHIST' :  BEGIN ; Don't stratify on height
                 CASE raintypeBBidx OF
                    0 : BEGIN
@@ -3637,6 +3686,17 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                       END
                   ENDCASE
                END
+      'ZDRBLWH' :  BEGIN 
+                 CASE raintypeBBidx OF
+                    0 : BEGIN
+                      ; accumulate stratiform rain types below the BB at/below 3 km
+                      ZDRBLWH_accum = [ZDRBLWH_accum, GR_ZDR[idxabv]]
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
       'GRDMSH' : BEGIN ; only do for all below BB
       		   if myflags.have_GR_Dm EQ 1 then begin
 	               CASE raintypeBBidx OF
@@ -3972,6 +4032,7 @@ else $
 IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2do) EQ 'GRDMSH' OR  $
    PlotTypes(idx2do) EQ 'HGTHIST' OR PlotTypes(idx2do) EQ 'BBHIST' OR $
    PlotTypes(idx2do) EQ 'MRHIST' OR PlotTypes(idx2do) EQ 'DRHIST' OR $
+   PlotTypes(idx2do) EQ 'ZDRBLWH' OR $
    (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL) THEN BEGIN
   ; CREATE THE SCATTER PLOT OBJECT FROM THE BINNED DATA
    do_MAE_1_1 = 1    ; flag to include/suppress MAE and the 1:1 line on plots
@@ -5428,6 +5489,32 @@ print, "GRPDSR plot...."
 			      END
 			ENDCASE
 	   	END
+	   'ZDRBLWH' : BEGIN
+ 			minhistval=0
+			maxhistval=100
+    	    titleLine1 = satprodtype+' '+version+ " DPR RR Histogram"  
+			CASE raintypeBBidx OF
+			   0 : BEGIN
+			      if ZDRBLWH_accum eq !NULL then begin
+			      	  print, "ZDR stratiform histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use stratiform types
+				  mean=MEAN(ZDRBLWH_accum)
+				  mean_str = STRING(mean, FORMAT='(F7.3)')
+				  histMean = "Mean " + mean_str
+				  hist1 = HISTOGRAM(ZDRBLWH_accum, LOCATIONS=xvals1, min=-0.7, max=0.7, nbins=7)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Stratiform Samples, 1 Layer Below Bright Band, " +pctabvstr+" Above Thresh"
+			      END
+			ELSE: BEGIN
+			         goto, plot_skipped1
+			      END
+			ENDCASE
+		END
 	   'GRDMSH' : BEGIN
 ;    	    titleLine1 = "GR Dm Std Dev Histogram  "+satprodtype+" for " $
 ;               + pr_or_dpr+' '+version
@@ -5615,6 +5702,39 @@ print, "GRPDSR plot...."
         bar.save, pngfile, RESOLUTION=300
         bar.close
    	  goto, plot_skipped1
+
+   endif
+   if PlotTypes(idx2do) EQ 'ZDRBLWH' then begin
+   
+        PRINT, ''
+        PRINT, '' 
+        PRINT, "PLOTTING: Histograms ", PlotTypes(idx2do)+ '_'+ rntypeLabels[raintypeBBidx]+BB_string
+        PRINT, '' 
+
+        IF do_dm_thresh EQ 1 OR do_dm_range EQ 1 THEN BEGIN
+             imTITLE = imTITLE + " " + filtertitlestring + dmTitleText
+        ENDIF ELSE BEGIN 
+             imTITLE = imTITLE + " " + filtertitlestring
+        ENDELSE
+        hist1_total=total(hist1, /double)
+        hist1=100.0 * (hist1/hist1_total)
+        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Rain Rate (mm/h)' $
+                      , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
+                      , xrange=[minhistval,maxhistval], yrange=[0,100])
+
+		startx = minhistval + 0.45*(maxhistval-minhistval)
+		histmax = max(hist1)
+		starty = 90
+ 
+       	text1 = TEXT(startx,starty, histMean, /CURRENT, /DATA)
+
+        pngfile = outpath_sav + '/'+ PlotTypes(idx2do) + '_'+ rntypeLabels[raintypeBBidx] + $
+             BB_string + '_Pct'+ strtrim(string(pctAbvThresh),2) + $
+             addme + filteraddstring + '.png'
+        print, "PNGFILE: ",pngfile
+        bar.save, pngfile, RESOLUTION=300
+        bar.close
+   	    goto, plot_skipped1
 
    endif
 
