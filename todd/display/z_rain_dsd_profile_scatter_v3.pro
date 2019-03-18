@@ -3220,6 +3220,7 @@ endif
 
       ENDSWITCH
 
+	 print, 'plot type: ',  PlotTypes(iplot)
      ; extract the samples to include in the scatter plots, if variable is
      ; available and there are qualifying points from above
       CASE PlotTypes(iplot) OF
