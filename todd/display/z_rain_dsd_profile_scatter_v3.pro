@@ -3687,6 +3687,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                   ENDCASE
                END
       'ZDRBLWH' :  BEGIN 
+   				IF countabv eq 0 THEN break
                  CASE raintypeBBidx OF
                     0 : BEGIN
                       ; accumulate stratiform rain types below the BB at/below 3 km
