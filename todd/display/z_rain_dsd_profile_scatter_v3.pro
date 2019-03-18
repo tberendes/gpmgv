@@ -849,9 +849,9 @@ MRHIST_accum2 = []
 DRHIST_accum0 = []
 DRHIST_accum1 = []
 DRHIST_accum2 = []
-ZDRABVH_accum0 = []
-ZDRABVH_accum1 = []
-ZDRABVH_accum2 = []
+;ZDRABVH_accum0 = []
+;ZDRABVH_accum1 = []
+;ZDRABVH_accum2 = []
 
 ZDRBLWH_accum = []
 
@@ -3695,7 +3695,6 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                 ELSE: BEGIN
                       END
                   ENDCASE
-               BREAK 
                END
       'GRDMSH' : BEGIN ; only do for all below BB
       		   if myflags.have_GR_Dm EQ 1 then begin
