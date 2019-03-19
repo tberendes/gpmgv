@@ -5517,8 +5517,9 @@ print, "GRPDSR plot...."
 				  hist1 = HISTOGRAM(ZDRBLWH_accum, LOCATIONS=xvals1, min=-0.7, max=0.7, binsize=0.2)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
+				  gvz_thresh_str = STRING(gvz_thresh, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Rain/dzl, 1 Layer Below Bright Band Z<"+gvz_thresh+", " +pctabvstr+" Above Thresh"
+                      "Stratiform Rain/dzl, 1 Layer Below Bright Band Z<"+gvz_thresh_str+", " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
