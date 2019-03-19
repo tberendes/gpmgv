@@ -883,6 +883,7 @@ IF KEYWORD_SET(batch_save) THEN buffer=1 ELSE buffer=0
 ; TAB 11/13/17 added fourth dimension for above BB convective
 
 have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+ 		    ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SWDP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW25 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW50 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
@@ -921,7 +922,6 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
             NWGZMXP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
              PIADMP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 ;		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
-		    ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
 
 ; position indices/definitions of the 3 flags in the array triplets in the structure
@@ -2723,8 +2723,10 @@ endif
              	CASE raintypeBBidx OF
                     0 : BEGIN
                       ; accumulate stratiform rain types below the BB at/below 3 km
-                      idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND hgtcat LE 1 $
-                        AND rntype EQ RainType_stratiform and hgtcat eq BBparms.BB_HgtLo - 1, countabv )
+                      ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+                      ;  AND rntype EQ RainType_stratiform and hgtcat eq BBparms.BB_HgtLo - 1, countabv )
+                      idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 $
+                        AND rntype EQ RainType_stratiform and hgtcat le BBparms.BB_HgtLo - 1, countabv )
                       END
                 ELSE: BEGIN
                       END
