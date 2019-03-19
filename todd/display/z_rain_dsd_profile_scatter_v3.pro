@@ -924,6 +924,11 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 ;		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
 
+;;&************************** Remove this **********************
+
+have_Hist = { ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
+
+
 ; position indices/definitions of the 3 flags in the array triplets in the structure
 ; - must be identically defined in accum_scat_data.pro
 haveVar = 0   ; do we have data for the variable
@@ -2720,13 +2725,19 @@ endif
 ;               BREAK 
 ;               END
       'ZDRBLWH' :  BEGIN 
+      			gvz_thresh = 18.0
              	CASE raintypeBBidx OF
                     0 : BEGIN
                       ; accumulate stratiform rain types below the BB
                       ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND hgtcat LE 1 $
                       ;  AND rntype EQ RainType_stratiform and hgtcat eq BBparms.BB_HgtLo - 1, countabv )
-                      idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+
+                      ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+                      ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
+
+                      idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
                          AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
+
                         print, 'ZDRBLWH count: ', countabv
                       END
                 ELSE: BEGIN
@@ -5512,7 +5523,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Rain/dzl, 1 Layer Below Bright Band Z<15, " +pctabvstr+" Above Thresh"
+                      "Stratiform Rain/dzl, 1 Layer Below Bright Band Z<"+gvz_thresh+", " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
