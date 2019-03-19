@@ -5722,9 +5722,9 @@ print, "GRPDSR plot...."
         ENDELSE
         hist1_total=total(hist1, /double)
         hist1=100.0 * (hist1/hist1_total)
-        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Rain Rate (mm/h)' $
+        bar = barplot(xvals1,hist1,ytitle='% Samples', xtitle='Zdr' $
                       , title=imTITLE, /BUFFER, INDEX=0, NBARS=numBars, FILL_COLOR='blue' $
-                      , xrange=[minhistval,maxhistval], yrange=[0,100])
+                      , xrange=[-0.9, 0.9], yrange=[0,100])
 
 		startx = minhistval + 0.45*(maxhistval-minhistval)
 		histmax = max(hist1)
