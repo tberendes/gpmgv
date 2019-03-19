@@ -1790,6 +1790,7 @@ ENDIF ELSE have_D0 = 0
 IF myflags.have_GR_Zdr EQ 1 THEN BEGIN
               have_Zdr = 1
               GR_ZDR=temporary(*ptr_GR_DP_Zdr)
+              GR_ZDR_stddev=temporary(*ptr_GR_DP_Zdrstddev)
 ENDIF ELSE have_Zdr = 0
 
 IF myflags.have_GR_Dm EQ 1 and have_SAT_DSD EQ 1 THEN BEGIN
@@ -2386,6 +2387,7 @@ print, ''
           endif
           IF have_Zdr EQ 1 THEN BEGIN
               GR_ZDR=GR_ZDR[idxgoodenuff]
+              GR_ZDR_stddev=GR_ZDR_stddev[idxgoodenuff]
           ENDIF
           IF have_D0 EQ 1 THEN BEGIN
               GR_D0=GR_D0[idxgoodenuff]
@@ -2720,7 +2722,11 @@ endif
 ;               BREAK 
 ;               END
       'ZDRBLWH' :  BEGIN 
-      			gvz_thresh = 18.0
+      			gvz_thresh = 20.0   ; 20, 15
+      			zdr_std_thresh = 0.2   ; .3, .4
+      			
+      			tmpstr=STRING(zdr_std_thresh, FORMAT='(F3.1)')
+      			zdr_add_str = 'zdr_std<'+tmpstr
              	CASE raintypeBBidx OF
                     0 : BEGIN
                       ; accumulate stratiform rain types below the BB
