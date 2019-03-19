@@ -5496,7 +5496,7 @@ print, "GRPDSR plot...."
 	   'ZDRBLWH' : BEGIN
  			minhistval=0
 			maxhistval=100
-    	    titleLine1 = satprodtype+' '+version+ " DPR RR Histogram"  
+    	    titleLine1 = satprodtype+' '+version+ " GR ZDR Histogram"  
 			CASE raintypeBBidx OF
 			   0 : BEGIN
 			      if ZDRBLWH_accum eq !NULL then begin
@@ -5512,7 +5512,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Samples, 1 Layer Below Bright Band, " +pctabvstr+" Above Thresh"
+                      "Stratiform Samples, 1 Layer Below Bright Band Z<15, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
