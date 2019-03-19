@@ -924,11 +924,6 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 ;		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                EPSI : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
 
-;;&************************** Remove this **********************
-
-have_Hist = { ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] }
-
-
 ; position indices/definitions of the 3 flags in the array triplets in the structure
 ; - must be identically defined in accum_scat_data.pro
 haveVar = 0   ; do we have data for the variable
