@@ -2725,9 +2725,8 @@ endif
                       ; accumulate stratiform rain types below the BB at/below 3 km
                       ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND hgtcat LE 1 $
                       ;  AND rntype EQ RainType_stratiform and hgtcat eq BBparms.BB_HgtLo - 1, countabv )
-                      ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
-                      idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND besthid eq 1 $
-                        AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
+                      idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+                         AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
                         print, 'ZDRBLWH count: ', countabv
                       END
                 ELSE: BEGIN
@@ -5513,7 +5512,7 @@ print, "GRPDSR plot...."
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Samples, 1 Layer Below Bright Band Z<15, " +pctabvstr+" Above Thresh"
+                      "Stratiform Rain/dzl, 1 Layer Below Bright Band Z<15, " +pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
