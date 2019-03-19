@@ -5508,7 +5508,7 @@ print, "GRPDSR plot...."
 				  mean=MEAN(ZDRBLWH_accum)
 				  mean_str = STRING(mean, FORMAT='(F7.3)')
 				  histMean = "Mean " + mean_str
-				  hist1 = HISTOGRAM(ZDRBLWH_accum, LOCATIONS=xvals1, min=-0.7, max=0.7, nbins=7)      
+				  hist1 = HISTOGRAM(ZDRBLWH_accum, LOCATIONS=xvals1, min=-0.7, max=0.7, binsize=0.2)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
