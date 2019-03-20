@@ -2726,8 +2726,8 @@ endif
 ;               BREAK 
 ;               END
       'ZDRBLWH' :  BEGIN 
-      			gvz_thresh = 20.0   ; 20, 15
-      			zdr_std_thresh = 0.2   ; .3, .4
+      			gvz_thresh = 18.0   ; 20, 15
+      			zdr_std_thresh = 0.3   ; .2, .3, .4
       			
       			tmpstr=STRING(zdr_std_thresh, FORMAT='(F3.1)')
       			zdr_add_str = 'zdr std<'+tmpstr
