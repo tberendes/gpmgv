@@ -2745,7 +2745,7 @@ endif
                       ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
                       idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
                          AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1) $
-                         AND GR_ZDR_stddev lt 0.2 , countabv )
+                         AND GR_ZDR_stddev lt zdr_std_thresh , countabv )
 
                         print, 'ZDRBLWH count: ', countabv
                       END
