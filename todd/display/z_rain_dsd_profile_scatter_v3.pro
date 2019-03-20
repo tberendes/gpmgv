@@ -5533,7 +5533,7 @@ print, "GRPDSR plot...."
 				  nstr = STRING(numPts, FORMAT='(I0)')
 				  gvz_thresh_str = STRING(gvz_thresh, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Rain/dzl, 1 Layer Below Bright Band, Z<"+gvz_thresh_str+", "+ zdr_add_str+ ","+pctabvstr+" Above Thresh"
+                      "Stratiform Rain/dzl, 1 Layer Below Bright Band, Z<"+gvz_thresh_str+", "+ zdr_add_str+ ", "+pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
