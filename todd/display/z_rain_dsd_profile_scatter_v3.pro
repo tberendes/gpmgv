@@ -1308,6 +1308,8 @@ ptr_GR_DP_Dzero=ptr_new(/allocate_heap)
 ; ptr_GR_DP_Dzerostddev=ptr_new(/allocate_heap)
 ; TAB 3/13/19 added PTRGVZDRMEAN
 ptr_GR_DP_ZDR=ptr_new(/allocate_heap)
+ptr_GR_DP_ZDRstddev=ptr_new(/allocate_heap)
+ptr_GR_DP_ZDRmax=ptr_new(/allocate_heap)
 
 ptr_DprDm=ptr_new(/allocate_heap)
 ptr_pctgooddzerogv=ptr_new(/allocate_heap)
@@ -1525,8 +1527,8 @@ CASE pr_or_dpr OF
        PTRGVRCMEAN=ptr_gvrc, PTRGVRCMAX=ptr_gvrcmax, PTRGVRCSTDDEV=ptr_gvrcstddev, $
        PTRGVRPMEAN=ptr_gvrp, PTRGVRPMAX=ptr_gvrpmax, PTRGVRPSTDDEV=ptr_gvrpstddev, $
        PTRGVMODEHID=ptr_BestHID, PTRGVHID=ptr_HID, $
-       PTRGVZDRMEAN=ptr_GR_DP_Zdr, PTRGVZDRMAX=ptr_GR_DP_Zdrmax,$
-       PTRGVZDRSTDDEV=ptr_GR_DP_Zdrstddev, $
+       PTRGVZDRMEAN=ptr_GR_DP_ZDR, PTRGVZDRMAX=ptr_GR_DP_ZDRmax,$
+       PTRGVZDRSTDDEV=ptr_GR_DP_ZDRstddev, $
        PTRGVKDPMEAN=ptr_GR_DP_Kdp, PTRGVKDPMAX=ptr_GR_DP_Kdpmax, $
        PTRGVKDPSTDDEV=ptr_GR_DP_Kdpstddev, $
        PTRGVRHOHVMEAN=ptr_GR_DP_RHOhv, PTRGVRHOHVMAX=ptr_GR_DP_RHOhvmax, $
@@ -1608,8 +1610,8 @@ CASE pr_or_dpr OF
        PTRGVMODEHID=ptr_BestHID, PTRGVHID=ptr_HID, $
        
        ; TAB 3/13/19
-       PTRGVZDRMEAN=ptr_GR_DP_Zdr, PTRGVZDRMAX=ptr_GR_DP_Zdrmax,$
-       PTRGVZDRSTDDEV=ptr_GR_DP_Zdrstddev, $
+       PTRGVZDRMEAN=ptr_GR_DP_ZDR, PTRGVZDRMAX=ptr_GR_DP_ZDRmax,$
+       PTRGVZDRSTDDEV=ptr_GR_DP_ZDRstddev, $
        
        ; TAB 2/18/19
        ; MRMS radar variables
@@ -1789,8 +1791,9 @@ ENDIF ELSE have_D0 = 0
 ; TAB 3/13/19
 IF myflags.have_GR_Zdr EQ 1 THEN BEGIN
               have_Zdr = 1
-              GR_ZDR=temporary(*ptr_GR_DP_Zdr)
-              GR_ZDR_stddev=temporary(*ptr_GR_DP_Zdrstddev)
+              GR_ZDR=temporary(*ptr_GR_DP_ZDR)
+              GR_ZDR_stddev=temporary(*ptr_GR_DP_ZDRstddev)
+              GR_ZDR_max=temporary(*ptr_GR_DP_ZDRmax)
 ENDIF ELSE have_Zdr = 0
 
 IF myflags.have_GR_Dm EQ 1 and have_SAT_DSD EQ 1 THEN BEGIN
@@ -2388,6 +2391,7 @@ print, ''
           IF have_Zdr EQ 1 THEN BEGIN
               GR_ZDR=GR_ZDR[idxgoodenuff]
               GR_ZDR_stddev=GR_ZDR_stddev[idxgoodenuff]
+              GR_ZDR_max=GR_ZDR_max[idxgoodenuff]
           ENDIF
           IF have_D0 EQ 1 THEN BEGIN
               GR_D0=GR_D0[idxgoodenuff]
