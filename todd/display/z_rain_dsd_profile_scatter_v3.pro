@@ -2730,7 +2730,8 @@ endif
       			zdr_std_thresh = 0.2   ; .3, .4
       			
       			tmpstr=STRING(zdr_std_thresh, FORMAT='(F3.1)')
-      			zdr_add_str = 'zdr_std<'+tmpstr
+      			zdr_add_str = 'zdr std<'+tmpstr
+      			
              	CASE raintypeBBidx OF
                     0 : BEGIN
                       ; accumulate stratiform rain types below the BB
@@ -2740,8 +2741,11 @@ endif
                       ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
                       ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
 
+                      ;idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+                      ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
                       idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
-                         AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
+                         AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1) $
+                         AND GR_ZDR_stddev lt 0.2 , countabv )
 
                         print, 'ZDRBLWH count: ', countabv
                       END
@@ -5529,7 +5533,7 @@ print, "GRPDSR plot...."
 				  nstr = STRING(numPts, FORMAT='(I0)')
 				  gvz_thresh_str = STRING(gvz_thresh, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
-                      "Stratiform Rain/dzl, 1 Layer Below Bright Band Z<"+gvz_thresh_str+", " +pctabvstr+" Above Thresh"
+                      "Stratiform Rain/dzl, 1 Layer Below Bright Band, Z<"+gvz_thresh_str+", "+ zdr_add_str+ ","+pctabvstr+" Above Thresh"
 			      END
 			ELSE: BEGIN
 			         goto, plot_skipped1
