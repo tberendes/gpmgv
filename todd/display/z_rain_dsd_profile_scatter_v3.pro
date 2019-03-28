@@ -4101,7 +4101,7 @@ else $
 IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2do) EQ 'GRDMSH' OR  $
    PlotTypes(idx2do) EQ 'HGTHIST' OR PlotTypes(idx2do) EQ 'BBHIST' OR $
    PlotTypes(idx2do) EQ 'MRHIST' OR PlotTypes(idx2do) EQ 'DRHIST' OR $
-   PlotTypes(idx2do) EQ 'ZDRBLWH' OR PlotTypes(idx2do) EQ 'ZDRABVH' OR$
+   PlotTypes(idx2do) EQ 'ZDRBLWH' OR PlotTypes(idx2do) EQ 'ZDRABVH' OR $
    (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL) THEN BEGIN
   ; CREATE THE SCATTER PLOT OBJECT FROM THE BINNED DATA
    do_MAE_1_1 = 1    ; flag to include/suppress MAE and the 1:1 line on plots
