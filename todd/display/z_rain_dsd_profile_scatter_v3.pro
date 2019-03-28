@@ -854,6 +854,7 @@ DRHIST_accum2 = []
 ;ZDRABVH_accum2 = []
 
 ZDRBLWH_accum = []
+ZDRABVH_accum = []
 
 ;'MRHIST': Histogram of MRMS Rain rates
 ;'DRHIST': Histogram of DPR Rain rates
@@ -884,6 +885,7 @@ IF KEYWORD_SET(batch_save) THEN buffer=1 ELSE buffer=0
 
 have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
  		    ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+ 		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SWDP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW25 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW50 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
@@ -2725,6 +2727,38 @@ endif
 ;                  ENDCASE
 ;               BREAK 
 ;               END
+      'ZDRABVH' :  BEGIN 
+      			gvz_thresh = 30.0   ; 20, 15
+      			zdr_add_str = ''
+ ;     			zdr_std_thresh = 0.4   ; .2, .3, .4
+      			
+ ;     			tmpstr=STRING(zdr_std_thresh, FORMAT='(F3.1)')
+ ;     			zdr_add_str = 'zdr std<'+tmpstr
+      			
+             	CASE raintypeBBidx OF
+                    0 : BEGIN
+                      ; accumulate stratiform rain types below the BB
+                      ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND hgtcat LE 1 $
+                      ;  AND rntype EQ RainType_stratiform and hgtcat eq BBparms.BB_HgtLo - 1, countabv )
+
+                      ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+                      ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
+
+                      ;idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+                      ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
+                      
+                      idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 2 AND (besthid eq 1 or besthid eq 2) $
+                         AND rntype EQ RainType_stratiform AND hgtcat ge (BBparms.BB_HgtHi + 1) $
+                        , countabv )
+                        ;AND GR_ZDR_stddev lt zdr_std_thresh , countabv )
+
+                        print, 'ZDRABVH count: ', countabv
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               BREAK 
+               END
       'ZDRBLWH' :  BEGIN 
       			gvz_thresh = 20.0   ; 20, 15
       			zdr_std_thresh = 0.4   ; .2, .3, .4
@@ -3710,6 +3744,17 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                       END
                   ENDCASE
                END
+      'ZDRABVH' :  BEGIN 
+   				IF countabv eq 0 THEN break
+                 CASE raintypeBBidx OF
+                    0 : BEGIN
+                      ; accumulate stratiform rain types above the BB 
+                      ZDRABVH_accum = [ZDABVH_accum, GR_ZDR[idxabv]]
+                      END
+                ELSE: BEGIN
+                      END
+                  ENDCASE
+               END
       'ZDRBLWH' :  BEGIN 
    				IF countabv eq 0 THEN break
                  CASE raintypeBBidx OF
@@ -4056,7 +4101,7 @@ else $
 IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2do) EQ 'GRDMSH' OR  $
    PlotTypes(idx2do) EQ 'HGTHIST' OR PlotTypes(idx2do) EQ 'BBHIST' OR $
    PlotTypes(idx2do) EQ 'MRHIST' OR PlotTypes(idx2do) EQ 'DRHIST' OR $
-   PlotTypes(idx2do) EQ 'ZDRBLWH' OR $
+   PlotTypes(idx2do) EQ 'ZDRBLWH' OR PlotTypes(idx2do) EQ 'ZDRABVH' OR$
    (have_hist.(idx2do)[haveVar, raintypeBBidx] EQ 1 AND (*ptr2do[0]) NE !NULL) THEN BEGIN
   ; CREATE THE SCATTER PLOT OBJECT FROM THE BINNED DATA
    do_MAE_1_1 = 1    ; flag to include/suppress MAE and the 1:1 line on plots
@@ -5513,6 +5558,33 @@ print, "GRPDSR plot...."
 			      END
 			ENDCASE
 	   	END
+	   'ZDRABVH' : BEGIN
+ 			minhistval=0
+			maxhistval=100
+    	    titleLine1 = satprodtype+' '+version+ " GR ZDR Histogram"  
+			CASE raintypeBBidx OF
+			   0 : BEGIN
+			      if ZDRABVH_accum eq !NULL then begin
+			      	  print, "ZDR stratiform histogram is empty, skipping plot..."
+			      	  goto, plot_skipped1
+			      endif
+			      BB_string = ''			      
+			      ; use stratiform types
+				  mean=MEAN(ZDRABVH_accum)
+				  mean_str = STRING(mean, FORMAT='(F7.3)')
+				  histMean = "Mean " + mean_str
+				  hist1 = HISTOGRAM(ZDRABVH_accum, LOCATIONS=xvals1, min=-0.7, max=0.7, binsize=0.2)      
+				  numPts = long(total(hist1,/INTEGER))
+				  nstr = STRING(numPts, FORMAT='(I0)')
+				  gvz_thresh_str = STRING(gvz_thresh, FORMAT='(I0)')
+        		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
+                      "Stratiform Rain/dzl, Above Bright Band, Z<"+gvz_thresh_str+", "+ zdr_add_str+ ", "+pctabvstr+" Above Thresh"
+			      END
+			ELSE: BEGIN
+			         goto, plot_skipped1
+			      END
+			ENDCASE
+		END
 	   'ZDRBLWH' : BEGIN
  			minhistval=0
 			maxhistval=100
@@ -5729,7 +5801,7 @@ print, "GRPDSR plot...."
    	  goto, plot_skipped1
 
    endif
-   if PlotTypes(idx2do) EQ 'ZDRBLWH' then begin
+   if PlotTypes(idx2do) EQ 'ZDRBLWH' OR PlotTypes(idx2do) EQ 'ZDRABVH' then begin
    
         PRINT, ''
         PRINT, '' 
