@@ -3749,7 +3749,7 @@ print, "" & print, "Using DPR Epsilon." & print, ""
                  CASE raintypeBBidx OF
                     0 : BEGIN
                       ; accumulate stratiform rain types above the BB 
-                      ZDRABVH_accum = [ZDABVH_accum, GR_ZDR[idxabv]]
+                      ZDRABVH_accum = [ZDRABVH_accum, GR_ZDR[idxabv]]
                       END
                 ELSE: BEGIN
                       END
