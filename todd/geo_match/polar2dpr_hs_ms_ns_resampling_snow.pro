@@ -1096,6 +1096,16 @@
 	              		  swe75_avg_gv = Z_MISSING
 	              		  swe75_stddev_gv = Z_MISSING
 	              		  swe75_max_gv = Z_MISSING
+
+	           	  	  	  n_gr_swemqt_points_rejected = Z_MISSING
+	              		  swemqt_avg_gv = Z_MISSING
+	              		  swemqt_stddev_gv = Z_MISSING
+	              		  swemqt_max_gv = Z_MISSING
+
+	           	  	  	  n_gr_swemrms_points_rejected = Z_MISSING
+	              		  swemrms_avg_gv = Z_MISSING
+	              		  swemrms_stddev_gv = Z_MISSING
+	              		  swemrms_max_gv = Z_MISSING
 	                  endelse	                 	                  
                   endif ; not skip_swe
 ;                  endif else begin
@@ -1166,6 +1176,12 @@
                swe75_avg_gv = SRAIN_BELOW_THRESH
                swe75_stddev_gv = SRAIN_BELOW_THRESH
                swe75_max_gv = SRAIN_BELOW_THRESH
+               swemqt_avg_gv = SRAIN_BELOW_THRESH
+               swemqt_stddev_gv = SRAIN_BELOW_THRESH
+               swemqt_max_gv = SRAIN_BELOW_THRESH
+               swemrms_avg_gv = SRAIN_BELOW_THRESH
+               swemrms_stddev_gv = SRAIN_BELOW_THRESH
+               swemrms_max_gv = SRAIN_BELOW_THRESH
                IF ( have_gv_hid ) THEN hid_hist = INTARR(n_hid_cats)
                dzero_avg_gv = SRAIN_BELOW_THRESH
                dzero_stddev_gv = SRAIN_BELOW_THRESH
@@ -1235,6 +1251,12 @@
                      tocdf_gr_swe75[jpr,ielev] = swe75_avg_gv
                      tocdf_gr_swe75_stddev[jpr,ielev] = swe75_stddev_gv
                      tocdf_gr_swe75_max[jpr,ielev] = swe75_max_gv
+                     tocdf_gr_swemqt[jpr,ielev] = swemqt_avg_gv
+                     tocdf_gr_swemqt_stddev[jpr,ielev] = swemqt_stddev_gv
+                     tocdf_gr_swemqt_max[jpr,ielev] = swemqt_max_gv
+                     tocdf_gr_swemrms[jpr,ielev] = swemrms_avg_gv
+                     tocdf_gr_swemrms_stddev[jpr,ielev] = swemrms_stddev_gv
+                     tocdf_gr_swemrms_max[jpr,ielev] = swemrms_max_gv
                   ENDIF
 
                   IF have_gv_hid THEN BEGIN
@@ -1317,6 +1339,12 @@
                              tocdf_gr_swe75[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_swe75_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_swe75_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemqt[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemqt_stddev[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemqt_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemrms[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemrms_stddev[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemrms_max[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_dzero THEN BEGIN
                              tocdf_gr_dzero[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1393,6 +1421,12 @@
                              tocdf_gr_swe75[jpr,ielev] = Z_MISSING
                              tocdf_gr_swe75_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_swe75_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemqt[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemqt_stddev[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemqt_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemrms[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemrms_stddev[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemrms_max[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_dzero THEN BEGIN
                              tocdf_gr_dzero[jpr,ielev] = Z_MISSING
@@ -1455,6 +1489,10 @@
                                UINT(n_gr_swe50_points_rejected)
          IF have_gv_swe THEN tocdf_gr_swe75_rejected[jpr,ielev] = $
                                UINT(n_gr_swe75_points_rejected)
+         IF have_gv_swe THEN tocdf_gr_swemqt_rejected[jpr,ielev] = $
+                               UINT(n_gr_swemqt_points_rejected)
+         IF have_gv_swe THEN tocdf_gr_swemrms_rejected[jpr,ielev] = $
+                               UINT(n_gr_swemrms_points_rejected)
          tocdf_gr_expected[jpr,ielev] = UINT(countGRpts)
 
       ENDFOR  ; each DPR subarray point: jpr=0, numDPRrays-1

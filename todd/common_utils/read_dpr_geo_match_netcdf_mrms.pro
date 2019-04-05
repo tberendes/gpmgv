@@ -322,6 +322,8 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     gv_swe25_reject_int=gv_swe25_reject, $
     gv_swe50_reject_int=gv_swe50_reject, $
     gv_swe75_reject_int=gv_swe75_reject, $
+    gv_swemqt_reject_int=gv_swemqt_reject, $
+    gv_swemrms_reject_int=gv_swemrms_reject, $
     
    ; horizontally (GV) and vertically (DPR Z, rain) averaged values at elevs.:
     dbzgv=threeDreflect, dbzraw=ZFactorMeasured, dbzcor=ZFactorCorrected,     $
@@ -383,6 +385,8 @@ FUNCTION read_dpr_geo_match_netcdf_mrms, ncfile, DIMS_ONLY=dims_only,         $
     swe25=swe25, $
     swe50=swe50, $
     swe75=swe75, $
+    swemqt=swemqt, $
+    swemrms=swemrms, $
     
    ; horizontally summarized GR Hydromet Identifier category at elevs.:
     hidmrms=mrmshid,                                                             $
@@ -870,6 +874,10 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                  DIM2SORT=2, IDXSORT=idxsort )
       'n_gr_swe75_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swe75_reject, $
                                                  DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swemqt_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swemqt_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swemrms_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swemrms_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
       'GR_Z' : status=PREPARE_NCVAR( ncid1, thisncvar, threeDreflect, $
                                      DIM2SORT=2, IDXSORT=idxsort )
       'GR_Z_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, threeDreflectMax, $
@@ -1017,6 +1025,12 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'GR_SWE75' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75 )
       'GR_SWE75_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75_max)
       'GR_SWE75_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75_stddev)
+      'GR_SWEMQT' : status=PREPARE_NCVAR( ncid1, thisncvar, swemqt )
+      'GR_SWEMQT_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swemqt_max)
+      'GR_SWEMQT_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swemqt_stddev)
+      'GR_SWEMRMS' : status=PREPARE_NCVAR( ncid1, thisncvar, swemrms )
+      'GR_SWEMRMS_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swemrms_max)
+      'GR_SWEMRMS_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swemrms_stddev)
       'MRMS_HID' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmshid)
 
        ELSE : BEGIN

@@ -412,6 +412,8 @@ FUNCTION fprep_dpr_geo_match_profiles_mrms, ncfilepr, heights_in, $
     PTRswe25=ptr_swe25, $
     PTRswe50=ptr_swe50, $
     PTRswe75=ptr_swe75, $
+    PTRswemqt=ptr_swemqt, $
+    PTRswemrms=ptr_swemrms, $
 ;    PTRswedp=ptr_swedp, PTRswedpstddev=ptr_swedpstddev, PTRswedpmax=ptr_swedpmax, $
 
     PTRMRMSHID=ptr_MRMS_HID, $
@@ -682,6 +684,8 @@ if (cpstatus eq 'OK') then begin
   swe25=fltarr(nfp)
   swe50=fltarr(nfp)
   swe75=fltarr(nfp)
+  swemqt=fltarr(nfp)
+  swemrms=fltarr(nfp)
 
   if mygeometa.num_MRMS_categories GT 0 then  MRMS_HID=intarr(nfp, mygeometa.num_MRMS_categories)
  
@@ -771,6 +775,8 @@ if (cpstatus eq 'OK') then begin
     swe25=swe25, $
     swe50=swe50, $
     swe75=swe75, $
+    swemqt=swemqt, $
+    swemrms=swemrms, $
 ;    swedpmax=swedpmax, $
 ;    swedpstddev=swedpstddev, $
     
@@ -1270,6 +1276,8 @@ swedp = swedp[idxpractual2d]
 swe25 = swe25[idxpractual2d]
 swe50 = swe50[idxpractual2d]
 swe75 = swe75[idxpractual2d]
+swemqt = swemqt[idxpractual2d]
+swemrms = swemrms[idxpractual2d]
 nearSurfRain_Comb = nearSurfRain_Comb[idxpractual2d]
 bbStatus = bbStatus[idxpractual2d]
 clutterStatus = clutterStatus[idxpractual2d]
@@ -1474,6 +1482,8 @@ swedp = REFORM(swedp, countactual, nswp )
 swe25 = REFORM(swe25, countactual, nswp )
 swe50 = REFORM(swe50, countactual, nswp )
 swe75 = REFORM(swe75, countactual, nswp )
+swemqt = REFORM(swemqt, countactual, nswp )
+swemrms = REFORM(swemrms, countactual, nswp )
 nearSurfRain_Comb = REFORM( nearSurfRain_Comb, countactual, nswp )
 pr_index = REFORM( pr_index, countactual, nswp )
 bbStatus = REFORM( bbStatus, countactual, nswp )
@@ -1761,6 +1771,8 @@ IF PTR_VALID(ptr_swedp) THEN *ptr_swedp = swedp
 IF PTR_VALID(ptr_swe25) THEN *ptr_swe25 = swe25
 IF PTR_VALID(ptr_swe50) THEN *ptr_swe50 = swe50
 IF PTR_VALID(ptr_swe75) THEN *ptr_swe75 = swe75
+IF PTR_VALID(ptr_swemqt) THEN *ptr_swemqt = swemqt
+IF PTR_VALID(ptr_swemrms) THEN *ptr_swemrms = swemrms
 
 IF PTR_VALID(ptr_MRMS_HID) AND mygeometa.num_MRMS_categories GT 0 THEN $
    *ptr_MRMS_HID = MRMS_HID

@@ -592,6 +592,12 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_swe75 = data_GR2DPR.GR_SWE75
       tocdf_gr_swe75_stddev = data_GR2DPR.GR_SWE75_STDDEV
       tocdf_gr_swe75_max = data_GR2DPR.GR_SWE75_MAX
+      tocdf_gr_swemqt = data_GR2DPR.GR_SWEMQT
+      tocdf_gr_swemqt_stddev = data_GR2DPR.GR_SWEMQT_STDDEV
+      tocdf_gr_swemqt_max = data_GR2DPR.GR_SWEMQT_MAX
+      tocdf_gr_swemrms = data_GR2DPR.GR_SWEMRMS
+      tocdf_gr_swemrms_stddev = data_GR2DPR.GR_SWEMRMS_STDDEV
+      tocdf_gr_swemrms_max = data_GR2DPR.GR_SWEMRMS_MAX
       tocdf_meas_dbz = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                   VALUE=FLOAT_RANGE_EDGE)
       tocdf_corr_dbz = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -623,6 +629,8 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_swe25_rejected = data_GR2DPR.N_GR_SWE25_REJECTED
       tocdf_gr_swe50_rejected = data_GR2DPR.N_GR_SWE50_REJECTED
       tocdf_gr_swe75_rejected = data_GR2DPR.N_GR_SWE75_REJECTED
+      tocdf_gr_swemqt_rejected = data_GR2DPR.N_GR_SWEMQT_REJECTED
+      tocdf_gr_swemrms_rejected = data_GR2DPR.N_GR_SWEMRMS_REJECTED
       tocdf_meas_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_r_rejected = UINTARR(numDPRrays, num_elevations_out)
@@ -1094,6 +1102,12 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'GR_SWE75', tocdf_gr_swe75
    NCDF_VARPUT, ncid, 'GR_SWE75_StdDev', tocdf_gr_swe75_stddev
    NCDF_VARPUT, ncid, 'GR_SWE75_Max', tocdf_gr_swe75_max
+   NCDF_VARPUT, ncid, 'GR_SWEMQT', tocdf_gr_swemqt
+   NCDF_VARPUT, ncid, 'GR_SWEMQT_StdDev', tocdf_gr_swemqt_stddev
+   NCDF_VARPUT, ncid, 'GR_SWEMQT_Max', tocdf_gr_swemqt_max
+   NCDF_VARPUT, ncid, 'GR_SWEMRMS', tocdf_gr_swemrms
+   NCDF_VARPUT, ncid, 'GR_SWEMRMS_StdDev', tocdf_gr_swemrms_stddev
+   NCDF_VARPUT, ncid, 'GR_SWEMRMS_Max', tocdf_gr_swemrms_max
 
    NCDF_VARPUT, ncid, 'GR_RHOhv', tocdf_gr_rhohv
     NCDF_VARPUT, ncid, 'have_GR_RHOhv', myflags.HAVE_GR_RHOHV
@@ -1160,6 +1174,8 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_gr_swe25_rejected', tocdf_gr_swe25_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe50_rejected', tocdf_gr_swe50_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe75_rejected', tocdf_gr_swe75_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swemqt_rejected', tocdf_gr_swemqt_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected', tocdf_gr_swemrms_rejected
    NCDF_VARPUT, ncid, 'n_dpr_meas_z_rejected', tocdf_meas_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_z_rejected', tocdf_corr_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_epsilon_rejected', tocdf_epsilon_rejected
