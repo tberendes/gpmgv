@@ -1701,7 +1701,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_swe25_rejected_'+DPR_scantype, tocdf_gr_swe25_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe50_rejected_'+DPR_scantype, tocdf_gr_swe50_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe75_rejected_'+DPR_scantype, tocdf_gr_swe75_rejected
-   NCDF_VARPUT, ncid, 'n_gr_swemtq_rejected_'+DPR_scantype, tocdf_gr_swemqt_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swemqt_rejected_'+DPR_scantype, tocdf_gr_swemqt_rejected
    NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected_'+DPR_scantype, tocdf_gr_swemrms_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected_'+DPR_scantype, tocdf_gr_expected
 
