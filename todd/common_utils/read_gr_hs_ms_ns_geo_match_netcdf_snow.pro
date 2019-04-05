@@ -383,11 +383,11 @@ for iswa=0,2 do begin
    NCDF_VARGET, ncid1, 'GR_SWEMQT_'+swath[iswa], GR_SWEMQT
    NCDF_VARGET, ncid1, 'GR_SWEMQT_StdDev_'+swath[iswa], GR_SWEMQT_StdDev
    NCDF_VARGET, ncid1, 'GR_SWEMQT_Max_'+swath[iswa], GR_SWEMQT_Max
-   NCDF_VARGET, ncid1, 'n_gr_SWEMQT_rejected_'+swath[iswa], n_gr_SWEMQT_rejected
+   NCDF_VARGET, ncid1, 'n_gr_swemqt_rejected_'+swath[iswa], n_gr_swemqt_rejected
    NCDF_VARGET, ncid1, 'GR_SWEMRMS_'+swath[iswa], GR_SWEMRMS
    NCDF_VARGET, ncid1, 'GR_SWEMRMS_StdDev_'+swath[iswa], GR_SWEMRMS_StdDev
    NCDF_VARGET, ncid1, 'GR_SWEMRMS_Max_'+swath[iswa], GR_SWEMRMS_Max
-   NCDF_VARGET, ncid1, 'n_gr_SWEMRMS_rejected_'+swath[iswa], n_gr_SWEMRMS_rejected
+   NCDF_VARGET, ncid1, 'n_gr_swemrms_rejected_'+swath[iswa], n_gr_swemrms_rejected
 
   ; copy the swath-specific data variables into anonymous structure, use
   ; TEMPORARY to avoid making a copy of the variable when loading to struct
