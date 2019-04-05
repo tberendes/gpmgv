@@ -1433,6 +1433,20 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                       VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_swe75_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
+
+      tocdf_gr_swemqt = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swemqt_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swemqt_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
+
+      tocdf_gr_swemrms = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swemrms_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_swemrms_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
                                    
 ;***********                                   
       tocdf_gr_zdr = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -1503,6 +1517,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_swe25_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swe50_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swe75_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_swemqt_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_swemrms_rejected = UINTARR(numDPRrays, num_elevations_out)
 
      ; get the indices of actual DPR footprints and create and load the 2D element
      ;   subarrays (no averaging/processing needed) with data from the product arrays
@@ -1658,6 +1674,14 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'GR_SWE75_'+DPR_scantype, tocdf_gr_swe75            ; data
       NCDF_VARPUT, ncid, 'GR_SWE75_StdDev_'+DPR_scantype, tocdf_gr_swe75_stddev
       NCDF_VARPUT, ncid, 'GR_SWE75_Max_'+DPR_scantype, tocdf_gr_swe75_max   
+ 
+      NCDF_VARPUT, ncid, 'GR_SWEMQT_'+DPR_scantype, tocdf_gr_swemqt            ; data
+      NCDF_VARPUT, ncid, 'GR_SWEMQT_StdDev_'+DPR_scantype, tocdf_gr_swemqt_stddev
+      NCDF_VARPUT, ncid, 'GR_SWEMQT_Max_'+DPR_scantype, tocdf_gr_swemqt_max   
+
+      NCDF_VARPUT, ncid, 'GR_SWEMRMS_'+DPR_scantype, tocdf_gr_swemrms            ; data
+      NCDF_VARPUT, ncid, 'GR_SWEMRMS_StdDev_'+DPR_scantype, tocdf_gr_swemrms_stddev
+      NCDF_VARPUT, ncid, 'GR_SWEMRMS_Max_'+DPR_scantype, tocdf_gr_swemrms_max   
       
    endif
 
@@ -1677,6 +1701,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_swe25_rejected_'+DPR_scantype, tocdf_gr_swe25_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe50_rejected_'+DPR_scantype, tocdf_gr_swe50_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe75_rejected_'+DPR_scantype, tocdf_gr_swe75_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swemtq_rejected_'+DPR_scantype, tocdf_gr_swemqt_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected_'+DPR_scantype, tocdf_gr_swemrms_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected_'+DPR_scantype, tocdf_gr_expected
 
    skippedSwath:

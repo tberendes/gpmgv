@@ -474,6 +474,8 @@
          n_gr_swe25_points_rejected = 0UL     ; # of above that are missing swe
          n_gr_swe50_points_rejected = 0UL     ; # of above that are missing swe
          n_gr_swe75_points_rejected = 0UL     ; # of above that are missing swe
+         n_gr_swemqt_points_rejected = 0UL     ; # of above that are missing swe
+         n_gr_swemrms_points_rejected = 0UL     ; # of above that are missing swe
          dpr_gates_expected = 0UL      ; # of above that are below GV RR cutoff
 
 ; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
@@ -805,6 +807,47 @@
 ;		Pierre  
 
 
+;Petersen, Walter A. (MSFC-ST11)
+;Thu 3/14/2019 4:22 PM
+
+
+;Jason/Todd,
+;I just got this Z-S relationship from Mark Kulie- and he got it from the 
+;SOO at Marquette.  I think it might be worth including this one in our 
+;snowfall rate mix as well (in addition to what I gave you already). 
+;– For Marquette. 
+ 
+;Todd- basically this can be inserted in with the other estimators 
+;for Marquette as :
+ 
+;Z=180S^2.0    or more usefully,
+;S = .0745*Z^0.5   (same deal with Z- it needs to be converted from its 
+; dBZ value to linear units- i.e., Z = 10^(dBZ/10))
+ 
+;I suppose you could also use it for the other locations as well, but, we 
+;could first see what it looks like for Marquette. 
+ 
+;Cheers,
+;Walt
+
+
+;Petersen, Walter A. (MSFC-ST11)
+;Tue 3/26/2019 9:48 AM
+;Berendes, Todd A. (MSFC-ST10)[UAH]
+
+;Wanted to check in on the progress for that ZDR histogram and then 
+;also to see if you had rerun those snow plots using that new relationship 
+;I sent a week or so ago.  If you haven’t run the snow yet…………I could 
+;actually add one more on there that I should have:
+ 
+;S = Z^0.5 * 0.1155   (which should be the same as Z = 75 S^2)….
+;and Z in linear units as in the other relationships.  So the two new ones 
+;would be this one (this is the MRMS relationship), and then the one that 
+;was specific to the Marquette area that I sent a week or so ago.
+ 
+;Cheers,
+;Walt
+
                IF have_gv_swe THEN BEGIN
                	  
                	  skip_swe=0
@@ -858,6 +901,16 @@
                   		  swe75_stddev_gv = rain_stddev
                   		  swe75_max_gv = rain_max
                	  	      
+               	  	  	  n_gr_swemqt_points_rejected = rain_rej
+                  		  swemqt_avg_gv = rain_avg
+                  		  swemqt_stddev_gv = rain_stddev
+                  		  swemqt_max_gv = rain_max
+
+               	  	  	  n_gr_swemrms_points_rejected = rain_rej
+                  		  swemrms_avg_gv = rain_avg
+                  		  swemrms_stddev_gv = rain_stddev
+                  		  swemrms_max_gv = rain_max
+
                	  	  	  skip_swe=1
                	  	  endif
                	  
@@ -881,6 +934,16 @@
 	                  swe75_avg_gv = Z_MISSING
 	                  swe75_stddev_gv = Z_MISSING
 	                  swe75_max_gv = Z_MISSING
+	                  
+  	                  n_gr_swemqt_points_rejected = Z_MISSING
+	                  swemqt_avg_gv = Z_MISSING
+	                  swemqt_stddev_gv = Z_MISSING
+	                  swemqt_max_gv = Z_MISSING
+	                  
+  	                  n_gr_swemrms_points_rejected = Z_MISSING
+	                  swemrms_avg_gv = Z_MISSING
+	                  swemrms_stddev_gv = Z_MISSING
+	                  swemrms_max_gv = Z_MISSING
 	                  
                	  	  skip_swe=1
                	  endelse
@@ -941,7 +1004,39 @@
 	              		  swe75_avg_gv = altstats.mean
 	              		  swe75_stddev_gv = altstats.stddev
 	              		  swe75_max_gv = altstats.max
-	              		  		              
+	              		  	
+	              		  ; Marquette relationship		              
+							;Z=180S^2.0    or more usefully,
+							;S = .0745*Z^0.5   (same deal with Z- it needs to be converted from its 
+							; dBZ value to linear units- i.e., Z = 10^(dBZ/10))
+	            	  	  swemqt=rainvals
+	 	               	  swemqt[zposind] = 0.0745 * Z[zposind]^0.5
+		                  ; use RP rain rate where snow is not detected
+		                  if num_notsnow gt 0 then $
+		                  		swemqt [notsnow_index]=rainvals[notsnow_index]
+	 	                  altstats=mean_stddev_max_by_rules(swemqt,'RR', dpr_rain_min, $
+		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)	                              
+	           	  	  	  n_gr_swemqt_points_rejected = altstats.rejects
+	              		  swemqt_avg_gv = altstats.mean
+	              		  swemqt_stddev_gv = altstats.stddev
+	              		  swemqt_max_gv = altstats.max
+	              		  
+	              		  ; MRMS relationship
+							;S = Z^0.5 * 0.1155   (which should be the same as Z = 75 S^2)….
+							;and Z in linear units
+	            	  	  swemrms=rainvals
+	 	               	  swemrms[zposind] = 0.1155 * Z[zposind]^0.5
+		                  ; use RP rain rate where snow is not detected
+		                  if num_notsnow gt 0 then $
+		                  		swemrms [notsnow_index]=rainvals[notsnow_index]
+	 	                  altstats=mean_stddev_max_by_rules(swemrms,'RR', dpr_rain_min, $
+		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)	                              
+	           	  	  	  n_gr_swemrms_points_rejected = altstats.rejects
+	              		  swemrms_avg_gv = altstats.mean
+	              		  swemrms_stddev_gv = altstats.stddev
+	              		  swemrms_max_gv = altstats.max
+
+
 	               		  if (num_gvkdp_z_posind GT 0)  then begin
 			               	  
 			               	  ; compute swerr for snow bins using formula

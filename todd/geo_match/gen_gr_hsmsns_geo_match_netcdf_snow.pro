@@ -676,6 +676,40 @@ for iswa=0,2 do begin
              'Sample Maximum GV snowfall water equivalent rate,  PQPE conditional quantiles 75%'
    ncdf_attput, cdfid, gvmaxSWE75varid, 'units', 'mm/h'
    ncdf_attput, cdfid, gvmaxSWE75varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   SWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWEMQTvarid, 'long_name', 'GV snowfall water equivalent rate, Marquette relationship'
+   ncdf_attput, cdfid, SWEMQTvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWEMQTvarid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, Marquette relationship'
+   ncdf_attput, cdfid, stddevgvSWEMQTvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWEMQTvarid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate,  Marquette relationship'
+   ncdf_attput, cdfid, gvmaxSWEMQTvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   SWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWEMRMSvarid, 'long_name', 'GV snowfall water equivalent rate, MRMS relationship'
+   ncdf_attput, cdfid, SWEMRMSvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, MRMS relationship'
+   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate, MRMS relationship'
+   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
    
 
 ;*******************
@@ -734,6 +768,16 @@ for iswa=0,2 do begin
    ncdf_attput, cdfid, gv_swe75_rejvarid, 'long_name', $
              'number of bins below rain_min in GR_SWE75_rainrate average'
    ncdf_attput, cdfid, gv_swe75_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   gv_swemqt_rejvarid = ncdf_vardef(cdfid, 'n_gr_swemqt_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swemqt_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWEMQT_rainrate average'
+   ncdf_attput, cdfid, gv_swemqt_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   gv_swemrms_rejvarid = ncdf_vardef(cdfid, 'n_gr_swemrms_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swemrms_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWEMRMS_rainrate average'
+   ncdf_attput, cdfid, gv_swemrms_rejvarid, '_FillValue', INT_RANGE_EDGE
 
    gv_hid_rejvarid = ncdf_vardef(cdfid, 'n_gr_hid_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_hid_rejvarid, 'long_name', $
