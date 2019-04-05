@@ -858,7 +858,7 @@ ncdf_attput, cdfid, BLKvarid, '_FillValue', FLOAT_RANGE_EDGE
    ncdf_attput, cdfid, gvmaxSWEMQTvarid, 'units', 'mm/h'
    ncdf_attput, cdfid, gvmaxSWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
    
-   gv_SWEMQT_rejvarid = ncdf_vardef(cdfid, 'n_gr_SWEMQT_rejected', [fpdimid,eldimid], /short)
+   gv_SWEMQT_rejvarid = ncdf_vardef(cdfid, 'n_gr_swemqt_rejected', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_SWEMQT_rejvarid, 'long_name', $
              'number of bins below rain_min in GR_SWEMQT average'
    ncdf_attput, cdfid, gv_SWEMQT_rejvarid, '_FillValue', INT_RANGE_EDGE
@@ -880,7 +880,7 @@ ncdf_attput, cdfid, BLKvarid, '_FillValue', FLOAT_RANGE_EDGE
    ncdf_attput, cdfid, gvmaxSWEMRMSvarid, 'units', 'mm/h'
    ncdf_attput, cdfid, gvmaxSWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
    
-   gv_SWEMRMS_rejvarid = ncdf_vardef(cdfid, 'n_gr_SWEMRMS_rejected', [fpdimid,eldimid], /short)
+   gv_SWEMRMS_rejvarid = ncdf_vardef(cdfid, 'n_gr_swemrms_rejected', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_SWEMRMS_rejvarid, 'long_name', $
              'number of bins below rain_min in GR_SWEMRMS average'
    ncdf_attput, cdfid, gv_SWEMRMS_rejvarid, '_FillValue', INT_RANGE_EDGE
