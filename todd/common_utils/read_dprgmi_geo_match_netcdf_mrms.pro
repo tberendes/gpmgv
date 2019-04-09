@@ -563,6 +563,12 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
        NCDF_VARGET, ncid1, 'GR_SWE75_'+swath[iswa], swe75 
        NCDF_VARGET, ncid1, 'GR_SWE75_Max_'+swath[iswa], swe75_max
        NCDF_VARGET, ncid1, 'GR_SWE75_StdDev_'+swath[iswa], swe75_stddev
+       NCDF_VARGET, ncid1, 'GR_SWEMQT_'+swath[iswa], swemqt 
+       NCDF_VARGET, ncid1, 'GR_SWEMQT_Max_'+swath[iswa], swemqt_max
+       NCDF_VARGET, ncid1, 'GR_SWEMQT_StdDev_'+swath[iswa], swemqt_stddev
+       NCDF_VARGET, ncid1, 'GR_SWEMRMS_'+swath[iswa], swemrms 
+       NCDF_VARGET, ncid1, 'GR_SWEMRMS_Max_'+swath[iswa], swemrms_max
+       NCDF_VARGET, ncid1, 'GR_SWEMRMS_StdDev_'+swath[iswa], swemrms_stddev
    
    endif
 
@@ -682,6 +688,12 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       swe75 : TEMPORARY(swe75), $
       swe75_max : TEMPORARY(swe75_max), $
       swe75_stddev : TEMPORARY(swe75_stddev)}
+      swemqt : TEMPORARY(swemqt), $
+      swemqt_max : TEMPORARY(swemqt_max), $
+      swemqt_stddev : TEMPORARY(swemqt_stddev)}
+      swemrms : TEMPORARY(swemrms), $
+      swemrms_max : TEMPORARY(swemrms_max), $
+      swemrms_stddev : TEMPORARY(swemrms_stddev)}
       tempstruc = create_struct(tempstruc,swestruc)
    endif
 

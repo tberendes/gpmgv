@@ -367,6 +367,8 @@ FUNCTION fprep_dprgmi_geo_match_profiles_mrms, ncfilepr, heights_in, KUKA=KuKaIn
     PTRswe25=ptr_swe25, $
     PTRswe50=ptr_swe50, $
     PTRswe75=ptr_swe75, $
+    PTRswemqt=ptr_swemqt, $
+    PTRswemrms=ptr_swemrms, $
 ;    PTRswedp=ptr_swedp, PTRswedpstddev=ptr_swedpstddev, PTRswedpmax=ptr_swedpmax, $
 
     PTRMRMSHID=ptr_MRMS_HID, $
@@ -689,6 +691,8 @@ if (cpstatus eq 'OK') then begin
     swe25=dataCmb.swe25
     swe50=dataCmb.swe50
     swe75=dataCmb.swe75
+    swemqt=dataCmb.swemqt
+    swemrms=dataCmb.swemrms
 ;    PTRswedp=ptr_swedp, PTRswedpstddev=ptr_swedpstddev, PTRswedpmax=ptr_swedpmax, $
   endif 
 
@@ -1067,6 +1071,8 @@ if myflags.have_GR_SWE eq 1 then begin
 	swe25 = swe25[idxpractual2d]
 	swe50 = swe50[idxpractual2d]
 	swe75 = swe75[idxpractual2d]
+	swemqt = swemqt[idxpractual2d]
+	swemrms = swemrms[idxpractual2d]
 endif
 clutterStatus = clutterStatus[idxpractual2d]
 BBHeight = BBHeight[idxpractual2d]
@@ -1224,6 +1230,8 @@ if myflags.have_GR_SWE eq 1 then begin
 	swe25 = REFORM(swe25, countactual, nswp )
 	swe50 = REFORM(swe50, countactual, nswp )
 	swe75 = REFORM(swe75, countactual, nswp )
+	swemqt = REFORM(swemqt, countactual, nswp )
+	swemrms = REFORM(swemrms, countactual, nswp )
 endif
 pr_index = REFORM( pr_index, countactual, nswp )
 clutterStatus = REFORM( clutterStatus, countactual, nswp )
@@ -1496,6 +1504,8 @@ if myflags.have_GR_SWE eq 1 then begin
 	IF PTR_VALID(ptr_swe25) THEN *ptr_swe25 = swe25
 	IF PTR_VALID(ptr_swe50) THEN *ptr_swe50 = swe50
 	IF PTR_VALID(ptr_swe75) THEN *ptr_swe75 = swe75
+	IF PTR_VALID(ptr_swemqt) THEN *ptr_swemqt = swemqt
+	IF PTR_VALID(ptr_swemrms) THEN *ptr_swemrms = swemrms
 endif
 
 IF PTR_VALID(ptr_rnType) THEN *ptr_rnType = rnType

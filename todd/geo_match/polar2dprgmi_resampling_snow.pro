@@ -504,6 +504,8 @@
          n_gr_swe25_points_rejected = 0UL     ; # of above that are missing swe
          n_gr_swe50_points_rejected = 0UL     ; # of above that are missing swe
          n_gr_swe75_points_rejected = 0UL     ; # of above that are missing swe
+         n_gr_swemqt_points_rejected = 0UL     ; # of above that are missing swe
+         n_gr_swemrms_points_rejected = 0UL     ; # of above that are missing swe
          dpr_gates_expected = 0UL      ; # DPR gates within the sweep vert. bounds
          n_correctedReflectFactor_rejected = 0UL  ; # of above that are below DPR dBZ cutoff
          n_precipTotPSDparamHigh_rejected = 0UL  ; ditto, for corrected DPR Z
@@ -988,6 +990,16 @@
                   		  swe75_stddev_gv = rain_stddev
                   		  swe75_max_gv = rain_max
                	  	      
+               	  	  	  n_gr_swemqt_points_rejected = rain_rej
+                  		  swemqt_avg_gv = rain_avg
+                  		  swemqt_stddev_gv = rain_stddev
+                  		  swemqt_max_gv = rain_max
+               	  	      
+               	  	  	  n_gr_swemrms_points_rejected = rain_rej
+                  		  swemrms_avg_gv = rain_avg
+                  		  swemrms_stddev_gv = rain_stddev
+                  		  swemrms_max_gv = rain_max
+               	  	      
                	  	  	  skip_swe=1
                	  	  endif
                	  
@@ -1011,6 +1023,16 @@
 	                  swe75_avg_gv = Z_MISSING
 	                  swe75_stddev_gv = Z_MISSING
 	                  swe75_max_gv = Z_MISSING
+	                  
+  	                  n_gr_swemqt_points_rejected = Z_MISSING
+	                  swemqt_avg_gv = Z_MISSING
+	                  swemqt_stddev_gv = Z_MISSING
+	                  swemqt_max_gv = Z_MISSING
+	                  
+  	                  n_gr_swemrms_points_rejected = Z_MISSING
+	                  swemrms_avg_gv = Z_MISSING
+	                  swemrms_stddev_gv = Z_MISSING
+	                  swemrms_max_gv = Z_MISSING
 	                  
                	  	  skip_swe=1
                	  endelse
@@ -1071,7 +1093,38 @@
 	              		  swe75_avg_gv = altstats.mean
 	              		  swe75_stddev_gv = altstats.stddev
 	              		  swe75_max_gv = altstats.max
-	              		  		              
+	              		  		              	              		  	
+	              		  ; Marquette relationship		              
+							;Z=180S^2.0    or more usefully,
+							;S = .0745*Z^0.5   (same deal with Z- it needs to be converted from its 
+							; dBZ value to linear units- i.e., Z = 10^(dBZ/10))
+	            	  	  swemqt=rainvals
+	 	               	  swemqt[zposind] = 0.0745 * Z[zposind]^0.5
+		                  ; use RP rain rate where snow is not detected
+		                  if num_notsnow gt 0 then $
+		                  		swemqt [notsnow_index]=rainvals[notsnow_index]
+	 	                  altstats=mean_stddev_max_by_rules(swemqt,'RR', dpr_rain_min, $
+		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)	                              
+	           	  	  	  n_gr_swemqt_points_rejected = altstats.rejects
+	              		  swemqt_avg_gv = altstats.mean
+	              		  swemqt_stddev_gv = altstats.stddev
+	              		  swemqt_max_gv = altstats.max
+	              		  
+	              		  ; MRMS relationship
+							;S = Z^0.5 * 0.1155   (which should be the same as Z = 75 S^2)….
+							;and Z in linear units
+	            	  	  swemrms=rainvals
+	 	               	  swemrms[zposind] = 0.1155 * Z[zposind]^0.5
+		                  ; use RP rain rate where snow is not detected
+		                  if num_notsnow gt 0 then $
+		                  		swemrms [notsnow_index]=rainvals[notsnow_index]
+	 	                  altstats=mean_stddev_max_by_rules(swemrms,'RR', dpr_rain_min, $
+		                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)	                              
+	           	  	  	  n_gr_swemrms_points_rejected = altstats.rejects
+	              		  swemrms_avg_gv = altstats.mean
+	              		  swemrms_stddev_gv = altstats.stddev
+	              		  swemrms_max_gv = altstats.max
+
 	               		  if (num_gvkdp_z_posind GT 0)  then begin
 			               	  
 			               	  ; compute swerr for snow bins using formula
@@ -1131,6 +1184,16 @@
 	              		  swe75_avg_gv = Z_MISSING
 	              		  swe75_stddev_gv = Z_MISSING
 	              		  swe75_max_gv = Z_MISSING
+
+	           	  	  	  n_gr_swemqt_points_rejected = Z_MISSING
+	              		  swemqt_avg_gv = Z_MISSING
+	              		  swemqt_stddev_gv = Z_MISSING
+	              		  swemqt_max_gv = Z_MISSING
+
+	           	  	  	  n_gr_swemrms_points_rejected = Z_MISSING
+	              		  swemrms_avg_gv = Z_MISSING
+	              		  swemrms_stddev_gv = Z_MISSING
+	              		  swemrms_max_gv = Z_MISSING
 	                  endelse	                 	                  
                   endif ; not skip_swe
 ;                  endif else begin
@@ -1198,6 +1261,12 @@
                swe75_avg_gv = SRAIN_BELOW_THRESH
                swe75_stddev_gv = SRAIN_BELOW_THRESH
                swe75_max_gv = SRAIN_BELOW_THRESH
+               swemqt_avg_gv = SRAIN_BELOW_THRESH
+               swemqt_stddev_gv = SRAIN_BELOW_THRESH
+               swemqt_max_gv = SRAIN_BELOW_THRESH
+               swemrms_avg_gv = SRAIN_BELOW_THRESH
+               swemrms_stddev_gv = SRAIN_BELOW_THRESH
+               swemrms_max_gv = SRAIN_BELOW_THRESH
                IF ( have_gv_hid ) THEN hid_hist = INTARR(n_hid_cats)
                dzero_avg_gv = SRAIN_BELOW_THRESH
                dzero_stddev_gv = SRAIN_BELOW_THRESH
@@ -1273,6 +1342,12 @@
                      tocdf_gr_swe75[jpr,ielev] = swe75_avg_gv
                      tocdf_gr_swe75_stddev[jpr,ielev] = swe75_stddev_gv
                      tocdf_gr_swe75_max[jpr,ielev] = swe75_max_gv
+                     tocdf_gr_swemqt[jpr,ielev] = swemqt_avg_gv
+                     tocdf_gr_swemqt_stddev[jpr,ielev] = swemqt_stddev_gv
+                     tocdf_gr_swemqt_max[jpr,ielev] = swemqt_max_gv
+                     tocdf_gr_swemrms[jpr,ielev] = swemrms_avg_gv
+                     tocdf_gr_swemrms_stddev[jpr,ielev] = swemrms_stddev_gv
+                     tocdf_gr_swemrms_max[jpr,ielev] = swemrms_max_gv
                   ENDIF
                   IF have_gv_hid THEN BEGIN
                      tocdf_gr_HID[*,jpr,ielev] = hid_hist
@@ -1367,6 +1442,12 @@
                              tocdf_gr_swe75[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_swe75_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_swe75_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemqt[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemqt_stddev[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemqt_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemrms[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemrms_stddev[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_swemrms_max[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_dzero THEN BEGIN
                              tocdf_gr_dzero[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1451,6 +1532,12 @@
                              tocdf_gr_swe75[jpr,ielev] = Z_MISSING
                              tocdf_gr_swe75_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_swe75_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemqt[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemqt_stddev[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemqt_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemrms[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemrms_stddev[jpr,ielev] = Z_MISSING
+                             tocdf_gr_swemrms_max[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_dzero THEN BEGIN
                              tocdf_gr_dzero[jpr,ielev] = Z_MISSING
@@ -1521,6 +1608,10 @@
                                UINT(n_gr_swe50_points_rejected)
          IF have_gv_swe THEN tocdf_gr_swe75_rejected[jpr,ielev] = $
                                UINT(n_gr_swe75_points_rejected)
+         IF have_gv_swe THEN tocdf_gr_swemqt_rejected[jpr,ielev] = $
+                               UINT(n_gr_swemqt_points_rejected)
+         IF have_gv_swe THEN tocdf_gr_swemrms_rejected[jpr,ielev] = $
+                               UINT(n_gr_swemrms_points_rejected)
          tocdf_gr_expected[jpr,ielev] = UINT(countGRpts)
          IF DPR_scantype EQ 'MS' THEN BEGIN
             tocdf_n_correctedReflectFactor_rejected[idxKuKa[swathID],jpr,ielev] = $
