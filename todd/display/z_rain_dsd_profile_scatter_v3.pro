@@ -871,7 +871,7 @@ printf, snow_LUN, 'snow_samples,conv,strat,filename'
 if csv_dump then begin
 	openw, csv_dump_LUN, outpath + '/snow_volumes.txt', /GET_LUN
 	; print header line for columns
-  	printf, csv_dump_LUN, 'nearest_approach_time,orbitnum,lat,lon,botm_ht,top_ht,bbHeight,gr_rainrate,sat_nearsfc_rr,sat_rr,swedp,swe25,swe50,swe75'
+  	printf, csv_dump_LUN, 'nearest_approach_time,orbitnum,lat,lon,botm_ht,top_ht,bbHeight,gr_rainrate,sat_nearsfc_rr,sat_rr,swedp,swe25,swe50,swe75,swemqt,swemrms'
 endif
 
 ; determine whether to display the scatter plot objects or just create them
@@ -890,6 +890,8 @@ have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW25 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW50 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW75 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+              SWMQT : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+             SWMRMS : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 			 GRDMSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 			HGTHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
 			 BBHIST : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
@@ -1284,6 +1286,8 @@ ptr_swedp=ptr_new(/allocate_heap)
 ptr_swe25=ptr_new(/allocate_heap)
 ptr_swe50=ptr_new(/allocate_heap)
 ptr_swe75=ptr_new(/allocate_heap)
+ptr_swemqt=ptr_new(/allocate_heap)
+ptr_swemrms=ptr_new(/allocate_heap)
 
 ; TAB 2/20/19
 ptr_prlat=ptr_new(/allocate_heap)
@@ -1555,6 +1559,8 @@ CASE pr_or_dpr OF
        PTRswe25=ptr_swe25, $
        PTRswe50=ptr_swe50, $
        PTRswe75=ptr_swe75, $
+       PTRswemqt=ptr_swemqt, $
+       PTRswemrms=ptr_swemrms, $
 
 	   ; TAB 7/9/18
 	   PTRtop=ptr_top, PTRbotm=ptr_botm, $
@@ -1633,6 +1639,8 @@ CASE pr_or_dpr OF
        PTRswe25=ptr_swe25, $
        PTRswe50=ptr_swe50, $
        PTRswe75=ptr_swe75, $
+       PTRswemqt=ptr_swemqt, $
+       PTRswemrms=ptr_swemrms, $
  
  	   ; TAB 2/20/19
 	   PTRprlat=ptr_prlat, PTRprlon=ptr_prlon, $
@@ -1689,6 +1697,8 @@ ENDIF
     swe25=temporary(*ptr_swe25)
     swe50=temporary(*ptr_swe50)
     swe75=temporary(*ptr_swe75)
+    swemqt=temporary(*ptr_swemqt)
+    swemrms=temporary(*ptr_swemrms)
     
 	; TAB 2/20/19
     prlat=temporary(*ptr_prlat)
@@ -1898,6 +1908,8 @@ IF have_swe EQ 1 THEN BEGIN
 	have_hist.SW25[haveVar,*] = 1
 	have_hist.SW50[haveVar,*] = 1
 	have_hist.SW75[haveVar,*] = 1
+	have_hist.SWMQT[haveVar,*] = 1
+	have_hist.SWMRMS[haveVar,*] = 1
 ENDIF
 
 IF have_NW THEN BEGIN
@@ -2388,6 +2400,8 @@ print, ''
     		  swe25=swe25[idxgoodenuff]
     		  swe50=swe50[idxgoodenuff]
     		  swe75=swe75[idxgoodenuff]
+    		  swemqt5=swemqt[idxgoodenuff]
+    		  swemrms=swemrms[idxgoodenuff]
           	  
           endif
           IF have_Zdr EQ 1 THEN BEGIN
@@ -2666,7 +2680,8 @@ endif
 	 			botm_ht[fp_ind],top_ht[fp_ind],bbHeight[fp_ind], $
 	 			gv_rainrate[fp_ind],nearSurfRain[fp_ind],DPR_RR[fp_ind],$
 	 			swedp[fp_ind],swe25[fp_ind],swe50[fp_ind],swe75[fp_ind], $
-	 			format='(%"%s\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f")'
+	 			swemqt[fp_ind],swemrms[fp_ind], $
+	 			format='(%"%s\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f\,%8.2f")'
 	  		endfor
   		endif
   
@@ -2913,6 +2928,8 @@ endif
 ;                 ENDELSE
 ;                 BREAK
 ;              END
+      'SWMQT' :
+      'SWMRMS' :
       'SWDP' :
       'SW25' :
       'SW50' :
@@ -3010,6 +3027,8 @@ endif
                 binmin2 = 1.0 & binmax2 = 6.0 & BINSPAN2 = 0.1
                 BREAK
               END
+  	   'SWMQT' :
+  	   'SWMRMS' :
   	   'SWDP' :
   	   'SW25' : 
   	   'SW50' : 
@@ -3376,6 +3395,26 @@ endif
   	   'SW75': BEGIN
                   IF countabv GT 0 AND have_swe THEN BEGIN
 	                scat_X = swe75[idxabv]
+	                scat_Y = DPR_RR[idxabv]                
+                    accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+                 ENDIF ELSE countabv=0
+  	   		    END
+  	   'SWMQT': BEGIN
+                  IF countabv GT 0 AND have_swe THEN BEGIN
+	                scat_X = swemqt[idxabv]
+	                scat_Y = DPR_RR[idxabv]                
+                    accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
+                                     binmax1, binmax2, BINSPAN1, BINSPAN2, $
+                                     plotDataPtrs, have_Hist, PlotTypes, $
+                                     iPlot, raintypeBBidx, rr_log, rr_log, hist_bins_log
+                 ENDIF ELSE countabv=0
+  	   		    END
+  	   'SWMRMS': BEGIN
+                  IF countabv GT 0 AND have_swe THEN BEGIN
+	                scat_X = swemrms[idxabv]
 	                scat_Y = DPR_RR[idxabv]                
                     accum_scat_data, scat_X, scat_Y, binmin1, binmin2, $
                                      binmax1, binmax2, BINSPAN1, BINSPAN2, $
@@ -4617,6 +4656,8 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
               ytitle= pr_or_dpr + ' RR (' + yunits + ')'
               BREAK
            END
+    'SWMQT' : 
+    'SWMRMS' : 
     'SWDP' : 
     'SW25' : 
     'SW50' : 
@@ -4671,6 +4712,18 @@ IF PlotTypes(idx2do) EQ 'HID' OR PlotTypes(idx2do) EQ 'GRZSH' OR PlotTypes(idx2d
                            " Scatter, Mean GR-DPR Bias: "
               		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWE75"+"_Scatter"
               		xtitle= 'SWE75 '+units
+			      END
+			   'SWMQT' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWEMQT "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWEMQT"+"_Scatter"
+              		xtitle= 'SWEMQT '+units
+			      END
+			   'SWMRMS' : BEGIN
+              		titleLine1 = satprodtype+' '+version+" RR vs. SWEMRMS "+ $
+                           " Scatter, Mean GR-DPR Bias: "
+              		pngpre=pr_or_dpr+'_'+version+"_RR_vs_SWEMRMS"+"_Scatter"
+              		xtitle= 'SWEMRMS '+units
 			      END
 				ENDCASE           
 
