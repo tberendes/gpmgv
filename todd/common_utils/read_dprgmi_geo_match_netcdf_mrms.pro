@@ -690,7 +690,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       swe75_stddev : TEMPORARY(swe75_stddev), $
       swemqt : TEMPORARY(swemqt), $
       swemqt_max : TEMPORARY(swemqt_max), $
-      swemqt_stddev : TEMPORARY(swemqt_stddev)}
+      swemqt_stddev : TEMPORARY(swemqt_stddev), $
       swemrms : TEMPORARY(swemrms), $
       swemrms_max : TEMPORARY(swemrms_max), $
       swemrms_stddev : TEMPORARY(swemrms_stddev)}
