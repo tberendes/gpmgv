@@ -687,14 +687,14 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       swe50_stddev : TEMPORARY(swe50_stddev), $
       swe75 : TEMPORARY(swe75), $
       swe75_max : TEMPORARY(swe75_max), $
-      swe75_stddev : TEMPORARY(swe75_stddev)}
+      swe75_stddev : TEMPORARY(swe75_stddev), $
       swemqt : TEMPORARY(swemqt), $
       swemqt_max : TEMPORARY(swemqt_max), $
       swemqt_stddev : TEMPORARY(swemqt_stddev)}
       swemrms : TEMPORARY(swemrms), $
       swemrms_max : TEMPORARY(swemrms_max), $
       swemrms_stddev : TEMPORARY(swemrms_stddev)}
-      tempstruc = create_struct(tempstruc,swestruc)
+      tempstruc = create_struct(tempstruc,swestruc)}
    endif
 
    if fieldFlags.have_mrms eq 1 then begin
