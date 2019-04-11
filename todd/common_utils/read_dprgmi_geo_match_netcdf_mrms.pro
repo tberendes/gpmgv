@@ -694,7 +694,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
       swemrms : TEMPORARY(swemrms), $
       swemrms_max : TEMPORARY(swemrms_max), $
       swemrms_stddev : TEMPORARY(swemrms_stddev)}
-      tempstruc = create_struct(tempstruc,swestruc)}
+      tempstruc = create_struct(tempstruc,swestruc)
    endif
 
    if fieldFlags.have_mrms eq 1 then begin
