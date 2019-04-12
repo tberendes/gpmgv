@@ -2400,7 +2400,7 @@ print, ''
     		  swe25=swe25[idxgoodenuff]
     		  swe50=swe50[idxgoodenuff]
     		  swe75=swe75[idxgoodenuff]
-    		  swemqt5=swemqt[idxgoodenuff]
+    		  swemqt=swemqt[idxgoodenuff]
     		  swemrms=swemrms[idxgoodenuff]
           	  
           endif
