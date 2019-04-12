@@ -696,21 +696,39 @@ if (cpstatus eq 'OK') then begin
 ;    PTRswedp=ptr_swedp, PTRswedpstddev=ptr_swedpstddev, PTRswedpmax=ptr_swedpmax, $
   endif 
 
+ ; TAB 4/12/19 modified array indices to fix existing bug in ku/ka selection 
  ; deal with the nKuKa dimension in MS swath.  Extract either the Ku or Ka
  ; subarray depending on idxKuKa
   IF ( scanType EQ 'MS' ) THEN BEGIN
-     zcor = REFORM(zcor[idxKuKa,*,*])
-     prexp = REFORM(prexp[idxKuKa,*,*])
-     zcorrej = REFORM(zcorrej[idxKuKa,*,*])
-     pia = REFORM(pia[idxKuKa,*])
-     stmTopHgt = REFORM(stmTopHgt[idxKuKa,*])
-     clutterStatus = REFORM(clutterStatus[idxKuKa,*,*])
+     zcor = REFORM(zcor[*,*,idxKuKa])
+     prexp = REFORM(prexp[*,*,idxKuKa])
+     zcorrej = REFORM(zcorrej[*,*,idxKuKa])
+     pia = REFORM(pia[*,idxKuKa])
+     stmTopHgt = REFORM(stmTopHgt[*,idxKuKa])
+     clutterStatus = REFORM(clutterStatus[*,*,idxKuKa])
 ; PLACEHOLDERS:
-;     ellipsoidBinOffset = REFORM(ellipsoidBinOffset[idxKuKa,*])
-;     lowestClutterFreeBin = REFORM(lowestClutterFreeBin[idxKuKa,*])
-;     rainFlag = REFORM(rainFlag[idxKuKa,*])
-;     surfaceRangeBin = REFORM(surfaceRangeBin[idxKuKa,*])
+;     ellipsoidBinOffset = REFORM(ellipsoidBinOffset[*,idxKuKa])
+;     lowestClutterFreeBin = REFORM(lowestClutterFreeBin[*,idxKuKa])
+;     rainFlag = REFORM(rainFlag[*,idxKuKa])
+;     surfaceRangeBin = REFORM(surfaceRangeBin[*,idxKuKa])
   ENDIF
+
+; ; *********  original code, idxKuKa in wrong dimension  *******
+; ; deal with the nKuKa dimension in MS swath.  Extract either the Ku or Ka
+; ; subarray depending on idxKuKa
+;  IF ( scanType EQ 'MS' ) THEN BEGIN
+;     zcor = REFORM(zcor[idxKuKa,*,*])
+;     prexp = REFORM(prexp[idxKuKa,*,*])
+;     zcorrej = REFORM(zcorrej[idxKuKa,*,*])
+;     pia = REFORM(pia[idxKuKa,*])
+;     stmTopHgt = REFORM(stmTopHgt[idxKuKa,*])
+;     clutterStatus = REFORM(clutterStatus[idxKuKa,*,*])
+;; PLACEHOLDERS:
+;;     ellipsoidBinOffset = REFORM(ellipsoidBinOffset[idxKuKa,*])
+;;     lowestClutterFreeBin = REFORM(lowestClutterFreeBin[idxKuKa,*])
+;;     rainFlag = REFORM(rainFlag[idxKuKa,*])
+;;     surfaceRangeBin = REFORM(surfaceRangeBin[idxKuKa,*])
+;  ENDIF
 
 endif else begin
 
