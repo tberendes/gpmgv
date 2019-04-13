@@ -344,7 +344,7 @@ if [ "FORCE_MATCH" = "0" ]
 	  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
 	 AND o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' \
 	   and o.sat_id='${SAT_ID}' and c.nearest_distance<=${MAX_DIST} \
-	   and c.subset NOT IN ('KOREA','KORA','DARW') \
+	   and c.subset NOT IN ('KOREA','KORA') \
 	   and c.overpass_time at time zone 'UTC' >= '${dateStart}' \
 	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
 	LEFT OUTER JOIN geo_match_product g \
@@ -364,7 +364,7 @@ else
 	  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
 	 AND o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' \
 	   and o.sat_id='${SAT_ID}' and c.nearest_distance<=${MAX_DIST} \
-	   and c.subset NOT IN ('KOREA','KORA','DARW') \
+	   and c.subset NOT IN ('KOREA','KORA') \
 	   and c.overpass_time at time zone 'UTC' >= '${dateStart}' \
 	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
 	LEFT OUTER JOIN geo_match_product g \
@@ -445,7 +445,7 @@ if [ "FORCE_MATCH" = "0" ]
        from eventsatsubrad_vw c \
      JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' \
-        and c.subset NOT IN ('KOREA','KORA','DARW') \
+        and c.subset NOT IN ('KOREA','KORA') \
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
      left outer join geo_match_product b on \
        (c.event_num=b.event_num and d.version=b.pps_version \
@@ -467,7 +467,7 @@ else
        from eventsatsubrad_vw c \
      JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' \
-        and c.subset NOT IN ('KOREA','KORA','DARW') \
+        and c.subset NOT IN ('KOREA','KORA') \
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
      left outer join geo_match_product b on \
        (c.event_num=b.event_num and d.version=b.pps_version \
