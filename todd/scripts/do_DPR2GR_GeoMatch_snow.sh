@@ -504,7 +504,6 @@ for thisdate in `cat $datelist`
             and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
             and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
             and c.version = '$PPS_VERSION' \
-            AND C.FILE1CUF NOT LIKE '%rhi%' \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
             from timediftmp group by 1 order by 1;
@@ -512,6 +511,9 @@ for thisdate in `cat $datelist`
                  a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b
                  where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
         | tee -a $LOG_FILE 2>&1
+
+# this was at end of middle where clause, caused error in control file
+#            AND C.FILE1CUF NOT LIKE '%rhi%' \
 
 #        date | tee -a $LOG_FILE 2>&1
 
