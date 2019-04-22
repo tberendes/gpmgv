@@ -380,9 +380,9 @@ dateStart=`echo $ymdstart | awk \
 #dateStart='2018-12-23'
 #dateEnd='2019-01-01'
 
-#dateStart='2014-03-18'
-dateStart='2017-03-09'
-dateEnd='2019-04-05'
+dateStart='2014-03-18'
+#dateStart='2017-03-09'
+dateEnd='2019-04-22'
 
 
 echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
