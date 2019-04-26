@@ -2743,7 +2743,7 @@ endif
 ;               BREAK 
 ;               END
       'ZDRABVH' :  BEGIN 
-      			gvz_thresh = 30.0   ; 20, 15
+      			gvz_thresh_abv = 30.0   ; 20, 15
       			zdr_add_str = ''
  ;     			zdr_std_thresh = 0.4   ; .2, .3, .4
       			
@@ -2759,10 +2759,10 @@ endif
                       ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
                       ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
 
-                      ;idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+                      ;idxabv = WHERE( gvz lt gvz_thresh_abv AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
                       ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
                       
-                      idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 2 AND (besthid eq 1 or besthid eq 2) $
+                      idxabv = WHERE( gvz lt gvz_thresh_abv AND BBprox EQ 2 AND (besthid eq 1 or besthid eq 2) $
                          AND rntype EQ RainType_stratiform AND hgtcat ge (BBparms.BB_HgtHi + 1) $
                         , countabv )
                         ;AND GR_ZDR_stddev lt zdr_std_thresh , countabv )
@@ -2775,7 +2775,7 @@ endif
                BREAK 
                END
       'ZDRBLWH' :  BEGIN 
-      			gvz_thresh = 20.0   ; 20, 15
+      			gvz_thresh_blw = 20.0   ; 20, 15
       			zdr_std_thresh = 0.8   ; .2, .3, .4
       			
       			tmpstr=STRING(zdr_std_thresh, FORMAT='(F3.1)')
@@ -2790,9 +2790,9 @@ endif
                       ;idxabv = WHERE( gvz lt 15.0 AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
                       ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
 
-                      ;idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+                      ;idxabv = WHERE( gvz lt gvz_thresh_blw AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
                       ;   AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1), countabv )
-                      idxabv = WHERE( gvz lt gvz_thresh AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
+                      idxabv = WHERE( gvz lt gvz_thresh_blw AND BBprox EQ 0 AND (besthid eq 1 or besthid eq 2) $
                          AND rntype EQ RainType_stratiform AND hgtcat le (BBparms.BB_HgtLo - 1) $
                          AND GR_ZDR_stddev lt zdr_std_thresh , countabv )
 
@@ -5629,7 +5629,7 @@ print, "GRPDSR plot...."
 				  hist1 = HISTOGRAM(ZDRABVH_accum, LOCATIONS=xvals1, min=-0.7, max=0.7, binsize=0.2)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
-				  gvz_thresh_str = STRING(gvz_thresh, FORMAT='(I0)')
+				  gvz_thresh_str = STRING(gvz_thresh_abv, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Stratiform Rain/dzl, Above Bright Band, Z<"+gvz_thresh_str+", "+ zdr_add_str+ ", "+pctabvstr+" Above Thresh"
 			      END
@@ -5656,7 +5656,7 @@ print, "GRPDSR plot...."
 				  hist1 = HISTOGRAM(ZDRBLWH_accum, LOCATIONS=xvals1, min=-0.7, max=0.7, binsize=0.2)      
 				  numPts = long(total(hist1,/INTEGER))
 				  nstr = STRING(numPts, FORMAT='(I0)')
-				  gvz_thresh_str = STRING(gvz_thresh, FORMAT='(I0)')
+				  gvz_thresh_str = STRING(gvz_thresh_blw, FORMAT='(I0)')
         		  imTITLE = titleLine1+ ", N="+nstr+"!C" + $
                       "Stratiform Rain/dzl, 1 Layer Below Bright Band, Z<"+gvz_thresh_str+", "+ zdr_add_str+ ", "+pctabvstr+" Above Thresh"
 			      END
