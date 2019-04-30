@@ -697,6 +697,11 @@ IF N_ELEMENTS(lat_range) GT 0 OR N_ELEMENTS(lon_range) GT 0 THEN BEGIN
 	min_lon = lon_range[0]
 	max_lon = lon_range[1]
 	latlon_filter=1
+
+	openw, latlon_filter_files_LUN, outpath + '/files_in_latlon_box.txt', /GET_LUN
+	; print header line for columns
+  	printf, latlon_filter_files_LUN, 'count,filename'
+	
 ENDIF
 
 IF FLOAT(!version.release) lt 8.1 THEN message, "Requires IDL 8.1 or later."
@@ -2180,7 +2185,10 @@ if latlon_filter then begin
 	print, 'filtered lat/lon ',num_outofbox,' out of ', n_elements(prlat)
 	latlon_box_str = STRING(min_lat,max_lat,min_lon,max_lon, FORMAT='("lat [",F6.2,",", F6.2,"] lon [",F6.2,",",F6.2,"]")')
     filterText=filterText+' '+latlon_box_str 
-
+    
+    if num_inbox gt 0 then begin
+   		 printf, latlon_filter_files_LUN, num_inbox, ncfilepr, format='(%"%d\,%s")' 
+	endif
 endif
 
 
@@ -6405,6 +6413,10 @@ if csv_dump then begin
 	close, csv_dump_LUN
 	FREE_LUN, csv_dump_LUN
 endif
+if latlon_filter then begin
+	close, latlon_filter_files_LUN
+	FREE_LUN, latlon_filter_files_LUN
+endif 
 
 IF N_ELEMENTS(profile_save) NE 0 AND bustOut NE 1 THEN BEGIN
    ; Compute ensemble mean and StdDev of dBZ at each level from grouped data
