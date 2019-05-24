@@ -315,8 +315,6 @@ dateStart=`echo $ymdstart | awk \
 #dateStart='2017-03-16'
 #dateEnd='2017-04-10'
 
-dateStart='2014-03-01'
-dateEnd='2019-04-09'
 
 #dateStart='2019-02-06'
 #dateEnd='2019-02-19'
@@ -330,6 +328,13 @@ dateEnd='2019-04-09'
 #dateEnd='2014-12-24'
 #dateStart='2015-05-27'
 #dateEnd='2015-05-28'
+
+#dateStart='2014-03-01'
+#dateEnd='2019-04-09'
+
+dateStart='2019-04-13'
+dateEnd='2019-05-24'
+
 
 echo "Running GRtoDPRGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
 
