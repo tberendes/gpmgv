@@ -89,18 +89,26 @@ for i = 0, nfields-1 do begin
         'HCLASS': rslfields[i] = 'HC'
         'SQI':    rslfields[i] = 'SQ'
         ; Some variations.
-        'REFLECTIVITY': begin
-            ; Todd Berendes, UAH, 11/6/18
-            ;  DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
-            if site_name eq 'Gunn_Pt' then rslfields[i] = 'CZ' else rslfields[i] = 'DZ'
-         end
+# TAB 5/14/19, changes in CPOL format make this unnecessary
+#        'REFLECTIVITY': begin
+#            ; Todd Berendes, UAH, 11/6/18
+#            ;  DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
+#            if site_name eq 'Gunn_Pt' then rslfields[i] = 'CZ' else rslfields[i] = 'DZ'
+#         end
+
+        'REFLECTIVITY': rslfields[i] = 'DZ'
         'CORRECTED_REFLECTIVITY': rslfields[i] = 'CZ'
         'VELOCITY': rslfields[i] = 'VR'
         'CORRECTED_VELOCITY': rslfields[i] = 'VE'
         'SPECTRUM_WIDTH': rslfields[i] = 'SW'
         'DIFFERENTIAL_REFLECTIVITY': rslfields[i] = 'DR'
         'DIFFERENTIALREFLECTIVITY':  rslfields[i] = 'DR'
-        'DIFFERENTIAL_PHASE': rslfields[i] = 'PH'
+        'DIFFERENTIAL_PHASE': begin
+            ; Todd Berendes, UAH, 5/14/19
+            ;  DARW Gunn_Pt site has both uncorrected and corrected PH
+            if site_name eq 'Gunn_Pt' then rslfields[i] = 'UP' else rslfields[i] = 'PH'
+         end
+#        'DIFFERENTIAL_PHASE': rslfields[i] = 'PH'
         'CROSS_CORRELATION_RATIO': rslfields[i] = 'RH'
         'SPECIFIC_DIFFERENTIAL_PHASE': rslfields[i] = 'KD'
         'HYDROCLASS': rslfields[i] = 'HC'
@@ -110,8 +118,11 @@ for i = 0, nfields-1 do begin
         'CORRECTED_DIFFERENTIAL_PHASE' : rslfields[i] = 'PH'
         ; TAB 12/06/18 
         ; for CPOL, don't use their KDP, use the one Jason computed with DROPS2 and added as "KDP" to the file
-        ;'CORRECTED_SPECIFIC_DIFFERENTIAL_PHASE' : rslfields[i] = 'KD'
+        ; 5/14/19 changed to use CPOL KPD
+        'CORRECTED_SPECIFIC_DIFFERENTIAL_PHASE' : rslfields[i] = 'KD'
         'RADAR_ESTIMATED_RAIN_RATE'  : rslfields[i] = 'RR'
+        'TOTAL_POWER': rslfields[i] = 'DZ'
+        
         else: begin
             rslfields[i] = cfrfields[i]
         end

@@ -1,0 +1,422 @@
+;+
+; Copyright © 2009, United States Government as represented by the
+; Administrator for The National Aeronautics and Space Administration.
+; All Rights Reserved.
+;
+; DESCRIPTION:
+;       Contains two modules used to produce a multiplot with scatter plots of
+;       PR and GV data, one for each breakout of the data by rain type and
+;       surface type.  Output is to a Postscript file whose name is supplied
+;       as the 'file' parameter.
+;
+;       Primary Module: plot_scatter_by_bb_prox_ps, file, title, siteID, prz_in, $
+;                            gvz_in, raintype_in, bbprox_in, npts, idxByBB, $
+;                            S2KU=s2ku, MIN_XY=minXY, MAX_XY=maxXY, UNITS=units, $
+;                            Y_TITLE=y_title, X_TITLE=x_title, HEIGHTS=heights_in
+;       Internal Module: plot_scat_ps, pos, sub_title, siteID, xdata, ydata, ndata, $
+;                            S2KU=s2ku, MIN_XY=minXY, MAX_XY=maxXY, UNITS=units, $
+;                            Y_TITLE=y_title, X_TITLE=x_title, HEIGHTS=hgtStruc
+;
+; HISTORY:
+;       February 2009, Bob Morris/GPM GV (SAIC)
+;       - Created from grid-based version, plot_scaPoint.pro.  Near-total
+;         rewrite to use data from the geo-match netCDF files of the
+;         GPM Validation Network.
+;       08/04/09, Bob Morris/GPM GV (SAIC)
+;       - Added S2KU keyword to control text in x-axis title to indicate
+;         when GV reflectivity has been Ku-adjusted.
+;       03/05/10, Bob Morris/GPM GV (SAIC)
+;       - Added MIN_XY and MAX_XY keyword to control range of x and y axes,
+;         and UNITS keyword to control log vs. linear plots and labeling.
+;       - Modified plotting of +/- error bounds lines to accommodate log scale.
+;       03/11/10, Bob Morris/GPM GV (SAIC)
+;       - Added Y_TITLE keyword to accommodate multiple rainrate sources and
+;         properly label the y axes on scatter plots.
+;       01/24/12, Bob Morris/GPM GV (SAIC)
+;       - Added siteID to parameter lists and to x-axis title.
+;       08/14/13, Bob Morris/GPM GV (SAIC)
+;       - Added KEYWORD_SET check/init on S2KU keyword value in top routine
+;         plot_scatter_by_bb_prox_ps to eliminate undefined error when not
+;         specified by caller.
+;       09/26/13, Bob Morris/GPM GV (SAIC)
+;       - Added X_TITLE keyword to accommodate alternate rainrate sources and
+;         properly label the x axes on scatter plots.
+;       - Added logic to handle s2ku option in axis titles when titles with
+;         'ZR' are specified
+;       04/28/14, Bob Morris/GPM GV (SAIC)
+;       - Added SAT_INSTR keyword to override the default y-axis "TRMM PR"
+;         labeling when Y_TITLE is not specified.
+;       - Added SKIP_BB keyword to plot a single "Unknown BB" set of plots when
+;         set.
+;       01/20/15, Bob Morris/GPM GV (SAIC)
+;       - Added capability to color-code scatter points by height of samples.
+;       01/28/15, Bob Morris/GPM GV (SAIC)
+;       - Modified to plot color-code labels even when the target panel for the
+;         labeling has no data points present.
+;
+;
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+;-
+;------------------------------------------------------------------------------
+
+pro plot_scat_ps, pos, sub_title, siteID, xdata, ydata, ndata, S2KU=s2ku, $
+                  MIN_XY=minXY, MAX_XY=maxXY, UNITS=units, Y_TITLE=y_title_in, $
+                  X_TITLE=x_title_in, SAT_INSTR=sat_instr, HEIGHTS=hgtStruc
+
+ncolor=255
+bgcolor=ncolor-1
+;IF (N_PARAMS() EQ 6) THEN symsize=0.5/( alog10(ndata) > 0.1 ) > 0.25 ELSE symsize=0.5
+IF (N_PARAMS() EQ 6) THEN symsize=(0.65/( alog10(ndata) > 0.1 ) > 0.25) < 0.7 $
+ELSE symsize=0.5
+
+;xymin = 15.0 & xymax = 65.0
+IF N_ELEMENTS(minXY) EQ 1 THEN xymin = minXY ELSE xymin = 15.0  ; default to dBZ
+IF N_ELEMENTS(maxXY) EQ 1 THEN xymax = maxXY ELSE xymax = 65.0  ; default to dBZ
+IF N_ELEMENTS(units) NE 1 THEN units = 'dBZ'
+IF units NE 'dBZ' THEN errlimit=5.0 ELSE errlimit=3.0  ; for +/- error lines
+
+IF N_ELEMENTS(sat_instr) NE 1 THEN satinstrument = 'TRMM PR' $
+                              ELSE satinstrument = sat_instr
+
+IF N_ELEMENTS(y_title_in) NE 1 THEN BEGIN
+   IF units EQ 'dBZ' THEN y_title=satinstrument+' (attenuation corrected), dBZ' $
+   ELSE y_title=satinstrument+', '+units
+ENDIF ELSE BEGIN
+   y_title = y_title_in + ', ' + units
+   IF keyword_set(s2ku) THEN BEGIN
+      IF STRPOS(y_title, 'ZR') NE -1 THEN y_title = y_title+' (Ku-adjusted)
+   ENDIF
+ENDELSE
+
+; define/modify the x-coordinate label, depending on GV adjustment status
+IF N_ELEMENTS(x_title_in) NE 1 THEN BEGIN
+   IF keyword_set(s2ku) THEN x_title=siteID+' Radar, '+units+' (Ku-adjusted)' $
+   ELSE x_title=siteID+' Radar, '+units
+ENDIF ELSE BEGIN
+   x_title = x_title_in + ', ' + units
+   IF keyword_set(s2ku) THEN BEGIN
+      IF STRPOS(x_title, 'ZR') NE -1 THEN x_title = x_title+' (Ku-adjusted)
+   ENDIF
+ENDELSE
+
+IF ( N_PARAMS() GT 3 ) THEN BEGIN
+
+   ; --- Define symbol as filled circle
+   A = FINDGEN(17) * (!PI*2/16.)
+   USERSYM, COS(A), SIN(A), /FILL
+
+   IF units EQ 'dBZ' THEN BEGIN
+     plot,POSITION=pos, [xymin,xymax], [xymin,xymax], /NODATA, $
+       xticklen=+0.04, yticklen=0.04, /noerase,$
+       xticks=5, xrange=[xymin,xymax], yrange=[xymin,xymax],$
+       xstyle=1, ystyle=1, yticks=5, xminor=5, yminor=5, $
+       ytickname=['15','25','35','45','55','65'], CHARSIZE=0.75, $
+       title=sub_title, ytitle=y_title, xtitle=x_title, color=ncolor
+   ENDIF ELSE BEGIN
+     plot,POSITION=pos,[xymin,xymax],[xymin,xymax],/NODATA, $
+       xticklen=+0.04, yticklen=0.04, /noerase, $
+       xticks=5, xrange=[xymin,xymax], yrange=[xymin,xymax], $
+       /xlog, /ylog, $
+       yticks=5, xminor=5, yminor=5, charsize=0.75, $
+       title=sub_title, ytitle=y_title, xtitle=x_title, color=ncolor
+   ENDELSE  
+
+  ; now add the data points to the plot
+   IF N_ELEMENTS(hgtStruc) EQ 0 THEN BEGIN
+      oplot, xdata[0:ndata-1], ydata[0:ndata-1], psym=8, symsize=symsize, $
+             color=30
+   ENDIF ELSE BEGIN
+     ; first plot the points' backgrounds in gray with a larger diameter to
+     ; allow light color points to be seen in the white plot area
+      oplot, xdata[0:ndata-1], ydata[0:ndata-1], psym=8, $
+             symsize=symsize*1.5, color=bgcolor
+     ; run a histogram of sample heights to bin them into 0.5 km layers
+      hgthist = HISTOGRAM(hgtStruc.HEIGHTS, BINSIZE=0.5, MIN=0.0, MAX=20.0, $
+                          REVERSE_INDICES=hgtbinidx)
+     ; identify indices of histo bins with samples at those height values
+      idxhistnotzero = WHERE(hgthist GT 0, countbinsok)
+      ;print, "Height: ", (hgtStruc.LABELS)[idxhistnotzero]
+      ;print, "N in bin: ", hgthist[idxhistnotzero]
+      ;print, "bincolors: ", (hgtStruc.bincolor)[idxhistnotzero]
+     ; extract xdata and ydata values for each bin and plot its points in
+     ; the assigned color
+      for ibin=0,countbinsok-1 do begin
+         xbin = xdata[ hgtbinidx[hgtbinidx[idxhistnotzero[ibin]] : $
+                       hgtbinidx[idxhistnotzero[ibin]+1]-1] ]
+         ybin = ydata[hgtbinidx[hgtbinidx[idxhistnotzero[ibin]] : $
+                      hgtbinidx[idxhistnotzero[ibin]+1]-1] ]
+        ; now plot the point in its assigned height color
+         oplot, xbin, ybin, psym=8, symsize=symsize, $
+                color=(hgtStruc.bincolor)[idxhistnotzero[ibin]]
+      endfor
+      IF (hgtStruc.PLOTLAB NE -1) THEN BEGIN
+         for ibin = hgtStruc.PLOTLAB, N_ELEMENTS(hgtStruc.LABELS)-1 do begin
+           ; plot height/color values in a stack on the right of the middle
+           ; set of scatter panel pairs.  First plot text in black with
+           ; slight offsets to give an outline effect so colors are visible.
+            xyouts, pos[2]+0.02-0.0001, pos[1]+0.0125*ibin-0.0001, $
+                    STRING((hgtStruc.LABELS)[ibin],FORMAT='(F5.2)')+" km", $
+                    charsize=0.75, color=ncolor, alignment=0, /normal
+            xyouts, pos[2]+0.02+0.0001, pos[1]+0.0125*ibin+0.0001, $
+                    STRING((hgtStruc.LABELS)[ibin],FORMAT='(F5.2)')+" km", $
+                    charsize=0.75, color=ncolor, alignment=0, /normal
+           ; now plot text in color based on height value
+            xyouts, pos[2]+0.02, pos[1]+0.0125*ibin, $
+                    STRING((hgtStruc.LABELS)[ibin],FORMAT='(F5.2)')+" km", $
+                    charsize=0.75, color=(hgtStruc.bincolor)[ibin], alignment=0, /normal
+         endfor
+      ENDIF
+   ENDELSE
+
+   IF units EQ 'dBZ' THEN BEGIN
+       ; plot lines of +/- 3dbz error
+       oplot,[xymin+errlimit,xymax],[xymin,xymax-errlimit],color=ncolor, LINESTYLE=2
+       oplot,[xymin,xymax-errlimit],[xymin+errlimit,xymax],color=ncolor, LINESTYLE=2
+   ENDIF ELSE BEGIN
+     ; plot 3 lines of +/- 1, 5, and 25 mm/hr error
+      FOR loc = xymin, xymax DO BEGIN
+        FOR expon = 0,2 DO BEGIN
+          oplot,[loc+errlimit^expon,loc+errlimit^expon+1],[loc,loc+1],color=ncolor, LINESTYLE=2
+          oplot,[loc,loc+1],[loc+errlimit^expon,loc+errlimit^expon+1],color=ncolor, LINESTYLE=2
+        ENDFOR
+      ENDFOR
+   ENDELSE  
+ 
+   oplot,[xymin,xymax],[xymin,xymax],color=ncolor
+
+   IF ndata GT 4 THEN BEGIN
+      correlation = correlate(xdata[0:ndata-1],ydata[0:ndata-1])
+
+      xyouts,pos[0]+0.018, pos[3]-0.02, "Correlation = "+string(correlation, $
+         format='(f4.2)')+"", $
+         charsize=0.65,color=ncolor,alignment=0,/normal
+
+      standard_error, xdata[0:ndata-1],ydata[0:ndata-1], STD_ERROR=std_error
+
+      xyouts,pos[0]+0.018, pos[3]-0.033, "Std. error = "+string(std_error, $
+         format='(f4.2)')+"", $
+         charsize=0.65,color=ncolor,alignment=0,/normal
+
+      IF units EQ 'dBZ' THEN BEGIN
+       ; plot the best-fit line
+        fitted = linfit(xdata[0:ndata-1],ydata[0:ndata-1])
+       ; figure out where it intersects the plot bounds
+        IF ( fitted[0] LT 0.0 ) THEN BEGIN
+          xstart=(xymin-fitted[0])/fitted[1]
+          ystart = xymin
+        ENDIF ELSE BEGIN
+          xstart = xymin
+          ystart = fitted[0]+fitted[1]*xymin
+        ENDELSE
+        yend = fitted[0]+fitted[1]*xymax
+        xend = xymax
+        IF ( yend GT xymax ) THEN BEGIN
+          xend = (xymax-fitted[0])/fitted[1]
+          yend = xymax
+        ENDIF
+        plots, [xstart,xend], [ystart,yend], LINESTYLE=1, THICK=1.5, color=ncolor
+      ENDIF
+   ENDIF
+
+   if ndata ge 0 and ndata lt 10 then fmt='(i1)'
+   if ndata ge 10 and ndata lt 100 then fmt='(i2)'
+   if ndata ge 100 and ndata lt 1000 then fmt='(i3)'
+   if ndata ge 1000 and ndata lt 10000 then fmt='(i4)'
+   if ndata ge 10000 and ndata lt 100000 then fmt='(i5)'
+
+   xyouts,pos[0]+0.018, pos[3]-0.046, "Points = "+string(ndata, $
+      format=fmt)+"", $
+      charsize=0.65,color=ncolor,alignment=0,/normal
+            
+ENDIF ELSE BEGIN
+
+   ;print, 'Plotting empty panel for ', sub_title
+   IF units EQ 'dBZ' THEN BEGIN
+     plot, POSITION=pos, [xymin,xymax],[xymin,xymax], /nodata, /noerase, $
+       xticklen=+0.04, yticklen=0.04, xticks=5, yticks=5, $
+       xminor=5, yminor=5, xtickname=['15','25','35','45','55','65'], $
+       ytickname=['15','25','35','45','55','65'], title=sub_title, $
+       ytitle=y_title, $
+       xtitle=x_title, $
+       color=ncolor,charsize=0.7
+   ENDIF ELSE BEGIN
+     plot,POSITION=pos,[xymin,xymax],[xymin,xymax], /nodata, $
+       xticklen=+0.04, yticklen=0.04,/noerase, $
+       xticks=5,xrange=[xymin,xymax],yrange=[xymin,xymax], $
+       /xlog, /ylog, $
+       yticks=5, xminor=5,yminor=5, $
+       title=sub_title, $
+       ytitle=y_title, $
+       xtitle=x_title, $
+       color=ncolor,charsize=0.7
+   ENDELSE  
+   xyouts,pos[0]+0.018, pos[3]-0.1, "NO DATA POINTS IN CATEGORY", $
+      charsize=0.75,color=ncolor,alignment=0,/normal
+
+  ; still go ahead and plot the height label information if it was defined
+   IF N_ELEMENTS(hgtStruc) NE 0 THEN BEGIN
+      IF (hgtStruc.PLOTLAB NE -1) THEN BEGIN
+         for ibin = hgtStruc.PLOTLAB, N_ELEMENTS(hgtStruc.LABELS)-1 do begin
+           ; plot height/color values in a stack on the right of the middle
+           ; set of scatter panel pairs.  First plot text in black with
+           ; slight offsets to give an outline effect so colors are visible.
+            xyouts, pos[2]+0.02-0.0001, pos[1]+0.0125*ibin-0.0001, $
+                    STRING((hgtStruc.LABELS)[ibin],FORMAT='(F5.2)')+" km", $
+                    charsize=0.75, color=ncolor, alignment=0, /normal
+            xyouts, pos[2]+0.02+0.0001, pos[1]+0.0125*ibin+0.0001, $
+                    STRING((hgtStruc.LABELS)[ibin],FORMAT='(F5.2)')+" km", $
+                    charsize=0.75, color=ncolor, alignment=0, /normal
+           ; now plot text in color based on height value
+            xyouts, pos[2]+0.02, pos[1]+0.0125*ibin, $
+                    STRING((hgtStruc.LABELS)[ibin],FORMAT='(F5.2)')+" km", $
+                    charsize=0.75, color=(hgtStruc.bincolor)[ibin], alignment=0, /normal
+         endfor
+      ENDIF
+   ENDIF
+
+ENDELSE
+end                     
+
+;------------------------------------------------------------------------------
+
+
+pro plot_scatter_by_bb_prox_ps, file, title, siteID, prz_in, gvz_in, $
+                                raintype_in, bbprox_in, npts, idxByBB, $
+                                S2KU=s2ku_in, MIN_XY=minXY, MAX_XY=maxXY, $
+                                UNITS=units, Y_TITLE=y_title, X_TITLE=x_title, $
+                                SAT_INSTR=sat_instr, SKIP_BB=skip_BB_in, $
+                                HEIGHTS=heights_in
+
+s2ku = KEYWORD_SET( s2ku_in )
+skip_BB = KEYWORD_SET( skip_BB_in )
+
+;orig_device = !D.NAME
+;set_plot,/copy,'ps'
+;device,filename=file, /color,bits=8,$
+;/inches,xoffset=0.25,yoffset=0.55,xsize=8.,ysize=10.
+
+; Set up color table
+;
+common colors, r_orig, g_orig, b_orig, r_curr, g_curr, b_curr ;load color table
+loadct,33, /SILENT
+ncolor=!d.table_size-1
+ncolor=255
+bgcolor=ncolor-1  ; background color around "expanded" scatter points
+red=bytarr(256) & green=bytarr(256) & blue=bytarr(256)
+red=r_curr & green=g_curr & blue=b_curr
+red(0)=255 & green(0)=255 & blue(0)=255
+red(bgcolor)=150 & green(bgcolor)=150 & blue(bgcolor)=150  ;gray background
+red(ncolor)=0 & green(ncolor)=0 & blue(ncolor)=0 
+tvlct,red,green,blue
+
+xyouts, 0.5, 9.8/10., title, alignment=0.5, color=ncolor, /normal, $
+        charsize=1., Charthick=1.5
+ 
+bblevstr = ['Unknown BB', 'Below BB', 'Within BB', 'Above BB']
+typestr = ['Any Type ', 'Stratiform, ', 'Convective, ']
+
+xs = 2.6/8.  &  ys = 2.55/10. ;2.2/8.  &  ys = 2.2/10.     ; individual plot x,y size
+x0 = 1.1/8.  &  y0 = 0.5/10. ;1.6/8.  &  y0 = 1.1/10.     ; starting margins on page
+x00 = 0.7/8.  &  y00 = 0.6/10.   ; between-plot spacing
+
+pos = fltarr(4)
+IF skip_BB EQ 0 THEN BEGIN
+   increment = 1    ; set up for legacy behavior
+   catend = 2
+ENDIF ELSE BEGIN
+   increment = 0
+   catend = 0
+   y0 = y0+ys+y00   ; place our one row at the middle of the page
+ENDELSE
+
+IF N_ELEMENTS(heights_in) NE 0 THEN BEGIN
+  ; run a histogram of sample heights to bin them into 0.5 km layers
+   hgthist = HISTOGRAM(heights_in, BINSIZE=0.5, MIN=0.0, MAX=20.0, $
+                       REVERSE_INDICES=hgtbinidx, locations=hgtofbin)
+  ; identify indices of histo bins with values and assign their colors
+   idxhistnotzero = WHERE(hgthist GT 0, countbinsok)
+   IF countbinsok GT 0 THEN BEGIN
+      clrstep = 254/(MAX(idxhistnotzero)+1)  ; set step to use the full range of colors
+      idxclrrange = INDGEN(MAX(idxhistnotzero)+1)  ; number of colors in range
+      bincolor = idxclrrange*clrstep < 254; color index of each of the above
+     ; height values for each color over range of data
+      labels = hgtofbin[0:MAX(idxhistnotzero)]
+     ; set plotlab to the height label of the first histo bin with data
+     ; for panel(s) where we want to plot labels, or -1 if not labeling
+      plotlab = -1
+;print, "ALL LABELS: ",labels[MIN(idxhistnotzero):MAX(idxhistnotzero)]
+   ENDIF ELSE MESSAGE, "Empty histogram of sample heights."
+ENDIF
+
+for i=0,catend do begin     ;row, count from bottom -- also, bbprox type
+
+  proxim = i+increment     ; 0= 'Unknown', 1=' Below', 2='Within', 3=' Above'
+  IF ( npts[i] GT 0 ) THEN BEGIN
+     idxthislev = idxByBB[i,0:npts[i]-1]
+     prz = prz_in[idxthislev]
+     gvz = gvz_in[idxthislev]
+     raintype = raintype_in[idxthislev]
+     bbprox = bbprox_in[idxthislev]
+     IF N_ELEMENTS(heights_in) NE 0 THEN heights = heights_in[idxthislev]
+  ENDIF ;ELSE print, 'no points at BB proximity level ', bblevstr[proxim]
+
+ ; don't indicate Ku-corrected for within-BB plots
+  IF ( s2ku ) THEN BEGIN
+     IF ( proxim EQ 2 OR proxim EQ 0 ) THEN s2ku4sca = 0 ELSE s2ku4sca = s2ku
+  ENDIF ELSE s2ku4sca = 0
+
+  for j=0,1 do begin   ;column, count from left -- also, strat/conv rain type index
+    raincat = j+1   ; 1=Stratiform, 2=Convective
+    x1=x0+j*(xs+x00)
+    y1=y0+i*(ys+y00)  
+    x2=x1+xs
+    y2=y1+ys          
+    pos[*] = [x1,y1,x2,y2]
+    subtitle = typestr[raincat]+bblevstr[proxim]
+    IF N_ELEMENTS(heights) NE 0 THEN BEGIN
+      ; set up to add height/color annotations if on convective-in-BB plot,
+      ; or on convective plot if BB is unknown
+       IF (i EQ 1) AND (j EQ 1) THEN plotlab = MIN(idxhistnotzero)
+       IF (proxim EQ 0) AND (j EQ 1) THEN plotlab = MIN(idxhistnotzero)
+    ENDIF
+    IF ( npts[i] GT 0 ) THEN BEGIN
+      idxsub = WHERE( bbprox EQ proxim AND raintype EQ raincat, nfound )
+      IF ( nfound GT 0 ) THEN BEGIN
+         prsub = prz[idxsub] & gvsub = gvz[idxsub]
+         IF N_ELEMENTS(heights) NE 0 THEN $
+            hgtstruc = { HEIGHTS:heights[idxsub], BINCOLOR:bincolor, $
+                         LABELS:labels, PLOTLAB:plotlab }
+         plot_scat_ps, pos, subtitle, siteID, gvsub, prsub, nfound, $
+                       S2KU=s2ku4sca, MIN_XY=minXY, MAX_XY=maxXY, UNITS=units, $
+                       Y_TITLE=y_title, X_TITLE=x_title, SAT_INSTR=sat_instr, $
+                       HEIGHTS=hgtstruc
+      ENDIF ELSE BEGIN
+         print, 'No points in rain category ', typestr[raincat], bblevstr[proxim]
+         IF N_ELEMENTS(heights) NE 0 THEN $
+           ; still need to plot height labels, just define a bogus HEIGHTS value
+            hgtstruc = { HEIGHTS:0.0, BINCOLOR:bincolor, $
+                         LABELS:labels, PLOTLAB:plotlab }
+         plot_scat_ps, pos, subtitle, siteID, S2KU=s2ku4sca, MIN_XY=minXY, $
+                       MAX_XY=maxXY, UNITS=units, Y_TITLE=y_title, X_TITLE=x_title, $
+                       SAT_INSTR=sat_instr, HEIGHTS=hgtstruc
+      ENDELSE
+    ENDIF ELSE BEGIN
+     ; print, 'no points at BB proximity level ', bblevstr[proxim]
+      IF N_ELEMENTS(heights) NE 0 THEN $
+        ; still need to plot height labels, just define a bogus HEIGHTS value
+         hgtstruc = { HEIGHTS:0.0, BINCOLOR:bincolor, $
+                      LABELS:labels, PLOTLAB:plotlab }
+      plot_scat_ps, pos, subtitle, siteID, S2KU=s2ku4sca, UNITS=units, $
+                    Y_TITLE=y_title, X_TITLE=x_title, SAT_INSTR=sat_instr, $
+                    HEIGHTS=hgtstruc
+    ENDELSE
+    IF N_ELEMENTS(heights) NE 0 THEN plotlab = -1  ; turn it off for remaining plots
+  endfor
+
+endfor
+
+;device,/close
+;SET_PLOT, orig_device
+end

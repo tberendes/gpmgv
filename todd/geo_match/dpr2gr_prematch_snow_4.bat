@@ -3,7 +3,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; dpr2gr_prematch_snow_2.bat   15 February 2017
+; dpr2gr_prematch_snow_4.bat   15 February 2017
 ;
 ; DESCRIPTION
 ; -----------
@@ -48,8 +48,8 @@ VERSION2MATCH='V06A'
  scores = 0
 ; nc_dir = ''
  flat_ncpath = 0
- dpr_dbz_min = 12.0
- nc_name_add = '12dbzGRDPR'
+ nc_name_add = '18dbzGRDPR'
+ dpr_dbz_min = 18.0
  dpr_rain_min = 0.01
  non_pps_files = 0
  declutter = 1

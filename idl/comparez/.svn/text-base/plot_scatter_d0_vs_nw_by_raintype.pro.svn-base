@@ -1,0 +1,194 @@
+;+
+; Copyright © 2014, United States Government as represented by the
+; Administrator for The National Aeronautics and Space Administration.
+; All Rights Reserved.
+;
+; DESCRIPTION:
+;       Contains two modules used to produce a multiplot with scatter plots of
+;       Dm vs. Nw for PR and GV data, one for each breakout of the data by
+;       rain type.  Output is to the display.
+;
+;       Primary Module: plot_scatter_d0_vs_nw_by_raintype, title, siteID, $
+;                            prdm_in, gvdm_in, prnw_in, gvnw_in, raintype_in, $
+;                            bbprox_in, npts, idxByBB, winsiz, $
+;                            MIN_XY=minXY, MAX_XY=maxXY, Y_TITLE=y_title,$
+;                            X_TITLE=x_title, SAT_INSTR=sat_instr, GR_DM_D0=GR_DM_D0
+;
+;       Internal Module: plot_d0_nw_scat, pos, sub_title, sourceID, ncolor, charsz, $
+;                            xdata, ydata, ndata, DM_D0=DM_D0
+;
+; HISTORY:
+;       Bob Morris/GPM GV (SAIC), July, 2014
+;       - Created from plot_dsd_scatter_by_raintype.pro.
+;       09/24/15, Bob Morris/GPM GV (SAIC)
+;       - Added optional GR_DM_D0 parameter to control labeling of GR Dm or D0.
+;       - Changed Nw plot range to 2-8 from 0-6.
+;
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+;-
+;------------------------------------------------------------------------------
+
+pro plot_d0_nw_scat, pos, sub_title, sourceID, ncolor, charsz, xdata, ydata, $
+                     ndata, DM_D0=DM_D0
+
+IF N_ELEMENTS(DM_D0) EQ 0 THEN x_title = sourceID + ' Dm, mm' $
+ELSE x_title = sourceID + ' '+DM_D0+', mm'
+y_title = sourceID + ' log10(Nw)'
+minX=0.0 & maxX=3.0
+minY=2.0 & maxY=8.0
+
+IF ( N_PARAMS() GT 5 ) THEN BEGIN
+
+   ; --- Define symbol as filled circle
+   A = FINDGEN(17) * (!PI*2/16.)
+   USERSYM, COS(A), SIN(A), /FILL
+
+   plot,POSITION=pos,xdata[0:ndata-1],ydata[0:ndata-1],$
+       xticklen=+0.04, yticklen=0.04,/noerase, $
+       xticks=3,xrange=[minX,maxX],yrange=[minY,maxY], $
+       yticks=3, xminor=5,yminor=5, $
+       title=sub_title, $
+       ytitle=y_title, $
+       xtitle=x_title, $
+       color=ncolor,charsize=charsz, psym=1, symsize=0.5
+;   oplot,[minX,maxX],[minY,maxY],color=ncolor
+
+   if ndata ge 0 and ndata lt 10 then fmt='(i1)'
+   if ndata ge 10 and ndata lt 100 then fmt='(i2)'
+   if ndata ge 100 and ndata lt 1000 then fmt='(i3)'
+   if ndata ge 1000 and ndata lt 10000 then fmt='(i4)'
+   if ndata ge 10000 and ndata lt 100000 then fmt='(i5)'
+
+   xyouts,pos[0]+0.03, pos[3]-0.051, "Points = "+string(ndata, $
+         format=fmt)+"", charsize=charsz/2.,color=ncolor,alignment=0,/normal
+ENDIF ELSE BEGIN
+  ; print, 'Plotting empty panel for ', sub_title
+   plot,POSITION=pos,[minX,maxX],[minX,maxX], /nodata, $
+       xticklen=+0.04, yticklen=0.04,/noerase, $
+       xticks=3,xrange=[minX,maxX],yrange=[minY,maxy], $
+       yticks=3, xminor=5,yminor=5, $
+       title=sub_title, $
+       ytitle=y_title, $
+       xtitle=x_title, $
+       color=ncolor,charsize=charsz  
+   xyouts, pos[0]+0.05, pos[3]-0.15, "NO DATA POINTS IN CATEGORY", $
+       charsize=charsz/2., color=ncolor, alignment=0, /normal
+
+ENDELSE
+end                     
+
+;------------------------------------------------------------------------------
+
+
+pro plot_scatter_d0_vs_nw_by_raintype, title, siteID, prdm_in, gvdm_in, $
+                             prnw_in, gvnw_in, raintype_in, bbprox_in, $
+                             npts, idxByBB, winsiz, SAT_INSTR=sat_instr, $
+                             GR_DM_D0=GR_DM_D0
+
+orig_device = !D.NAME
+s2ku = KEYWORD_SET( s2ku_in )
+
+; set proportions of WINDOW
+xsize=6.5
+ysize=6.8
+
+; work from a default window size of 375 (PPI_SIZE keyword in parent procedure),
+; set character size based on 0.75 for the default size, increment by 0.25
+winfac = winsiz/5
+charsz = 0.6*(winsiz/125)
+
+; Set up color table
+;
+common colors, r_orig, g_orig, b_orig, r_curr, g_curr, b_curr ;load color table
+loadct,33, /SILENT
+ncolor=!d.table_size-1
+ncolor=255
+forecolor=[0,0,0]   ; change to 255's for white plot on black background
+backcolor=[255,255,255]-forecolor
+red=bytarr(256) & green=bytarr(256) & blue=bytarr(256)
+red=r_curr & green=g_curr & blue=b_curr
+;red(0)=255 & green(0)=255 & blue(0)=255
+red(0)=backcolor[0] & green(0)=backcolor[1] & blue(0)=backcolor[2]
+red(1)=215 & green(1)=215 & blue(1)=215  ;gray background
+red(ncolor)=forecolor[0] & green(ncolor)=forecolor[1] & blue(ncolor)=forecolor[2]
+tvlct,red,green,blue
+
+WINDOW, 4, TITLE=title, XSIZE=xsize*winfac, YSIZE=ysize*winfac, RETAIN=2
+
+bblevstr = ['Unknown BB', 'Below BB', 'Within BB', 'Above BB']
+typestr = ['Any Type ', 'Stratiform, ', 'Convective, ']
+
+xs = 0.4  &  ys = xs * xsize / ysize
+x0 = 0.075  &  y0 = x0 * xsize / ysize
+x00 = 0.1  &  y00 = 0.1
+
+pos = fltarr(4)
+increment = 1    ; set up for legacy behavior
+catend = 1
+
+; extract the subarrays at the below-BB layer only
+  proxim = 1     ; 0= 'Unknown', 1=' Below', 2='Within', 3=' Above'
+  IF ( npts[0] GT 0 ) THEN BEGIN
+     idxthislev = idxByBB[0,0:npts[0]-1]
+     prdm=prdm_in[idxthislev]
+     gvdm=gvdm_in[idxthislev]
+     prnw=prnw_in[idxthislev]
+     gvnw=gvnw_in[idxthislev]
+     raintype = raintype_in[idxthislev]
+     bbprox = bbprox_in[idxthislev]
+  ENDIF
+
+for i=0,catend do begin     ;row, count from bottom -- also, bbprox type
+
+
+  CASE i OF
+     0 : BEGIN
+            prvar=gvnw
+            gvvar=gvdm
+            minXY=0.0
+            maxXY=3.0
+            sourceID = siteID
+            IF N_ELEMENTS(GR_DM_D0) NE 0 THEN dm_or_d0 = GR_DM_D0 $
+            ELSE dm_or_d0 = 'D0'   ; default to D0 for GR, if not given
+         END
+     1 : BEGIN
+            prvar=prnw
+            gvvar=prdm
+            maxX=3.0
+            maxY=6.0
+            sourceID = sat_instr
+            dm_or_d0 = 'Dm'        ; default to Dm for DPR
+         END
+  ENDCASE
+
+  for j=0,1 do begin   ;column, count from left; also, strat/conv raintype index
+    raincat = j+1   ; 1=Stratiform, 2=Convective
+    x1=x0+j*(xs+x00)
+    y1=y0+i*(ys+y00)  
+    x2=x1+xs
+    y2=y1+ys          
+    pos[*] = [x1,y1,x2,y2]
+    IF i EQ catend THEN subtitle = typestr[raincat]+bblevstr[proxim] $
+                   ELSE subtitle = ''
+    IF ( npts[0] GT 0 ) THEN BEGIN
+      idxsub = WHERE( bbprox EQ proxim AND raintype EQ raincat, nfound )
+      IF ( nfound GT 0 ) THEN BEGIN
+         prsub = prvar[idxsub] & gvsub = gvvar[idxsub]
+         plot_d0_nw_scat, pos, subtitle, sourceID, ncolor, charsz, gvsub, $
+                          prsub, nfound, DM_D0=dm_or_d0
+      ENDIF ELSE BEGIN
+         print, 'No points in rain category ', typestr[raincat], bblevstr[proxim]
+         plot_d0_nw_scat, pos, subtitle, sourceID, ncolor, charsz
+      ENDELSE
+    ENDIF ELSE BEGIN
+;      print, 'no points at BB proximity level'
+      plot_d0_nw_scat, pos, subtitle, sourceID, ncolor, charsz
+    ENDELSE
+  endfor
+
+endfor
+
+SET_PLOT, orig_device
+end

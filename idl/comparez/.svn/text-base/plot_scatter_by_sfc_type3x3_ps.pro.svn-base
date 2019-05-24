@@ -1,0 +1,280 @@
+;+
+; Copyright © 2011, United States Government as represented by the
+; Administrator for The National Aeronautics and Space Administration.
+; All Rights Reserved.
+;
+; DESCRIPTION:
+;       Contains two modules used to produce a multiplot with scatter plots of
+;       PR and GV data, one for each breakout of the data by rain type and
+;       surface type.  Output is to a Postscript file whose name is supplied
+;       as the 'file' parameter.
+;
+;       Primary Module:   plot_scatter_by_sfc_type_ps, file, title, siteID, $
+;                            prz_in, gvz_in, raintype_in, sfctype_in, npts, $
+;                            idxBySfcType, MIN_XY=minXY, MAX_XY=maxXY, $
+;                            UNITS=units, Y_TITLE=y_title, X_TITLE=x_title
+;       Internal Module:  plot_scat_ps, pos, sub_title, siteID, xdata, ydata, $
+;                            ndata, S2KU=s2ku, MIN_XY=minXY, MAX_XY=maxXY, $
+;                            UNITS=units, Y_TITLE=y_title, X_TITLE=x_title
+;
+; HISTORY:
+;       Bob Morris/GPM GV (SAIC), June, 2011
+;       - Created from plot_scatter_by_bb_prox_ps.pro.  Left s2ku as internal
+;         parameter, just in case.
+;       Bob Morris/GPM GV (SAIC), November, 2011
+;       - Created from plot_scatter_by_sfc_type_ps, modified to do 3 columns
+;         so that any/all rain type points are also plotted.
+;       Bob Morris/GPM GV (SAIC), November, 2012
+;       - Added siteID to parameter lists and to x-axis title.
+;       Bob Morris/GPM GV (SAIC), October, 2013
+;       - Added X_TITLE keyword to accommodate alternate rainrate sources and
+;         properly label the x axes on scatter plots.
+;       Bob Morris/GPM GV (SAIC), October, 2015
+;       - Fixed labeling of axes with and without points to plot.
+;       - Made plotted symbols filled circles with a size that is dependent on
+;         the number of points.
+;
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+;-
+;------------------------------------------------------------------------------
+
+pro plot_scat_ps, pos, sub_title, siteID, xdata, ydata, ndata, S2KU=s2ku, $
+                  MIN_XY=minXY, MAX_XY=maxXY, UNITS=units, $
+                  Y_TITLE=y_title_in, X_TITLE=x_title_in
+
+ncolor=255
+;xymin = 15.0 & xymax = 65.0
+IF (N_PARAMS() EQ 6) THEN symsize=(0.65/( alog10(ndata) > 0.1 ) > 0.25) < 0.7 $
+ELSE symsize=0.5
+
+s2ku = KEYWORD_SET(s2ku)
+IF N_ELEMENTS(minXY) EQ 1 THEN xymin = minXY ELSE xymin = 15.0  ; default to dBZ
+IF N_ELEMENTS(maxXY) EQ 1 THEN xymax = maxXY ELSE xymax = 65.0  ; default to dBZ
+IF N_ELEMENTS(units) NE 1 THEN units = 'dBZ'
+IF units NE 'dBZ' THEN errlimit=5.0 ELSE errlimit=3.0  ; for +/- error lines
+
+IF N_ELEMENTS(y_title_in) NE 1 THEN BEGIN
+   IF units EQ 'dBZ' THEN y_title='TRMM PR (attenuation corrected), dBZ' $
+   ELSE y_title='TMI rainrate, '+units
+ENDIF ELSE y_title = y_title_in
+
+; define/modify the x-coordinate label, depending on GV adjustment status
+IF N_ELEMENTS(x_title_in) NE 1 THEN BEGIN
+   IF units eq 'dBZ' THEN BEGIN
+      IF ( s2ku ) THEN x_title=siteID+' Radar, '+units+' (Ku-adjusted)' $
+      ELSE x_title=siteID+' Radar, '+units
+   ENDIF ELSE BEGIN
+      IF ( s2ku ) THEN x_title=siteID+' rainrate, '+units+' (Ku-adjusted Z)' $
+      ELSE x_title=siteID+' rainrate, '+units
+   ENDELSE
+ENDIF ELSE BEGIN
+   x_title = x_title_in + ', ' + units
+   IF keyword_set(s2ku) THEN BEGIN
+      IF STRPOS(x_title, 'ZR') NE -1 THEN x_title = x_title+' (Ku-adjusted)
+   ENDIF
+ENDELSE
+
+IF ( N_PARAMS() GT 3 ) THEN BEGIN
+
+   ; --- Define symbol as filled circle
+   A = FINDGEN(17) * (!PI*2/16.)
+   USERSYM, COS(A), SIN(A), /FILL
+
+   IF units EQ 'dBZ' THEN BEGIN
+     plot,POSITION=pos,xdata[0:ndata-1],ydata[0:ndata-1],$
+       xticklen=+0.04, yticklen=0.04,/noerase,$
+       xticks=5,xrange=[xymin,xymax],yrange=[xymin,xymax],$
+       xstyle=1, ystyle=1,$
+       yticks=5, xminor=5,yminor=5, ytickname=['15','25','35','45','55','65'], $
+       title=sub_title, $
+      ;title="h = "+string(height[n],format='(f4.1)')+" (km)",$
+       ytitle=y_title, $ ;'TRMM PR (attenuation corrected), dBZ', $
+       xtitle=x_title, $
+       color=ncolor,charsize=0.7, $
+      ; psym=1, symsize=0.5      ; plot '+' markers
+       psym=8, symsize=symsize ;0.15     ; plot '.' markers
+       ; plot lines of +/- 3dbz error
+       oplot,[xymin+errlimit,xymax],[xymin,xymax-errlimit],color=ncolor, LINESTYLE=2
+       oplot,[xymin,xymax-errlimit],[xymin+errlimit,xymax],color=ncolor, LINESTYLE=2
+   ENDIF ELSE BEGIN
+     plot,POSITION=pos,xdata[0:ndata-1],ydata[0:ndata-1],$
+       xticklen=+0.04, yticklen=0.04,/noerase, $
+       xticks=5,xrange=[xymin,xymax],yrange=[xymin,xymax], $
+       /xlog, /ylog, $
+       yticks=5, xminor=5,yminor=5, $
+       title=sub_title, $
+       ytitle=y_title, $ ;'TMI rainrate, '+units, $
+       xtitle=x_title, $
+       color=ncolor,charsize=0.7, $
+       psym=8, symsize=symsize ;0.15     ; plot '.' markers
+     ; plot 3 lines of +/- 1, 5, and 25 mm/hr error
+      FOR loc = xymin, xymax DO BEGIN
+        FOR expon = 0,2 DO BEGIN
+          oplot,[loc+errlimit^expon,loc+errlimit^expon+1],[loc,loc+1],color=ncolor, LINESTYLE=2
+          oplot,[loc,loc+1],[loc+errlimit^expon,loc+errlimit^expon+1],color=ncolor, LINESTYLE=2
+        ENDFOR
+      ENDFOR
+   ENDELSE  
+ 
+   oplot,[xymin,xymax],[xymin,xymax],color=ncolor
+
+   IF ndata GT 4 THEN BEGIN
+      correlation = correlate(xdata[0:ndata-1],ydata[0:ndata-1])
+
+      xyouts,pos[0]+0.018, pos[3]-0.02, "Correlation = "+string(correlation, $
+         format='(f4.2)')+"", $
+         charsize=0.65,color=ncolor,alignment=0,/normal
+
+      standard_error, xdata[0:ndata-1],ydata[0:ndata-1], STD_ERROR=std_error
+
+      xyouts,pos[0]+0.018, pos[3]-0.033, "Std. error = "+string(std_error, $
+         format='(f4.2)')+"", $
+         charsize=0.65,color=ncolor,alignment=0,/normal
+
+      IF units EQ 'dBZ' THEN BEGIN
+       ; plot the best-fit line
+        fitted = linfit(xdata[0:ndata-1],ydata[0:ndata-1])
+       ; figure out where it intersects the plot bounds
+        IF ( fitted[0] LT 0.0 ) THEN BEGIN
+          xstart=(xymin-fitted[0])/fitted[1]
+          ystart = xymin
+        ENDIF ELSE BEGIN
+          xstart = xymin
+          ystart = fitted[0]+fitted[1]*xymin
+        ENDELSE
+        yend = fitted[0]+fitted[1]*xymax
+        xend = xymax
+        IF ( yend GT xymax ) THEN BEGIN
+          xend = (xymax-fitted[0])/fitted[1]
+          yend = xymax
+        ENDIF
+        plots, [xstart,xend], [ystart,yend], LINESTYLE=1, THICK=1.5, color=ncolor
+      ENDIF
+   ENDIF
+
+   if ndata ge 0 and ndata lt 10 then fmt='(i1)'
+   if ndata ge 10 and ndata lt 100 then fmt='(i2)'
+   if ndata ge 100 and ndata lt 1000 then fmt='(i3)'
+   if ndata ge 1000 and ndata lt 10000 then fmt='(i4)'
+   if ndata ge 10000 and ndata lt 100000 then fmt='(i5)'
+
+   xyouts,pos[0]+0.018, pos[3]-0.046, "Points = "+string(ndata, $
+      format=fmt)+"", $
+      charsize=0.65,color=ncolor,alignment=0,/normal
+            
+ENDIF ELSE BEGIN
+
+   ;print, 'Plotting empty panel for ', sub_title
+   IF units EQ 'dBZ' THEN BEGIN
+     plot, POSITION=pos, [xymin,xymax],[xymin,xymax], /nodata, /noerase, $
+       xticklen=+0.04, yticklen=0.04, xticks=5, yticks=5, $
+       xminor=5, yminor=5, xtickname=['15','25','35','45','55','65'], $
+       ytickname=['15','25','35','45','55','65'], title=sub_title, $
+       ytitle=y_title, $ ;'TRMM PR (attenuation corrected), dBZ', $
+       xtitle=x_title, $
+       color=ncolor,charsize=0.7
+   ENDIF ELSE BEGIN
+     plot,POSITION=pos,[xymin,xymax],[xymin,xymax], /nodata, $
+       xticklen=+0.04, yticklen=0.04,/noerase, $
+       xticks=5,xrange=[xymin,xymax],yrange=[xymin,xymax], $
+       /xlog, /ylog, $
+       yticks=5, xminor=5,yminor=5, $
+       title=sub_title, $
+       ytitle=y_title, $ ;'TMI rainrate, '+units, $
+       xtitle=x_title, $
+       color=ncolor,charsize=0.7
+   ENDELSE  
+   xyouts,pos[0]+0.018, pos[3]-0.1, "NO DATA POINTS IN CATEGORY", $
+      charsize=0.6,color=ncolor,alignment=0,/normal
+
+ENDELSE
+end                     
+
+;------------------------------------------------------------------------------
+
+
+pro plot_scatter_by_sfc_type3x3_ps, file, title, siteID, prz_in, gvz_in, $
+                             raintype_in, sfctype_in, npts, idxBySfcType, $
+                             MIN_XY=minXY, MAX_XY=maxXY, UNITS=units, $
+                             Y_TITLE=y_title, X_TITLE=x_title
+
+;orig_device = !D.NAME
+;set_plot,/copy,'ps'
+;device,filename=file, /color,bits=8,$
+;/inches,xoffset=0.25,yoffset=0.55,xsize=8.,ysize=10.
+
+; Set up color table
+;
+common colors, r_orig, g_orig, b_orig, r_curr, g_curr, b_curr ;load color table
+loadct, 33, /SILENT
+ncolor=!d.table_size-1
+ncolor=255
+red=bytarr(256) & green=bytarr(256) & blue=bytarr(256)
+red=r_curr & green=g_curr & blue=b_curr
+red(0)=255 & green(0)=255 & blue(0)=255
+red(1)=215 & green(1)=215 & blue(1)=215  ;gray background
+red(ncolor)=0 & green(ncolor)=0 & blue(ncolor)=0 
+tvlct,red,green,blue
+
+xyouts, 0.5, 9.3/10., title, alignment=0.5, color=ncolor, /normal, $
+        charsize=1., Charthick=1.5
+ 
+;bblevstr = ['  N/A ', 'Below BB', 'Within BB', 'Above BB']
+SfcType_str = [' N/A ', 'Ocean', ' Land', 'Coast']
+typestr = ['Any Type, ', 'Stratiform, ', 'Convective, ']
+
+xs = 1.9/8.  &  ys = 1.9/10.   ; plot panel size
+x0 = 0.5/8.  &  y0 = 1.5/10.    ; lower left plot panel position
+x00 = 0.7/8.  &  y00 = 0.8/10. ; spacing between panels
+
+pos = fltarr(4)
+
+for i=0,2 do begin     ;row, count from bottom -- also, sfctype type
+
+  proxim = i+1     ; 1='Ocean', 2='Land', 3='Coast'
+  IF ( npts[i] GT 0 ) THEN BEGIN
+     idxthislev = idxBySfcType[i,0:npts[i]-1]
+     prz = prz_in[idxthislev]
+     gvz = gvz_in[idxthislev]
+     raintype = raintype_in[idxthislev]
+     sfctype = sfctype_in[idxthislev]
+  ENDIF ;ELSE print, 'no points at BB proximity level ', SfcType_str[proxim]
+
+ ; don't indicate Ku-corrected for TMI plots
+  s2ku4sca = 0
+
+  for j=0,2 do begin   ;column, count from left -- also, any/strat/conv rain type index
+    raincat = j        ; 0=Any, 1=Stratiform, 2=Convective
+    x1=x0+j*(xs+x00)
+    y1=y0+i*(ys+y00)  
+    x2=x1+xs
+    y2=y1+ys          
+    pos[*] = [x1,y1,x2,y2]
+    subtitle = typestr[raincat]+SfcType_str[proxim]
+    IF ( npts[i] GT 0 ) THEN BEGIN
+      IF j EQ 0 THEN idxsub = WHERE( sfctype EQ proxim, nfound ) $
+      ELSE idxsub = WHERE( sfctype EQ proxim AND raintype EQ raincat, nfound )
+      IF ( nfound GT 0 ) THEN BEGIN
+         prsub = prz[idxsub] & gvsub = gvz[idxsub]
+         plot_scat_ps, pos, subtitle, siteID, gvsub, prsub, nfound, $
+                       S2KU=s2ku4sca, MIN_XY=minXY, MAX_XY=maxXY, UNITS=units, $
+                       Y_TITLE=y_title, X_TITLE=x_title
+      ENDIF ELSE BEGIN
+         print, 'No points in rain category ', typestr[raincat], SfcType_str[proxim]
+         plot_scat_ps, pos, subtitle, siteID, MIN_XY=minXY, MAX_XY=maxXY, $
+                       UNITS=units, Y_TITLE=y_title, X_TITLE=x_title
+      ENDELSE
+    ENDIF ELSE BEGIN
+     ; print, 'no points at BB proximity level ', SfcType_str[proxim]
+      plot_scat_ps, pos, subtitle, siteID, MIN_XY=minXY, MAX_XY=maxXY, $
+                    UNITS=units, Y_TITLE=y_title, X_TITLE=x_title
+    ENDELSE
+  endfor
+
+endfor
+
+;device,/close
+;SET_PLOT, orig_device
+end

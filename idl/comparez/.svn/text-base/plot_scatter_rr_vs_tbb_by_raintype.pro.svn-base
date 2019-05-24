@@ -1,0 +1,203 @@
+;+
+; Copyright © 2016, United States Government as represented by the
+; Administrator for The National Aeronautics and Space Administration.
+; All Rights Reserved.
+;
+; DESCRIPTION:
+;       Contains two modules used to produce a multiplot with scatter plots of
+;       GMI and GV rainrate data versus GMI instrument calibrated temperature,
+;       one for each breakout of the data by rain type.  Output is to the
+;       display.
+;
+;       Primary Module:  plot_scatter_rr_vs_tbb_by_raintype, title, pr_rr_in, $
+;                            gv_rr_in, Tbb_in, raintype_in, $
+;                            UNITS=units, Y_TITLE=y_title, X_TITLE=x_title
+;       Internal Module: plot_rr_tbb_scat, pos, sub_title, siteID, ncolor, $
+;                            charsz, xdata, ydata, ndata, UNITS=units, $
+;                            Y_TITLE=y_title_in, X_TITLE=x_title_in
+;
+; HISTORY:
+;       Bob Morris/GPM GV (SAIC), August, 2016
+;       - Created from plot_scatter_by_sfc_type3x3.pro.
+;
+;
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+;-
+;------------------------------------------------------------------------------
+
+pro plot_rr_tbb_scat, pos, sub_title, siteID, ncolor, charsz, xdata, ydata, $
+                      ndata, UNITS=units, Y_TITLE=y_title_in, X_TITLE=x_title_in
+
+IF N_ELEMENTS(units) NE 1 THEN units = 'mm/h'
+IF N_ELEMENTS(x_title_in) NE 1 THEN x_title = 'GMI 89v Tbb (K)' $
+   ELSE x_title = x_title_in
+IF N_ELEMENTS(y_title_in) NE 1 THEN y_title = 'GMI rainate, mm/h' $
+   ELSE y_title = y_title_in
+
+yminRR = 0.1
+ymaxRR = 100.0
+xminTbb = 90.0
+xmaxTbb = 300.0
+
+IF ( N_PARAMS() GT 5 ) THEN BEGIN
+
+   ; --- Define symbol as filled circle
+   A = FINDGEN(17) * (!PI*2/16.)
+   USERSYM, COS(A), SIN(A), /FILL
+
+   plot, POSITION=pos, xdata[0:ndata-1], ydata[0:ndata-1], $
+         xticklen=+0.04, yticklen=0.04, /noerase, $
+         xrange=[xminTbb,xmaxTbb],yrange=[yminRR,ymaxRR], /ylog, $
+         xticks=7, yticks=5, xminor=3, yminor=5, xtickinterval=30, $
+         title=sub_title, ytitle=y_title, xtitle=x_title, $
+         color=ncolor,charsize=charsz, psym=1, symsize=0.5
+
+    ; plot lines of +/- 1, 5, and 25 mm/hr error
+;     FOR loc = xymin, xymax DO BEGIN
+;        FOR expon = 0,2 DO BEGIN
+;           oplot,[loc+errlimit^expon,loc+errlimit^expon+1],[loc,loc+1],color=ncolor, LINESTYLE=2
+;           oplot,[loc,loc+1],[loc+errlimit^expon,loc+errlimit^expon+1],color=ncolor, LINESTYLE=2
+;        ENDFOR
+;     ENDFOR
+
+   oplot,[xminTbb,xmaxTbb],[yminRR,ymaxRR],color=ncolor
+
+   IF ndata GT 4 THEN BEGIN
+      correlation = correlate(xdata[0:ndata-1],ydata[0:ndata-1])
+
+      xyouts,pos[0]+0.03, pos[3]-0.025, "Correlation = "+string(correlation, $
+            format='(f4.2)')+"", $
+            charsize=charsz,color=ncolor,alignment=0,/normal
+
+      standard_error, xdata[0:ndata-1],ydata[0:ndata-1], STD_ERROR=std_error
+
+      xyouts,pos[0]+0.03, pos[3]-0.038, "Std. error = "+string(std_error, $
+            format='(f4.2)')+"", $
+            charsize=charsz,color=ncolor,alignment=0,/normal
+
+   ENDIF
+
+   if ndata ge 0 and ndata lt 10 then fmt='(i1)'
+   if ndata ge 10 and ndata lt 100 then fmt='(i2)'
+   if ndata ge 100 and ndata lt 1000 then fmt='(i3)'
+   if ndata ge 1000 and ndata lt 10000 then fmt='(i4)'
+   if ndata ge 10000 and ndata lt 100000 then fmt='(i5)'
+
+   xyouts,pos[0]+0.03, pos[3]-0.051, "Points = "+string(ndata, $
+         format=fmt)+"", charsize=charsz,color=ncolor,alignment=0,/normal
+            
+ENDIF ELSE BEGIN
+  ; print, 'Plotting empty panel for ', sub_title
+   plot, POSITION=pos, [xminTbb,xmaxTbb], [yminRR,ymaxRR], /nodata, $
+         xticklen=+0.04, yticklen=0.04,/noerase, $
+         xrange=[xminTbb,xmaxTbb],yrange=[yminRR,ymaxRR], $
+         /ylog, xticks=7, yticks=5, xminor=3, yminor=5, xtickinterval=30, $
+         title=sub_title, ytitle=y_title, xtitle=x_title, $
+         color=ncolor,charsize=charsz
+
+   xyouts, pos[0]+0.05, pos[3]-0.15, "NO DATA POINTS IN CATEGORY", $
+         charsize=charsz, color=ncolor, alignment=0, /normal
+
+ENDELSE
+end                     
+
+;------------------------------------------------------------------------------
+
+
+pro plot_scatter_rr_vs_tbb_by_raintype, title, siteID, prz_in, gvz_in, $
+                              Tbb_in, raintype_in, winsiz, UNITS=units, $
+                              Y_TITLE=y_title, X_TITLE=x_title
+
+orig_device = !D.NAME
+
+; set proportions of WINDOW
+xsize=9.75
+ysize=6.5 ;9.75
+
+; work from a default window size of 375 (PPI_SIZE keyword in parent procedure),
+; set character size based on 0.75 for the default size, increment by 0.25
+winfac = winsiz/5
+charsz = 0.25*(winsiz/125)
+
+; Set up color table
+;
+common colors, r_orig, g_orig, b_orig, r_curr, g_curr, b_curr ;load color table
+loadct, 33, /SILENT
+ncolor=!d.table_size-1
+ncolor=255
+forecolor=[0,0,0]   ; change to 255's for white plot on black background
+backcolor=[255,255,255]-forecolor
+red=bytarr(256) & green=bytarr(256) & blue=bytarr(256)
+red=r_curr & green=g_curr & blue=b_curr
+;red(0)=255 & green(0)=255 & blue(0)=255
+red(0)=backcolor[0] & green(0)=backcolor[1] & blue(0)=backcolor[2]
+red(1)=215 & green(1)=215 & blue(1)=215  ;gray background
+red(ncolor)=forecolor[0] & green(ncolor)=forecolor[1] & blue(ncolor)=forecolor[2]
+tvlct,red,green,blue
+
+WINDOW, 5, TITLE=title, XSIZE=xsize*winfac, YSIZE=ysize*winfac, RETAIN=2
+
+;bblevstr = ['  N/A ', 'Below BB', 'Within BB', 'Above BB']
+SfcType_str = [' GMI ', siteID]
+typestr = ['Any Type, ', 'Stratiform, ', 'Convective, ']
+
+xs = 0.25  &  ys = xs * xsize / ysize
+x0 = 0.075  &  y0 = x0 ;* xsize / ysize
+x00 = 0.067  &  y00 = 0.09
+
+pos = fltarr(4)
+
+for i=0,1 do begin     ;row, count from bottom -- also, RR type
+
+;  proxim = i+1     ; 1='Ocean', 2='Land', 3='Coast'
+;  IF ( npts[i] GT 0 ) THEN BEGIN
+;     idxthislev = idxBySfcType[i,0:npts[i]-1]
+   IF i eq 0 THEN BEGIN
+      prz = prz_in
+      y_title = 'GMI rainate, mm/h'
+   ENDIF ELSE BEGIN
+      prz = gvz_in
+      y_title = siteID + ' rainate, mm/h'
+   ENDELSE
+   gvz = Tbb_in
+   raintype = raintype_in ;[idxthislev]
+;     sfctype = sfctype_in ;[idxthislev]
+;  ENDIF
+
+ ; don't indicate Ku-corrected for TMI plots
+;  s2ku4sca = 0
+
+  for j=0,2 do begin   ;column, count from left; also, strat/conv raintype index
+    raincat = j ;+1   ; 1=Stratiform, 2=Convective
+    x1=x0+j*(xs+x00)
+    y1=y0+i*(ys+y00)  
+    x2=x1+xs
+    y2=y1+ys          
+    pos[*] = [x1,y1,x2,y2]
+    subtitle = typestr[raincat] +SfcType_str[i]
+;    IF ( npts[i] GT 0 ) THEN BEGIN
+      IF j EQ 0 THEN idxsub = WHERE( prz gt 0.0, nfound ) $
+      ELSE idxsub = WHERE( prz gt 0.0 AND raintype EQ raincat, nfound )
+      IF ( nfound GT 0 ) THEN BEGIN
+         prsub = prz[idxsub] & gvsub = gvz[idxsub]
+         plot_rr_tbb_scat, pos, subtitle, siteID, ncolor, charsz, gvsub, prsub, $
+                    nfound, UNITS=units, Y_TITLE=y_title, X_TITLE=x_title
+      ENDIF ELSE BEGIN
+         print, 'No Tbb/RR scatter points in category ', $
+                typestr[raincat], SfcType_str[i]
+         plot_rr_tbb_scat, pos, subtitle, siteID, ncolor, charsz, $
+                    UNITS=units, Y_TITLE=y_title, X_TITLE=x_title
+      ENDELSE
+;    ENDIF ELSE BEGIN
+;      print, 'no points at BB proximity level'
+;      plot_rr_tbb_scat, pos, subtitle, siteID, ncolor, charsz, $
+;                 UNITS=units, Y_TITLE=y_title, X_TITLE=x_title
+;    ENDELSE
+  endfor
+
+endfor
+
+SET_PLOT, orig_device
+end

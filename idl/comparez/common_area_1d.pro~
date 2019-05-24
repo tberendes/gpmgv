@@ -1,0 +1,245 @@
+;+
+; Copyright © 2008, United States Government as represented by the
+; Administrator for The National Aeronautics and Space Administration.
+; All Rights Reserved.
+;
+; AUTHOR:
+;       Liang Liao
+;       Caelum Research Corp.
+;       Code 975, NASA/GSFC
+;       Greenbelt, MD 20771
+;       Phone: 301-614-5718
+;       E-mail: lliao@priam.gsfc.nasa.gov
+;
+; DESCRIPTION:
+; Given matching data arrays of PR and GV radar reflectivity, rain type, and
+; underlying surface type, produces multiple stratifications of the reflectivity
+; data based broken out by rain type and surface type in new data arrays.
+;  - The size of the input arrays varies in this version, and the data are in a
+;    1-D array).
+;
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+;-
+
+pro common_area_1d, S_1c21=s_pr0, S_2a25=s_pr, S_2a55=s_gv, $
+                    C_1c21=c_pr0, C_2a25=c_pr, C_2a55=c_gv, $
+                    T_1c21=t_pr0, T_2a25=t_pr, T_2a55=t_gv, $
+                    O_1c21=o_pr0, O_2a25=o_pr, O_2a55=o_gv, $ 
+                    L_1c21=l_pr0, L_2a25=l_pr, L_2a55=l_gv, $
+                    M_1c21=m_pr0, M_2a25=m_pr, M_2a55=m_gv
+                
+common PR_GV, rainType_2a23, rainType_2a54, dbz_1c21, dbz_2a25, dbz_2a55, oceanFlag , $
+              epsilon,epsilon_0
+common sample, start_sample,sample_range,num_range,dbz_min,dbz_max 
+common cumulation, s_npt, c_npt, t_npt, o_npt, l_npt, m_npt, $
+                   s_pr0_tot, s_pr_tot, s_gv_tot, c_pr0_tot, c_pr_tot, c_gv_tot, $
+                   t_pr0_tot, t_pr_tot, t_gv_tot, o_pr0_tot, o_pr_tot, o_gv_tot, $
+                   l_pr0_tot, l_pr_tot, l_gv_tot, m_pr0_tot, m_pr_tot, m_gv_tot  ,$
+                   t_epsilon,t_epsilon0,o_epsilon,o_epsilon0,l_epsilon,l_epsilon0,$
+                   m_epsilon,m_epsilon0,s_epsilon,s_epsilon0,c_epsilon,c_epsilon0
+ 
+s_count = 0L
+c_count = 0L
+t_count = 0L
+o_count = 0L
+l_count = 0L
+m_count = 0L
+
+npts_in = N_ELEMENTS(dbz_2a25)
+
+s_space0 = fltarr(npts_in)
+c_space0 = fltarr(npts_in)
+t_space0 = fltarr(npts_in)
+o_space0 = fltarr(npts_in)
+l_space0 = fltarr(npts_in)
+m_space0 = fltarr(npts_in)
+
+s_space = fltarr(npts_in)
+c_space = fltarr(npts_in)
+t_space = fltarr(npts_in)
+o_space = fltarr(npts_in)
+l_space = fltarr(npts_in)
+m_space = fltarr(npts_in)
+
+s_ground = fltarr(npts_in)
+c_ground = fltarr(npts_in)
+t_ground = fltarr(npts_in)
+o_ground = fltarr(npts_in)
+l_ground = fltarr(npts_in)
+m_ground = fltarr(npts_in)
+
+for i=0, npts_in-1 do begin
+  
+  if (dbz_1c21[i] ge (dbz_min)) and (dbz_1c21[i] le (dbz_max+30)) and $
+     (dbz_2a25[i] ge (dbz_min)) and (dbz_2a55[i] ge (dbz_min-5.)) and $
+    ;(dbz_2a25[i] ge (dbz_min)) and (dbz_2a55[i] ge (dbz_min-0.)) and $
+     (dbz_2a25[i] le (dbz_max+30)) and (dbz_2a55[i] le (dbz_max+30)) then begin
+     
+    if (rainType_2a23[i] eq 1) and (rainType_2a54[i] eq 1) then begin
+      
+      s_space0[s_count] = dbz_1c21[i]
+      s_space[s_count] = dbz_2a25[i]
+      s_ground[s_count] = dbz_2a55[i]
+      s_count = s_count + 1
+      
+      s_pr0_tot[s_npt] = dbz_1c21[i]
+      s_pr_tot[s_npt] = dbz_2a25[i]
+      s_gv_tot[s_npt] = dbz_2a55[i]
+;      s_epsilon[s_npt]=epsilon[i]
+;      s_epsilon0[s_npt]=epsilon_0[i]
+      s_npt = s_npt + 1
+
+    endif
+    
+    if (rainType_2a23[i] eq 2) and (rainType_2a54[i] eq 2) then begin
+      
+      c_space0[c_count] = dbz_1c21[i]
+      c_space[c_count] = dbz_2a25[i]
+      c_ground[c_count] = dbz_2a55[i]
+      c_count = c_count + 1
+      
+      c_pr0_tot[c_npt] = dbz_1c21[i]
+      c_pr_tot[c_npt] = dbz_2a25[i]
+      c_gv_tot[c_npt] = dbz_2a55[i]
+      
+;      c_epsilon[c_npt]=epsilon[i]
+;      c_epsilon0[c_npt]=epsilon_0[i]
+      c_npt = c_npt + 1
+
+    endif
+    
+    t_space0[t_count] = dbz_1c21[i]
+    t_space[t_count] = dbz_2a25[i]
+    t_ground[t_count] = dbz_2a55[i]
+    t_count = t_count + 1
+    
+    t_pr0_tot[t_npt] = dbz_1c21[i]
+    t_pr_tot[t_npt] = dbz_2a25[i]
+    t_gv_tot[t_npt] = dbz_2a55[i]
+    
+;    t_epsilon[t_npt]=epsilon[i]
+;    t_epsilon0[t_npt]=epsilon_0[i]
+    t_npt = t_npt + 1
+    
+; ..............................................
+
+    if (oceanFlag[i] eq 0) then begin
+      
+      o_space0[o_count] = dbz_1c21[i]
+      o_space[o_count] = dbz_2a25[i]
+      o_ground[o_count] = dbz_2a55[i]
+      o_count = o_count + 1
+      
+      o_pr0_tot[o_npt] = dbz_1c21[i]
+      o_pr_tot[o_npt] = dbz_2a25[i]
+      o_gv_tot[o_npt] = dbz_2a55[i]
+      
+;      o_epsilon[o_npt]=epsilon[i]
+;      o_epsilon0[o_npt]=epsilon_0[i]
+      o_npt = o_npt + 1
+      
+    endif
+    
+    if (oceanFlag[i] eq 10) then begin
+      
+      l_space0[l_count] = dbz_1c21[i]
+      l_space[l_count] = dbz_2a25[i]
+      l_ground[l_count] = dbz_2a55[i]
+      l_count = l_count + 1
+      
+      l_pr0_tot[l_npt] = dbz_1c21[i]
+      l_pr_tot[l_npt] = dbz_2a25[i]
+      l_gv_tot[l_npt] = dbz_2a55[i]
+      
+;      l_epsilon[l_npt]=epsilon[i]
+;      l_epsilon0[l_npt]=epsilon_0[i]
+      l_npt = l_npt + 1
+      
+    endif
+    
+    if (oceanFlag[i] ne 0) and (oceanFlag[i] ne 10) then begin
+      
+      m_space0[m_count] = dbz_1c21[i]
+      m_space[m_count] = dbz_2a25[i]
+      m_ground[m_count] = dbz_2a55[i]
+      m_count = m_count + 1
+      
+      m_pr0_tot[m_npt] = dbz_1c21[i]
+      m_pr_tot[m_npt] = dbz_2a25[i]
+      m_gv_tot[m_npt] = dbz_2a55[i]
+      
+;      m_epsilon[m_npt]=epsilon[i]
+;      m_epsilon0[m_npt]=epsilon_0[i]
+      m_npt = m_npt + 1
+      
+    endif
+
+    
+  endif
+  
+endfor
+
+if s_count gt 0 then begin
+   s_pr0 = s_space0[0:(s_count-1)]
+   s_pr = s_space[0:(s_count-1)]
+   s_gv = s_ground[0:(s_count-1)]
+endif else begin
+   s_pr0 = -99.
+   s_pr = -99.
+   s_gv = -99.
+endelse 
+ 
+if c_count gt 0 then begin
+   c_pr0 = c_space0[0:(c_count-1)]
+   c_pr = c_space[0:(c_count-1)]
+   c_gv = c_ground[0:(c_count-1)]
+endif else begin
+   c_pr0 = -99.
+   c_pr = -99.
+   c_gv = -99.
+endelse
+
+if t_count gt 0 then begin
+   t_pr0 = t_space0[0:(t_count-1)]
+   t_pr = t_space[0:(t_count-1)]
+   t_gv = t_ground[0:(t_count-1)]
+endif else begin
+   t_pr0 = -99.
+   t_pr = -99.
+   t_gv = -99.
+endelse   
+
+if o_count gt 0 then begin
+   o_pr0 = o_space0[0:(o_count-1)]
+   o_pr = o_space[0:(o_count-1)]
+   o_gv = o_ground[0:(o_count-1)]
+endif else begin
+   o_pr0 = -99.
+   o_pr = -99.
+   o_gv = -99.
+endelse
+
+if l_count gt 0 then begin
+   l_pr0 = l_space0[0:(l_count-1)]
+   l_pr = l_space[0:(l_count-1)]
+   l_gv = l_ground[0:(l_count-1)]
+endif else begin
+   l_pr0 = -99.
+   l_pr = -99.
+   l_gv = -99.
+endelse   
+
+if m_count gt 0 then begin
+   m_pr0 = m_space0[0:(m_count-1)]
+   m_pr = m_space[0:(m_count-1)]
+   m_gv = m_ground[0:(m_count-1)]
+endif else begin
+   m_pr0 = -99.
+   m_pr = -99.
+   m_gv = -99.
+endelse   
+   
+ 
+end

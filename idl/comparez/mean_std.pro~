@@ -1,0 +1,52 @@
+;+
+; Copyright © 2008, United States Government as represented by the
+; Administrator for The National Aeronautics and Space Administration.
+; All Rights Reserved.
+;
+; AUTHOR:
+;       Liang Liao
+;       Caelum Research Corp.
+;       Code 975, NASA/GSFC
+;       Greenbelt, MD 20771
+;       Phone: 301-614-5718
+;       E-mail: lliao@priam.gsfc.nasa.gov
+;
+; DESCRIPTION
+; -- Give the mean and standard deviation for 1-dim data 
+;
+; -- If Keyword of `log_flag' is defined, the data are processed
+;    in the nonlinear space, i.e., Z (not dBZ) space (mm**6/m**3).
+;    Only is it used in radar reflectivity factor.
+;
+;
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+;-
+
+pro mean_std, data, MEAN=mean, STD=std, LOG=log_flag
+
+sizeOf_data = SIZE(data,/dimension)
+
+IF keyword_set(log_flag) THEN BEGIN
+
+  data = 10.^(0.1*data)
+  
+  mean = Total(data)/float(sizeOf_data) 
+   
+  x2 = Total(data^2)/float(sizeOf_data)
+  std = sqrt(x2-mean^2)
+  
+  mean = 10.*ALOG10(mean)
+  std = 10.*ALOG10(std)
+  
+ENDIF ELSE BEGIN  
+
+  mean = Total(data)/float(sizeOf_data)
+
+  x2 = Total(data^2)/float(sizeOf_data)
+  std = sqrt(x2-mean^2)
+  
+ENDELSE
+
+end

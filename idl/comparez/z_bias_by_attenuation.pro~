@@ -1,0 +1,86 @@
+PRO z_bias_by_attenuation, PCT_ABV_THRESH=pctAbvThresh,  $
+                           S2KU=s2ku,                    $
+                           NAME_ADD=name_add,            $
+                           NCSITEPATH=ncsitepath,        $
+                           NCFILELIST=ncfilelist,        $
+                           BBWIDTH=bbwidth,              $
+                           SAVEFILE=savefile
+
+IF N_ELEMENTS(ncfilelist) EQ 1 THEN BEGIN
+  ; find out how many files are listed in the file 'ncfilelist'
+   command = 'wc -l ' + ncfilelist
+   spawn, command, result
+   nf = LONG(result[0])
+   IF (nf LE 0) THEN BEGIN
+      print, "" 
+      print, "No files listed in ", ncfilelist
+      print, " -- Exiting."
+      GOTO, errorExit
+   ENDIF
+   IF N_ELEMENTS(ncsitepath) EQ 1 THEN ncpre=ncsitepath+'/' ELSE ncpre=''
+   prfiles = STRARR(nf)
+   OPENR, ncunit, ncfilelist, ERROR=err, /GET_LUN
+   ; initialize the variables into which file records are read as strings
+   dataPR = ''
+   ncnum=0
+   WHILE NOT (EOF(ncunit)) DO BEGIN 
+     ; get GRtoPR filename
+      READF, ncunit, dataPR
+      ncfull = ncpre + STRTRIM(dataPR,2)
+      IF FILE_TEST(ncfull, /REGULAR) THEN BEGIN
+         prfiles[ncnum] = ncfull
+         ncnum++
+      ENDIF ELSE message, "File "+ncfull+" does not exist!", /INFO
+   ENDWHILE  ; each matchup file to process in control file
+   CLOSE, ncunit
+   nf = ncnum
+   IF (nf LE 0) THEN BEGIN
+      print, "" 
+      message, "No files listed in "+ncfilelist+" were found.", /INFO
+      print, " -- Exiting."
+      GOTO, errorExit
+   ENDIF
+   IF STREGEX(prfiles[0], '.6.') EQ -1 THEN verstr='v7' ELSE verstr='v6'
+ENDIF ELSE BEGIN
+   IF N_ELEMENTS(ncsitepath) EQ 1 THEN BEGIN
+      IF STREGEX( ncsitepath, '(.6.|.7.)' ) EQ -1 THEN BEGIN
+         print, ""
+         print, "No version specification in NCSITEPATH parameter, try again!"
+         GOTO, errorExit
+      ENDIF ELSE BEGIN
+         ; find the TRMM product version and wildcard file pattern
+         IF STREGEX(ncsitepath, '.6.') EQ -1 THEN verstr='v7' ELSE verstr='v6'
+      ENDELSE
+   ENDIF ELSE BEGIN
+      print, "" & print, "Running PR v7 matchups only." & print, ""
+      verstr='v7'
+   ENDELSE
+ENDELSE
+
+IF ( N_ELEMENTS(pctAbvThresh) NE 1 ) THEN BEGIN
+   print, "Defaulting to 100 for PERCENT BINS ABOVE THRESHOLD."
+   pctAbvThresh = 100
+ENDIF ELSE BEGIN
+   IF ( pctAbvThresh LT 0 OR pctAbvThresh GT 100 ) THEN BEGIN
+      print, "Invalid value for PCT_ABV_THRESH: ", pctAbvThresh, $
+             ", must be between 0 and 100."
+      print, "Defaulting to 100 for PERCENT BINS ABOVE THRESHOLD."
+      pctAbvThresh = 100
+   ENDIF
+END      
+pctStr = ', '+STRING(pctAbvThresh, FORMAT='(i0)')+'% Above Threshold'
+
+hist9 = HISTOGRAM_GEO_MATCH_ZDIFF_BY_PR_ATTEN( PCT_ABV_THRESH=pctAbvThresh,  $
+                                               S2KU=s2ku,                    $
+                                               NAME_ADD=name_add,            $
+                                               NCSITEPATH=ncsitepath,        $
+                                               NCFILELIST=ncfilelist,        $
+                                               BBWIDTH=bbwidth)
+
+IF N_ELEMENTS(savefile) EQ 1 THEN SAVE, hist9, FILE=savefile
+
+plot_scatter_prgrdiff_vs_pratten, 'PR-GR Z bias by PR attenuation, '+verstr+pctStr, 'All', $
+                                  hist9, 500
+
+errorExit:
+end
