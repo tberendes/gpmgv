@@ -160,7 +160,8 @@ SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 #PPS_VERSION="V05A"
 PPS_VERSION="V06A"
 export PPS_VERSION
-PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
+#PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
+PARAMETER_SET=3  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
 export PARAMETER_SET
 INSTRUMENT_ID="DPR"       # type of DPR 2A products to process: DPR only, herein
 export INSTRUMENT_ID
@@ -385,9 +386,7 @@ dateStart=`echo $ymdstart | awk \
 #dateStart='2018-12-23'
 #dateEnd='2019-01-01'
 
-#dateStart='2014-03-18'
-#dateEnd='2019-04-15'
-dateStart='2019-04-13'
+dateStart='2014-03-18'
 dateEnd='2019-05-24'
 
 echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
