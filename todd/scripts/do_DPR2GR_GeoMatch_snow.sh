@@ -155,7 +155,8 @@ export rundate
 
 PPS_VERSION="V06A"         # specifies default PPS version of products to process
 export PPS_VERSION
-PARAMETER_SET=2  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
+#PARAMETER_SET=2  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
+PARAMETER_SET=3  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
 export PARAMETER_SET
 INSTRUMENT_ID="DPR"        # default type of DPR 2A products to process: DPR, Ka, or Ku
 export INSTRUMENT_ID
@@ -380,10 +381,7 @@ dateStart=`echo $ymdstart | awk \
 #dateStart='2018-12-23'
 #dateEnd='2019-01-01'
 
-#dateStart='2014-03-18'
-#dateEnd='2019-04-22'
-
-dateStart='2019-04-13'
+dateStart='2014-03-18'
 dateEnd='2019-05-24'
 
 echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE

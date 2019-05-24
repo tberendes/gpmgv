@@ -124,7 +124,8 @@ SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
 PPS_VERSION=V06A        # default DPRGMI product version to be processed
 export PPS_VERSION
-PARAMETER_SET=1  # default set of polar2dprgmi_snow parameters (polar2dprgmi_snow .bat file) in use
+#PARAMETER_SET=1  # default set of polar2dprgmi_snow parameters (polar2dprgmi_snow .bat file) in use
+PARAMETER_SET=2  # default set of polar2dprgmi_snow parameters (polar2dprgmi_snow .bat file) in use
 export PARAMETER_SET
 MAX_DIST=250  # max radar-to-subtrack distance for overlap
 
@@ -329,10 +330,7 @@ dateStart=`echo $ymdstart | awk \
 #dateStart='2015-05-27'
 #dateEnd='2015-05-28'
 
-#dateStart='2014-03-01'
-#dateEnd='2019-04-09'
-
-dateStart='2019-04-13'
+dateStart='2014-03-01'
 dateEnd='2019-05-24'
 
 
