@@ -273,7 +273,7 @@ if [ "$SKIP_NEWRAIN" = "0" ]
     if [ -s $SQL_BIN ]
       then
         echo "\i $SQL_BIN" | psql -a -d gpmgv | tee -a $LOG_FILE 2>&1
-      else5
+      else
         echo "ERROR: SQL command file $SQL_BIN not found, exiting." | tee -a $LOG_FILE
         echo "" | tee -a $LOG_FILE
         exit 1
@@ -290,7 +290,7 @@ fi
 # to the past 30 days (unless overridden by specifying dateStart and dateEnd).
 # Note that startDate through endDate-1 are inclusive, whereas events for
 # endDate itself are (typically) excluded.
-24
+
 # re-used file to hold list of dates to run
 datelist=${TMP_DIR}/doCOMBGeoMatchSelectedDates_temp.txt
 
