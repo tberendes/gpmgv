@@ -89,12 +89,12 @@ for i = 0, nfields-1 do begin
         'HCLASS': rslfields[i] = 'HC'
         'SQI':    rslfields[i] = 'SQ'
         ; Some variations.
-# TAB 5/14/19, changes in CPOL format make this unnecessary
-#        'REFLECTIVITY': begin
-#            ; Todd Berendes, UAH, 11/6/18
-#            ;  DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
-#            if site_name eq 'Gunn_Pt' then rslfields[i] = 'CZ' else rslfields[i] = 'DZ'
-#         end
+; TAB 5/14/19, changes in CPOL format make this unnecessary
+;        'REFLECTIVITY': begin
+;            ; Todd Berendes, UAH, 11/6/18
+;            ;  DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
+;            if site_name eq 'Gunn_Pt' then rslfields[i] = 'CZ' else rslfields[i] = 'DZ'
+;         end
 
         'REFLECTIVITY': rslfields[i] = 'DZ'
         'CORRECTED_REFLECTIVITY': rslfields[i] = 'CZ'
@@ -108,7 +108,7 @@ for i = 0, nfields-1 do begin
             ;  DARW Gunn_Pt site has both uncorrected and corrected PH
             if site_name eq 'Gunn_Pt' then rslfields[i] = 'UP' else rslfields[i] = 'PH'
          end
-#        'DIFFERENTIAL_PHASE': rslfields[i] = 'PH'
+;        'DIFFERENTIAL_PHASE': rslfields[i] = 'PH'
         'CROSS_CORRELATION_RATIO': rslfields[i] = 'RH'
         'SPECIFIC_DIFFERENTIAL_PHASE': rslfields[i] = 'KD'
         'HYDROCLASS': rslfields[i] = 'HC'
