@@ -125,7 +125,7 @@ SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 PPS_VERSION=V06A        # default DPRGMI product version to be processed
 export PPS_VERSION
 #PARAMETER_SET=1  # default set of polar2dprgmi_snow parameters (polar2dprgmi_snow .bat file) in use
-PARAMETER_SET=4  # default set of polar2dprgmi_snow parameters (polar2dprgmi_snow .bat file) in use
+PARAMETER_SET=1  # default set of polar2dprgmi_snow parameters (polar2dprgmi_snow .bat file) in use
 export PARAMETER_SET
 MAX_DIST=250  # max radar-to-subtrack distance for overlap
 
@@ -290,7 +290,7 @@ fi
 # to the past 30 days (unless overridden by specifying dateStart and dateEnd).
 # Note that startDate through endDate-1 are inclusive, whereas events for
 # endDate itself are (typically) excluded.
-
+24
 # re-used file to hold list of dates to run
 datelist=${TMP_DIR}/doCOMBGeoMatchSelectedDates_temp.txt
 
@@ -331,8 +331,11 @@ dateStart=`echo $ymdstart | awk \
 #dateEnd='2015-05-28'
 
 #dateStart='2014-03-01'
-dateStart='2017-08-27'
-dateEnd='2019-05-24'
+
+#dateStart='2017-08-27'
+#dateEnd='2019-05-24'
+dateStart='2019-05-03'
+dateEnd='2019-05-04'
 
 
 echo "Running GRtoDPRGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
