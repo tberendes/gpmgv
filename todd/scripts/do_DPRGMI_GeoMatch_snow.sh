@@ -334,7 +334,7 @@ dateStart=`echo $ymdstart | awk \
 
 #dateStart='2017-08-27'
 #dateEnd='2019-05-24'
-dateStart='2019-05-21'
+dateStart='2019-05-22'
 dateEnd='2019-06-12'
 
 
