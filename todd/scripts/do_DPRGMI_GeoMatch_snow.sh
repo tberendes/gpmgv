@@ -273,7 +273,7 @@ if [ "$SKIP_NEWRAIN" = "0" ]
     if [ -s $SQL_BIN ]
       then
         echo "\i $SQL_BIN" | psql -a -d gpmgv | tee -a $LOG_FILE 2>&1
-      else
+      else5
         echo "ERROR: SQL command file $SQL_BIN not found, exiting." | tee -a $LOG_FILE
         echo "" | tee -a $LOG_FILE
         exit 1
@@ -334,8 +334,8 @@ dateStart=`echo $ymdstart | awk \
 
 #dateStart='2017-08-27'
 #dateEnd='2019-05-24'
-dateStart='2019-05-03'
-dateEnd='2019-05-04'
+dateStart='2019-05-21'
+dateEnd='2019-06-12'
 
 
 echo "Running GRtoDPRGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
