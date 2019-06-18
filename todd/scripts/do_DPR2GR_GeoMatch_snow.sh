@@ -156,7 +156,7 @@ export rundate
 PPS_VERSION="V06A"         # specifies default PPS version of products to process
 export PPS_VERSION
 #PARAMETER_SET=2  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
-PARAMETER_SET=3  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
+PARAMETER_SET=4  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
 export PARAMETER_SET
 INSTRUMENT_ID="DPR"        # default type of DPR 2A products to process: DPR, Ka, or Ku
 export INSTRUMENT_ID
