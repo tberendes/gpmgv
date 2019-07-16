@@ -434,7 +434,7 @@ if [ "FORCE_MATCH" = "0" ]
 	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
 	WHERE g.pathname is null order by 1 ;"
 	
-  else
+  else 
     # don't check for previous runs, leave off g.pathname is null clause
 	DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
 	"SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
