@@ -406,7 +406,7 @@ fi
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
 # hardcode dates for DARW 
-#cat /home/tberendes/darw_new_rainy_dates.txt > $datelist
+cat /home/tberendes/darw_new_rainy_dates.txt > $datelist
 
 echo " "
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
