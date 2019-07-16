@@ -161,7 +161,8 @@ SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 PPS_VERSION="V06A"
 export PPS_VERSION
 #PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
-PARAMETER_SET=5  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
+# 2=12dbz, 3=15dbz, 4=18dbz, 5=20dbz
+PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
 export PARAMETER_SET
 INSTRUMENT_ID="DPR"       # type of DPR 2A products to process: DPR only, herein
 export INSTRUMENT_ID
@@ -415,7 +416,7 @@ if [ "FORCE_MATCH" = "0" ]
 	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
 	LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
 	   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
-	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' ) \
+	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' and g.geo_match_version=${GEO_MATCH_VERSION} ) \
 	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
 	WHERE g.pathname is null order by 1 ;"`
 	
@@ -429,7 +430,7 @@ if [ "FORCE_MATCH" = "0" ]
 	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
 	LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
 	   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
-	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' ) \
+	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' and g.geo_match_version=${GEO_MATCH_VERSION} ) \
 	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
 	WHERE g.pathname is null order by 1 ;"
 	
@@ -445,7 +446,7 @@ if [ "FORCE_MATCH" = "0" ]
 	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
 	LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
 	   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
-	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' ) \
+	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' and g.geo_match_version=${GEO_MATCH_VERSION} ) \
 	JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
  # Check LEFT OUTER clause...    
 fi
@@ -471,7 +472,8 @@ echo ''
 #echo "2014-12-29" > $datelist
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
-
+# hardcode dates for DARW 
+#cat /home/tberendes/darw_new_rainy_dates.txt > $datelist
 
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE

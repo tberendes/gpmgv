@@ -413,6 +413,8 @@ JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 #echo "2015-01-06" > $datelist   # edit/uncomment to just run a specific date
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
+# hardcode dates for DARW 
+#cat /home/tberendes/darw_new_rainy_dates.txt > $datelist
 
 # darw test
 #echo "2014-12-29" > $datelist

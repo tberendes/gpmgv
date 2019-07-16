@@ -405,6 +405,8 @@ fi
 #echo "2015-02-19" > $datelist
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
+# hardcode dates for DARW 
+#cat /home/tberendes/darw_new_rainy_dates.txt > $datelist
 
 echo " "
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
@@ -459,7 +461,7 @@ if [ "FORCE_MATCH" = "0" ]
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
      left outer join geo_match_product b on \
        (c.event_num=b.event_num and d.version=b.pps_version \
-        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET}) \
+        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} and b.geo_match_version=${GEO_MATCH_VERSION}) \
        JOIN rainy100inside100 r on (c.event_num=r.event_num) \
       where cast(nominal at time zone 'UTC' as date) = '${thisdate}' \
        and b.pathname is null and d.version = '$PPS_VERSION' \
@@ -481,7 +483,7 @@ else
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
      left outer join geo_match_product b on \
        (c.event_num=b.event_num and d.version=b.pps_version \
-        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET}) \
+        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} and b.geo_match_version=${GEO_MATCH_VERSION}) \
        JOIN rainy100inside100 r on (c.event_num=r.event_num) \
       where cast(nominal at time zone 'UTC' as date) = '${thisdate}' \
        and d.version = '$PPS_VERSION' \
