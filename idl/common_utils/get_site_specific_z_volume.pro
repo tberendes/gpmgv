@@ -116,8 +116,8 @@ ENDIF ELSE BEGIN
 ;       ENDIF ELSE field1 = uf_field
        ENDIF ELSE IF siteID EQ 'DARW' THEN BEGIN
            CASE uf_field OF
-             'RP' : field1 = 'RR'         ; CPOL/CP2 RR maps to RP in matchups
-             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP       
+;             'RP' : field1 = 'RR'         ; CPOL/CP2 RR maps to RP in matchups
+;             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP       
              ELSE : field1 = uf_field
            ENDCASE
        ENDIF ELSE field1 = uf_field
