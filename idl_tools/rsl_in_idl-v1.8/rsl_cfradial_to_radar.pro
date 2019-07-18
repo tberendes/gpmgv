@@ -598,7 +598,7 @@ endif else begin
 	time_id = NCDF_VARID(cfid,'time')
     NCDF_ATTGET, cfid, time_id , 'units', start_time
     time_coverage_start = string(start_time)
-    time_coverage_start = time_coverage_start.Substring(16)
+    time_coverage_start = time_coverage_start.Substring(15)
     print, 'missing time_coverage_start using time units attribute'
     print, time_coverage_start
 endelse
@@ -798,11 +798,51 @@ endif
 radar.volume.sweep.ray.h.gate_size = gate_size
 radar.volume.sweep.ray.h.range_bin1 = range_bin1
 
-ncdf_varget,cfid,'latitude',latitude
-ncdf_varget,cfid,'longitude',longitude
+; another hack for DARW data:
+
+loc = where(varnames eq 'latitude', count)
+if count gt 0 then begin
+	ncdf_varget,cfid,'latitude',latitude
+endif else begin
+	loc = where(gattnames eq 'origin_latitude',count)
+	if count gt 0 then begin
+	    ncdf_attget,cfid,'origin_latitude',val,/global
+	    latitude = float(val)
+	    print, 'missing latitude, using origin_latitude attribute...'
+	    print, latitude
+	endif
+endelse
+
+loc = where(varnames eq 'longitude', count)
+if count gt 0 then begin
+	ncdf_varget,cfid,'longitude',longitude
+endif else begin
+	loc = where(gattnames eq 'origin_longitude',count)
+	if count gt 0 then begin
+	    ncdf_attget,cfid,'origin_longitude',val,/global
+	    longitude = float(val)
+	    print, 'missing longitude using origin_longitude attribute...'
+	    print, longitude
+	endif
+endelse
+	
 loc = where(varnames eq 'altitude',count)
-if count gt 0 then ncdf_varget,cfid,'altitude',altitude $
-    else altitude = 0.
+if count gt 0 then begin
+	ncdf_varget,cfid,'altitude',altitude
+endif else begin
+	loc = where(gattnames eq 'origin_altitude',count)
+	if count gt 0 then begin
+	    ncdf_attget,cfid,'origin_altitude',val,/global
+	    altitude = float(val)
+	    print, 'missing altitude using origin_altitude attribute...'
+	    print, altitude
+	endif else begin
+		altitude = 0.
+	endelse
+endelse
+
+;if count gt 0 then ncdf_varget,cfid,'altitude',altitude $
+;    else altitude = 0.
 
 if n_elements(latitude) gt 1 then latitude = latitude[0]
 if n_elements(longitude) gt 1 then longitude = longitude[0]
