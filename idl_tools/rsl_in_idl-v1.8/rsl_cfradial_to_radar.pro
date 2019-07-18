@@ -807,6 +807,7 @@ endif else begin
 	loc = where(gattnames eq 'origin_latitude',count)
 	if count gt 0 then begin
 	    ncdf_attget,cfid,'origin_latitude',val,/global
+	    val = string(val)
 	    print, val
 	    READS, val, latitude, format='(F8.4)' 
 	    print, 'missing latitude, using origin_latitude attribute...'
@@ -821,6 +822,7 @@ endif else begin
 	loc = where(gattnames eq 'origin_longitude',count)
 	if count gt 0 then begin
 	    ncdf_attget,cfid,'origin_longitude',val,/global
+	    val = string(val)
 	    print, val
 	    READS, val, longitude, format='(F8.4)' 
 	    print, 'missing longitude using origin_longitude attribute...'
@@ -835,6 +837,7 @@ endif else begin
 	loc = where(gattnames eq 'origin_altitude',count)
 	if count gt 0 then begin
 	    ncdf_attget,cfid,'origin_altitude',val,/global
+	    val = string(val)
 	    print, val
 	    READS, val, altitude, format='(F8.4)' 
 	    print, 'missing altitude using origin_altitude attribute...'
