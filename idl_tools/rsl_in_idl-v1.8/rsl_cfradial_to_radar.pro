@@ -597,7 +597,8 @@ endif else begin
 ; missing time_coverage_start variable, use attribute of time dimension
 	time_id = NCDF_VARID(cfid,'time')
     NCDF_ATTGET, cfid, time_id , 'units', start_time
-    time_coverage_start = string(start_time).Substring(16)
+    time_coverage_start = string(start_time)
+    time_coverage_start = time_coverage_start.Substring(16)
     print, 'missing time_coverage_start using time units attribute'
     print, time_coverage_start
 endelse
