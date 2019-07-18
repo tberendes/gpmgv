@@ -588,8 +588,20 @@ if count1 gt 0 && count2 gt 0 && n_elements(n_points) gt 0 then begin
     n_gates_vary = 'true'
 endif else n_gates_vary = 'false'
 
-ncdf_varget,cfid,'time_coverage_start',time_coverage_start
-time_coverage_start = string(time_coverage_start)
+; hack for DARW CPOL files with missing time_coverage_start variable
+loc = where(varnames eq 'time_coverage_start', count)
+if count ne 0 then begin
+	ncdf_varget,cfid,'time_coverage_start',time_coverage_start
+	time_coverage_start = string(time_coverage_start)
+endif else begin
+; missing time_coverage_start variable, use attribute of time dimension
+	time_id = NCDF_VARID(cfid,'time')
+    NCDF_ATTGET, cfid, time_id , 'units', start_time
+    time_coverage_start = string(start_time).Substring(16)
+    print, 'missing time_coverage_start using time units attribute'
+    print, time_coverage_start
+endelse
+
 year=0L & month=0L & day=0L & hour=0L & minute=0L & second=0.0
 reads, time_coverage_start, year, month, day, hour, minute, second, $
     format='(I4,5(X,I2))'
