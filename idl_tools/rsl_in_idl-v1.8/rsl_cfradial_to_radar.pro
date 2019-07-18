@@ -833,7 +833,7 @@ endif else begin
 	loc = where(gattnames eq 'origin_altitude',count)
 	if count gt 0 then begin
 	    ncdf_attget,cfid,'origin_altitude',val,/global
-	    READS, val, altitude format='(F8.4)' 
+	    READS, val, altitude, format='(F8.4)' 
 	    print, 'missing altitude using origin_altitude attribute...'
 	    print, altitude
 	endif else begin
