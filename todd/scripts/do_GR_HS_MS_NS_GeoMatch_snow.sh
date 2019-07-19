@@ -471,10 +471,10 @@ echo ''
 # darwin test:
 #echo "2014-12-29" > $datelist
 
-#echo "2014-03-10" > $datelist
+echo "2014-03-10" > $datelist
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
 # hardcode dates for DARW 
-cat /home/tberendes/darw_new_rainy.txt > $datelist
+#cat /home/tberendes/darw_new_rainy.txt > $datelist
 
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
