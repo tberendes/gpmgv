@@ -889,8 +889,9 @@ IF KEYWORD_SET(batch_save) THEN buffer=1 ELSE buffer=0
 ; TAB 11/13/17 added fourth dimension for above BB convective
 
 have_Hist = { GRZSH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
- 		    ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
- 		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+; Comment these out for DARW, ZDR not present
+; 		    ZDRBLWH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
+; 		    ZDRABVH : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SWDP : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW25 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
                SW50 : [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], $
