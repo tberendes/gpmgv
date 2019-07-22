@@ -162,7 +162,7 @@ PPS_VERSION="V06A"
 export PPS_VERSION
 #PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
 # 2=12dbz, 3=15dbz, 4=18dbz, 5=20dbz
-PARAMETER_SET=4  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
+PARAMETER_SET=5  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
 export PARAMETER_SET
 INSTRUMENT_ID="DPR"       # type of DPR 2A products to process: DPR only, herein
 export INSTRUMENT_ID
