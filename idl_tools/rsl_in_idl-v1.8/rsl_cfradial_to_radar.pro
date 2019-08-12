@@ -588,7 +588,8 @@ if count1 gt 0 && count2 gt 0 && n_elements(n_points) gt 0 then begin
     n_gates_vary = 'true'
 endif else n_gates_vary = 'false'
 
-; hack for DARW CPOL files with missing time_coverage_start variable
+; TAB hack for DARW CPOL files with missing time_coverage_start variable
+; use global attribute instead
 loc = where(varnames eq 'time_coverage_start', count)
 if count ne 0 then begin
 	ncdf_varget,cfid,'time_coverage_start',time_coverage_start
@@ -798,7 +799,8 @@ endif
 radar.volume.sweep.ray.h.gate_size = gate_size
 radar.volume.sweep.ray.h.range_bin1 = range_bin1
 
-; another hack for DARW data:
+; TAB another hack for DARW CPOL data, missing latitude, longitude and altitude variables
+; read from global attributes:
 
 loc = where(varnames eq 'latitude', count)
 if count gt 0 then begin
