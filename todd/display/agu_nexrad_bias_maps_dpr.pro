@@ -141,6 +141,9 @@ ENDCASE
 ; File format is like:
 ; RADAR_ID|V3bias|numV3|V4bias|numV4|radarLatitude|radarLongitude
 
+print, 'Todd test ***********'
+; actaully, changed to RADAR_ID|V4bias|numV4|V3bias|numV3|radarLatitude|radarLongitude
+
 num = 0
 WHILE ~ EOF(unit) DO BEGIN
    READF, unit, filestr
