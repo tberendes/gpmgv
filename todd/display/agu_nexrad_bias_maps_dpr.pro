@@ -294,7 +294,8 @@ tvlct, 255B,255B,255B, 5 ; color #5 is white
 ;   src2=1
 ;ENDIF ELSE BEGIN
    src1=0  ; do PR, DPR, PR-DPR
-   src2=3
+;   src2=3
+   src2=2
 ;ENDELSE
 
 for isource = src1,src2 do begin
