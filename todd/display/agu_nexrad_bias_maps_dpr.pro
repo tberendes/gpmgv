@@ -166,8 +166,10 @@ WHILE ~ EOF(unit) DO BEGIN
    num++
 ENDWHILE
 
-sym_string_pre = STRCOMPRESS(STRING(V3diffs),/REMOVE_ALL)
-sym_string_post = STRCOMPRESS(STRING(V4diffs),/REMOVE_ALL)
+;sym_string_pre = STRCOMPRESS(STRING(V3diffs),/REMOVE_ALL)
+;sym_string_post = STRCOMPRESS(STRING(V4diffs),/REMOVE_ALL)
+sym_string_pre = STRCOMPRESS(STRING(V4diffs),/REMOVE_ALL)
+sym_string_post = STRCOMPRESS(STRING(V3diffs),/REMOVE_ALL)
 sym_string_chg = STRCOMPRESS(STRING(diffchg),/REMOVE_ALL)
 
 max_sym = (MAX(ABS(V3diffs)) > MAX(ABS(V4diffs))) > MAX(ABS(diffchg)) + 0.05
