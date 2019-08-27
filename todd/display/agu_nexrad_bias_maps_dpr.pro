@@ -322,7 +322,8 @@ for isource = src1,src2 do begin
           print, "Plotting " + new_version + "-" + old_version + " bias"
           ;print, "Plotting ITE109-V4 bias change"
           ;cbarTitle = 'GR-DPR bias change (dBZ) from ' + new_version + ' to ' + old_version
-          cbarTitle = 'GR-DPR bias change (dBZ) from ' + old_version + ' to ' + new_version
+          ;cbarTitle = 'GR-DPR bias change (dBZ) from ' + old_version + ' to ' + new_version
+          cbarTitle = 'GR-DPR bias change (dBZ) ' + new_version + ' - ' + old_version
           end
       3 : begin
           sym2 = sym_string_pre
