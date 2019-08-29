@@ -416,7 +416,7 @@ JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
 # hardcode dates for DARW 
-cat /home/tberendes/darw_new_rainy.txt > $datelist
+#cat /home/tberendes/darw_new_rainy.txt > $datelist
 
 # darw test
 #echo "2014-12-29" > $datelist
