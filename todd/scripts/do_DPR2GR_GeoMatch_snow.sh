@@ -421,6 +421,8 @@ JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 # darw test
 #echo "2014-12-29" > $datelist
 
+cat /home/tberendes/reunion_rainy_dates.txt > $datelist
+
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE
 echo " "
