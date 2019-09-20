@@ -411,6 +411,8 @@ fi
 # hardcode dates for DARW 
 #cat /home/tberendes/darw_new_rainy.txt > $datelist
 
+cat /home/tberendes/reunion_rainy_dates.txt > $datelist
+
 echo " "
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE
