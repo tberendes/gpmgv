@@ -154,7 +154,10 @@ export TMP_DIR
 #GEO_NC_DIR=${DATA_DIR}/netcdf/geo_match
 BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
-SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
+
+#SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
+# special rainy100inside100 script to get smaller scale events
+SQL_BIN=${BIN_DIR}/rainCases20in100kmAddNewEvents.sql
 
 #PPS_VERSION="V04A"        # specifies which PPS version of products to process
 #PPS_VERSION="V05A"
@@ -475,10 +478,10 @@ echo ''
 
 #echo "2014-03-10" > $datelist
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
-# hardcode dates for DARW 
+# hardcode dates for DARW, La Reunion, and special dates
 #cat /home/tberendes/darw_new_rainy.txt > $datelist
-
-cat /home/tberendes/reunion_rainy_dates.txt > $datelist
+#cat /home/tberendes/reunion_rainy_dates.txt > $datelist
+cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE

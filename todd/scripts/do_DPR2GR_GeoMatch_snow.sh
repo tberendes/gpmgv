@@ -147,7 +147,10 @@ export TMP_DIR
 #GEO_NC_DIR=${DATA_DIR}/netcdf/geo_match
 BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
-SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
+
+#SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
+# special rainy100inside100 script to get smaller scale events
+SQL_BIN=${BIN_DIR}/rainCases20in100kmAddNewEvents.sql
 
 rundate=`date -u +%y%m%d`
 LOG_FILE=${LOG_DIR}/do_DPR2GR_GeoMatch_snow.${rundate}.log
@@ -418,10 +421,11 @@ JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 # hardcode dates for DARW 
 #cat /home/tberendes/darw_new_rainy.txt > $datelist
 
-# darw test
 #echo "2014-12-29" > $datelist
-
-cat /home/tberendes/reunion_rainy_dates.txt > $datelist
+# hardcode dates for DARW, La Reunion, and special dates
+#cat /home/tberendes/darw_new_rainy.txt > $datelist
+#cat /home/tberendes/reunion_rainy_dates.txt > $datelist
+cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE

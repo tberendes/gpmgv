@@ -120,7 +120,10 @@ export LOG_DIR
 #BIN_DIR=${GV_BASE_DIR}/scripts/matchup
 BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
-SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
+
+#SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
+# special rainy100inside100 script to get smaller scale events
+SQL_BIN=${BIN_DIR}/rainCases20in100kmAddNewEvents.sql
 
 PPS_VERSION=V06A        # default DPRGMI product version to be processed
 export PPS_VERSION
@@ -408,10 +411,10 @@ fi
 #echo "2015-02-19" > $datelist
 
 #cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
-# hardcode dates for DARW 
+# hardcode dates for DARW, La Reunion, and special dates
 #cat /home/tberendes/darw_new_rainy.txt > $datelist
-
-cat /home/tberendes/reunion_rainy_dates.txt > $datelist
+#cat /home/tberendes/reunion_rainy_dates.txt > $datelist
+cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
 
 echo " "
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
