@@ -159,7 +159,7 @@ export rundate
 PPS_VERSION="V06A"         # specifies default PPS version of products to process
 export PPS_VERSION
 # 2=12dbz, 3=15dbz, 4=18dbz, 5=20dbz
-PARAMETER_SET=2  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
+PARAMETER_SET=3  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
 export PARAMETER_SET
 INSTRUMENT_ID="DPR"        # default type of DPR 2A products to process: DPR, Ka, or Ku
 export INSTRUMENT_ID
@@ -425,7 +425,9 @@ JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 # hardcode dates for DARW, La Reunion, and special dates
 #cat /home/tberendes/darw_new_rainy.txt > $datelist
 #cat /home/tberendes/reunion_rainy_dates.txt > $datelist
-cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
+
+#cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
+cat /home/tberendes/dual_radar/NPOL_KGSP_dates.txt > $datelist
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE

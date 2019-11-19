@@ -414,7 +414,9 @@ fi
 # hardcode dates for DARW, La Reunion, and special dates
 #cat /home/tberendes/darw_new_rainy.txt > $datelist
 #cat /home/tberendes/reunion_rainy_dates.txt > $datelist
-cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
+
+#cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
+cat /home/tberendes/dual_radar/NPOL_KGSP_dates.txt > $datelist
 
 echo " "
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
