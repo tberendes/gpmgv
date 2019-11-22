@@ -1,0 +1,57 @@
+pro get_2a23_swath_metadata_driver
+
+IF N_ELEMENTS(outpath) NE 1 THEN BEGIN
+   CASE GETENV('HOSTNAME') OF
+      'ds1-gpmgv.gsfc.nasa.gov' : BEGIN
+             datadirroot = '/data/gpmgv'
+             outpath=datadirroot+'/tmp'
+             END
+      'ws1-gpmgv.gsfc.nasa.gov' : BEGIN
+             datadirroot = '/data'
+             outpath=datadirroot+'/tmp'
+             END
+      ELSE : BEGIN
+             print, "Unknown system ID, setting outpath to user's home directory"
+             datadirroot = '~/data'
+             outpath='~'
+             END
+   ENDCASE
+   PRINT, "Assigning default output file path: ", outpath
+ENDIF
+
+prpath = datadirroot+"/prsubsets/2A23/"  ; full path to 2A23 product directory
+quote="'"
+
+; create and open the OUTPUT file
+rainmetafile = outpath+"/2A23_RAIN_META_SWATH.unl"
+GET_LUN, UNLUNIT
+OPENW, UNLUNIT, rainmetafile
+
+SQLSTR='echo "\t \a \\\select a.filename, b.filename, c.filename, d.filename from orbit_subset_product a join orbit_subset_product b using (orbit,subset) join orbit_subset_product c using (orbit,subset) join orbit_subset_product d using (orbit,subset)  where a.product_type='+quote+'2A12'+quote+' and b.product_type = '+quote+'2A23'+quote+' and c.product_type='+quote+'2A12'+quote+' and d.product_type = '+quote+'2A23'+quote+' and a.version=7 and a.version=b.version and c.version=6 and c.version=d.version and a.subset='+quote+'sub-GPMGV1'+quote+' limit 5;" | psql -q -d gpmgv'
+
+print, sqlstr
+SPAWN, sqlstr, event_data, COUNT=num_events
+
+IF ( num_events LT 1 ) THEN BEGIN
+   message, "No/too few rows returned from DB query: "+STRING(num_events,FORMAT='(I0)')
+ENDIF ELSE BEGIN
+  ; load the Total row data into arrays
+   PRINT, 'total number of events = ', num_events
+ENDELSE
+
+print, event_data
+
+FOR i=0,num_events-1 DO BEGIN
+   parsed = strsplit( event_data[i], '|', /extract )
+   file7 = parsed[1]   ; version 7 2A23 file name
+   file6 = parsed[3]   ; version 6 2A23 file name
+   print, get_2a23_swath_metadata( prpath+file7 )
+   print, get_2a23_swath_metadata( prpath+file6 )
+   printf, UNLUNIT, get_2a23_swath_metadata( prpath+file6 )
+   printf, UNLUNIT, get_2a23_swath_metadata( prpath+file7 )
+ENDFOR
+
+errorExit:
+FREE_LUN, UNLUNIT
+
+end

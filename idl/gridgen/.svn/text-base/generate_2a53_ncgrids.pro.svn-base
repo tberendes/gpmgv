@@ -1,0 +1,123 @@
+;+
+; Copyright © 2008, United States Government as represented by the
+; Administrator for The National Aeronautics and Space Administration.
+; All Rights Reserved.
+;
+; DESCRIPTION
+;       Reads rain rate grids from a 2A-53 GV radar file, resamples the
+;       2 km resolution grid to 4 km, and writes the 4km grid to the supplied
+;       GV netCDF file.  Also computes textual and unix ticks version of the
+;       radar volume scan time start, and writes these and the GV site ID and
+;       lat/lon location to the netCDF file.
+;
+; AUTHOR:
+;       Bob Morris, NASA/GSFC, GPM GV (SAIC)
+;
+; HISTORY:
+;       6/2007 by Bob Morris, GPM GV (SAIC)
+;       - Created from generate_2a55_ncgrids.pro routine
+;       12/2009 by Bob Morris, GPM GV (SAIC)
+;       - Modified parsing of file name to accommodate prefix prepended onto the
+;         2A53 file copy.
+;
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+;-
+
+pro generate_2a53_ncgrids, file_2A53, ncgvfile
+
+common groundSite, event_num, siteID, siteLong, siteLat
+common time,       event_time, volscantime, orbit
+
+; 'Include' file for grid dimensions, spacings
+@grid_def.inc
+
+; We need the following to prepare analyzed output for REBINing to NX x NY grid.
+; Must have a grid whose dimensions are even multiples of NX and NY.
+x_cut = (NX * REDUCFAC) - 1  ; upper x array index to extract from hi-res grid
+                             ; prior to REBINning to NX x NY grid
+y_cut = (NY * REDUCFAC) - 1  ; as for x_cut, but upper y array index
+
+
+;
+; Open the netcdf file for writing, and fill passed/common parameters
+;
+ncid = NCDF_OPEN( ncgvfile, /WRITE )
+NCDF_VARPUT, ncid, 'site_ID', siteID
+NCDF_VARPUT, ncid, 'site_lat', siteLat
+NCDF_VARPUT, ncid, 'site_lon', siteLong
+
+rainRate=intarr(151,151,20)  ; just define with any value and dimension 
+;
+; Read 2a53 raintype and volume scan times
+; and parse date information from input 2a53 file name
+;
+read_2a53, file_2a53, RAIN=rainRate, hour, minute, second
+
+;help, rainRate
+gvSurfRain=rainRate/10. >  0.00001  ;is the scale factor in the vData?
+;help, gvSurfRain
+
+; -- Resampling 2x2 km 2a53 to 4x4 km grid.
+; -- Extract an even number of horizontal points (150) for REBINning to 75x75
+
+; CURRENT GPM GV VALIDATION NETWORK 2A53 FILE IS LIMITED TO ONE VOLUME.
+; OTHERWISE, WE WOULD HAVE TO WORK THRU THE VOLUME SCAN TIMES HERE TO FIND THE
+; ONE COINCIDENT WITH THE PR OVERPASS TIME, WHICH WOULD HAVE TO BE PASSED INTO
+; THIS ROUTINE. OTHER POSSIBILITIES ARE TO OBTAIN THE COINCIDENT VOLUME FROM
+; THE 2A-52 PRODUCT, OR FROM MATCHING THE VOS TIME METADATA IN THE gpmgv
+; DATABASE TO THE SITE OVERPASS TIME AND INCLUDING THE CORRESPONDING VOLUME
+; NUMBER IN THE CONTROL FILE INFORMATION
+
+nvol = 0
+
+rainRate_new = gvSurfRain[0:x_cut,0:y_cut,nvol]
+rainRate_new = REBIN(rainRate_new, NX, NY)
+
+NCDF_VARPUT, ncid, 'rainRate', rainRate_new       ; grid data
+NCDF_VARPUT, ncid, 'have_rainRate', DATA_PRESENT  ; data presence flag
+
+; -- get the yr (yy), mon, day of the volscan from the filename
+file_only_2a53 =  file_basename(file_2a53)
+len_file_only_2a53 = STRLEN(file_only_2a53)
+startpos = strpos(file_only_2a53,'2A53.')+6
+file_fields2get = STRMID(file_only_2a53,startpos,len_file_only_2a53-startpos)
+
+void = ' '
+site = ' '
+year = ' '  
+month = 0  & day = 0
+
+reads, file_fields2get, year, month, day, site, $
+       format='(i2,i2,i2,3x,a4)'
+
+; -- get the hr, min, and sec fields of our volume scan = nvol
+hrs = hour[nvol]
+min = minute[nvol]
+sec = second[nvol]
+
+  if hrs ne -99 then begin
+    dtimestring = fmtdatetime(year, month, day, hrs, min, sec)
+    print, file_only_2a53,"|",dtimestring,"+00"
+  endif else begin
+    dtimestring = '1970-01-01 00:00:00'
+    print, file_only_2a53,"|",dtimestring,"+00"
+  endelse
+
+dateparts = strsplit(dtimestring, '-', /extract)
+yyyy = dateparts[0]
+;print, "yr mo day hrs min sec: ", yyyy, month, day, hrs, min, sec
+
+voltimeticks = unixtime(long(yyyy), long(month), long(day), hrs, min, sec)
+volscantime = voltimeticks
+;print, "UNIX time ticks at volscan begin = ", voltimeticks
+;NCDF_VARPUT, ncid, 'beginTimeOfVolumeScan', voltimeticks
+;NCDF_VARPUT, ncid, 'abeginTimeOfVolumeScan', dtimestring
+
+NCDF_CLOSE, ncid
+
+end
+
+@read_2a53.pro
+@unixtime.pro

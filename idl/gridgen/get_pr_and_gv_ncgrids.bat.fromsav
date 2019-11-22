@@ -1,0 +1,6 @@
+PRO_DIR = getenv("IDL_PRO_DIR")
+cd, PRO_DIR
+cd, '..'
+DATESTAMP = GETENV("RUNDATE")
+FILES4NC = GETENV("GETMYGRIDS")
+get_pr_and_gv_ncgrids, DATESTAMP, FILES4NC

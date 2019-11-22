@@ -1,0 +1,332 @@
+;+
+; Copyright © 2016, United States Government as represented by the
+; Administrator for The National Aeronautics and Space Administration.
+; All Rights Reserved.
+;
+; grid_2agprof_fields.pro        Morris/GPM GV/SAIC      May 2016
+;
+; DESCRIPTION:
+; ------------
+; Reads latitude, longitude, and rain rate fields from a 2AGPROF data file,
+; resamples rain rate to a 4x4 km grid centered on an overpassed ground radar,
+; applies a rain rate threshold to flag rainy points, and computes statistics
+; of rain field over (a) the entire 300x300 km grid, and (b) for those
+; points within 100 km of the radar (i.e., the grid center).  Writes the
+; individual statistic values and data and overpass event identifiers to a
+; delimited text file for loading into the gpmgv database.  These
+; identifiers are key values within the database and cannot be changed
+; without making corresponding changes or additions to the database.
+;
+; HISTORY:
+; --------
+; Morris - May 11 2016 - Created from extract2adprmeta.pro.
+; Morris - Feb 22 2017 - Modified to work with V5 GPROF data changes.
+;
+; NOTES:
+; ------
+;
+; 1) Information on rain flag (flagPrecip).
+;  - flagPrecip (4-byte integer, array size: nray x nscan):;    Precipitation or no precipitation.;           1   No precipitation;           2   Precipitation;       -9999   Missing value
+;
+;
+; EMAIL QUESTIONS OR COMMENTS TO:
+;       <Bob Morris> kenneth.r.morris@nasa.gov
+;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
+;
+;-
+
+function grid_2agprof_fields, file_2aGPROF, saveFile, dist, INSTRUMENT, $
+                              res, GridN, NEAREST_NEIGHBOR=nearest_neighbor
+
+; "Include" file for GPROF-product-specific parameters (i.e., RAYSPERSCAN):
+@dpr_params.inc
+
+common sample, start_sample_in, sample_range_in
+common time, TRMM_TIME, hh_gv, mm_gv, ss_gv, year, month, day, orbit
+common groundSite, event_num, siteID, siteLong, siteLat, nsites
+
+print, ""
+idx100 = where( dist LE 100.0, count100 )
+if ( count100 EQ 0 ) then begin
+   print, "ERROR in grid_2agprof_fields(): can't find points <= 100km in dist array provided."
+   status = 'extract2A23meta: ERROR IN DIST ARRAY'
+   goto, errorExit
+endif
+;print, "In grid_2agprof_fields.pro: siteID, siteLong, siteLat, orbit = ", $
+;        siteID, siteLong, siteLat, orbit
+
+;
+; Read/extract 2aGPROF Rain Rate, lat, lon
+;
+   status = read_2agprof_hdf5( file_2AGPROF, /READ_ALL )
+
+   s=SIZE(status, /TYPE)
+   CASE s OF
+      8 :         ; expected structure to be returned, just proceed
+      2 : BEGIN
+          IF ( status EQ -1 ) THEN BEGIN
+            PRINT, ""
+            message, "ERROR reading fields from ", file_2AGPROF
+;            PRINT, "Skipping events for orbit = ", orbit
+;            skip_gr_events, lun0, nsites
+;            PRINT, ""
+;            GOTO, errorExit
+          ENDIF ELSE message, "Unknown type returned from read_2agprof_hdf5."
+          END
+       ELSE : message, "Passed argument type not an integer or a structure."
+   ENDCASE
+
+
+; extract pointer data fields into Lats and Lons arrays
+   Lons = (*status.S1.ptr_datasets).Longitude
+   Lats = (*status.S1.ptr_datasets).Latitude
+
+;  extract pointer data fields into scLats and scLons arrays
+   scLons =  (*status.S1.ptr_scStatus).SClongitude
+   scLats =  (*status.S1.ptr_scStatus).SClatitude
+
+; NOTE THAT THE ARRAYS ARE IN (RAY,SCAN) COORDINATES.  NEED TO ACCOUNT FOR THIS
+; WHEN ASSIGNING "gmi_master_idx" ARRAY INDICES.
+
+; - get dimensions (#footprints, #scans) from Lons array
+   s = SIZE(Lons, /DIMENSIONS)
+   IF N_ELEMENTS(s) EQ 2 THEN BEGIN
+      IF s[0] EQ status.s1.SWATHHEADER.NUMBERPIXELS THEN NPIXEL_GMI = s[0] $
+        ELSE message, 'Mismatch in data array dimension NUMBERPIXELS.'
+      IF s[1] EQ status.s1.SWATHHEADER.MAXIMUMNUMBERSCANSTOTAL $
+        THEN NSCANS_GMI = s[1] $
+        ELSE message, 'Mismatch in data array dimension NUMBERSCANS.', /INFO
+NSCANS_GMI = s[1]
+   ENDIF ELSE message, "Don't have a 2-D array for Longitude, quitting."
+
+; extract pointer data fields into instrument data arrays
+   pixelStatus = (*status.S1.ptr_datasets).pixelStatus
+   convectPrecipFraction = (*status.S1.ptr_datasets).convectPrecipFraction
+   convectivePrecipitation = (*status.S1.ptr_datasets).convectivePrecipitation
+   surfacePrecipitation = (*status.S1.ptr_datasets).surfacePrecipitation
+;   PoP = (*status.S1.ptr_datasets).probabilityOfPrecip
+
+   ; get the number of "rays", scans in the dataset
+   SAMPLE_RANGE = NSCANS_GMI
+   RAYSPERSCAN = NPIXEL_GMI
+;help, SAMPLE_RANGE, NPIXEL_GMI
+; set a binary rain flag value based on rain rate at/exceeeding 0.25 mm/h
+   rainFlag = FIX(surfacePrecipitation GE 0.25)
+
+; define rain type categories based on convectPrecipFraction (V04 and earlier)
+; or convectivePrecipitation/surfacePrecipitation (V05 and later).  If V04 or
+; earlier, then convectivePrecipitation will be returned as the string 'N/A'.
+; If V05 or later, obsolete convectPrecipFraction variable will be returned as
+; the string 'N/A'.
+
+   IF SIZE(convectivePrecipitation, /TYPE) EQ 7 THEN BEGIN
+      ; If convectivePrecipitation is STRING (type code 7) then it is <=V04A,
+      ; and we use convectPrecipFraction in rain type determination
+      rainType = convectPrecipFraction     ; create same-size variable
+      ; initialize all points to stratiform
+      rainType[*,*] = RainType_stratiform
+      ; set below-zero values to missing rain type
+      idxrrmiss = WHERE(convectPrecipFraction LT 0.0, countrrmiss)
+      IF countrrmiss GT 0 THEN rainType[idxrrmiss] = RainType_missing
+      ; set points with fraction>0.5 to convective
+      idxrrconv = WHERE(convectPrecipFraction GT 0.5, countrrconv)
+      IF countrrconv GT 0 THEN rainType[idxrrconv] = RainType_convective
+   ENDIF ELSE BEGIN
+      ; V05 or later, we use convectivePrecipitation in rain type determination
+      rainType = convectivePrecipitation     ; create same-size variable
+      ; initialize all points to stratiform
+      rainType[*,*] = RainType_stratiform
+      ; set below-zero values to missing rain type
+      idxrrmiss = WHERE(convectivePrecipitation LT 0.0 $
+                     OR surfacePrecipitation LT 0.0, countrrmiss)
+      IF countrrmiss GT 0 THEN rainType[idxrrmiss] = RainType_missing
+      idxrrgood = WHERE(convectivePrecipitation GE 0.0 $
+                    AND surfacePrecipitation GT 0.001, countrrgood)
+      idxrrconv = WHERE(convectivePrecipitation[idxrrgood]/surfacePrecipitation[idxrrgood] $
+                        GT 0.5, countrrconv)
+      IF countrrconv GT 0 THEN rainType[idxrrgood[idxrrconv]] = RainType_convective
+   ENDELSE
+   help, countrrconv, countrrgood
+
+; free the remaining memory/pointers in data structure
+   free_ptrs_in_struct, status
+
+; define arrays sufficient to hold data for the maximum possible number of GPROF
+; footprints within our analysis region
+xdata = fltarr(9000)
+ydata = fltarr(9000)
+zdata_rainType = fltarr(9000)
+zdata_rainflag = intarr(9000)
+zdata_sfcRainRate = fltarr(9000)
+
+;******************************************************************************
+; Here is where we now start looping over the list of sites overpassed in
+; this orbit. Need to reinitialize variables first (as a good practice).
+;******************************************************************************
+
+for siteN = 0, nsites - 1 do begin
+
+   print, format='("Processing 2A-",a0," precip. metadata for ",a0,", event_num ",i0)', $
+          Instrument, siteID[siteN], event_num[siteN]
+
+   start_sample = start_sample_in
+;   sample_range = sample_range_in
+   count = 0L
+   xdata[*] = 0.0
+   ydata[*] = 0.0
+   zdata_rainType[*] = 0.0
+   zdata_rainflag[*] = 0
+   zdata_sfcRainRate[*] = 0.0
+
+   ; -- Convert lat/lon for each GPROF beam sample to ground-radar-centric
+   ;    x and y cartesian coordinates, in km.  Store location and element
+   ;    data for samples within 150 km in arrays for interpolation to GV grid.
+   ;
+   for scan=0,SAMPLE_RANGE-1 do begin
+     for angle = 0, NPIXEL_GMI-1 do begin
+       ; coarse filter to PR beams within +/- 3 degrees of site lat/lon
+        IF (ABS(lons[angle,scan]-siteLong[siteN]) lt 3.) and $
+           (ABS(lats[angle,scan]-siteLat[siteN]) lt 3.) then begin
+ 
+           coordinate_b_to_a, siteLong[siteN], siteLat[siteN], lons[angle,scan], $
+                        lats[angle,scan], XX, YY
+
+           ; fine filter, save only points falling within the 300x300km grid bounds
+           if (abs(XX) le 150.) and (abs(YY) le 150.) then begin  
+            ; POPULATE THE ARRAYS OF POINTS TO BE ANALYZED
+             xdata[count] = XX
+             ydata[count] = YY
+             zdata_rainType[count] = rainType[angle,scan]
+             zdata_rainflag[count] = rainFlag[angle,scan]
+             zdata_sfcRainRate[count] = surfacePrecipitation[angle,scan]
+             count = count + 1
+;            print, scan, angle, XX, YY, zdata_rainType[count-1]
+
+            ; Paint a band of NON_COINCIDENT off either edge of the scan to
+            ; force the nearest-neighbor interpolation to set the value to
+            ; NON_COINCIDENT when extrapolating gridpoints outside PR scan
+            ; limits
+             if (angle eq 0) then begin 
+                ; Get the next footprint's X and Y
+                coordinate_b_to_a, siteLong[siteN], siteLat[siteN], lons[angle+1,scan], $
+                                   lats[angle+1,scan], XX2, YY2
+                ; extrapolate X and Y to where (angle = -1) would be
+                XX2 = XX - (XX2 - XX)
+                YY2 = YY - (YY2 - YY)
+                ; add a NON_COINCIDENT point to the data arrays
+                xdata[count] = XX2
+                ydata[count] = YY2
+                zdata_rainType[count] = -77.
+                zdata_rainflag[count] = -77
+                zdata_sfcRainRate[count] = -77.
+                count = count + 1
+             endif
+             if (angle eq (NPIXEL_GMI-1)) then begin
+                ; Get the prior footprint's X and Y
+                coordinate_b_to_a, siteLong[siteN], siteLat[siteN], lons[angle-1,scan], $
+                                   lats[angle-1,scan], XX2, YY2
+                ; extrapolate X and Y to where NPIXEL_GMI would be
+                XX2 = XX + (XX - XX2)
+                YY2 = YY + (YY - YY2)
+                ; add a NON_COINCIDENT point to the data arrays
+                xdata[count] = XX2
+                ydata[count] = YY2
+                zdata_rainType[count] = -77.
+                zdata_rainflag[count] = -77
+                zdata_sfcRainRate[count] = -77.
+                count = count + 1
+             endif
+   
+           endif  ;fine x,y filter
+        ENDIF     ;coarse lat/lon filter
+     endfor       ; angles
+   endfor         ; scans
+
+   if (count eq 0L) then begin
+      message, "No grids able to be computed for event!"
+   endif else begin
+     ; cut out the arrays of assigned footprint x,y, and data field values
+      x = xdata[0:count-1]
+      y = ydata[0:count-1]
+      z_rainType = zdata_rainType[0:count-1]
+      z_rainflag=zdata_rainflag[0:count-1]
+      zdata_sfcRainRate=zdata_sfcRainRate[0:count-1]
+
+     ; compute the Delauney triangulation of the x,y coordinates
+      TRIANGULATE, x, y, tr
+     ; define the output Cartesian grid dimensions and coordinates
+      xpos4 = findgen(GridN)
+      xpos4 = xpos4 * res - res*(GridN/2)
+      ypos4 = xpos4
+
+     ; =========================================================================
+
+     ; do the nearest-neighbor gridding of rain type
+      rainType_new = GRIDDATA(x, y, z_rainType, /NEAREST_NEIGHBOR, $
+                              TRIANGLES=tr, /GRID, XOUT=xpos4, YOUT=ypos4)
+
+      ; handle -77/-88/-99 properly -> -7/-8/-9
+      ; GRIDDATA output is FLOAT, cast to INT when rescaling
+      rainType = FIX(rainType_new)
+;      idx123 = WHERE( rainType lt 0, count123 )
+;      if ( count123 gt 0 ) then rainType[idx123] = rainType[idx123]/10
+
+      ;  This should never be needed now that we use nearest-neighbor interpolation
+      idxfixme = WHERE((rainType ne 1) and (rainType ne 2) and (rainType ne 3) $
+                and (rainType ne -7) and (rainType ne -8) and (rainType ne -9), count )
+      if ( count gt 0 ) then begin
+        print, $
+        format='("Warning:  Have ",I0, " unknown RainType values in analyzed grid!")',$
+           count
+      ;  print, rainType[idxfixme]
+
+        rainType[idxfixme]=-8
+      endif
+
+     ; =========================================================================
+
+     ; analyze grid for rain flag
+
+      rainFlagMapF = GRIDDATA(x, y, z_rainflag, /NEAREST_NEIGHBOR, $
+                              TRIANGLES=tr, /GRID, XOUT=xpos4, YOUT=ypos4)
+    ; GRIDDATA does interp in double precision, returns float; we need back in INT
+      rainFlagMap = FIX(rainFlagMapF + 0.0001)
+
+     ; pull metrics out of the RainFlag element
+      idxRain = WHERE((rainFlagMap AND FLAGPRECIP_PRECIPITATION) NE 0, numRainPts)
+      print, "Num Gridpoints with Rain Certain flag: ", numRainPts
+
+     ; =========================================================================
+
+     ; do the nearest-neighbor or radial basis/natural spline gridding of
+     ; surface rain rate
+
+      IF KEYWORD_SET(NEAREST_NEIGHBOR) THEN BEGIN
+         rainrate = GRIDDATA(x, y, zdata_sfcRainRate, /NEAREST_NEIGHBOR, $
+                              TRIANGLES=tr, /GRID, XOUT=xpos4, YOUT=ypos4)
+      ENDIF ELSE BEGIN
+         rainrate = GRIDDATA(x, y, zdata_sfcRainRate, /RADIAL_BASIS_FUNCTION, $
+                              TRIANGLES=tr, FUNCTION_TYPE=3, /GRID, $
+                              XOUT=xpos4, YOUT=ypos4)
+         idxNegRR = WHERE(rainrate LT 0.0, countNeg)
+         IF countNeg GT 0 THEN rainrate[idxNegRR] = 0.0
+      ENDELSE
+
+     ; =========================================================================
+
+     ; save the gridded arrays to the IDL Save file
+
+      SAVE, file=saveFile[siteN], rainrate, rainFlagMap, rainType, dist
+
+     ; =========================================================================
+
+   endelse  ; (count eq 0L)
+
+endfor      ;(nsites loop)
+status = 'OK'
+
+errorExit:
+
+return, status
+
+end

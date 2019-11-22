@@ -1,0 +1,6 @@
+PRO_DIR = getenv("IDL_PRO_DIR")
+cd, PRO_DIR
+DATESTAMP = GETENV("RUNDATE")
+FILES4NC = GETENV("GETMYGRIDS")
+.compile update_pr_ncgrids.pro
+update_pr_ncgrids, DATESTAMP, FILES4NC

@@ -1,0 +1,149 @@
+STRUCTURE /L2BCMB_MS_INPUT/
+ REAL*4 surfaceElevation(25)
+ INTEGER*4 surfaceType(25)
+ REAL*4 localZenithAngle(25)
+ INTEGER*4 precipitationFlag(2,25)
+ INTEGER*2 surfaceRangeBin(2,25)
+ INTEGER*2 lowestClutterFreeBin(2,25)
+ REAL*4 ellipsoidBinOffset(2,25)
+ INTEGER*2 stormTopBin(2,25)
+ REAL*4 stormTopAltitude(2,25)
+ INTEGER*4 precipitationType(25)
+ INTEGER*4 precipTypeQualityFlag(25)
+ REAL*4 piaEffective(2,25)
+ REAL*4 piaEffectiveSigma(2,25)
+ INTEGER*2 piaEffectiveReliabFlag(2,25)
+END STRUCTURE
+STRUCTURE /L2BCMB_MS_SCANSTATUS/
+ BYTE dataQuality
+ BYTE dataWarning
+ BYTE missing
+ BYTE modeStatus
+ INTEGER*2 geoError
+ INTEGER*2 geoWarning
+ INTEGER*2 SCorientation
+ INTEGER*2 pointingStatus
+ BYTE acsModeMidScan
+ BYTE targetSelectionMidScan
+ BYTE operationalMode
+ BYTE limitErrorFlag
+ REAL*8 FractionalGranuleNumber
+END STRUCTURE
+STRUCTURE /SCANTIME/
+ INTEGER*2 Year
+ BYTE Month
+ BYTE DayOfMonth
+ BYTE Hour
+ BYTE Minute
+ BYTE Second
+ INTEGER*2 MilliSecond
+ INTEGER*2 DayOfYear
+ REAL*8 SecondOfDay
+END STRUCTURE
+STRUCTURE /L2BCMB_MS/
+ RECORD /SCANTIME/ ScanTime
+ REAL*4 Latitude(25)
+ REAL*4 Longitude(25)
+ RECORD /L2BCMB_MS_SCANSTATUS/ scanStatus
+ RECORD /L2BCMB_MS_INPUT/ Input
+ REAL*4 surfaceAirPressure(25)
+ REAL*4 surfaceAirTemperature(25)
+ REAL*4 surfaceVaporDensity(25)
+ REAL*4 skinTemperature(25)
+ INTEGER*2 envParamNode(10,25)
+ REAL*4 airPressure(10,25)
+ REAL*4 airTemperature(10,25)
+ REAL*4 vaporDensity(10,25)
+ REAL*4 cloudLiqWaterCont(88,25)
+ REAL*4 cloudIceWaterCont(88,25)
+ INTEGER*2 phaseBinNodes(5,25)
+ INTEGER*2 PSDparamLowNode(9,25)
+ REAL*4 precipPSDparamLow(2,9,25)
+ REAL*4 precipPSDparamHigh(88,25)
+ REAL*4 precipLiqWaterCont(88,25)
+ REAL*4 precipLiqWaterContSigma(88,25)
+ REAL*4 precipRate(88,25)
+ REAL*4 precipRateSigma(88,25)
+ REAL*4 liqMassFracTrans(5,25)
+ REAL*4 liqRateFracTrans(5,25)
+ REAL*4 iceDensity(2,25)
+ REAL*4 surfPrecipRate(25)
+ REAL*4 surfPrecipRateSigma(25)
+ REAL*4 surfLiqRateFrac(25)
+ REAL*4 tenMeterWindSpeed(25)
+ REAL*4 surfEmissivity(15,25)
+ REAL*4 simulatedBrightTemp(15,25)
+ REAL*4 pia(2,25)
+ REAL*4 correctedReflectFactor(2,88,25)
+END STRUCTURE
+STRUCTURE /L2BCMB_NS_INPUT/
+ REAL*4 surfaceElevation(49)
+ INTEGER*4 surfaceType(49)
+ REAL*4 localZenithAngle(49)
+ INTEGER*4 precipitationFlag(49)
+ INTEGER*2 surfaceRangeBin(49)
+ INTEGER*2 lowestClutterFreeBin(49)
+ REAL*4 ellipsoidBinOffset(49)
+ INTEGER*2 stormTopBin(49)
+ REAL*4 stormTopAltitude(49)
+ INTEGER*4 precipitationType(49)
+ INTEGER*4 precipTypeQualityFlag(49)
+ REAL*4 piaEffective(49)
+ REAL*4 piaEffectiveSigma(49)
+ INTEGER*2 piaEffectiveReliabFlag(49)
+END STRUCTURE
+STRUCTURE /L2BCMB_NS_SCANSTATUS/
+ BYTE dataQuality
+ BYTE dataWarning
+ BYTE missing
+ BYTE modeStatus
+ INTEGER*2 geoError
+ INTEGER*2 geoWarning
+ INTEGER*2 SCorientation
+ INTEGER*2 pointingStatus
+ BYTE acsModeMidScan
+ BYTE targetSelectionMidScan
+ BYTE operationalMode
+ BYTE limitErrorFlag
+ REAL*8 FractionalGranuleNumber
+END STRUCTURE
+STRUCTURE /L2BCMB_NS/
+ RECORD /SCANTIME/ ScanTime
+ REAL*4 Latitude(49)
+ REAL*4 Longitude(49)
+ RECORD /L2BCMB_NS_SCANSTATUS/ scanStatus
+ RECORD /L2BCMB_NS_INPUT/ Input
+ REAL*4 surfaceAirPressure(49)
+ REAL*4 surfaceAirTemperature(49)
+ REAL*4 surfaceVaporDensity(49)
+ REAL*4 skinTemperature(49)
+ INTEGER*2 envParamNode(10,49)
+ REAL*4 airPressure(10,49)
+ REAL*4 airTemperature(10,49)
+ REAL*4 vaporDensity(10,49)
+ REAL*4 cloudLiqWaterCont(88,49)
+ REAL*4 cloudIceWaterCont(88,49)
+ INTEGER*2 phaseBinNodes(5,49)
+ INTEGER*2 PSDparamLowNode(9,49)
+ REAL*4 precipPSDparamLow(2,9,49)
+ REAL*4 precipPSDparamHigh(88,49)
+ REAL*4 precipLiqWaterCont(88,49)
+ REAL*4 precipLiqWaterContSigma(88,49)
+ REAL*4 precipRate(88,49)
+ REAL*4 precipRateSigma(88,49)
+ REAL*4 liqMassFracTrans(5,49)
+ REAL*4 liqRateFracTrans(5,49)
+ REAL*4 iceDensity(2,49)
+ REAL*4 surfPrecipRate(49)
+ REAL*4 surfPrecipRateSigma(49)
+ REAL*4 surfLiqRateFrac(49)
+ REAL*4 tenMeterWindSpeed(49)
+ REAL*4 surfEmissivity(15,49)
+ REAL*4 simulatedBrightTemp(15,49)
+ REAL*4 pia(49)
+ REAL*4 correctedReflectFactor(88,49)
+ END STRUCTURE
+STRUCTURE /L2BCMB_SWATHS/
+ RECORD /L2BCMB_NS/ NS
+ RECORD /L2BCMB_MS/ MS
+END STRUCTURE

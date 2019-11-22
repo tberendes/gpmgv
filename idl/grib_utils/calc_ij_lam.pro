@@ -1,0 +1,447 @@
+      FUNCTION CALC_IJ_LAM, ALATITUDE, ALONGITUDE, $
+                            ALATITUDE_LL, ALONGITUDE_LL, $
+                            STND_PARALLEL, ORIENT, $
+                            CLONG_EW, AMESH_LENGTH, $
+                            XI, YJ, NX, NY
+;
+;       AUGUST  1988 STACKPOLE         NMC42     NAS
+;       AUGUST  1996 TIM BOYER         GSC/TDL   HP9000/7xx   MODIFIED
+;       OCTOBER 1996 DOUG SPANGENBERG  GSC/TDL   HP9000/7XX   MODIFIED
+;
+;       July 2012  Morris, GPM GV, SAIC - converted to IDL
+; 
+;       PURPOSE 
+;            CONVERTS THE COORDINATES OF A LOCATION ON EARTH GIVEN IN
+;            THE NATURAL COORDINATE SYSTEM OF LATITUDE AND LONGITUDE TO A
+;            GRID COORDINATE SYSTEM OVERLAID ON A LAMBERT CONFORMAL
+;            MAP PROJECTION.  THE OUTPUT CONSISTS OF XI AND YJ WHICH ARE
+;            REAL 2-DIMENSIONAL ARRAYS HOLDING THE I AND J POSITIONS BASED
+;            ON LATITUDE, LONGITUDE, AND THE SPECIFIED GRID PARAMETERS.
+;
+;            XI and YJ are in the 1-based FORTRAN array index convention; i.e.,
+;            gridpoint coordinates run from 1 to NX and 1 to NY, and their
+;            corrresponding array indices run from 0 to NX-1, and o to NY-1.
+;
+;            ADAPTED FROM STACKPOLE'S ROUTINE, WHICH COMPUTED POINT-BY-POINT
+;            INSTEAD OF A WHOLE ARRAY, AND WHOSE INPUT WAS IN TERMS OF
+;            EAST LONGITUDE.  ACCORDING TO STACKPOLE (SUBROUTINE W3FB11),
+;            THE FORMULAE AND NOTATION ARE LOOSELY BASED ON HOKE, HAYES,
+;            AND RENNINGER'S "MAP PROJECTIONS AND GRID SYSTEMS...",
+;            MARCH 1981, AFGWC/TN-79/003.  THE LATITUDE MUST BE
+;            POSITIVE IN THE NORTHERN HEMISPHERE AND NEGATIVE IN
+;            THE SOUTHERN HEMISPHERE.  THE LONGITUDE CAN BE INPUT
+;            IN EITHER EAST OR WEST LONGITUDE AND CAN BE IN THE
+;            RANGE -360 TO +360.  NOTE THAT THE INPUT LONGITUDE, LONGITUDE OF
+;            THE LOWER LEFT CORNER, AND THE ORIENTATION MUST ALL EITHER BE
+;            EAST OR WEST LONGITUDE.  THIS ROUTINE CANNOT BE USED WITH A
+;            STANDARD PARALLEL AT EITHER POLE OR WITHIN 10 DEGREES OF THE
+;            EQUATOR.  A NORTHERN HEMISPHERIC PROJECTION IS INDICATED BY A
+;            POSITIVE STANDARD PARALLEL; OTHERWISE, THE PROJECTION IS FOR
+;            THE SOUTHERN HEMISPHERE.  ALL LATITUDES AND LONGITUDES ARE IN
+;            DEGREES.
+;
+;        DATA SETS USED
+;            NONE.
+;
+;        VARIABLES
+;    ALATITUDE(IX,IY) = LATITUDE ARRAY IN DEGREES WHOSE VALUES ARE TO BE
+;                       CONVERTED INTO XI, YJ GRID COORDINATES
+;                       (IX=0,NX-1) (IY=0,NY-1).
+;                       NOTE THAT THE VALUES IN THE SOUTHERN HEMISPHERE
+;                       WILL BE NEGATIVE. (INPUT)
+;   ALONGITUDE(IX,IY) = LONGITUDE ARRAY IN DEGREES WHOSE VALUES ARE TO BE
+;                       CONVERTED INTO XI, YJ GRID COORDINATES
+;                       (IX=0,NX-1) (IY=0,NY-1).
+;                       THE LONGITUDE CONVENTION (EAST OR WEST) WILL
+;                       BE AS INDICATED BY CLONG_EW.  (INPUT)
+;        ALATITUDE_LL = NORTH LATITUDE OF LOWER LEFT POINT (1,1)
+;                       OF GRID.  LATITUDE IS NEGATIVE FOR SOUTH
+;                       LATITUDE.  MUST BE IN THE RANGE -89.9 TO
+;                       +89.9.  (INPUT)
+;       ALONGITUDE_LL = LONGITUDE OF LOWER LEFT POINT (1,1)
+;                       OF GRID (SEE CLONG_EW).  WEST LONGITUDE 
+;                       IS IMMEDIATELY CONVERTED TO EAST LONGITUDE
+;                       FOR THE COMPUTATIONS.  MUST BE IN THE RANGE
+;                       -360 TO +360.  (INPUT)
+;       STND_PARALLEL = LATITUDE AT WHICH THE AMESH_LENGTH DISTANCE
+;                       APPLIES.  LATITUDE IS NEGATIVE FOR SOUTH
+;                       LATITUDE.  THE SIGN DETERMINES THE HEMISPHERE
+;                       OF THE PROJECTION-- + FOR NORTHERN, - FOR
+;                       SOUTHERN.  MUST BE IN THE RANGE +10 TO
+;                       +89.9 FOR NORTHERN HEMISPHERIC PROJECTION AND
+;                       IN THE RANGE -89.9 TO -10 FOR SOUTHERN
+;                       HEMISPHERIC PROJECTION.  (INPUT)
+;              ORIENT = THE ORIENTATION OF THE GRID.  THIS IS THE
+;                       LONGITUDE WHICH IS ALIGNED WITH THE Y
+;                       AXIS (SEE CLONG_EW).  MUST BE IN THE RANGE
+;                       -360 TO +360.  (INPUT)
+;            CLONG_EW = THE CONVENTION FOR THE LONGITUDE.  THIS CAN 
+;                       BE ONE OF TWO POSSIBLE VALUES:
+;                         'EAST' = ALONGITUDE(IX,IY), ALONGITUDE_LL, AND
+;                                  ORIENT ARE EAST LONGITUDE.
+;                         'WEST' = ALONGITUDE(IX,IY), ALONGITUDE_LL, AND
+;                                  ORIENT ARE WEST LONGITUDE.
+;                       EAST (OR WEST) LONGITUDE CAN RANGE FROM -360
+;                       THROUGH 360.  (CHARACTER*4)  (INPUT)
+;        AMESH_LENGTH = MESH LENGTH OF GRID IN METERS AT STND_PARALLEL.
+;                       (INPUT)
+;           XI(IX,IY) = ARRAY OF I COORDINATES OF THE POINTS SPECIFIED BY
+;                       ALATITUDE, ALONGITUDE (IX=0,NX-1) (IY=0,NY-1). (OUTPUT)
+;           YJ(IX,IY) = ARRAY OF J COORDINATES OF THE POINTS SPECIFIED BY
+;                       ALATITUDE, ALONGITUDE (IX=0,NX-1) (IY=0,NY-1). (OUTPUT)
+;                  NX = NUMBER OF GRIDPOINTS IN THE X DIRECTION.
+;                       (INPUT)
+;                  NY = NUMBER OF GRIDPOINTS IN THE Y DIRECTION.
+;                       (INPUT)
+;               ISTAT = STATUS RETURN.  (OUTPUT, function return value)
+;                       NUMBERS ASSOCIATED WITH THE VARIABLES
+;                       LISTED BELOW ARE DEFINED IN HEADER FILE
+;                       'hm/HM_ERROR.inc', and comprise the other
+;                       possible ISTAT values:
+;
+;                       HM_SUCCESS = GOOD RETURN.
+;                       GCT_LL_LONG_NOT_IN_RANGE = 
+;                           THE VALUE IN ALONGITUDE_LL IS NOT IN
+;                           THE RANGE -360 TO +360.
+;                       GCT_ORIENT_LONG_NOT_IN_RANGE =
+;                           THE VALUE IN ORIENT IS NOT IN
+;                           THE RANGE -360 TO +360.
+;                       GCT_LL_LAT_NOT_IN_RANGE = 
+;                           THE VALUE IN ALATITUDE_LL IS NOT IN
+;                           THE RANGE -90 TO +90.  A VALUE OF EXACTLY
+;                           90 DEGREES IN THE OPPOSITE HEMISPHERE TO
+;                           THE PROJECTION IS NOT ALLOWED, OR DIVISION
+;                           BY ZERO WOULD OCCUR.
+;                       GCT_STND_PARALLEL_NOT_IN_RANGE = 
+;                           THE VALUE IN STND_PARALLEL IS NOT IN
+;                           THE RANGE -90 TO +90.
+;                       GCT_LONG_NOT_EAST_OR_WEST = 
+;                           THE LONGITUDE CONVENTION SPECIFIED IN
+;                           CLONG_EW IS NEITHER 'EAST' OR 'WEST'.
+;                       GCT_MESH_LENGTH_ZERO = 
+;                           THE MESH LENGTH AMESH_LENGTH IS ZERO.
+;                           THIS WOULD CAUSE A DIVIDE BY ZERO.
+;                       GCT_STND_PARALLEL_CLOSE_TO_EQUATOR =
+;                           THE VALUE IN STND_PARALLEL IS WITHIN 
+;                           10 DEGREES OF THE EQUATOR.  THE
+;                           DEGENERATE FORM OF THE LAMBERT TO THE
+;                           EQUATORIAL MERCATOR IS NOT ALLOWED, OR
+;                           FLOATING POINT OVERFLOW WILL OCCUR (ON
+;                           THE 32-BIT HP 755, THIS OCCURS AT 
+;                           LESS THAN 5 DEGREES LATITUDE.  WHAT 
+;                           HAPPENS IS THAT THE DISTANCE FROM THE 
+;                           GRIDPOINT TO THE POLE EXCEEDS THE
+;                           SIZE OF THE FLOATING POINT NUMBER OF
+;                           ABOUT 10^38.)    
+;                       IF THE STATUS CODE IS NOT HM_SUCCESS,
+;                       ALATITUDE( , ) AND ALONGITUDE( , ) WILL
+;                       BE RETURNED AS THE MISSING VALUE RMISS.
+;
+;                 DXL = GRID LENGTH USED IN CALCULATIONS.  (INTERNAL)
+;          ELONGITUDE = EAST LONGITUDE GRID IN DEGREES. (INTERNAL)
+;               ELON1 = EAST LONGITUDE OF LOWER LEFT POINT (1,1)
+;                       OF GRID.  THE ROUTINE WAS ORIGINALLY
+;                       WRITTEN IN TERMS OF EAST LONGITUDE, AND
+;                       THE BASIC COMPUTATIONS HAVE NOT BEEN CHANGED.
+;                       (INTERNAL)
+;             EORIENT = THE ORIENTATION OF THE GRID IN DEGREES
+;                       EAST LONGITUDE.  (INTERNAL)
+;                   H = SET TO +1. FOR NORTHERN HEMISPHERIC PROJECTION
+;                       AND TO -1. FOR SOUTHERN HEMISPHERIC PROJECTION.
+;                       (INTERNAL)
+;               RMISS = THE MISSING VALUE INDICATOR.  (SET IN HEADER
+;                       FILE hm/HM_CONST.f.h)  (INTERNAL)  
+;
+;        ROUTINES CALLED
+;           HM_HMU_LOG_ERROR
+;
+;***********************************************************************
+;
+; "Include" files defining constants, error codes used here
+      @HM_ERROR.inc
+      @HM_CONST.inc
+
+; Legacy FORTRAN variable declarations:
+;
+;      CHARACTER*4 CLONG_EW
+;
+;      INTEGER NX,NY
+;      INTEGER IX,IY
+;      INTEGER ISTAT
+;
+;      REAL ALATITUDE(NX,NY), ALONGITUDE(NX,NY), ELONGITUDE
+;      REAL ALATITUDE_LL, ALONGITUDE_LL
+;      REAL STND_PARALLEL, ORIENT, AMESH_LENGTH
+;      REAL XI(NX,NY), YJ(NX,NY)
+;      REAL ALATN1, AN, ALA1, ARG, ALA
+;      REAL COSLTN
+;      REAL EORIENT, ELONVR, ELON1, ELO1, ELO
+;      REAL DXL
+;      REAL H
+;      REAL POLEI, POLEJ
+;      REAL REBYDX,RMLL,RM
+;
+;***********************************************************************
+;
+      ISTAT=0
+
+;        CHECK CONSISTENCY OF ARRAY SIZES AND NX AND NY (NEW, NOT PART OF THE
+;        ORIGINAL FORTRAN SUBROUTINE)
+
+      IF (NX LE 0 OR NY LE 0) THEN message, "NX or NY zero or negative!"
+      salat = size(ALATITUDE)
+      salon = size(ALONGITUDE)
+      sxi = size(XI)
+      syj = size(YJ)
+      IF (salat[0] NE 2 OR salon[0] NE 2 OR sxi[0] NE 2 OR syj[0] NE 2) $
+      THEN BEGIN
+         ISTAT = GCT_ARRAY_SIZES_INCORRECT
+;        CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;         'INPUT ARRAYS NOT ALL 2-DIMENSIONAL', $
+;         'MAJOR')
+         GOTO, label195
+      ENDIF
+      IF (salat[1] NE NX OR salon[1] NE NX OR sxi[1] NE NX OR syj[1] NE NX) $
+      THEN BEGIN
+         ISTAT = GCT_ARRAY_SIZES_INCORRECT
+;        CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;         'INPUT ARRAY X-DIMENSIONS NOT ALL EQUAL TO NX', $
+;         'MAJOR')
+         GOTO, label195
+      ENDIF
+      IF (salat[2] NE NY OR salon[2] NE NY OR sxi[2] NE NY OR syj[2] NE NY) $
+      THEN BEGIN
+         ISTAT = GCT_ARRAY_SIZES_INCORRECT
+;        CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;         'INPUT ARRAY Y-DIMENSIONS NOT ALL EQUAL TO NY', $
+;         'MAJOR')
+         GOTO, label195
+      ENDIF
+;
+;        CHECK FOR LONGITUDE OF CORNER POINT IN RANGE -360 TO +360.
+;
+      IF(ALONGITUDE_LL LT -360. OR ALONGITUDE_LL GT +360.) THEN BEGIN
+         ISTAT=GCT_LL_LONG_NOT_IN_RANGE
+;        CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;         'LONGITUDE OF LL CORNER OF GRID NOT IN RANGE -360 TO +360', $
+;         'MAJOR')
+         GOTO, label195
+      ENDIF
+;
+;        CHECK FOR LONGITUDE OF ORIENTATION IN RANGE -360 TO +360.
+;
+      IF(ORIENT LT -360. OR ORIENT GT +360.) THEN BEGIN
+         ISTAT=GCT_ORIENT_LONG_NOT_IN_RANGE
+;        CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;          'LONGITUDE OF ORIENTATION OF GRID NOT IN RANGE -360 TO +360', $
+;          'MAJOR')
+         GOTO, label195
+      ENDIF
+;
+;        CHECK FOR LATITUDE OF CORNER POINT IN RANGE -90 TO +90.
+;        A LATITUDE OF EXACTLY 90 DEGREES IN THE OPPOSITE
+;        HEMISPHERE THAN THE PROJECTION IS NOT ALLOWED, OR
+;        DIVISION BY ZERO WOULD OCCUR.
+;
+      IF(STND_PARALLEL LT 0.) THEN $
+         IF(ALATITUDE_LL LT -90.0 OR $
+           ALATITUDE_LL GT +89.9) THEN ISTAT=GCT_LL_LAT_NOT_IN_RANGE $
+      ELSE IF(ALATITUDE_LL LT -89.9  AND $
+            ALATITUDE_LL GT +90.0) THEN ISTAT=GCT_LL_LAT_NOT_IN_RANGE
+
+      IF (ISTAT EQ GCT_LL_LAT_NOT_IN_RANGE) THEN BEGIN
+;        CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;         'LATITUDE OF LL CORNER OF GRID NOT IN RANGE -90 TO +90', $
+;         'MAJOR')
+         GOTO, label195
+      ENDIF
+;
+;        CONVERT WEST LONGITUDE TO EAST LONGITUDE WHEN INPUT IS IN
+;        TERMS OF WEST LONGITUDE.
+;        THE ROUTINE WAS ORIGINALLY WRITTEN FOR EAST LONGITUDE
+;        TO BE CONSISTENT WITH GRIB USAGE.  HOWEVER, USE OF WEST
+;        LONGITUDE IS USUALLY MORE CONVENIENT FOR WESTERN HEMISPHERE
+;        DWELLERS.
+;
+      CASE CLONG_EW OF
+        'WEST' : BEGIN
+            ELON1=360.-ALONGITUDE_LL
+            IF(ELON1 GT 360.) THEN ELON1=ELON1-360.
+;           THE ABOVE STATEMENT KEEPS ELON1 IN THE RANGE 0-360.
+            EORIENT=360.-ORIENT
+            IF(EORIENT GT 360.) THEN EORIENT=EORIENT-360.
+;           THE ABOVE STATEMENT KEEPS EORIENT IN THE RANGE 0-360.
+         END
+;
+        'EAST' : BEGIN
+            ELON1=ALONGITUDE_LL
+            IF(ELON1 LT 0.) THEN ELON1=ELON1+360.
+;           THE ABOVE STATEMENT KEEPS ELON1 IN THE RANGE 0-360.
+            EORIENT=ORIENT
+            IF(EORIENT LT 0.) THEN EORIENT=EORIENT+360.
+;           THE ABOVE STATEMENT KEEPS EORIENT IN THE RANGE 0-360.
+         END
+;
+         ELSE : BEGIN
+            ISTAT=GCT_LONG_NOT_EAST_OR_WEST
+;           CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;             'LONGITUDE OF GRID NOT EAST OR WEST', $
+;             'MAJOR')
+            GOTO, label195
+         END
+      ENDCASE
+;
+;        CHECK FOR LATITUDE OF STANDARD PARALLEL IN RANGE
+;        -89.9 TO +89.9.  A LATITUDE OF NEAR 0 DEGREES IS NOT
+;        ALLOWED OR FLOATING POINT OVERFLOW MAY OCCUR.  ALSO, EXACTLY
+;        90 DEGREES IS NOT ALLOWED, OR DIVISION BY ZERO WOULD OCCUR.
+;        SET H=1. FOR THE NORTHERN HEMISPHERIC PROJECTION, -1. FOR 
+;        SOUTHERN HEMISPERE.
+;        REFLON IS LONGITUDE UPON WHICH THE POSITIVE X-COORDINATE
+;        DRAWN THROUGH THE POLE AND TO THE RIGHT LIES
+;        ROTATED AROUND FROM ORIENTATION (Y-COORDINATE) LONGITUDE
+;        DIFFERENTLY IN EACH HEMISPHERE (THIS IS THE ORIGINAL
+;        STACKPOLE EXPLANATION).
+;
+      IF( ABS(STND_PARALLEL) LT 10.)  THEN BEGIN
+         ISTAT=GCT_STND_PARALLEL_CLOSE_TO_EQUATOR
+;           THE STANDARD PARALLEL CANNOT BE NEAR THE EQUATOR.
+;         CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;          'STANDARD LATITUDE TOO NEAR THE EQUATOR FOR LAMBERT MAP', $
+;          'MAJOR')
+         GOTO, label195
+      ENDIF
+
+      IF( ABS(STND_PARALLEL) GT 89.9) THEN BEGIN
+         ISTAT=GCT_STND_PARALLEL_NOT_IN_RANGE
+;         CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;          'STANDARD PARALLEL OF GRID NOT IN RANGE -90 TO +90', $
+;          'MAJOR')
+         GOTO, label195
+      ENDIF
+
+      IF (STND_PARALLEL LT 0) THEN BEGIN
+         H=-1
+         REFLON=EORIENT-90. 
+      ENDIF ELSE BEGIN
+         H=1
+         REFLON=EORIENT-270.
+      ENDELSE
+;
+      IF(AMESH_LENGTH EQ 0.) THEN BEGIN
+         ISTAT=GCT_MESH_LENGTH_ZERO
+;           GRID LENGTH CAN'T BE ZERO.
+;         CALL HM_HMU_LOG_ERROR('HM_HMU_CALC_LATLONGLAM', $
+;          'MESH LENGTH OF GRID IS ZERO', $
+;          'MAJOR')
+         GOTO, label195
+      ENDIF
+;
+      DXL=ABS(AMESH_LENGTH)
+;        IN EARLIER ROUTINES, A NEGATIVE GRIDLENGTH WAS ALLOWED.
+;        THE ABSOLUTE VALUE IS TAKEN HERE JUST IN CASE.
+;
+;        PRELIMINARY VARIABLES AND REDEFINITIONS.
+;
+      REBYDX = REARTH/DXL
+      ALATN1 = STND_PARALLEL * DEG2RAD
+      AN = H * SIN(ALATN1)
+      COSLTN = COS(ALATN1)
+;
+;        MAKE SURE THAT INPUT LONGITUDE DOES NOT PASS THROUGH
+;        THE CUT ZONE (FORBIDDEN TERRITORY) OF THE FLAT MAP
+;        AS MEASURED FROM THE VERTICAL (REFERENCE) LONGITUDE.
+;
+      IF((ELON1-EORIENT) GT 180.) THEN $
+         ELON1 = ELON1 - 360. $
+      ELSE IF((ELON1-EORIENT) LT (-180.)) THEN $
+         ELON1 = ELON1 + 360.
+
+      ELONVR = EORIENT * DEG2RAD
+
+;        RADIUS TO LOWER LEFT HAND (LL) CORNER.
+
+      ALA1 = ALATITUDE_LL * DEG2RAD
+      RMLL = REBYDX * ((COSLTN^(1.-AN))*(1.+AN)^AN) * $
+             (((COS(ALA1))/(1.+H*SIN(ALA1)))^AN)/AN
+
+;        USE LL POINT INFO (POINT [1,1]) TO LOCATE POLE POINT.
+;        USE FORTRAN CONVENTION FOR ARRAY INDICES IN COMPUTATIONS
+
+      ELO1 = ELON1 * DEG2RAD
+      ARG = AN * (ELO1-ELONVR)
+      POLEI = 1. - H * RMLL * SIN(ARG)
+      POLEJ = 1. + RMLL * COS(ARG)
+;         
+      FOR IY = 0, NY-1 DO BEGIN
+        FOR IX = 0, NX-1 DO BEGIN
+;
+;            CHECK FOR ANY MISSING LAT AND LON VALUES
+;
+          IF(ALATITUDE(IX,IY) EQ RMISS OR ALONGITUDE(IX,IY) EQ RMISS) THEN BEGIN
+             XI(IX,IY)=RMISS
+             YJ(IX,IY)=RMISS
+             BREAK
+          ENDIF
+;
+;            IF LAT IS EXACTLY 90 OR -90, ASSIGN XI TO POLEI AND
+;            YJ TO POLEJ.
+;
+          IF(ABS(ALATITUDE(IX,IY)) EQ 90.) THEN BEGIN
+             XI(IX,IY)=POLEI
+             YJ(IX,IY)=POLEJ
+             BREAK
+          ENDIF
+;
+;             INSURE THAT LONGITUDE IS EAST AND IN
+;             THE RANGE 0 TO +360 FOR THE COMPUTATIONS.
+;
+          IF(CLONG_EW  EQ  'EAST') THEN BEGIN
+              ELONGITUDE=ALONGITUDE(IX,IY)
+              IF(ELONGITUDE LT 0.) THEN ELONGITUDE = ELONGITUDE+360.
+;                 THE ABOVE STATEMENT KEEPS ELONGITUDE IN THE RANGE
+;                 0-360.
+          ENDIF
+;
+          IF(CLONG_EW  EQ  'WEST') THEN BEGIN
+              ELONGITUDE = 360.-ALONGITUDE(IX,IY)
+              IF(ELONGITUDE GT 360.) THEN ELONGITUDE = ELONGITUDE-360.
+;                 THE ABOVE STATEMENT KEEPS ELONGITUDE IN THE RANGE
+;                 0-360.
+          ENDIF
+;
+;        MAKE SURE THAT INPUT LONGITUDE DOES NOT PASS THROUGH
+;        THE CUT ZONE (FORBIDDEN TERRITORY) OF THE FLAT MAP
+;        AS MEASURED FROM THE VERTICAL (REFERENCE) LONGITUDE.
+;
+          IF((ELONGITUDE-EORIENT) GT 180.) THEN $
+              ELONGITUDE = ELONGITUDE - 360. $
+          ELSE IF((ELONGITUDE-EORIENT) LT (-180.)) THEN $
+               ELONGITUDE = ELONGITUDE + 360.
+
+;
+;
+;             RADIUS TO DESIRED POINT AND THE I J TOO
+;
+          ALA =  ALATITUDE(IX,IY) * DEG2RAD
+          RM = REBYDX * ((COSLTN^(1.-AN))*(1.+AN)^AN) * $
+               (((COS(ALA))/(1.+H*SIN(ALA)))^AN)/AN
+;
+          ELO = ELONGITUDE * DEG2RAD
+          ARG = AN*(ELO-ELONVR)
+          XI(IX,IY) = POLEI + H * RM * SIN(ARG)
+          YJ(IX,IY) = POLEJ - RM * COS(ARG)
+;
+        ENDFOR
+      ENDFOR
+; 
+      GOTO, label200
+;
+;        IN CASE OF ERRORS, RETURN GRIDS OF MISSING VALUES.
+;
+ label195:
+      XI(*,*)=RMISS
+      YJ(*,*)=RMISS
+;     
+ label200:  RETURN, ISTAT
+      END
