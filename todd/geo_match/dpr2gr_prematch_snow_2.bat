@@ -54,7 +54,7 @@ VERSION2MATCH='V03B'
  dpr_rain_min = 0.01
 ; non_pps_files = 0
  non_pps_files = 1
- declutter = 2
+ declutter = 0
 
 .compile dpr2gr_prematch.pro
 ;restore, file='/home/tberendes/git/gpmgv/todd/geo_match/dpr2gr_prematch.sav'
