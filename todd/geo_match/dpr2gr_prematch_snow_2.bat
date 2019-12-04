@@ -53,7 +53,7 @@ VERSION2MATCH='V03B'
  nc_name_add = '12dbzGRDPR'
  dpr_rain_min = 0.01
 ; non_pps_files = 0
- non_pps_files = 1
+ non_pps_files = 0
  declutter = 0
 
 .compile dpr2gr_prematch.pro
