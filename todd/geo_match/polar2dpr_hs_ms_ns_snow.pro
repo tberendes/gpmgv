@@ -146,7 +146,7 @@ PRO polar2dpr_hs_ms_ns_snow, control_file, range_threshold_km, GPM_ROOT=gpmroot,
                   NC_NAME_ADD=ncnameadd, DPR_DBZ_MIN=dpr_dbz_min, $
                   MARK_EDGES=mark_edges, USE_DPR_ROI=use_dpr_roi, $
                   DBZ_MIN=dBZ_min, DPR_RAIN_MIN=dpr_rain_min, $
-                  FLAT_NCPATH=flat_ncpath, DIR_BLOCK=dir_block
+                  FLAT_NCPATH=flat_ncpath, DIR_BLOCK=dir_block, non_pps_files=non_pps_files
 
 ; for debugging
 !EXCEPT=2
