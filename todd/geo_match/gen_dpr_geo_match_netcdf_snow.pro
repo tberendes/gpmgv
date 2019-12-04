@@ -284,7 +284,9 @@ IF ( N_PARAMS() EQ 8 AND PPS_NAMED EQ 1 ) THEN BEGIN
    endelse
 
 ENDIF ELSE BEGIN
-   IF ( PPS_NAMED EQ 1 ) THEN BEGIN
+; TAB 12/4/19 This may be a bug in the original, this is a hack for using non-subsetted GPM files with different nameing convention
+;   IF ( PPS_NAMED EQ 1 ) THEN BEGIN
+   IF ( PPS_NAMED EQ 0 ) THEN BEGIN
       origDPRFileName='Unspecified'
       origKUFileName='Unspecified'
       origKAFileName='Unspecified'
