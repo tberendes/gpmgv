@@ -51,7 +51,8 @@ VERSION2MATCH='V06A'
  nc_name_add = '20dbzGRDPR'
  dpr_dbz_min = 20.0
  dpr_rain_min = 0.01
- non_pps_files = 0
+; non_pps_files = 0
+ non_pps_files = 1
  declutter = 1
 
 .compile dpr2gr_prematch.pro
