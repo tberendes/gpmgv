@@ -284,9 +284,7 @@ IF ( N_PARAMS() EQ 8 AND PPS_NAMED EQ 1 ) THEN BEGIN
    endelse
 
 ENDIF ELSE BEGIN
-; TAB 12/4/19 This may be a bug in the original, this is a hack for using non-subsetted GPM files with different nameing convention
-;   IF ( PPS_NAMED EQ 1 ) THEN BEGIN
-   IF ( PPS_NAMED EQ 0 ) THEN BEGIN
+   IF ( PPS_NAMED EQ 1 ) THEN BEGIN
       origDPRFileName='Unspecified'
       origKUFileName='Unspecified'
       origKAFileName='Unspecified'
@@ -301,8 +299,12 @@ ENDIF ELSE BEGIN
       origKAFileName   = ''+STRJOIN(STRTRIM(dprgrfiles[2],2))
       origCOMBFileName = ''+STRJOIN(STRTRIM(dprgrfiles[3],2))
       origGRFileName   = ''+STRJOIN(STRTRIM(dprgrfiles[4],2))
-      origPRFileName   = ''+STRJOIN(STRTRIM(dprgrfiles[5],2))
-      orig2BPRTMIFileName = ''+STRJOIN(STRTRIM(dprgrfiles[6],2))
+      origPRFileName   = 'Unspecified'
+      orig2BPRTMIFileName = 'Unspecified'
+; TAB 12/4/19 This may be a bug in the original, this is a hack for using non-subsetted GPM files with different naming convention
+; these filenames are only specified in the old TRMM files
+;      origPRFileName   = ''+STRJOIN(STRTRIM(dprgrfiles[5],2))
+;      orig2BPRTMIFileName = ''+STRJOIN(STRTRIM(dprgrfiles[6],2))
    ENDELSE
 ENDELSE
 
