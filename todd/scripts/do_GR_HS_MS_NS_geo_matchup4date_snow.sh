@@ -253,8 +253,11 @@ kindstr=$PARAMETER_SET'_'$PPS_VERSION'_'$gver
 # initialize the appstatus table entry for this run's yymmdd, first
 # checking whether we already have an entry for this yymmdd in database
 
+# TODO increase size of table column for this to work
+# WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '${THISRUN}';" \
+
 echo "\pset format u \t \o ${DBTEMPFILE} \\\ SELECT status FROM appstatus \
- WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '${THISRUN}';" \
+ WHERE app_id = 'geo_match_GRx3' AND datestamp = '${THISRUN}';" \
   | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 
 if [ -s ${DBTEMPFILE} ]
@@ -268,7 +271,7 @@ if [ -s ${DBTEMPFILE} ]
      # now with defaults for first_attempt and ntries columns
      echo "" | tee -a $LOG_FILE
      echo "INSERT INTO appstatus (app_id, datestamp, status) VALUES \
-       ('GM_GRx3_${kindstr}', '${THISRUN}', '$UNTRIED');" | psql -a -d gpmgv \
+       ('geo_match_GRx3', '${THISRUN}', '$UNTRIED');" | psql -a -d gpmgv \
        | tee -a $LOG_FILE 2>&1
 fi
 
@@ -356,7 +359,7 @@ done
 
 echo "" | tee -a $LOG_FILE
 echo "UPDATE appstatus SET ntries = ntries + 1 \
-      WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
+      WHERE app_id = 'geo_match_GRx3' AND datestamp = '$THISRUN';" \
      | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 echo "" | tee -a $LOG_FILE
 
@@ -383,11 +386,11 @@ grep 'GRtoDPR' $LOG_FILE | grep ${THISRUN} > $DBCATALOGFILE
 if [ -s $DBCATALOGFILE -a "$FORCE_MATCH" = "0" ]
   then
     echo "UPDATE appstatus SET status = '$SUCCESS' \
-    WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
+    WHERE app_id = 'geo_match_GRx3' AND datestamp = '$THISRUN';" \
     | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
   else
     echo "UPDATE appstatus SET status = '$MISSING' \
-    WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
+    WHERE app_id = 'geo_match_GRx3' AND datestamp = '$THISRUN';" \
     | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 #    exit 1  # No, don't force parent script to quit if no success for this date
 fi
