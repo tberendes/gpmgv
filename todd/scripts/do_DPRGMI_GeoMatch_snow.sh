@@ -143,6 +143,7 @@ export SAT_ID
 ALGORITHM="2BDPRGMI"
 export ALGORITHM
 GEO_MATCH_VERSION=1.31     # should match latest version of GRtoDPRGMI netCDF file
+# must match version in gen_dprgmi_geo_match_netcdf_snow.pro
 export GEO_MATCH_VERSION
 
 SKIP_NEWRAIN=0   # if 1, skip call to psql with SQL_BIN

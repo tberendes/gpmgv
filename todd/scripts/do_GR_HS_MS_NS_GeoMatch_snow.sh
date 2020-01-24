@@ -178,7 +178,8 @@ export SWATH
 #   use the fixed app_id value 'geo_match_GRx3', not something based on $SWATH.
 
 # TAB 8/27/18 changed version to 1.1 for new snow water equivalent field
-GEO_MATCH_VERSION=1.1     # current GRtoDPR_HS_MS_NS netCDF matchup file definition version
+GEO_MATCH_VERSION=1.1     # current GRtoDPR_HS_MS_NS netCDF matchup file definition version, 
+# must match version in gen_gr_hsmsms_geo_match_netcdf_snow.pro
 export GEO_MATCH_VERSION
 
 SKIP_NEWRAIN=0   # if 1, skip call to psql with SQL_BIN to update "rainy" events

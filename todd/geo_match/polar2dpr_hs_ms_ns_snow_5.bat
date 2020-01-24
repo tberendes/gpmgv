@@ -32,7 +32,8 @@ polar2dpr_hs_ms_ns_snow, FILES4NC, 100, SCORES=0, GPM_ROOT=gpm_root, $
            DIRGV='/data/gpmgv/gv_radar/finalQC_in', PLOT_PPIS=0, $
            NC_DIR='/data/gpmgv/netcdf/grmatch', DIR2ADPR='/.', DIR_BLOCK='/data/gpmgv/blockage', $
 ;           DPR_DBZ_MIN=15.0, DBZ_MIN=15.0
-           DPR_DBZ_MIN=20.0, DBZ_MIN=20.0, NC_NAME_ADD='20dbzGRDPR', non_pps_files=1
+;           DPR_DBZ_MIN=20.0, DBZ_MIN=20.0, NC_NAME_ADD='20dbzGRDPR', non_pps_files=1
+           DPR_DBZ_MIN=20.0, DBZ_MIN=20.0, NC_NAME_ADD='20dbzGRDPR'
  
 ;resolve_all
 ;save, /routines, file='/home/tberendes/git/gpmgv/todd/geo_match/polar2dpr_hs_ms_ns_snow.sav'

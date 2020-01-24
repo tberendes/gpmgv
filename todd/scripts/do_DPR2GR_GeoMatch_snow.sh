@@ -168,6 +168,7 @@ export SAT_ID
 SWATH="All"
 # TAB 8/30/18 changed version to 1.22 from 1.21 for new snow equivalent RR fields
 GEO_MATCH_VERSION=1.22     # current GRtoDPR netCDF matchup file version output by IDL
+# must match version in gen_dpr_geo_match_netcdf_snow.pro
 export GEO_MATCH_VERSION
 
 # Set up to ALWAYS skip call to psql with SQL_BIN, must have already been done
