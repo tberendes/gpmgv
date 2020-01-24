@@ -91,6 +91,9 @@
 #    in rows tagged with the fixed app_id attribute value 'geo_match_GRx3' and
 #    a datestamp having the value of $YYMMDD.
 #
+#    TAB 1/24/20:  changing app id from geo_match_GRx3 to GM_GRx3 to shorten it to keep appended 
+#    length < 15 char for database field length
+#
 #
 #  LOGS
 #
@@ -130,6 +133,8 @@
 #  2/15/2017   Morris     Added logic to use PARAMETER_SET environment variable
 #                         value to define the version of the polar2dpr_hs_ms_ns
 #                         ".bat" file to be run by IDL.
+#  1/24/20:    Berendes   changing app id from geo_match_GRx3 to GM_GRx3 to shorten it to keep appended 
+#    					  length < 15 char for database field length
 #
 ################################################################################
 
@@ -231,6 +236,8 @@ fi
 #   it specific to the "flavor" of DPR data to be matched up
 # - Note that appstatus table entries for this script use the fixed app_id value
 #   'geo_match_GRx3', not something based on $kind.
+#    TAB 1/24/20:  changing app id from geo_match_GRx3 to GM_GRx3 to shorten it to keep appended 
+#    length < 15 char for database field length
 
 kind=`head -1 $CONTROLFILE | cut -f 6-7 -d '|' | sed 's/|//'`
 
@@ -240,12 +247,14 @@ gver=`echo $GEO_MATCH_VERSION | sed 's/\./_/'`
 # use $PARAMETER_SET, $PPS_VERSION
 kindstr=$PARAMETER_SET'_'$PPS_VERSION'_'$gver
 # append kindstr to app_id
+# changing app id from geo_match_GRx3 to GM_GRx3 to shorten it to keep appended 
+# length < 15 char for database field length
 
 # initialize the appstatus table entry for this run's yymmdd, first
 # checking whether we already have an entry for this yymmdd in database
 
 echo "\pset format u \t \o ${DBTEMPFILE} \\\ SELECT status FROM appstatus \
- WHERE app_id = 'geo_match_GRx3_${kindstr}' AND datestamp = '${THISRUN}';" \
+ WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '${THISRUN}';" \
   | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 
 if [ -s ${DBTEMPFILE} ]
@@ -259,7 +268,7 @@ if [ -s ${DBTEMPFILE} ]
      # now with defaults for first_attempt and ntries columns
      echo "" | tee -a $LOG_FILE
      echo "INSERT INTO appstatus (app_id, datestamp, status) VALUES \
-       ('geo_match_GRx3_${kindstr}', '${THISRUN}', '$UNTRIED');" | psql -a -d gpmgv \
+       ('GM_GRx3_${kindstr}', '${THISRUN}', '$UNTRIED');" | psql -a -d gpmgv \
        | tee -a $LOG_FILE 2>&1
 fi
 
@@ -347,7 +356,7 @@ done
 
 echo "" | tee -a $LOG_FILE
 echo "UPDATE appstatus SET ntries = ntries + 1 \
-      WHERE app_id = 'geo_match_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
+      WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
      | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 echo "" | tee -a $LOG_FILE
 
@@ -374,11 +383,11 @@ grep 'GRtoDPR' $LOG_FILE | grep ${THISRUN} > $DBCATALOGFILE
 if [ -s $DBCATALOGFILE -a "$FORCE_MATCH" = "0" ]
   then
     echo "UPDATE appstatus SET status = '$SUCCESS' \
-    WHERE app_id = 'geo_match_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
+    WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
     | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
   else
     echo "UPDATE appstatus SET status = '$MISSING' \
-    WHERE app_id = 'geo_match_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
+    WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '$THISRUN';" \
     | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 #    exit 1  # No, don't force parent script to quit if no success for this date
 fi
