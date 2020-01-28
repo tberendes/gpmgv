@@ -352,7 +352,7 @@ echo "Running GRtoDPRGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
 # Exclude events for orbit subsets where we have no routine ground radar
 # acquisition (probably need to add to this list of excluded subsets!).
 
-if [ "FORCE_MATCH" = "0" ]
+if [ "$FORCE_MATCH" = "0" ]
   then
   
 	DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
@@ -457,7 +457,7 @@ while read thisdate
 # TAB MODIFIED 2/4/19, changed the date check to select dates even when the
 # previous matchups are found when using the -f (FORCE_MATCH) option
 
-if [ "FORCE_MATCH" = "0" ]
+if [ "$FORCE_MATCH" = "0" ]
   then
 
     DBOUT2=`psql -a -A -t -o $filelist  -d gpmgv -c "select c.orbit, count(*), \
@@ -526,7 +526,7 @@ fi
 	# TAB MODIFIED 9/13/18, changed the date check to select dates even when the
 	# previous matchups are found when using the -f (FORCE_MATCH) option
 	
-	if [ "FORCE_MATCH" = "0" ]
+	if [ "$FORCE_MATCH" = "0" ]
 	  then
 		DBOUT3=`psql -a -A -t -o $outfile -d gpmgv -c \
 	       "select a.event_num, a.orbit, a.radar_id, \

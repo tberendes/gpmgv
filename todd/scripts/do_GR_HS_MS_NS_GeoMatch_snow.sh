@@ -187,9 +187,9 @@ SKIP_NEWRAIN=0   # if 1, skip call to psql with SQL_BIN to update "rainy" events
 # *************  UNSET THIS! *******************
 SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
 
-# If FORCE_MATCH is set to 1, ignore appstatus for date(s) and force (re)run of
+# If $FORCE_MATCH is set to 1, ignore appstatus for date(s) and force (re)run of
 # matchups by child script do_GR_HS_MS_NS_geo_matchup4date_snow.sh:
-FORCE_MATCH=0
+$FORCE_MATCH=0
 
 # override coded defaults with any optional user-specified values
 while getopts v:p:m:kf option
@@ -200,7 +200,7 @@ while getopts v:p:m:kf option
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
         k) SKIP_NEWRAIN=1;;
-        f) FORCE_MATCH=1;;
+        f) $FORCE_MATCH=1;;
         *) echo "Usage: "
            echo "do_GR_HS_MS_NS_GeoMatch.sh -v PPS_Version -p Parameter_Set " \
                 "-m GeoMatchVersion -[k|f]"
@@ -409,7 +409,7 @@ echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 # TAB MODIFIED 9/13/18, changed the date check to select dates even when the
 # previous matchups are found on a date when using the -f (FORCE_MATCH) option
 
-if [ "FORCE_MATCH" = "0" ]
+if [ "$FORCE_MATCH" = "0" ]
   then
   
 	DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
@@ -528,7 +528,7 @@ for thisdate in `cat $datelist`
 # TAB MODIFIED 9/13/18, changed the date check to select dates even when the
 # previous matchups are found when using the -f (FORCE_MATCH) option
 
-if [ "FORCE_MATCH" = "0" ]
+if [ "$FORCE_MATCH" = "0" ]
   then
 	    DBOUT2=`psql -a -A -t -o $filelist  -d gpmgv -c "select c.orbit, count(*), \
 	       '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
@@ -610,9 +610,9 @@ echo ''
         subset=`echo $row | cut -f4 -d '|'`
 
 	# TAB MODIFIED 9/13/18, changed the date check to select dates even when the
-	# previous matchups are found when using the -f (FORCE_MATCH) option
+	# previous matchups are found when using the -f ($FORCE_MATCH) option
 	
-	if [ "FORCE_MATCH" = "0" ]
+	if [ "$$FORCE_MATCH" = "0" ]
 	  then
 
 		DBOUT3=`psql -a -A -t -o $outfile -d gpmgv -c "select a.event_num, a.orbit, \
@@ -701,8 +701,8 @@ ls -al $outfileall
         echo "" | tee -a $LOG_FILE
         start1=`date -u`
         echo "Calling do_GR_HS_MS_NS_geo_matchup4date_snow.sh $yymmdd on $start1" | tee -a $LOG_FILE
-# default do_GR_HS_MS_NS_geo_matchup4date_snow.sh to set FORCE_MATCH to 1 so every date is processed by default
-#        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f $FORCE_MATCH $yymmdd $outfileall
+# default do_GR_HS_MS_NS_geo_matchup4date_snow.sh to set $FORCE_MATCH to 1 so every date is processed by default
+#        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f $$FORCE_MATCH $yymmdd $outfileall
         ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f 1 $yymmdd $outfileall
 
         case $? in
