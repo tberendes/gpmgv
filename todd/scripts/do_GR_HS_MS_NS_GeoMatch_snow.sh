@@ -200,7 +200,7 @@ while getopts v:p:m:kf option
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
         k) SKIP_NEWRAIN=1;;
-        f) $FORCE_MATCH=1;;
+        f) FORCE_MATCH=1;;
         *) echo "Usage: "
            echo "do_GR_HS_MS_NS_GeoMatch.sh -v PPS_Version -p Parameter_Set " \
                 "-m GeoMatchVersion -[k|f]"
@@ -612,7 +612,7 @@ echo ''
 	# TAB MODIFIED 9/13/18, changed the date check to select dates even when the
 	# previous matchups are found when using the -f ($FORCE_MATCH) option
 	
-	if [ "$$FORCE_MATCH" = "0" ]
+	if [ "$FORCE_MATCH" = "0" ]
 	  then
 
 		DBOUT3=`psql -a -A -t -o $outfile -d gpmgv -c "select a.event_num, a.orbit, \
@@ -702,7 +702,7 @@ ls -al $outfileall
         start1=`date -u`
         echo "Calling do_GR_HS_MS_NS_geo_matchup4date_snow.sh $yymmdd on $start1" | tee -a $LOG_FILE
 # default do_GR_HS_MS_NS_geo_matchup4date_snow.sh to set $FORCE_MATCH to 1 so every date is processed by default
-#        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f $$FORCE_MATCH $yymmdd $outfileall
+#        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f $FORCE_MATCH $yymmdd $outfileall
         ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f 1 $yymmdd $outfileall
 
         case $? in
