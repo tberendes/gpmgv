@@ -701,7 +701,9 @@ ls -al $outfileall
         echo "" | tee -a $LOG_FILE
         start1=`date -u`
         echo "Calling do_GR_HS_MS_NS_geo_matchup4date_snow.sh $yymmdd on $start1" | tee -a $LOG_FILE
-        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f $FORCE_MATCH $yymmdd $outfileall
+# default do_GR_HS_MS_NS_geo_matchup4date_snow.sh to set FORCE_MATCH to 1 so every date is processed by default
+#        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f $FORCE_MATCH $yymmdd $outfileall
+        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.sh -f 1 $yymmdd $outfileall
 
         case $? in
           0 )
