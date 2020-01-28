@@ -189,7 +189,7 @@ SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSE
 
 # If $FORCE_MATCH is set to 1, ignore appstatus for date(s) and force (re)run of
 # matchups by child script do_GR_HS_MS_NS_geo_matchup4date_snow.sh:
-$FORCE_MATCH=0
+FORCE_MATCH=0
 
 # override coded defaults with any optional user-specified values
 while getopts v:p:m:kf option
