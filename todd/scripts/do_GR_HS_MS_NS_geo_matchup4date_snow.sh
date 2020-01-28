@@ -91,7 +91,7 @@
 #    in rows tagged with the fixed app_id attribute value 'geo_match_GRx3' and
 #    a datestamp having the value of $YYMMDD.
 #
-#    TAB 1/24/20:  Appended _dev or _test to geo_match_GRx3 app_id field to remove confilct with
+#    TAB 1/24/20:  Appended "D" (dev) or "T" (test) to geo_match_GRx3 app_id field to remove confilct with
 #                  operational matchups
 #
 #
@@ -263,7 +263,7 @@ kind=`head -1 $CONTROLFILE | cut -f 6-7 -d '|' | sed 's/|//'`
 # TAB: added dev/test string to app_id
 # WHERE app_id = 'geo_match_GRx3' AND datestamp = '${THISRUN}';" \
 echo "\pset format u \t \o ${DBTEMPFILE} \\\ SELECT status FROM appstatus \
- WHERE app_id = 'geo_match_GRx3_dev' AND datestamp = '${THISRUN}';" \
+ WHERE app_id = 'geo_match_GRx3D' AND datestamp = '${THISRUN}';" \
   | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 
 if [ -s ${DBTEMPFILE} ]
@@ -277,7 +277,7 @@ if [ -s ${DBTEMPFILE} ]
      # now with defaults for first_attempt and ntries columns
      echo "" | tee -a $LOG_FILE
      echo "INSERT INTO appstatus (app_id, datestamp, status) VALUES \
-       ('geo_match_GRx3_dev', '${THISRUN}', '$UNTRIED');" | psql -a -d gpmgv \
+       ('geo_match_GRx3D', '${THISRUN}', '$UNTRIED');" | psql -a -d gpmgv \
        | tee -a $LOG_FILE 2>&1
 fi
 
@@ -365,7 +365,7 @@ done
 
 echo "" | tee -a $LOG_FILE
 echo "UPDATE appstatus SET ntries = ntries + 1 \
-      WHERE app_id = 'geo_match_GRx3_dev' AND datestamp = '$THISRUN';" \
+      WHERE app_id = 'geo_match_GRx3D' AND datestamp = '$THISRUN';" \
      | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 echo "" | tee -a $LOG_FILE
 
@@ -394,11 +394,11 @@ grep 'GRtoDPR' $LOG_FILE | grep ${THISRUN} > $DBCATALOGFILE
 if [ -s $DBCATALOGFILE ]
   then
     echo "UPDATE appstatus SET status = '$SUCCESS' \
-    WHERE app_id = 'geo_match_GRx3_dev' AND datestamp = '$THISRUN';" \
+    WHERE app_id = 'geo_match_GRx3D' AND datestamp = '$THISRUN';" \
     | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
   else
     echo "UPDATE appstatus SET status = '$MISSING' \
-    WHERE app_id = 'geo_match_GRx3_dev' AND datestamp = '$THISRUN';" \
+    WHERE app_id = 'geo_match_GRx3D' AND datestamp = '$THISRUN';" \
     | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
 #    exit 1  # No, don't force parent script to quit if no success for this date
 fi
