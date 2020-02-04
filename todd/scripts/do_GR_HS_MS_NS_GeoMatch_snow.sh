@@ -586,7 +586,7 @@ if [ "$FORCE_MATCH" = "0" ]
 	       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
 	     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' \
 	     group by 1,3,4,5,6,7,8 \
-	     order by c.orbit"`  | tee -a $LOG_FILE 2>&1
+	     order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
  
  # Check LEFT OUTER clause...    
 
