@@ -1,24 +1,26 @@
 #!/bin/sh
 ###############################################################################
 #
-# do_DPR2GR_GeoMatch_snow.sh    Morris/SAIC/GPM GV    March 2016
+# do_GR_HS_MS_NS_GeoMatch.sh    Morris/SAIC/GPM GV    March 2016
 #
-# Wrapper to do DPR-GV NetCDF geometric matchups for DPR 2A-[DPR|Ka|Ku] files
+# Wrapper to do GR geometric matchups to HS, MS, and NS scans in 2A-DPR files
 # already received and cataloged, for cases meeting predefined criteria.  This
-# script drives volume matches of DPR data to GR data that has already been
-# volume matched to DPR for all of the DPR scan types.  The previously matched
-# GR data are contained in "GRtoDPR_HS_MS_NS" netCDF files, which are read and
-# merged with the volume matched DPR data to produce the baseline "GRtoDPR"
-# matchup netCDF files.  This script queries the 'gpmgv' database to find rainy
-# site overpass events between a specified start and end date and assembles a
-# series of date-specific control files to run matchups for those dates.  For
-# each date, calls the child script do_DPR2GR_geo_matchup4date_snow.sh, which in turn
-# invokes IDL to generate the DPRtoGR volume match netCDF files for that day's
-# rainy overpass events as listed in the daily control file.  Ancillary output
-# from the script is a series of 'control files', one per day in the range of
+# script drives volume matches of GR data to DPR footprint locations for all
+# of the DPR scan types.  The DPR-matched GR data are written to event-specific
+# "GRtoDPR_HS_MS_NS" netCDF files that hold the GR matchups for all three types
+# of DPR scans in a single file.  These matchup files are specific to GR site,
+# GPM orbit, PPS processing version of the input 2A-DPR data, and matchup file
+# definition version (currently 1.0).  Output of this script and its called
+# processes consists of a set of intermediate netCDF files containing ground
+# radar data only, volume-matched to all three (HS, MS, NS) DPR scan types.
+# Ancillary output is a series of 'control files', one per day in the range of
 # dates to be processed, listing DPR and ground radar data files to be processed
 # for rainy site overpass events for that calendar date, as well as metadata
 # parameters related to the DPR and GR data and the site overpass events.
+#
+# A run of this script should be followed up with one or more runs of
+# do_DPR2GR_GeoMatch.sh for the same range of dates to complete the creation of
+# baseline GRtoDPR netCDF files containing both volume-matched DPR and GR data.
 #
 # The script has logic to compute the start and end dates over which to attempt
 # volume match runs.  The end date is the current calendar day, and the start
@@ -40,20 +42,21 @@
 # SYNOPSIS
 # --------
 #
-#    do_DPR2GR_GeoMatch_snow.sh [OPTION]...
+#    do_GR_HS_MS_NS_GeoMatch.sh [OPTION]...
 #
 #
 #    OPTIONS/ARGUMENTS:
 #    -----------------
-#    -i INSTRUMENT_ID       Override default INSTRUMENT_ID (DPR) to the specified
-#                           INSTRUMENT_ID (Ka or Ku).  This determines which type of
-#                           2A product will be processed in the matchups.  STRING type.
-#
 #    -v PPS_VERSION         Override default PPS_VERSION to the specified PPS_VERSION.
-#                           This determines which version of the 2A product will be
+#                           This determines which version of the 2ADPR product will be
 #                           processed in the matchups.  STRING type.
 #
-#    -p PARAMETER_SET       Override default PARAMETER_SET to the specified PARAMETER_SET.#                           This defines which version "V" of the IDL batch file#                           dpr2gr_prematch_V.bat is to be used in processing matchups.#                           This value also gets written to the geo_match_product table#                           in the gpmgv database as a descriptive attribute.  It's up#                           to the user to keep track of its use and meaning in relation#                           to the configured parameters in the dpr2gr_prematch_V.bat#                           files. See do_DPR2GR_geo_matchup4date_snow.sh for details.#                           INTEGER type.
+#    -p PARAMETER_SET       Override default PARAMETER_SET to the specified PARAMETER_SET.
+#                           This defines which version "V" of the IDL batch file
+#                           polar2dpr_hs_ms_ns_V.bat is to be used in processing matchups.
+#                           This value also gets written to the geo_match_product table
+#                           in the gpmgv database as a descriptive attribute.  It's up
+#                           to the user to keep track of its use and meaning in relation#                           to the configured parameters in the polar2dpr_hs_ms_ns_V.bat#                           files. See do_GR_HS_MS_NS_geo_matchup4date.sh for details.#                           INTEGER type.
 #
 #    -m GEO_MATCH_VERSION   Override default GEO_MATCH_VERSION to the specified
 #                           GEO_MATCH_VERSION.  This only changes if the IDL code that
@@ -62,69 +65,51 @@
 #                           GEO_MATCH_VERSION is not the same as the version encoded in
 #                           the output netCDF filename a fatal error occurs.  FLOAT type.
 #
+#    -k                     If specified, skip the step of updating the rain events in
+#                           the rainy100inside100 table.  Takes no argument value.
+#
 #    -f                     If specified, then instruct matchup programs to create
 #                           and overwrite any existing matchups for a date even if
 #                           the database says they have been run already (see NOTE).
 #                           Takes no argument value.
-#
-# NOTE:  When running dates that might have already had DPR-GV matchup sets
-#        run, the child script do_DPR2GR_geo_matchup4date_snow.sh will skip
-#        processing for these dates, as a check of the 'appstatus' table
-#        will say that the date has already been done.  Delete the entries
-#        from this table where app_id='geo_matchIIAll', where II is the value
-#        of $INSTRUMENT and the rest of the characters (geo_match and All) are
-#        fixed and literal values, for the date(s) to be run, or for all dates.
-#        EXCEPTION:  If script is called with the -f option
-#        (e.g., "do_DPR2GR_GeoMatch_snow.sh -f"), then the status of prior runs
-#        for the set of dates configured in the script will be ignored and
-#        the matchups will be re-run, possibly overwriting the existing files.
-#
-#        The SWATH variable has the fixed value "All" in this script, as the
-#        IDL procedure dpr2gr_prematch.pro automatically runs matchup for all
-#        the scan types present in the 2A product type being processed.
 #    
 #
-# PRECONDITIONS
-# -------------
-# Since this script relies on the existence of previously-volume-matched ground
-# radar data in "GRtoDPR_HS_MS_NS" netCDF files, do_GR_HS_MS_NS_GeoMatch_snow.sh
-# must already have been configured and successfully run over the start and
-# end date range configured in this script.  Neither this script nor its child
-# script do_DPR2GR_geo_matchup4date_snow.sh check for the pre-existence of these
-# GRtoDPR_HS_MS_NS netCDF files.
+# NOTE:  When running dates that have already had GR->DPR matchup sets run,
+#        the child script do_GR_HS_MS_NS_geo_matchup4date.sh will skip
+#        processing for these dates, as its query of the 'appstatus' table
+#        will say that the date has already been done.  Delete the entries
+#        from this table where app_id='geo_match_GRx3', either for the date(s)
+#        to be run, or for all dates.  EXCEPTION:  If script is called with the
+#        -f option (e.g., "do_GR_HS_MS_NS_GeoMatch.sh -f"), then the status of
+#        prior runs for the set of dates configured in the script is ignored and
+#        the matchups will be re-run, possibly overwriting the existing files.
 #
-# 3/25/2016   Morris       - Created from do_DPR_GeoMatch.sh.
+# 3/17/2016   Morris       - Created from do_DPR_GeoMatch.sh.
+# 8/30/2016   Morris       - Modified queries to eliminate temp tables where
+#                            possible now that schema has changed.
 # 10/5/2016   Morris       - Cleanup and additional documentation.
 #                          - Dropped the unused yymmdd argument to function
 #                            catalog_to_db().
-#                          - Renamed variable SWATH to SCAN in function to
-#                            distinguish it from variable used in main script.
-#                          - Dropped the unused/disabled optional arguments.
+#                          - Dropped the useless -s SAT_ID option.
 # 2/14/2017   Morris       - Added definition and export of ITE_or_Operational
 #                            environment variable.
-# 6/19/2017   Morris       - Changed default PPS_VERSION value to "V05A".
-# 8/31/2018   Berendes     - Added new snow equivalent RR fields and changed
-#							 version to 1.22
 #
 ###############################################################################
 
-# set up the default and override configuration parameters
 
 USER_ID=`whoami`
 if [ "$USER_ID" = "morris" ]
   then
     GV_BASE_DIR=/home/morris/swdev
-  elif [ "$USER_ID" = "gvoper" ]
+  else
+    if [ "$USER_ID" = "gvoper" ]
       then
         GV_BASE_DIR=/home/gvoper
-  elif [ "$USER_ID" = "tberendes" ]
-      then
-        GV_BASE_DIR=/home/tberendes/git/gpmgv/todd
-  else
-      echo "User unknown, can't set GV_BASE_DIR!"
-      exit 1
+      else
+        echo "User unknown, can't set GV_BASE_DIR!"
+        exit 1
+    fi
 fi
-
 echo "GV_BASE_DIR: $GV_BASE_DIR"
 export GV_BASE_DIR
 
@@ -145,57 +130,50 @@ export LOG_DIR
 TMP_DIR=/data/tmp
 export TMP_DIR
 #GEO_NC_DIR=${DATA_DIR}/netcdf/geo_match
-BIN_DIR=${GV_BASE_DIR}/scripts
+BIN_DIR=${GV_BASE_DIR}/scripts/matchup
 export BIN_DIR
-
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
-# special rainy100inside100 script to get smaller scale events
-#SQL_BIN=${BIN_DIR}/rainCases20in100kmAddNewEvents.sql
 
-rundate=`date -u +%y%m%d`
-LOG_FILE=${LOG_DIR}/do_DPR2GR_GeoMatch_snow.${rundate}.log
-export rundate
-
-PPS_VERSION="V06A"         # specifies default PPS version of products to process
+#PPS_VERSION="V04A"        # specifies which PPS version of products to process
+#PPS_VERSION="V05A"
+#PPS_VERSION="V05B"
+PPS_VERSION="V06A"
 export PPS_VERSION
-# 2=12dbz, 3=15dbz, 4=18dbz, 5=20dbz
-PARAMETER_SET=3  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
+PARAMETER_SET=2  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
+#PARAMETER_SET=3  # set of polar2dpr_hs_ms_ns parameters (polar2dpr_hs_ms_ns.bat file) in use
 export PARAMETER_SET
-INSTRUMENT_ID="DPR"        # default type of DPR 2A products to process: DPR, Ka, or Ku
+INSTRUMENT_ID="DPR"       # type of DPR 2A products to process: DPR only, herein
 export INSTRUMENT_ID
 SAT_ID="GPM"
 export SAT_ID
-SWATH="All"
-# TAB 8/30/18 changed version to 1.22 from 1.21 for new snow equivalent RR fields
-GEO_MATCH_VERSION=1.22     # current GRtoDPR netCDF matchup file version output by IDL
-# must match version in gen_dpr_geo_match_netcdf_snow.pro
+
+SWATH="All3"   # do not change this
+export SWATH
+# - Note that appstatus table entries for the child script do_GR_HS_MS_NS_geo_matchup4date.sh
+#   use the fixed app_id value 'geo_match_GRx3', not something based on $SWATH.
+
+GEO_MATCH_VERSION=1.0     # current GRtoDPR_HS_MS_NS netCDF matchup file definition version
 export GEO_MATCH_VERSION
 
-# Set up to ALWAYS skip call to psql with SQL_BIN, must have already been done
-# by do_GR_HS_MS_NS_GeoMatch_snow.sh, otherwise we might attempt additional "rainy"
-# events/dates with no precomputed GR matchups:
-SKIP_NEWRAIN=1
+SKIP_NEWRAIN=0   # if 1, skip call to psql with SQL_BIN to update "rainy" events
 
 # If FORCE_MATCH is set to 1, ignore appstatus for date(s) and force (re)run of
-# matchups by child script do_DPR2GR_geo_matchup4date_snow.sh:
+# matchups by child script do_GR_HS_MS_NS_geo_matchup4date.sh:
 FORCE_MATCH=0
 
-# *************  UNSET THIS! *******************
-SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
-
 # override coded defaults with any optional user-specified values
-while getopts i:v:p:m:f option
+while getopts v:p:m:kf option
   do
     case "${option}"
       in
-        i) INSTRUMENT_ID=${OPTARG};;
         v) PPS_VERSION=${OPTARG};;
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
+        k) SKIP_NEWRAIN=1;;
         f) FORCE_MATCH=1;;
         *) echo "Usage: "
-           echo "do_DPR2GR_GeoMatch_snow.sh -i INSTRUMENT -v PPS_Version -p ParmSet " \
-                "-m GeoMatchVersion -f"
+           echo "do_GR_HS_MS_NS_GeoMatch.sh -v PPS_Version -p Parameter_Set " \
+                "-m GeoMatchVersion -[k|f]"
            exit 1
     esac
 done
@@ -205,26 +183,31 @@ export ALGORITHM
 
 # extract the first character of the PPS_VERSION and set and export it as a
 # flag for the IDL batch script to determine whether we are processing ITE or
-# operational data, and set the top-level path to the data files accordingly
+# operational data and set the top-level path to the data files accordingly
 
 ITE_or_Operational=`echo $PPS_VERSION | cut -c1`
 export ITE_or_Operational
 
 COMBO=${SAT_ID}_${INSTRUMENT_ID}_${ALGORITHM}_${SWATH}
 
+rundate=`date -u +%y%m%d`
+#rundate=allYMD                                      # BOGUS for all dates
+LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_GeoMatch.${rundate}.log
+export rundate
+
 umask 0002
 
 ################################################################################
 function catalog_to_db() {
 
-# function finds matchup file names produced by IDL dpr2gr_prematch procedure as
-# listed in the do_DPR2GR_geo_matchup_catalog.yymmdd.txt file, which was produced
-# by do_DPR2GR_geo_matchup4date_snow.sh by examining its own log file for date yymmdd, 
-# 'do_DPR2GR_geo_matchup4date_snow.yymmdd.log'. Parses the output netCDF file names to
-# extract individual identifying fields, formats fields into a row of data for
+# function finds matchup file names produced by IDL polar2dpr_hs_ms_ns procedure
+# as listed in the do_GR_HS_MS_NS_geo_matchup_catalog.yymmdd.txt file, which was
+# produced by do_GR_HS_MS_NS_geo_matchup4date.sh by examining its own log file,
+# do_GR_HS_MS_NS_geo_matchup4date.yymmdd.log, for the date yymmdd.  Parses the
+# output netCDF file names to extract individual identifying fields, formats
 # the 'geo_match_product' table in the 'gpmgv' database, and loads the entries
-# to the database by calling the 'psql' utility with the fixed SQL command file
-# catalog_geo_match_products.sql.
+# fields into a row of data for to the database by calling the 'psql' utility
+# with the fixed SQL command file catalog_geo_match_products.sql.
 
 DBCATALOGFILE=$1
 SQL_BIN2=${BIN_DIR}/catalog_geo_match_products.sql
@@ -235,7 +218,7 @@ echo "Cataloging new matchup files listed in $DBCATALOGFILE"
 # command in catalog_geo_match_products.sql, which both scripts execute under
 # psql.  Any changes to the path, name, or format must be coordinated in all
 # three files AND IN ANY OTHER SCRIPTS THAT CALL psql TO EXECUTE
-# catalogGeoMatchProducts.unl.  For instance, in do_GR_HS_MS_NS_GeoMatch.sh.
+# catalogGeoMatchProducts.unl.  For instance, in do_DPR2GR_GeoMatch.sh.
 
 loadfile=${TMP_DIR}/catalogGeoMatchProducts.unl
 if [ -f $loadfile ]
@@ -248,13 +231,9 @@ for ncfile in `cat $DBCATALOGFILE`
     radar_id=`echo ${ncfile} | cut -f2 -d '.'`
     orbit=`echo ${ncfile} | cut -f4 -d '.'`
    # PPS_VERSION=`echo ${ncfile} | cut -f5 -d '.'`
-
-   # NEED TO EXTRACT THE SCAN TYPE OUT OF THE FILE NAMES AS MULTIPLE SCANS
-   # ARE RUN AUTOMATICALLY.
-    SCAN=`echo ${ncfile} | cut -f7 -d '.'`
-
+    VERSION_FILENAME=`echo ${ncfile} | cut -f6 -d '.' | sed 's/_/./'`
+#echo "GEO_MATCH_VERSION ${GEO_MATCH_VERSION}  VERSION_FILENAME ${VERSION_FILENAME}"
     # check for mismatch between input/coded geo_match_version and matchup file version
-    VERSION_FILENAME=`echo ${ncfile} | cut -f8 -d '.' | sed 's/_/./'`
     if [ `expr $VERSION_FILENAME = $GEO_MATCH_VERSION` = 0 ]
       then
         echo "Mismatch between script GEO_MATCH_VERSION ("${GEO_MATCH_VERSION}\
@@ -262,7 +241,8 @@ for ncfile in `cat $DBCATALOGFILE`
 #      exit 1
     fi
     rowpre="${radar_id}|${orbit}|"
-    rowpost="|${PPS_VERSION}|${PARAMETER_SET}|${VERSION_FILENAME}|1|${INSTRUMENT_ID}|${SAT_ID}|${SCAN}"
+#    rowpost="|${PPS_VERSION}|${PARAMETER_SET}|2.1|1|${INSTRUMENT_ID}"
+    rowpost="|${PPS_VERSION}|${PARAMETER_SET}|${VERSION_FILENAME}|1|${INSTRUMENT_ID}|${SAT_ID}|${SWATH}"
     gzfile=`ls ${ncfile}\.gz`
     if [ $? = 0 ]
       then
@@ -283,8 +263,7 @@ done
 
 if [ -s $loadfile ]
   then
-   # call 'psql' with the predefined SQL command file to load the rows of data
-   # in "loadfile" to the database
+   # load the rows to the database
     echo "\i $SQL_BIN2" | psql -a -d gpmgv >> $LOG_FILE 2>&1
     tail $LOG_FILE | grep INSERT
 fi
@@ -306,26 +285,18 @@ echo "INSTRUMENT_ID: $INSTRUMENT_ID" | tee -a $LOG_FILE
 echo "PPS_VERSION: $PPS_VERSION" | tee -a $LOG_FILE
 echo "PARAMETER_SET: $PARAMETER_SET" | tee -a $LOG_FILE
 echo "ALGORITHM: $ALGORITHM" | tee -a $LOG_FILE
-#echo "SWATH: $SWATH" | tee -a $LOG_FILE
-#echo "SKIP_NEWRAIN: $SKIP_NEWRAIN" | tee -a $LOG_FILE
+echo "SWATH: $SWATH" | tee -a $LOG_FILE
+echo "SKIP_NEWRAIN: $SKIP_NEWRAIN" | tee -a $LOG_FILE
 echo "FORCE_MATCH: $FORCE_MATCH" | tee -a $LOG_FILE
 echo "ITE_or_Operational: $ITE_or_Operational" | tee -a $LOG_FILE
-echo "COMBO: $COMBO" | tee -a $LOG_FILE
 echo "" | tee -a $LOG_FILE
 
 echo ""
-# configure some SQL constraint values based on GPM product type
 case $COMBO
   in
-    GPM_DPR_2ADPR_All) echo "$COMBO OK" 
-                       MAX_DIST=250  # max radar-to-subtrack distance for overlap
-                       MATCHTYPE=DPR ;;
-    GPM_Ku_2AKu_All)   echo "$COMBO OK" 
-                       MAX_DIST=250
-                       MATCHTYPE=DPR ;;
-    GPM_Ka_2AKa_All)   echo "$COMBO OK" 
-                       MAX_DIST=150
-                       MATCHTYPE=DPR ;;
+    GPM_DPR_2ADPR_All3)  echo "$COMBO OK" 
+                         MAX_DIST=250
+                         MATCHTYPE=DPR ;;
     *) echo "Illegal Satellite/Instrument/Algorithm/Swath combination: $COMBO" \
        | tee -a $LOG_FILE
        echo "Exiting with error." | tee -a $LOG_FILE
@@ -360,13 +331,13 @@ fi
 datelist=${TMP_DIR}/doGeoMatchSelectedDates_temp.txt
 rm -v $datelist
 
-# get today's YYYYMMDD, format it as dateEnd
+# get today's YYYYMMDD
 ymd=`date -u +%Y%m%d`
 dateEnd=`echo $ymd | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 
 # get YYYYMMDD for 30 days ago
-ymdstart=`offset_date $ymd -30`
+ymdstart=`offset_date $ymd -60`
 dateStart=`echo $ymdstart | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 
@@ -374,35 +345,41 @@ dateStart=`echo $ymdstart | awk \
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
-#dateStart='2018-02-23'
-#dateEnd='2018-02-24'
+# thundersnow dates
+#dateStart='2018-02-20'
+#dateEnd='2018-02-21'
+#dateStart='2018-03-22'
+#dateEnd='2018-03-24'
+#dateStart='2018-03-13'
+#dateEnd='2018-03-15'
+#dateStart='2018-04-12'
+#dateEnd='2018-04-15'
 
-#dateStart='2017-11-01'
-#dateEnd='2018-05-01'
-
-#dateStart='2018-11-01'
-#dateEnd='2019-02-19'
-#dateStart='2018-12-23'
-#dateEnd='2019-01-01'
+#dateStart='2018-05-19'
+#dateEnd='2018-05-26'
 
 #dateStart='2014-03-18'
-#dateEnd='2019-05-24'
-#dateStart='2019-05-22'
-#dateStart='2018-05-01'
-#dateEnd='2019-06-12'
-dateStart='2019-06-12'
-dateEnd='2019-08-29'
+#dateStart='2018-11-27'
+#dateEnd='2019-01-28'
 
-echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
+#dateStart='2019-01-25'
+#dateEnd='2019-04-03'
+#dateStart='2019-03-31'
+#dateEnd='2019-07-08'
+#dateStart='2019-07-02'
+#dateEnd='2019-08-28'
+#dateStart='2019-08-26'
+#dateEnd='2020-01-13'
+dateStart='2020-01-13'
+dateEnd='2020-01-28'
+
+echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
 # GET THE LIST OF QUALIFYING 'RAINY' DATES FOR THIS MATCHUP CONFIGURATION.
-# We ignore the usual clause "left outer join geo_match_product" since
-# SWATH="All" has no meaning to the entries in this table and the returned
-# pathname would always be null.  Meaning that we don't know if one or more of
-# the intended GRtoDPR netCDF output files already exists based on the entries
-# in the "geo_match_product" table.  Exclude events for orbit subsets where we
-# have no routine ground radar acquisition (probably need to add to this list
-# of excluded subsets!).
+# Exclude events for orbit subsets where we have no routine ground radar
+# acquisition (probably need to add to this list of excluded subsets!),
+# and events where the entries in the geo_match_product table indicate that the
+# corresponding output matchup file (pathname attribute) already exists.
 
 DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
 "SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
@@ -412,23 +389,30 @@ from eventsatsubrad_vw c JOIN orbit_subset_product o \
    and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
    and c.overpass_time at time zone 'UTC' > '${dateStart}' \
    and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
-JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
+LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
+   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
+   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' ) \
+JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+WHERE g.pathname is null order by 1 ;"`
 
-#echo "2014-03-19" > $datelist   # edit/uncomment to just run a specific date
-#echo "2015-01-08" > $datelist   # edit/uncomment to just run a specific date
-#echo "2015-01-06" > $datelist   # edit/uncomment to just run a specific date
+echo ''
+echo "SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
+from eventsatsubrad_vw c JOIN orbit_subset_product o \
+  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
+   and o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
+   and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
+   and c.overpass_time at time zone 'UTC' > '${dateStart}' \
+   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
+LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
+   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
+   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' ) \
+JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+WHERE g.pathname is null order by 1 ;"
+echo ''
 
-#cat /home/tberendes/snowrate/darwin_dates.txt > $datelist
-# hardcode dates for DARW 
-#cat /home/tberendes/darw_new_rainy.txt > $datelist
-
-#echo "2014-12-29" > $datelist
-# hardcode dates for DARW, La Reunion, and special dates
-#cat /home/tberendes/darw_new_rainy.txt > $datelist
-#cat /home/tberendes/reunion_rainy_dates.txt > $datelist
-
-#cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
-cat /home/tberendes/dual_radar/NPOL_KGSP_dates.txt > $datelist
+#echo "2014-03-18" > $datelist   # edit/uncomment to just run a specific date
+#echo -e "2017-10-21\n2017-11-08\n2017-11-16\n2017-11-19\n2017-11-27\n2017-11-30\n2017-12-07\n2017-12-08\n2017-12-15\n2017-12-23\n2018-01-03\n2018-01-07" > $datelist
+#echo -e "2017-10-21" > $datelist
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE
@@ -453,7 +437,7 @@ for thisdate in `cat $datelist`
     filelist=${TMP_DIR}/DPR_filelist4geoMatch_temp.txt
     outfile=${TMP_DIR}/DPR_files_sites4geoMatch_temp.txt
 
-   # tag is used to distinguish the type and date of matchups to be executed
+   # 'tag' is used to distinguish the type and date of matchups to be executed
     tag=${ALGORITHM}.${SWATH}.${PPS_VERSION}.${yymmdd}
    # define the pathname of the final control file for the date and type
     outfileall=${TMP_DIR}/DPR_files_sites4geoMatch.${tag}.txt
@@ -463,14 +447,11 @@ for thisdate in `cat $datelist`
         rm -v $outfileall | tee -a $LOG_FILE 2>&1
     fi
 
-   # Get a listing of this date's 2Axxx files to process and their control file
+   # Get a listing of this date's DPR files to process and their control file
    # metadata, format the partial file paths, and write to intermediate file
    # $filelist as '|' delimited data.  These lines of data will comprise the
    # satellite-product-specific lines in the control file.
-   # -- Corresponding 2B-DPRGMI file is ignored for now
-   # We leave out the usual clause "left outer join geo_match_product",
-   # since SWATH="All" has no meaning to the entries in this table,
-   # and the returned pathname would always be null
+   # -- 2B-DPRGMI file is left out for now
 
     DBOUT2=`psql -a -A -t -o $filelist  -d gpmgv -c "select c.orbit, count(*), \
        '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
@@ -482,25 +463,47 @@ for thisdate in `cat $datelist`
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
         AND d.version = '$PPS_VERSION' \
+     left outer join geo_match_product b on \
+      ( c.event_num=b.event_num and d.version=b.pps_version \
+        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
+        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' ) \
        JOIN rainy100inside100 r on (c.event_num=r.event_num) \
-     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' \
+     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' and b.pathname is null \
      group by 1,3,4,5,6,7,8 \
-     order by c.orbit"`  | tee -a $LOG_FILE 2>&1
+     order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
+#     order by c.orbit"`  | tee -a $LOG_FILE 2>&1
 
-#echo ''
-#echo "filelist:"
-#cat $filelist
-#echo ''
+echo "select c.orbit, count(*), \
+       '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
+'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
+||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename\
+       as file2a \
+       from eventsatsubrad_vw c \
+     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
+        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
+        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
+        AND d.version = '$PPS_VERSION' \
+     left outer join geo_match_product b on \
+      ( c.event_num=b.event_num and d.version=b.pps_version \
+        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
+        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' ) \
+       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' and b.pathname is null \
+     group by 1,3,4,5,6,7,8 \
+     order by c.orbit;"
+#     order by c.orbit"
+
+echo ''
+echo "filelist:"
+cat $filelist
+echo ''
 
    # - Step through the satellite-specific control metadata and, for each line,
    #   get the ground-radar-specific control file metadata for the site overpass
    #   events where precip is occurring for this satellite/orbit/subset.
-   # - We now use temp tables and sorting by time difference between overpass_time and
-   #   radar nominal time (nearest minute) to handle where the same radar_id comes up
-   #   more than once for an orbit.  We also exclude UF file matches for RHI scans.
-   # - Again, we leave out the usual clause "left outer join geo_match_product",
-   #   since SWATH="All" has no meaning to the entries in this table and the
-   #   returned pathname would always be null
+   # - We now use temp tables and sorting by time difference between overpass_time
+   #   and radar nominal time (nearest minute) to handle where the same radar_id
+   #   comes up more than once for an orbit.  We also exclude UF file matches for RHI scans.
 
     for row in `cat $filelist | sed 's/ /_/'`
       do
@@ -513,12 +516,18 @@ for thisdate in `cat $datelist`
           into temp timediftmp
           from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
 	    collate_satsubprod_1cuf c \
+            left outer join geo_match_product e on \
+              (c.radar_id=e.radar_id and c.orbit=e.orbit and \
+               c.version=e.pps_version and e.instrument_id = '${INSTRUMENT_ID}' \
+               and e.parameter_set=${PARAMETER_SET} and e.sat_id='${SAT_ID}' \
+               and e.geo_match_version=${GEO_MATCH_VERSION}) and e.scan_type='${SWATH}' \
           where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
             and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num\
             and a.orbit = ${orbit} and c.subset = '${subset}'
             and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
             and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
-            and c.version = '$PPS_VERSION' \
+            and c.version = '$PPS_VERSION' and e.pathname is null \
+            AND C.FILE1CUF NOT LIKE '%rhi%' \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
             from timediftmp group by 1 order by 1;
@@ -527,14 +536,11 @@ for thisdate in `cat $datelist`
                  where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
         | tee -a $LOG_FILE 2>&1
 
-# this was at end of middle where clause, caused error in control file
-#            AND C.FILE1CUF NOT LIKE '%rhi%' \
-
 #        date | tee -a $LOG_FILE 2>&1
 
        # Append the satellite-product-specific line followed by the
        # ground-radar-specific control file line(s) to this date's control file
-       # ($outfileall) as instructions for IDL to do DPR-GR matchup file creation.
+       # ($outfileall) as instructions for IDL to do GR-to-DPR matchup file creation.
         echo ""  | tee -a $LOG_FILE
         echo "Control file additions:"  | tee -a $LOG_FILE
         echo ""  | tee -a $LOG_FILE
@@ -549,33 +555,27 @@ ls -al $outfileall
 
     if [ -s $outfileall ]
       then
-       # Call the IDL wrapper script, do_DPR2GR_geo_matchup4date_snow.sh, to run
+       # Call the IDL wrapper script, do_GR_HS_MS_NS_geo_matchup4date.sh, to run
        # the IDL .bat files.  Let each of these deal with whether the yymmdd
        # has been done before.
 
         echo "" | tee -a $LOG_FILE
         start1=`date -u`
-        echo "Calling do_DPR2GR_geo_matchup4date_snow.sh $yymmdd on $start1" | tee -a $LOG_FILE
-#        ${BIN_DIR}/do_DPR2GR_geo_matchup4date_snow.sh -f $FORCE_MATCH $yymmdd $outfileall
-        ${BIN_DIR}/do_DPR2GR_geo_matchup4date_snow.sh -f 1 $yymmdd $outfileall
+        echo "Calling do_GR_HS_MS_NS_geo_matchup4date.sh $yymmdd on $start1" | tee -a $LOG_FILE
+        ${BIN_DIR}/do_GR_HS_MS_NS_geo_matchup4date.sh -f $FORCE_MATCH $yymmdd $outfileall
 
         case $? in
           0 )
             echo ""
-            echo "SUCCESS status returned from do_DPR2GR_geo_matchup4date_snow.sh"\
+            echo "SUCCESS status returned from do_GR_HS_MS_NS_geo_matchup4date.sh"\
              | tee -a $LOG_FILE
            # extract the pathnames of the matchup files created this run, and 
            # catalog them in the geo_matchup_product table.  The following file
-           # must be identically defined here and in do_DPR2GR_geo_matchup4date_snow.sh
-            DBCATALOGFILE=${TMP_DIR}/do_DPR2GR_geo_matchup_catalog.${yymmdd}.txt
+           # must be identically defined here and in do_GR_HS_MS_NS_geo_matchup4date.sh
+            DBCATALOGFILE=${TMP_DIR}/do_GR_HS_MS_NS_geo_matchup_catalog.${yymmdd}.txt
             if [ -s $DBCATALOGFILE ] 
               then
-                if [ "$SKIP_CATALOG" = "0" ]
-                  then
-                	 catalog_to_db $DBCATALOGFILE
-                  else
-                     echo "Skipping Cataloging of matchup file for testing..."| tee -a $LOG_FILE
-                fi
+                catalog_to_db $DBCATALOGFILE
               else
                 echo "but no matchup files listed in $DBCATALOGFILE !"\
                  | tee -a $LOG_FILE
@@ -584,13 +584,13 @@ ls -al $outfileall
           ;;
           1 )
             echo ""
-            echo "FAILURE status returned from do_DPR2GR_geo_matchup4date_snow.sh, quitting!"\
+            echo "FAILURE status returned from do_GR_HS_MS_NS_geo_matchup4date.sh, quitting!"\
              | tee -a $LOG_FILE
             exit 1
           ;;
           2 )
             echo ""
-            echo "REPEAT status returned from do_DPR2GR_geo_matchup4date_snow.sh, do nothing!"\
+            echo "REPEAT status returned from do_GR_HS_MS_NS_geo_matchup4date.sh, do nothing!"\
              | tee -a $LOG_FILE
           ;;
         esac

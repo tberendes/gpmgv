@@ -155,9 +155,9 @@ export TMP_DIR
 BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
 
-#SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
+SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 # special rainy100inside100 script to get smaller scale events
-SQL_BIN=${BIN_DIR}/rainCases20in100kmAddNewEvents.sql
+#SQL_BIN=${BIN_DIR}/rainCases20in100kmAddNewEvents.sql
 
 #PPS_VERSION="V04A"        # specifies which PPS version of products to process
 #PPS_VERSION="V05A"

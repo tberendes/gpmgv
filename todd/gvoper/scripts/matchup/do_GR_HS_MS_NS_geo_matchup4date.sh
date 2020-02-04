@@ -2,7 +2,7 @@
 
 ################################################################################
 #
-#  do_GR_HS_MS_NS_geo_matchup4date_snow.sh    Morris/SAIC/GPM GV    April 2014
+#  do_GR_HS_MS_NS_geo_matchup4date.sh    Morris/SAIC/GPM GV    April 2014
 #
 #
 #  DESCRIPTION
@@ -92,12 +92,11 @@
 #    a datestamp having the value of $YYMMDD.
 #
 #
-#
 #  LOGS
 #
 #    Output for script run is logged to file:
 #
-#           do_GR_HS_MS_NS_geo_matchup4date_snow.yymmdd.log
+#           do_GR_HS_MS_NS_geo_matchup4date.yymmdd.log
 #
 #    in the $LOG_DIR directory, where 'yymmdd' is the input data date,
 #    unless an improper number of arguments are passed. In this case the error
@@ -128,24 +127,18 @@
 #
 #  HISTORY
 #
-#  2/15/2017   Morris     Added logic to use PARAMETER_SET environment variable
+#  2/15/2017   Morris   - Added logic to use PARAMETER_SET environment variable
 #                         value to define the version of the polar2dpr_hs_ms_ns
 #                         ".bat" file to be run by IDL.
-#  1/24/20:    Berendes   FORCE_MATCH default set to "1" and removed FORCE_MATCH
-#                         clause from final check that causes DB field to be 
-#                         set to "missing" if FORCE_MATCH is used.  I belive this
-#                         is a pre-existing bug, and the date check is unnecessary 
-#                         in our current processing scheme since the parent script
-#                         checks for duplicates on each processing date and doesn't 
-#                         add duplicates to the control file unless -f is used
-#                         in parent script.
+#                       - Changed IDL_PRO_DIR to ${GV_BASE_DIR}/idl/geo_match
+#                         for user gvoper.
 #
 ################################################################################
 
 
 #GV_BASE_DIR=/home/morris/swdev    # must be set & exported by calling process
 BIN_DIR=${GV_BASE_DIR}/scripts
-IDL_PRO_DIR=${GV_BASE_DIR}/geo_match
+IDL_PRO_DIR=${GV_BASE_DIR}/idl/geo_match
 export IDL_PRO_DIR                 # IDL polar2dpr_hs_ms_ns.bat needs this
 IDL=/usr/local/bin/idl
 #TMP_DIR=/data/tmp   # must be set & exported by calling process
@@ -167,7 +160,7 @@ FAILED='F'     # failed in processing, make no more attempts
 
 status=$UNTRIED   # assume we haven't yet tried to do current yymmdd
 
-FORCE_MATCH=1    # if 1, ignore any appstatus for date(s) and (re)run matchups
+FORCE_MATCH=0    # if 1, ignore any appstatus for date(s) and (re)run matchups
 DO_RHI=0         # if 0 use polar2dpr_hs_ms_ns.bat, if 1 use rhi2dpr_hs_ms_ns.bat (TBD)
 echo ""
 
@@ -185,16 +178,16 @@ shift $((OPTIND-1))  # shift the non-option arguments to beginning of list
 if [ $# != 2 ] 
   then
      THISRUN=`date -u +%y%m%d`
-     LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.${THISRUN}.fatal.log
+     LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_geo_matchup4date.${THISRUN}.fatal.log
      echo "FATAL: Exactly two non-option arguments required, $# given." | tee -a $LOG_FILE
-     echo "Usage: do_GR_HS_MS_NS_geo_matchup4date_snow.sh [-f[0|1]] YYMMDD CONTROLFILE"
+     echo "Usage: do_GR_HS_MS_NS_geo_matchup4date.sh [-f[0|1]] YYMMDD CONTROLFILE"
      exit 1
 fi
 
 THISRUN=$1
 CONTROLFILE=$2  # e.g., /data/tmp/DPR_files_sites4geoMatch.2AKu.NS.V03B.${THISRUN}.txt
 
-LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_geo_matchup4date_snow.${THISRUN}.log
+LOG_FILE=${LOG_DIR}/do_GR_HS_MS_NS_geo_matchup4date.${THISRUN}.log
 
 echo "+++++++++++++++++++++++++++++++++++++++++++" | tee -a $LOG_FILE
 echo "Processing matchups for control file ${CONTROLFILE}" | tee $LOG_FILE
@@ -204,7 +197,7 @@ case "${FORCE_MATCH}"
   in
     0) echo "FORCE_MATCH: $FORCE_MATCH" | tee -a $LOG_FILE ;;
     1) echo "FORCE_MATCH: $FORCE_MATCH" | tee -a $LOG_FILE ;;
-    *) echo "Invalid value ${FORCE_MATCH} for -f option in do_GR_HS_MS_NS_geo_matchup4date_snow.sh."\
+    *) echo "Invalid value ${FORCE_MATCH} for -f option in do_GR_HS_MS_NS_geo_matchup4date.sh."\
        | tee -a $LOG_FILE
        exit 1;;
 esac
@@ -214,9 +207,9 @@ echo "" | tee -a $LOG_FILE
 # determine which version of the polar2dpr or rhi2dpr batch file to use
 case "${DO_RHI}"
   in
-    0) BATFILE=polar2dpr_hs_ms_ns_snow_${PARAMETER_SET}.bat ;;
+    0) BATFILE=polar2dpr_hs_ms_ns_${PARAMETER_SET}.bat ;;
     1) BATFILE=rhi2dpr_hs_ms_ns_${PARAMETER_SET}.bat ;;
-    *) echo "Invalid value ${DO_RHI} for -r option in do_GR_HS_MS_NS_geo_matchup4date_snow.sh."\
+    *) echo "Invalid value ${DO_RHI} for -r option in do_GR_HS_MS_NS_geo_matchup4date.sh."\
        | tee -a $LOG_FILE
        exit 1;;
 esac
@@ -227,13 +220,12 @@ if [ -s $CONTROLFILE ]
   then
     export CONTROLFILE          # IDL polar2dpr_hs_ms_ns_V.bat needs this
   else
-    echo "ERROR in do_GR_HS_MS_NS_geo_matchup4date_snow.sh, control file $CONTROLFILE not found."\
+    echo "ERROR in do_GR_HS_MS_NS_geo_matchup4date.sh, control file $CONTROLFILE not found."\
      | tee -a $LOG_FILE
     exit 1
 fi
 
 #exit
-
 
 # figure out what kind of 2A radar matchup we are doing (instrument and swath)
 # - append these values to one another for use in diagnostic messages to make
@@ -243,22 +235,9 @@ fi
 
 kind=`head -1 $CONTROLFILE | cut -f 6-7 -d '|' | sed 's/|//'`
 
-# this is doesn't work since char length of status column is 15, an not long enough to append to 
-# create suffix for appstatus type to account for parameter, PPS version, and geo_match version
-#gver=`echo $GEO_MATCH_VERSION | sed 's/\./_/'`
-# use $PARAMETER_SET, $PPS_VERSION
-#kindstr=$PARAMETER_SET'_'$PPS_VERSION'_'$gver
-# append kindstr to app_id
-# changing app id from geo_match_GRx3 to GM_GRx3 to shorten it to keep appended 
-# length < 15 char for database field length
-
 # initialize the appstatus table entry for this run's yymmdd, first
 # checking whether we already have an entry for this yymmdd in database
 
-# TODO would need to increase size of table column for this to work
-# WHERE app_id = 'GM_GRx3_${kindstr}' AND datestamp = '${THISRUN}';" \
-
-# WHERE app_id = 'geo_match_GRx3' AND datestamp = '${THISRUN}';" \
 echo "\pset format u \t \o ${DBTEMPFILE} \\\ SELECT status FROM appstatus \
  WHERE app_id = 'geo_match_GRx3' AND datestamp = '${THISRUN}';" \
   | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
@@ -386,9 +365,7 @@ DBCATALOGFILE=${TMP_DIR}/do_GR_HS_MS_NS_geo_matchup_catalog.${THISRUN}.txt
 grep 'GRtoDPR' $LOG_FILE | grep ${THISRUN} > $DBCATALOGFILE
 #grep 'GRtoDPR' $LOG_FILE  > $DBCATALOGFILE  #TEMPORARY OVERRIDE FOR MANUAL CONTROL FILE WITH MULTIPLE DATES
 
-# prior behavior caused "MISSING" status whenever FORCE_MATCH = 1
-#if [ -s $DBCATALOGFILE -a "$FORCE_MATCH" = "0" ]
-if [ -s $DBCATALOGFILE ]
+if [ -s $DBCATALOGFILE -a "$FORCE_MATCH" = "0" ]
   then
     echo "UPDATE appstatus SET status = '$SUCCESS' \
     WHERE app_id = 'geo_match_GRx3' AND datestamp = '$THISRUN';" \
@@ -401,7 +378,7 @@ if [ -s $DBCATALOGFILE ]
 fi
 
 echo "" | tee -a $LOG_FILE
-echo "do_GR_HS_MS_NS_geo_matchup4date_snow.sh complete, exiting." | tee -a $LOG_FILE
+echo "do_GR_HS_MS_NS_geo_matchup4date.sh complete, exiting." | tee -a $LOG_FILE
 echo "See log file $LOG_FILE"
 echo "+++++++++++++++++++++++++++++++++++++++++++" | tee -a $LOG_FILE
 echo "" | tee -a $LOG_FILE
