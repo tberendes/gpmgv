@@ -132,6 +132,14 @@
 #                         ".bat" file to be run by IDL.
 #                       - Changed IDL_PRO_DIR to ${GV_BASE_DIR}/idl/geo_match
 #                         for user gvoper.
+#  1/24/20:    Berendes   FORCE_MATCH default set to "1" and removed FORCE_MATCH
+#                         clause from final check that causes DB field to be 
+#                         set to "missing" if FORCE_MATCH is used.  I belive this
+#                         is a pre-existing bug, and the date check is unnecessary 
+#                         in our current processing scheme since the parent script
+#                         checks for duplicates on each processing date and doesn't 
+#                         add duplicates to the control file unless -f is used
+#                         in parent script.
 #
 ################################################################################
 
@@ -160,7 +168,7 @@ FAILED='F'     # failed in processing, make no more attempts
 
 status=$UNTRIED   # assume we haven't yet tried to do current yymmdd
 
-FORCE_MATCH=0    # if 1, ignore any appstatus for date(s) and (re)run matchups
+FORCE_MATCH=1    # if 1, ignore any appstatus for date(s) and (re)run matchups
 DO_RHI=0         # if 0 use polar2dpr_hs_ms_ns.bat, if 1 use rhi2dpr_hs_ms_ns.bat (TBD)
 echo ""
 
@@ -365,7 +373,9 @@ DBCATALOGFILE=${TMP_DIR}/do_GR_HS_MS_NS_geo_matchup_catalog.${THISRUN}.txt
 grep 'GRtoDPR' $LOG_FILE | grep ${THISRUN} > $DBCATALOGFILE
 #grep 'GRtoDPR' $LOG_FILE  > $DBCATALOGFILE  #TEMPORARY OVERRIDE FOR MANUAL CONTROL FILE WITH MULTIPLE DATES
 
-if [ -s $DBCATALOGFILE -a "$FORCE_MATCH" = "0" ]
+# prior behavior caused "MISSING" status whenever FORCE_MATCH = 1
+#if [ -s $DBCATALOGFILE -a "$FORCE_MATCH" = "0" ]
+if [ -s $DBCATALOGFILE ]
   then
     echo "UPDATE appstatus SET status = '$SUCCESS' \
     WHERE app_id = 'geo_match_GRx3' AND datestamp = '$THISRUN';" \

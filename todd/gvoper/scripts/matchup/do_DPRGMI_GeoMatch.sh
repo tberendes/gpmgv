@@ -333,22 +333,46 @@ echo "Running GRtoDPRGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
 # Exclude events for orbit subsets where we have no routine ground radar
 # acquisition (probably need to add to this list of excluded subsets!).
 
-DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
-"SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
-from eventsatsubrad_vw c JOIN orbit_subset_product o \
-  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
- AND o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' \
-   and o.sat_id='${SAT_ID}' and c.nearest_distance<=${MAX_DIST} \
-   and c.subset NOT IN ('KOREA','KORA','DARW') \
-   and c.overpass_time at time zone 'UTC' >= '${dateStart}' \
-   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
-LEFT OUTER JOIN geo_match_product g \
-    on ( c.event_num=g.event_num and g.pps_version='${PPS_VERSION}' \
-         and g.instrument_id='${INSTRUMENT_ID}' \
-         and g.PARAMETER_SET=${PARAMETER_SET} \
-         and g.geo_match_version=${GEO_MATCH_VERSION} )
-JOIN rainy100inside100 r on (c.event_num=r.event_num) \
- WHERE pathname is null order by 1 ;"`
+if [ "$FORCE_MATCH" = "0" ]
+  then
+  
+	DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
+	"SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
+	from eventsatsubrad_vw c JOIN orbit_subset_product o \
+	  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
+	 AND o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' \
+	   and o.sat_id='${SAT_ID}' and c.nearest_distance<=${MAX_DIST} \
+	   and c.subset NOT IN ('KOREA','KORA') \
+	   and c.overpass_time at time zone 'UTC' >= '${dateStart}' \
+	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
+	LEFT OUTER JOIN geo_match_product g \
+	    on ( c.event_num=g.event_num and g.pps_version='${PPS_VERSION}' \
+	         and g.instrument_id='${INSTRUMENT_ID}' \
+	         and g.PARAMETER_SET=${PARAMETER_SET} \
+	         and g.geo_match_version=${GEO_MATCH_VERSION} )
+	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+	 WHERE g.pathname is null order by 1 ;"`
+#	 WHERE pathname is null order by 1 ;"`
+
+else 
+    # don't check for previous runs, leave off g.pathname is null clause
+	DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
+	"SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
+	from eventsatsubrad_vw c JOIN orbit_subset_product o \
+	  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
+	 AND o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' \
+	   and o.sat_id='${SAT_ID}' and c.nearest_distance<=${MAX_DIST} \
+	   and c.subset NOT IN ('KOREA','KORA') \
+	   and c.overpass_time at time zone 'UTC' >= '${dateStart}' \
+	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
+	LEFT OUTER JOIN geo_match_product g \
+	    on ( c.event_num=g.event_num and g.pps_version='${PPS_VERSION}' \
+	         and g.instrument_id='${INSTRUMENT_ID}' \
+	         and g.PARAMETER_SET=${PARAMETER_SET} \
+	         and g.geo_match_version=${GEO_MATCH_VERSION} )
+	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+	order by 1 ;"`
+fi
 
 echo " "
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
@@ -385,6 +409,12 @@ while read thisdate
    # $filelist as '|' delimited data.  These lines of data will comprise the
    # satellite-product-specific lines in the control file.
 
+# TAB MODIFIED 2/4/19, changed the date check to select dates even when the
+# previous matchups are found when using the -f (FORCE_MATCH) option
+
+if [ "$FORCE_MATCH" = "0" ]
+  then
+
     DBOUT2=`psql -a -A -t -o $filelist  -d gpmgv -c "select c.orbit, count(*), \
        '${yymmdd}'::text as datestamp, c.subset, d.version, \
        '${INSTRUMENT_ID}'::text as instrument, \
@@ -393,7 +423,7 @@ while read thisdate
        from eventsatsubrad_vw c \
      JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' \
-        and c.subset NOT IN ('KOREA','KORA','DARW') \
+        and c.subset NOT IN ('KOREA','KORA') \
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
      left outer join geo_match_product b on \
        (c.event_num=b.event_num and d.version=b.pps_version \
@@ -403,6 +433,30 @@ while read thisdate
        and b.pathname is null and d.version = '$PPS_VERSION' \
      group by 1,3,4,5,6,7 \
      order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
+
+else
+
+      # don't check previous runs, skip pathname check
+    DBOUT2=`psql -a -A -t -o $filelist  -d gpmgv -c "select c.orbit, count(*), \
+       '${yymmdd}'::text as datestamp, c.subset, d.version, \
+       '${INSTRUMENT_ID}'::text as instrument, \
+'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
+||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename as file2b \
+       from eventsatsubrad_vw c \
+     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
+        AND c.subset = d.subset AND c.sat_id='$SAT_ID' \
+        and c.subset NOT IN ('KOREA','KORA') \
+        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
+     left outer join geo_match_product b on \
+       (c.event_num=b.event_num and d.version=b.pps_version \
+        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} and b.geo_match_version=${GEO_MATCH_VERSION}) \
+       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+      where cast(nominal at time zone 'UTC' as date) = '${thisdate}' \
+       and d.version = '$PPS_VERSION' \
+     group by 1,3,4,5,6,7 \
+     order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
+
+fi
 
 # echo "Contents of ${TMP_DIR}/COMB_filelist4geoMatch_temp.txt:"
 # cat ${TMP_DIR}/COMB_filelist4geoMatch_temp.txt
@@ -424,37 +478,76 @@ while read thisdate
         subset=`echo $row | cut -f4 -d '|'`
 #        echo "${orbit}, $subset, ${INSTRUMENT_ID}, $PPS_VERSION, ${thisdate}"
 
-	DBOUT3=`psql -a -A -t -o $outfile -d gpmgv -c \
-       "select a.event_num, a.orbit, a.radar_id, \
-               date_trunc('second', a.overpass_time at time zone 'UTC') as ovrptime, \
-               extract(EPOCH from date_trunc('second', a.overpass_time)) as ovrpticks, \
-               b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, \
-               c.file1cuf, c.tdiff \
-          into temp timediftmp
-          from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
-	       collate_satsubprod_1cuf c \
-          left outer join geo_match_product e on \
-              ( c.event_num=e.event_num and c.version=e.pps_version \
-                and e.instrument_id = '${INSTRUMENT_ID}' \
-                and e.parameter_set=${PARAMETER_SET} \
-                and e.geo_match_version=${GEO_MATCH_VERSION} ) \
-          where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
-            and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num \
-            and a.orbit = ${orbit} and c.subset = '${subset}'
-            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
-            AND c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
-            and pathname is null and c.version = '$PPS_VERSION' \
-            AND C.FILE1CUF NOT LIKE '%rhi%' \
-          order by 3,9; \
+	# TAB MODIFIED 9/13/18, changed the date check to select dates even when the
+	# previous matchups are found when using the -f (FORCE_MATCH) option
+	
+	if [ "$FORCE_MATCH" = "0" ]
+	  then
+		DBOUT3=`psql -a -A -t -o $outfile -d gpmgv -c \
+	       "select a.event_num, a.orbit, a.radar_id, \
+	               date_trunc('second', a.overpass_time at time zone 'UTC') as ovrptime, \
+	               extract(EPOCH from date_trunc('second', a.overpass_time)) as ovrpticks, \
+	               b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, \
+	               c.file1cuf, c.tdiff \
+	          into temp timediftmp \
+	          from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
+		       collate_satsubprod_1cuf c \
+	          left outer join geo_match_product e on \
+	              ( c.event_num=e.event_num and c.version=e.pps_version \
+	                and e.instrument_id = '${INSTRUMENT_ID}' \
+	                and e.parameter_set=${PARAMETER_SET} \
+	                and e.geo_match_version=${GEO_MATCH_VERSION} ) \
+	          where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
+	            and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num \
+	            and a.orbit = ${orbit} and c.subset = '${subset}' \
+	            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}' \
+	            AND c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
+	            and pathname is null and c.version = '$PPS_VERSION' \
+	          order by 3,9; \
+	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
+	            from timediftmp group by 1 order by 1; \
+	          select a.event_num, a.orbit, a.radar_id, a.ovrptime, a.ovrpticks, \
+	                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b
+	                 where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
+	        | tee -a $LOG_FILE 2>&1
+# this was at end of middle where clause, caused error in control file
+#	            AND C.FILE1CUF NOT LIKE '%rhi%' \
 
-          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
-            from timediftmp group by 1 order by 1; \
-
-          select a.event_num, a.orbit, a.radar_id, a.ovrptime, a.ovrpticks, \
-                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b
-                 where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
-        | tee -a $LOG_FILE 2>&1
-
+     else 
+     # don't check for previous runs
+     
+ 		DBOUT3=`psql -a -A -t -o $outfile -d gpmgv -c \
+	       "select a.event_num, a.orbit, a.radar_id, \
+	               date_trunc('second', a.overpass_time at time zone 'UTC') as ovrptime, \
+	               extract(EPOCH from date_trunc('second', a.overpass_time)) as ovrpticks, \
+	               b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, \
+	               c.file1cuf, c.tdiff \
+	          into temp timediftmp \
+	          from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
+		       collate_satsubprod_1cuf c \
+	          left outer join geo_match_product e on \
+	              ( c.event_num=e.event_num and c.version=e.pps_version \
+	                and e.instrument_id = '${INSTRUMENT_ID}' \
+	                and e.parameter_set=${PARAMETER_SET} \
+	                and e.geo_match_version=${GEO_MATCH_VERSION} ) \
+	          where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
+	            and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num \
+	            and a.orbit = ${orbit} and c.subset = '${subset}' \
+	            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}' \
+	            AND c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
+	            and c.version = '$PPS_VERSION' \
+	          order by 3,9; \
+	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
+	            from timediftmp group by 1 order by 1; \
+	          select a.event_num, a.orbit, a.radar_id, a.ovrptime, a.ovrpticks, \
+	                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b
+	                 where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
+	        | tee -a $LOG_FILE 2>&1
+	        
+# this was at end of middle where clause, caused error in control file
+#	            AND C.FILE1CUF NOT LIKE '%rhi%' \
+     
+     fi
        # Append the satellite-product-specific line followed by the
        # ground-radar-specific control file line(s) to this date's control file
        # ($outfileall) as instructions for IDL to do DPRGMI-GR matchup file creation.

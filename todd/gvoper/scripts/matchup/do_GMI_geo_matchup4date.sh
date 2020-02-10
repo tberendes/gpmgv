@@ -174,7 +174,8 @@ case $status in
   $SUCCESS )
     echo "Status indicates yymmdd = ${THISRUN} already successfully processed."\
      | tee -a $LOG_FILE
-    exit 2
+#  TAB 2/5/20 remove exit to allow reprocessing of previous days
+#    exit 2
   ;;
   $FAILED )
     echo "Status indicates yymmdd = ${THISRUN} had prior fatals, skipping."\
