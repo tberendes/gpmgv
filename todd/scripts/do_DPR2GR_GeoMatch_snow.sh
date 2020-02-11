@@ -390,8 +390,11 @@ dateStart=`echo $ymdstart | awk \
 #dateStart='2019-05-22'
 #dateStart='2018-05-01'
 #dateEnd='2019-06-12'
-dateStart='2019-06-12'
-dateEnd='2019-08-29'
+#dateStart='2019-06-12'
+#dateEnd='2019-08-29'
+
+dateStart='2020-02-01'
+dateEnd='2020-02-02'
 
 echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
@@ -428,7 +431,7 @@ JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 #cat /home/tberendes/reunion_rainy_dates.txt > $datelist
 
 #cat /home/tberendes/dual_radar/KEVX_KEOX_dates.txt > $datelist
-cat /home/tberendes/dual_radar/NPOL_KGSP_dates.txt > $datelist
+#cat /home/tberendes/dual_radar/NPOL_KGSP_dates.txt > $datelist
 
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
 cat $datelist | tee -a $LOG_FILE
