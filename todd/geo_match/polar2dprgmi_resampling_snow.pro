@@ -519,8 +519,7 @@
 	     if skip_elev NE 1 then begin
          	dpr_index = dpr_master_idx[jpr]
 	     endif else begin
-	     	d      skip_elev = 0
-	     	pr_index = -3 ; cause to fall into missing data block later
+	     	dpr_index = -3 ; cause to fall into missing data block later
 	     endelse
 
          IF ( dpr_index GE 0 AND dpr_echoes[jpr] NE 0B ) THEN BEGIN
