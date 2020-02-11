@@ -644,7 +644,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
      ;   (no more averaging/processing needed) with data from the product arrays
 
       prgoodidx = WHERE( tocdf_pr_idx GE 0L, countprgood )
-      if countprgood eq 0L then print," **** no valid footprints **** "
+;      if countprgood eq 0L then print," **** no valid footprints **** "
       IF ( countprgood GT 0 ) THEN BEGIN
          pr_idx_2get = tocdf_pr_idx[prgoodidx]
          tocdf_corr_srain[prgoodidx] = surfRain_corr[pr_idx_2get]
@@ -661,7 +661,12 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          tocdf_heightStormTop[prgoodidx] = heightStormTop[pr_idx_2get]
          tocdf_rayNum = data_GR2DPR.RAYNUM
          tocdf_scanNum = data_GR2DPR.SCANNUM
-     ENDIF
+     ENDIF ELSE BEGIN
+         PRINT, ""
+         PRINT, "No valid (no zero) DPR footprints found for ", siteID, ", skipping."
+         PRINT, ""
+         GOTO, nextGRfile
+   	 ENDELSE
 
      ; get the indices of any bogus scan-edge DPR footprints
       predgeidx = WHERE( tocdf_pr_idx EQ -2, countpredge )
