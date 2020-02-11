@@ -663,7 +663,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          tocdf_scanNum = data_GR2DPR.SCANNUM
      ENDIF ELSE BEGIN
          PRINT, ""
-         PRINT, "No valid (no zero) DPR footprints found for ", siteID, ", skipping."
+         PRINT, "No valid (non zero) DPR footprints found for ", siteID, ", skipping."
          PRINT, ""
          GOTO, nextGRfile
    	 ENDELSE

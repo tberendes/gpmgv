@@ -115,6 +115,8 @@
             BREAK  ; jump out of loop ASAP
          ENDIF
       ENDFOR
+      
+      skip_elev = 0
       IF azsign EQ 0 THEN BEGIN
 ;         PRINT, "Error computing sweep direction, skipping this event!
 ;         GOTO, nextGRfile
@@ -123,7 +125,6 @@
          skip_elev = 1
          goto, skip_sweep
       ENDIF
-      skip_elev = 0
 
      ; Compute the leading edge of each ray as the mean center azimuth of it
      ; and the next ray, if the azimuth step is nominal.  Otherwise, use the
@@ -718,15 +719,15 @@
 ; 		tricky part) will be the conservative approach we take to ensuring that we are actually computing the Z-S relationship for a 
 ; 		pixel/radar gate producing snow, and snow that is at or at least very close to, the surface.    I think we could fold in some 
 ; 		surface model analysis data from the RUC or HRRR as well- but that would be a bit more work.  Since the MRMS already does this 
-; 		by default, and since you have that matched to pixels – we could just use its hydrometeor type as our guide (then we are implicitly 
+; 		by default, and since you have that matched to pixels ï¿½ we could just use its hydrometeor type as our guide (then we are implicitly 
 ; 		identifying radar pixels in snow).
 ;
-;		Do you see what I’m talking about here?  It will be very cool and useful.  Might take us an iteration or two- but I think we can 
+;		Do you see what Iï¿½m talking about here?  It will be very cool and useful.  Might take us an iteration or two- but I think we can 
 ;		and should do this.  I would like to take a crack at it very soon (not while you are on vacation, obviously)- before the PMM 
-;		Science Team meeting week of October 7.  I would like to see if we can’t get something of a preliminary GR-DPR comparison done 
+;		Science Team meeting week of October 7.  I would like to see if we canï¿½t get something of a preliminary GR-DPR comparison done 
 ;		with snow in the VN before that (it should not be that complicated- just lots of crunching).
 ;
-;		One iteration might be playing with the Z-S a little bit (KDP,Z) – but I need to verify something in this paper first.  For now, 
+;		One iteration might be playing with the Z-S a little bit (KDP,Z) ï¿½ but I need to verify something in this paper first.  For now, 
 ;		I think we could use this relationship I show above (works for Colorado and Oklahoma).
 ;
 ;		Cheers,
@@ -754,21 +755,21 @@
 ;
 ;  Response:
 ;
-;		Ok- thanks.  With DPR – just assume that if the GR says it is snowing, so should the DPR for now- and then you just 
+;		Ok- thanks.  With DPR ï¿½ just assume that if the GR says it is snowing, so should the DPR for now- and then you just 
 ;		use the same precip rate variable you would anyway (Same for 2BCMB).   There is a precip type/snow flag in the DPR 
-;		data file as well……but again, if we go conservative, and rely on MRMS, then the DPR precip rate will almost always be snow.  
-;		We could also filter on the zerodegreebin in the DPR data files, or surfaceairTemp in the 2BCMB ietc....- but, I think I’d 
+;		data file as wellï¿½ï¿½but again, if we go conservative, and rely on MRMS, then the DPR precip rate will almost always be snow.  
+;		We could also filter on the zerodegreebin in the DPR data files, or surfaceairTemp in the 2BCMB ietc....- but, I think Iï¿½d 
 ;		like to be consistent with MRMS.
 ;
-;		Now there is also the GPROF (GMI) and combined algorithms as well.  GPROF has a “temp2mindex” that is the temperature 
+;		Now there is also the GPROF (GMI) and combined algorithms as well.  GPROF has a ï¿½temp2mindexï¿½ that is the temperature 
 ;		at 2 m (in K) used for selecting profiles- so that would also be another potential way of discriminating on our own- but 
-;		not sure that is read into the matching routine.   For GMI- the variable will be “frozenPrecipitation” this is the snowfall 
+;		not sure that is read into the matching routine.   For GMI- the variable will be ï¿½frozenPrecipitationï¿½ this is the snowfall 
 ;		rate we want to use there.
 ;
 ;		I wonder if you could run the MRMS in post-processing now, then when you do that, create a database file you can read in 
-;		that has the precip phase information in it that the DPR-GR matching software would use? (kind of a “reference”).  The other 
+;		that has the precip phase information in it that the DPR-GR matching software would use? (kind of a ï¿½referenceï¿½).  The other 
 ;		option is to go with the GR HID variable- if classified as frozen (wet snow/dry snow/low-density graupel)- then it is called 
-;		“snow” and the Z-S is applied.  We *could* try that first if the MRMS route looks a little to daunting to play with (but, I 
+;		ï¿½snowï¿½ and the Z-S is applied.  We *could* try that first if the MRMS route looks a little to daunting to play with (but, I 
 ;		think using the MRMS would be better).
 ;
 ;		Walt
@@ -777,7 +778,7 @@
 ;		Todd- here are the equations from Pierre for the relationships to use in VN for his PQPE approach (this is different from 
 ;       the polarimetric estimator you are coding up now- but, maybe easier as it is straight up reflectivity as opposed to using 
 ;       the other pol variables). Remember that you have to use the linear Z (not log units (dBZ)) for this; i.e., Z = 10^(dbz/10)  
-;       to get the snowfall rates-……actually, that’s true for the polarimetric estimation as well (but I think I already mentioned that).			 
+;       to get the snowfall rates-ï¿½ï¿½actually, thatï¿½s true for the polarimetric estimation as well (but I think I already mentioned that).			 
 ;		
 ;		The quantiles are good to compute as well as one could make the lower and upper quantile scatter plots as well to 
 ;       illustrate uncertainty in the estimate.
@@ -815,7 +816,7 @@
 ;I just got this Z-S relationship from Mark Kulie- and he got it from the 
 ;SOO at Marquette.  I think it might be worth including this one in our 
 ;snowfall rate mix as well (in addition to what I gave you already). 
-;– For Marquette. 
+;ï¿½ For Marquette. 
  
 ;Todd- basically this can be inserted in with the other estimators 
 ;for Marquette as :
@@ -837,10 +838,10 @@
 
 ;Wanted to check in on the progress for that ZDR histogram and then 
 ;also to see if you had rerun those snow plots using that new relationship 
-;I sent a week or so ago.  If you haven’t run the snow yet…………I could 
+;I sent a week or so ago.  If you havenï¿½t run the snow yetï¿½ï¿½ï¿½ï¿½I could 
 ;actually add one more on there that I should have:
  
-;S = Z^0.5 * 0.1155   (which should be the same as Z = 75 S^2)….
+;S = Z^0.5 * 0.1155   (which should be the same as Z = 75 S^2)ï¿½.
 ;and Z in linear units as in the other relationships.  So the two new ones 
 ;would be this one (this is the MRMS relationship), and then the one that 
 ;was specific to the Marquette area that I sent a week or so ago.
@@ -1022,7 +1023,7 @@
 	              		  swemqt_max_gv = altstats.max
 	              		  
 	              		  ; MRMS relationship
-							;S = Z^0.5 * 0.1155   (which should be the same as Z = 75 S^2)….
+							;S = Z^0.5 * 0.1155   (which should be the same as Z = 75 S^2)ï¿½.
 							;and Z in linear units
 	            	  	  swemrms=rainvals
 	 	               	  swemrms[zposind] = 0.1155 * Z[zposind]^0.5
@@ -1044,14 +1045,14 @@
 			               	  ; original equation
 			               	  ;swedp[gvkdp_z_posind] = 1.53 * gvkdpvals[gvkdp_z_posind]^0.68 * Z[gvkdp_z_posind]^0.29
 			               	  ; fixed equation 10/2/18
-	;Todd- this is a screw up on my part……………………
+	;Todd- this is a screw up on my partï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	;I should have given you this equation for the S(KDP, Z)
 	;
 	;S = 1.48 * KDP^0.61 * Z^0.33
 	;
 	;Note that the multiplier and exponents are slightly different than what you are currently using.    But, we need to use this one.    
-	;My guess is that there should not be a huge difference, but,…….
-	;Can you just insert this fix and re run what you just did?  I’m really sorry…………………..
+	;My guess is that there should not be a huge difference, but,ï¿½ï¿½.
+	;Can you just insert this fix and re run what you just did?  Iï¿½m really sorryï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½..
 	;Cheers,
 	;Walt
 			               	  swedp[gvkdp_z_posind] = 1.48 * gvkdpvals[gvkdp_z_posind]^0.61 * Z[gvkdp_z_posind]^0.33

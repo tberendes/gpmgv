@@ -145,9 +145,15 @@
             BREAK  ; jump out of loop ASAP
          ENDIF
       ENDFOR
+
+      skip_elev = 0
       IF azsign EQ 0 THEN BEGIN
-         PRINT, "Error computing sweep direction, skipping this event!
-         GOTO, nextGRfile
+;         PRINT, "Error computing sweep direction, skipping this event!
+;         GOTO, nextGRfile
+; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
+         PRINT, "Error computing sweep direction, skipping this elevation, writing missing values...
+         skip_elev = 1
+         goto, skip_sweep
       ENDIF
 
      ; Compute the leading edge of each ray as the mean center azimuth of it
@@ -475,6 +481,10 @@
      ; (horizontally) and within the vertical layer defined by the GV radar
      ; beam top/bottom:
 
+; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
+    ; come here if sweep is missing and write out missing values at end of this loop
+	skip_sweep:
+
       FOR jpr=0, numDPRrays-1 DO BEGIN
         ; init output variables defined/set in loop/if
          writeMISSING = 1
@@ -499,7 +509,13 @@
          n_precipTotWaterCont_rejected = 0UL
          clutterStatus = 0UL           ; result of clutter-free proximity for volume
 
-         dpr_index = dpr_master_idx[jpr]
+; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
+	     if skip_elev NE 1 then begin
+         	dpr_index = dpr_master_idx[jpr]
+	     endif else begin
+	     	d      skip_elev = 0
+	     	pr_index = -3 ; cause to fall into missing data block later
+	     endelse
 
          IF ( dpr_index GE 0 AND dpr_echoes[jpr] NE 0B ) THEN BEGIN
 
@@ -996,6 +1012,7 @@
                           tocdf_top_hgt[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_botm_hgt[jpr,ielev] = FLOAT_OFF_EDGE
                        END
+; TAB 11/27/18 This is where bad sweeps in DARW data should be handled
               ELSE  :  BEGIN
                       ; data internal issues, set science values to missing
                           tocdf_gr_dbz[jpr,ielev] = Z_MISSING
