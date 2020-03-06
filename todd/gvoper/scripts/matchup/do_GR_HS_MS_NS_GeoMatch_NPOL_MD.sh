@@ -502,6 +502,7 @@ if [ "$FORCE_MATCH" = "0" ]
 	        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
 	        AND d.version = '$PPS_VERSION' \
             AND C.RADAR_ID IN ('${GRSITE}') \
+            AND C.FILE1CUF NOT LIKE '%rhi%' \
 	     left outer join geo_match_product b on \
 	      ( c.event_num=b.event_num and d.version=b.pps_version \
 	        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
@@ -522,6 +523,7 @@ if [ "$FORCE_MATCH" = "0" ]
 	        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
 	        AND d.version = '$PPS_VERSION' \
             AND C.RADAR_ID IN ('${GRSITE}') \
+            AND C.FILE1CUF NOT LIKE '%rhi%' \
 	     left outer join geo_match_product b on \
 	      ( c.event_num=b.event_num and d.version=b.pps_version \
 	        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
@@ -543,6 +545,7 @@ if [ "$FORCE_MATCH" = "0" ]
 	        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
 	        AND d.version = '$PPS_VERSION' \
             AND C.RADAR_ID IN ('${GRSITE}') \
+            AND C.FILE1CUF NOT LIKE '%rhi%' \
 	     left outer join geo_match_product b on \
 	      ( c.event_num=b.event_num and d.version=b.pps_version \
 	        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
