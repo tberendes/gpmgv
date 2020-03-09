@@ -171,6 +171,8 @@ SWATH="All"
 GEO_MATCH_VERSION=1.21     # current GRtoDPR netCDF matchup file version output by IDL
 export GEO_MATCH_VERSION
 
+GRSITE="NPOL_MD"
+
 # Set up to ALWAYS skip call to psql with SQL_BIN, must have already been done
 # by do_GR_HS_MS_NS_GeoMatch.sh, otherwise we might attempt additional "rainy"
 # events/dates with no precomputed GR matchups:
@@ -445,6 +447,7 @@ from eventsatsubrad_vw c JOIN orbit_subset_product o \
    and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
    and c.overpass_time at time zone 'UTC' > '${dateStart}' \
    and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
+   AND C.RADAR_ID IN ('${GRSITE}') \
 JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 
 #echo "2014-03-19" > $datelist   # edit/uncomment to just run a specific date
@@ -504,6 +507,7 @@ for thisdate in `cat $datelist`
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
         AND d.version = '$PPS_VERSION' \
+        AND C.RADAR_ID IN ('${GRSITE}') \
        JOIN rainy100inside100 r on (c.event_num=r.event_num) \
      where cast(nominal at time zone 'UTC' as date) = '${thisdate}' \
      group by 1,3,4,5,6,7,8 \
@@ -541,6 +545,7 @@ for thisdate in `cat $datelist`
             and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
             and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
             and c.version = '$PPS_VERSION' \
+            AND C.RADAR_ID IN ('${GRSITE}') \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
             from timediftmp group by 1 order by 1;
