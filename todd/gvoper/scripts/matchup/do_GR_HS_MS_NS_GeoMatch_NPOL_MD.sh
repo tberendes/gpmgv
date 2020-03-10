@@ -380,6 +380,13 @@ dateStart=`echo $ymdstart | awk \
 dateStart='2020-01-13'
 dateEnd='2020-01-28'
 
+# test dates
+dateStart='2020-02-06'
+dateEnd='2020-02-07'
+dateStart='2018-01-04'
+dateEnd='2018-01-05'
+
+
 echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
 # GET THE LIST OF QUALIFYING 'RAINY' DATES FOR THIS MATCHUP CONFIGURATION.
@@ -552,6 +559,26 @@ if [ "$FORCE_MATCH" = "0" ]
 	     group by 1,3,4,5,6,7,8 \
 	     order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
  
+ 	echo "select c.orbit, count(*), \
+	       '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
+	'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
+	||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename\
+	       as file2a \
+	       from eventsatsubrad_vw c \
+	     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
+	        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
+	        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
+	        AND d.version = '$PPS_VERSION' \
+            AND C.RADAR_ID IN ('${GRSITE}') \
+	     left outer join geo_match_product b on \
+	      ( c.event_num=b.event_num and d.version=b.pps_version \
+	        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
+	        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' ) \
+	       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+	     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' \
+	     group by 1,3,4,5,6,7,8 \
+	     order by c.orbit;"
+
  # Check LEFT OUTER clause...    
 
 fi
@@ -598,6 +625,7 @@ echo ''
 	            and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
 	            and c.version = '$PPS_VERSION' and e.pathname is null \
                 AND C.RADAR_ID IN ('${GRSITE}') \
+                AND C.FILE1CUF NOT LIKE '%rhi%' \
 	          order by 3,9; \
 	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
 	            from timediftmp group by 1 order by 1; \
@@ -629,6 +657,7 @@ echo ''
 	            and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
 	            and c.version = '$PPS_VERSION' \
                 AND C.RADAR_ID IN ('${GRSITE}') \
+                AND C.FILE1CUF NOT LIKE '%rhi%' \
 	          order by 3,9; \
 	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
 	            from timediftmp group by 1 order by 1; \

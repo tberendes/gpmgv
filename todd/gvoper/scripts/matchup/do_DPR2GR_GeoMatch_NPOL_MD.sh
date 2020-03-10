@@ -427,6 +427,12 @@ dateStart=`echo $ymdstart | awk \
 dateStart='2020-01-13'
 dateEnd='2020-01-28'
 
+# test dates
+dateStart='2020-02-06'
+dateEnd='2020-02-07'
+dateStart='2018-01-04'
+dateEnd='2018-01-05'
+
 
 echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
@@ -546,6 +552,7 @@ for thisdate in `cat $datelist`
             and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
             and c.version = '$PPS_VERSION' \
             AND C.RADAR_ID IN ('${GRSITE}') \
+            AND C.FILE1CUF NOT LIKE '%rhi%' \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
             from timediftmp group by 1 order by 1;
