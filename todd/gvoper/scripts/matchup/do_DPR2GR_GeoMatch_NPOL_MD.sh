@@ -373,57 +373,6 @@ dateStart=`echo $ymdstart | awk \
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
-# ITE114 
-#dateStart='2014-06-01'
-#dateEnd='2016-12-01'
-#last V04 matchups
-#dateStart='2017-03-16'
-#dateEnd='2017-04-10'
-#dateStart='2017-05-01'
-#dateEnd='2017-05-03'
-
-# dates for ITE601
-#dateStart='2014-03-01'
-#dateEnd='2018-01-01'
-
-#dateStart='2018-05-23'
-#dateStart='2018-05-23'
-
-#dateEnd='2018-06-05'
-#dateEnd='2018-06-06'
-#dateEnd='2018-02-19'
-#dateEnd='2018-04-19'
-
-# thundersnow dates
-#dateStart='2018-02-21'
-#dateEnd='2018-02-22'
-#dateStart='2018-03-23'
-#dateEnd='2018-03-24'
-#dateStart='2018-03-13'
-#dateEnd='2018-03-15'
-#dateStart='2018-04-12'
-#dateEnd='2018-04-15'
-
-#dateStart='2014-03-18'
-#dateEnd='2018-05-21'
-# check this date, seems to be error in GR files on 7/22/18
-#dateStart='2018-07-22'
-#dateEnd='2018-07-23'
-
-#dateStart='2014-03-18'
-#dateEnd='2018-12-03'
-#dateStart='2018-11-27'
-#dateEnd='2019-01-28'
-
-#dateStart='2019-01-25'
-#dateEnd='2019-04-03'
-
-#dateStart='2019-03-31'
-#dateEnd='2019-07-08'
-#dateStart='2019-07-02'
-#dateEnd='2019-08-28'
-#dateStart='2019-08-26'
-#dateEnd='2020-01-13'
 
 dateStart='2014-08-03'
 dateEnd='2020-02-11'

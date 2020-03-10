@@ -352,31 +352,6 @@ dateStart=`echo $ymdstart | awk \
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
-# thundersnow dates
-#dateStart='2018-02-20'
-#dateEnd='2018-02-21'
-#dateStart='2018-03-22'
-#dateEnd='2018-03-24'
-#dateStart='2018-03-13'
-#dateEnd='2018-03-15'
-#dateStart='2018-04-12'
-#dateEnd='2018-04-15'
-
-#dateStart='2018-05-19'
-#dateEnd='2018-05-26'
-
-#dateStart='2014-03-18'
-#dateStart='2018-11-27'
-#dateEnd='2019-01-28'
-
-#dateStart='2019-01-25'
-#dateEnd='2019-04-03'
-#dateStart='2019-03-31'
-#dateEnd='2019-07-08'
-#dateStart='2019-07-02'
-#dateEnd='2019-08-28'
-#dateStart='2019-08-26'
-#dateEnd='2020-01-13'
 
 dateStart='2014-08-03'
 dateEnd='2020-02-11'
