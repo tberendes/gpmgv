@@ -160,7 +160,7 @@ export SWATH
 
 GEO_MATCH_VERSION=1.0     # current GRtoDPR_HS_MS_NS netCDF matchup file definition version
 export GEO_MATCH_VERSION
-GRSITE="NPOL_MD"
+GRSITE="NPOL_WA"
 
 SKIP_NEWRAIN=0   # if 1, skip call to psql with SQL_BIN to update "rainy" events
 
@@ -378,9 +378,8 @@ dateStart=`echo $ymdstart | awk \
 #dateStart='2019-08-26'
 #dateEnd='2020-01-13'
 
-dateStart='2014-08-03'
-dateEnd='2020-02-11'
-
+dateStart='2015-11-14'
+dateEnd='2016-01-11'
 
 echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
@@ -607,7 +606,7 @@ echo ''
 	            b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
 	          into temp timediftmp \
 	          from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
-		    collate_npol_md_1cuf c \
+		    collate_npol_wa_1cuf c \
 	            left outer join geo_match_product e on \
 	              (c.radar_id=e.radar_id and c.orbit=e.orbit and \
 	               c.version=e.pps_version and e.instrument_id = '${INSTRUMENT_ID}' \
@@ -639,7 +638,7 @@ echo ''
 	            b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
 	          into temp timediftmp \
 	          from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
-		    collate_npol_md_1cuf c \
+		    collate_npol_wa_1cuf c \
 	            left outer join geo_match_product e on \
 	              (c.radar_id=e.radar_id and c.orbit=e.orbit and \
 	               c.version=e.pps_version and e.instrument_id = '${INSTRUMENT_ID}' \
