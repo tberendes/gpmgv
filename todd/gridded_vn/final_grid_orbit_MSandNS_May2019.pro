@@ -95,7 +95,7 @@ indir='/data/gpmgv/netcdf/gridded_vn/test/'
 year=['2017'] ;You can either add ALL the years, or run the script per year
 
 for aa = 0, n_elements(year)-1 do begin  ;for the years listed
-  spawn, 'ls '+indir+strcompress(year[aa]), inlist
+  spawn, '/bin/ls '+indir+strcompress(year[aa]), inlist
   inlistsize=size(inlist, /dimensions)
   count=inlistsize
 
@@ -166,7 +166,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
   ;NOTE: dd=0: Orbit=503, 2 files;  dd=16: Orbit=636, 5 files;  dd=187: Orbit=1917, 10 files
   for dd=0, n_elements(unique_orbitnr)-1 do begin
   ;for dd=0, 0 do begin ;Testing with one orbit only (2 files):
-    spawn, 'ls '+indir+strcompress(year[aa])+'/GRtoDPRGMI.*.*.'+strcompress(unique_orbitnr[dd], $
+    spawn, '/bin/ls '+indir+strcompress(year[aa])+'/GRtoDPRGMI.*.*.'+strcompress(unique_orbitnr[dd], $
            /remove_all)+'.V06A.1_3.15dBZ_7km.nc.gz', inlist_new
 
     print, ''
