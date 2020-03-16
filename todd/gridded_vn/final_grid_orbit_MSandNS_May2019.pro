@@ -44,7 +44,7 @@ PRO final_grid_orbit_MSandNS_May2019
 ;													;
 ;To run the script: 											;
 ;IDL> .r final_grid_orbit_MSandNS_May2019.pro								;
-;IDL> final_grid_orbit_MSandNS__May2019									;
+;IDL> final_grid_orbit_MSandNS_May2019									;
 ;You will have to change the following:									;
 ;indir='/rstor/matthee/GPM-HID/DATA/gpmgv/netcdf/geo_match/GPM/2BDPRGMI/V06A/1_3/' => You will need 	;
 ;  to change the directory location to where your original data is located				;
@@ -90,7 +90,7 @@ grid_longitude_main=LonNew[0:1465] ;Since we're dealing with Lon from -130.0 to 
 ;This is where the original files are located that are used to create the gridded files:
 ;indir='/rstor/matthee/GPM-HID/DATA/gpmgv/netcdf/geo_match/GPM/2BDPRGMI/V06A/1_3/'
 
-indir='/data/gpmgv/netcdf/gridded_vn/test/'
+indir='/data/gpmgv/netcdf/gridded_vn/test'
 ;year=['2014','2015','2016','2017','2018']
 year=['2017'] ;You can either add ALL the years, or run the script per year
 
