@@ -90,7 +90,7 @@ grid_longitude_main=LonNew[0:1465] ;Since we're dealing with Lon from -130.0 to 
 ;This is where the original files are located that are used to create the gridded files:
 ;indir='/rstor/matthee/GPM-HID/DATA/gpmgv/netcdf/geo_match/GPM/2BDPRGMI/V06A/1_3/'
 
-indir='/data/gpmgv/netcdf/gridded_vn/test'
+indir='/data/gpmgv/netcdf/gridded_vn/test/'
 ;year=['2014','2015','2016','2017','2018']
 year=['2017'] ;You can either add ALL the years, or run the script per year
 
