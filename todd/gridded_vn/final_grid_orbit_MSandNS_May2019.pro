@@ -181,7 +181,10 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
            
     ;We need to find the radar name and date again (for only the files we are looking at)
     ;We are now also including the entire directory and not just the filename
-    fileradar_sub=strmid(inlist_new, 89, 6) ;Making the radar name 6 to avoid everything being -1
+    pathlen = n_elements(indir)+n_elements('GRtoDPRGMI.')+n_elements(year[aa])+1 ; add one for trailing dot
+    print, 'pathlen ', pathlen
+    fileradar_sub=strmid(inlist_new, pathlen-1, 8) ;Making the radar name 8 to avoid everything being -1    
+;    fileradar_sub=strmid(inlist_new, 89, 6) ;Making the radar name 6 to avoid everything being -1
     filetestradar=strpos(fileradar_sub[*], '.')
     fileradar_sub2=strarr(n_elements(inlist_new))
     fileradarname=strarr(n_elements(inlist_new))
@@ -212,7 +215,9 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
       filenamelength[ee]=strlen(indir+strcompress(year[aa])+'/GRtoDPRGMI.'+fileradarname[ee]+'.')
       filedate[ee]=strmid(inlist_new[ee], filenamelength[ee], 6)
       filedate2[ee]=string(filedate[ee])
-      new_filename2[ee]=strmid(inlist_new[ee], 78, 60) ;To ensure all orbit numbers are included
+      slashpos = strpos(strmid(inlist_new[ee],'/', /REVERSE_SEARCH)
+      new_filename2[ee]=strmid(inlist_new[ee], slashpos, 60) ;To ensure all orbit numbers are included
+;      new_filename2[ee]=strmid(inlist_new[ee], 78, 60) ;To ensure all orbit numbers are included
       sub_newfilename[ee]=strlen(new_filename2[ee])-3 ;To get rid of the .gz
       sub_filename2[ee]=strmid(new_filename2[ee], 0, sub_newfilename[ee])
       new_filename[ee]=reform(sub_filename2[ee])
