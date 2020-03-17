@@ -183,7 +183,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
     ;We are now also including the entire directory and not just the filename
     pathlen = n_elements(indir)+n_elements('GRtoDPRGMI.')+n_elements(year[aa])+1 ; add one for trailing dot
     print, 'pathlen ', pathlen
-    fileradar_sub=strmid(inlist_new, pathlen-1, 8) ;Making the radar name 8 to avoid everything being -1    
+    fileradar_sub=strmid(inlist_new, pathlen-1, 10) ; catch up to 10 char site names   
 ;    fileradar_sub=strmid(inlist_new, 89, 6) ;Making the radar name 6 to avoid everything being -1
     filetestradar=strpos(fileradar_sub[*], '.')
     fileradar_sub2=strarr(n_elements(inlist_new))
