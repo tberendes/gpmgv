@@ -212,7 +212,8 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
       fileradar_sub2[ee]=strmid(fileradar_sub[ee], 0, filetestradar[ee])
       fileradarname[ee]=reform(fileradar_sub2[ee])
       ;This is just to get the radar name and isn't the actual charachter length of the entire file name!
-      filenamelength[ee]=strlen(indir+strcompress(year[aa])+'/GRtoDPRGMI.'+fileradarname[ee]+'.')
+      print,'inlist_new[ee]: ',inlist_new[ee] 
+      filenamelength[ee]=strlen(indir+strcompress(year[aa])+'/GRtoDPRGMI.'+fileradarname[ee]+'.')+1
       filedate[ee]=strmid(inlist_new[ee], filenamelength[ee], 6)
       filedate2[ee]=string(filedate[ee])
       slashpos = strpos(inlist_new[ee],'/', /REVERSE_SEARCH)
