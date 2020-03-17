@@ -189,8 +189,8 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
     fileradar_sub2=strarr(n_elements(inlist_new))
     fileradarname=strarr(n_elements(inlist_new))
     filenamelength=intarr(n_elements(inlist_new))
-    filedate=lonarr(n_elements(inlist_new))
-    filedate2=string(filedate) ;so we can find the string lenght again
+    filedate=strarr(n_elements(inlist_new))
+;    filedate2=string(filedate) ;so we can find the string lenght again
     new_filename2=strarr(n_elements(inlist_new))
     sub_newfilename=new_filename2 ;To set the same string arrays
     sub_filename2=new_filename2
@@ -217,7 +217,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
       print,'filenamelength[ee]: ',filenamelength[ee]
       filedate[ee]=strmid(inlist_new[ee], filenamelength[ee]-1, 6)
       print,'filedate[ee]: ',filedate[ee]
-      filedate2[ee]=string(filedate[ee])
+;      filedate2[ee]=string(filedate[ee])
       slashpos = strpos(inlist_new[ee],'/', /REVERSE_SEARCH)
       print,'slashpos: ',slashpos
       new_filename2[ee]=strmid(inlist_new[ee], slashpos+1, 60) ;To ensure all orbit numbers are included
