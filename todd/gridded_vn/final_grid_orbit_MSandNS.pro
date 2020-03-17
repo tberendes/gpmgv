@@ -107,7 +107,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
 
   ;We need to find the radar name and date before we can find the orbit numbers!
 ;  radar_sub=strmid(filename, 11, 6) ;Making the radar name 6 to avoid everything being -1
-  radar_sub=strmid(filename, 11, 8) ;Making the radar name 8 to avoid everything being -1
+  radar_sub=strmid(filename, 11, 10) ;Making the radar name 8 to avoid everything being -1
   testradar=strpos(radar_sub[*], '.')
   radar_sub2=strarr(n_elements(filename))
   radarname=strarr(n_elements(filename))
