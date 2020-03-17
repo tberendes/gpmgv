@@ -302,7 +302,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
       total_nKuKa=2
       total_nPhsBnN=5
       total_len_atime_ID=19
-      total_len_site_ID=4
+      total_len_site_ID=10
 
       ;To create the arrays and set "no values" equal to -999
       mvi=-999 ;Integer
@@ -787,7 +787,8 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
 	large_atimeNearestApproach[ff,0:18] = atimeNearestApproach[*]
 	large_timeSweepStart[ff,0:file_elev-1] = timeSweepStart[*]
         large_atimeSweepStart[ff,0:18,0:file_elev-1] = atimeSweepStart[*,*]
-	large_site_ID[ff,0:3] = site_ID[*]
+;	large_site_ID[ff,0:3] = site_ID[*]
+	large_site_ID[ff,*] = site_ID[*]
         large_site_lat[ff] = site_lat
         large_site_lon[ff] = site_lon
         large_site_elev[ff] = site_elev
@@ -1085,7 +1086,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
      grid_nKuKa=2
      grid_nPhsBnN=5
      grid_len_atime_ID=19
-     grid_len_site_ID=4
+     grid_len_site_ID=10
      grid_nr_xgrid=1466
      grid_nr_ygrid=776
      grid_nr_zgrid=17
