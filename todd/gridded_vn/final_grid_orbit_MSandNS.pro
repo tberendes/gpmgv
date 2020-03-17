@@ -118,7 +118,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
   orbitnr_sub2=strarr(n_elements(filename))
   orbitnr_sub=lonarr(n_elements(filename))
   testorbit=intarr(n_elements(filename))
-  orbitnr=lonarr(n_elements(filename))
+  orbitnr=strarr(n_elements(filename))
 
   ;For the number of TOTAL files for each year:
   for bb=0, n_elements(filename)-1 do begin
