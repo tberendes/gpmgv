@@ -128,10 +128,10 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
     namelength[bb]=strlen('GRtoDPRGMI.'+radarname[bb]+'.')  
     date[bb]=strmid(filename[bb], namelength[bb], 6)
     date2[bb]=string(date[bb])
-    print ,"date: ",date, " radar: ", radarname
+    print ,"date[bb]: ",date[bb], " radarname[bb]: ", radarname[bb]
  
     orbitlength[bb]=strlen('GRtoDPRGMI.'+strcompress(radarname[bb])+'.'+strcompress(date2[bb]))
-    orbitnr_sub2[bb]=strmid(filename[bb], orbitlength[bb], 6) ;To account for varying orbit numbers
+    orbitnr_sub2[bb]=strmid(filename[bb], orbitlength[bb]+1, 6) ;To account for varying orbit numbers
     testorbit[bb]=strpos(orbitnr_sub2[bb], '.')
     orbitnr_sub[bb]=strmid(orbitnr_sub2[bb], 0, testorbit[bb])
     orbitnr[bb]=reform(orbitnr_sub[bb])
