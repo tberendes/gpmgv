@@ -218,7 +218,8 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
       print,'inlist_new[ee]: ',inlist_new[ee] 
 ;      filenamelength[ee]=strlen(indir+strcompress(year[aa])+'/GRtoDPRGMI.'+fileradarname[ee]+'.')
 
-      filenamelength[ee]=slashpos+1+strlen('GRtoDPRGMI.') +strlen(fileradarname[ee]) + 2 ; add for dot and one past dot
+      print,'fileradarname[ee]: ',fileradarname[ee]
+      filenamelength[ee]=slashpos+1+strlen('GRtoDPRGMI.') +strlen(fileradarname[ee]) + 1 ; add for dot and one past dot
       print,'filenamelength[ee]: ',filenamelength[ee]
       filedate[ee]=strmid(inlist_new[ee], filenamelength[ee]-1, 6)
       print,'filedate[ee]: ',filedate[ee]
