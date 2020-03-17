@@ -112,7 +112,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
   radar_sub2=strarr(n_elements(filename))
   radarname=strarr(n_elements(filename))
   namelength=intarr(n_elements(filename))
-  date=lonarr(n_elements(filename))
+  date=strarr(n_elements(filename))
   date2=string(date) ;so we can find the string lenght!
   orbitlength=intarr(n_elements(filename))
   orbitnr_sub2=strarr(n_elements(filename))
@@ -128,6 +128,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
     namelength[bb]=strlen('GRtoDPRGMI.'+radarname[bb]+'.')  
     date[bb]=strmid(filename[bb], namelength[bb], 6)
     date2[bb]=string(date[bb])
+    print "date: ",date, " radar: ", radarname
  
     orbitlength[bb]=strlen('GRtoDPRGMI.'+strcompress(radarname[bb])+'.'+strcompress(date2[bb]))
     orbitnr_sub2[bb]=strmid(filename[bb], orbitlength[bb], 6) ;To account for varying orbit numbers
