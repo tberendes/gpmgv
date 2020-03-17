@@ -1,4 +1,4 @@
-PRO final_grid_orbit_MSandNS
+PRO final_grid_orbit_MSandNS_May2019
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;This script reads in 2BDPRGMI data and grids it to CONUS as a function of orbit number.		;
@@ -44,7 +44,7 @@ PRO final_grid_orbit_MSandNS
 ;													;
 ;To run the script: 											;
 ;IDL> .r final_grid_orbit_MSandNS_May2019.pro								;
-;IDL> final_grid_orbit_MSandNS_May2019									;
+;IDL> final_grid_orbit_MSandNS__May2019									;
 ;You will have to change the following:									;
 ;indir='/rstor/matthee/GPM-HID/DATA/gpmgv/netcdf/geo_match/GPM/2BDPRGMI/V06A/1_3/' => You will need 	;
 ;  to change the directory location to where your original data is located				;
@@ -88,14 +88,13 @@ grid_latitude_main=LatNew[0:775] ;Since we're only dealing with Lat from 20.0 to
 grid_longitude_main=LonNew[0:1465] ;Since we're dealing with Lon from -130.0 to -60.0
 
 ;This is where the original files are located that are used to create the gridded files:
-;indir='/rstor/matthee/GPM-HID/DATA/gpmgv/netcdf/geo_match/GPM/2BDPRGMI/V06A/1_3/'
+indir='/rstor/matthee/GPM-HID/DATA/gpmgv/netcdf/geo_match/GPM/2BDPRGMI/V06A/1_3/'
 
-indir='/data/gpmgv/netcdf/gridded_vn/test/'
 ;year=['2014','2015','2016','2017','2018']
-year=['2017'] ;You can either add ALL the years, or run the script per year
+year=['2014'] ;You can either add ALL the years, or run the script per year
 
 for aa = 0, n_elements(year)-1 do begin  ;for the years listed
-  spawn, '/bin/ls '+indir+strcompress(year[aa]), inlist
+  spawn, 'ls '+indir+strcompress(year[aa]), inlist
   inlistsize=size(inlist, /dimensions)
   count=inlistsize
 
@@ -106,8 +105,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
   filename=inlist
 
   ;We need to find the radar name and date before we can find the orbit numbers!
-;  radar_sub=strmid(filename, 11, 6) ;Making the radar name 6 to avoid everything being -1
-  radar_sub=strmid(filename, 11, 8) ;Making the radar name 8 to avoid everything being -1
+  radar_sub=strmid(filename, 11, 6) ;Making the radar name 6 to avoid everything being -1
   testradar=strpos(radar_sub[*], '.')
   radar_sub2=strarr(n_elements(filename))
   radarname=strarr(n_elements(filename))
@@ -167,7 +165,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
   ;NOTE: dd=0: Orbit=503, 2 files;  dd=16: Orbit=636, 5 files;  dd=187: Orbit=1917, 10 files
   for dd=0, n_elements(unique_orbitnr)-1 do begin
   ;for dd=0, 0 do begin ;Testing with one orbit only (2 files):
-    spawn, '/bin/ls '+indir+strcompress(year[aa])+'/GRtoDPRGMI.*.*.'+strcompress(unique_orbitnr[dd], $
+    spawn, 'ls '+indir+strcompress(year[aa])+'/GRtoDPRGMI.*.*.'+strcompress(unique_orbitnr[dd], $
            /remove_all)+'.V06A.1_3.15dBZ_7km.nc.gz', inlist_new
 
     print, ''
@@ -181,10 +179,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
            
     ;We need to find the radar name and date again (for only the files we are looking at)
     ;We are now also including the entire directory and not just the filename
-    pathlen = n_elements(indir)+n_elements('GRtoDPRGMI.')+n_elements(year[aa])+1 ; add one for trailing dot
-    print, 'pathlen ', pathlen
-    fileradar_sub=strmid(inlist_new, pathlen-1, 8) ;Making the radar name 8 to avoid everything being -1    
-;    fileradar_sub=strmid(inlist_new, 89, 6) ;Making the radar name 6 to avoid everything being -1
+    fileradar_sub=strmid(inlist_new, 89, 6) ;Making the radar name 6 to avoid everything being -1
     filetestradar=strpos(fileradar_sub[*], '.')
     fileradar_sub2=strarr(n_elements(inlist_new))
     fileradarname=strarr(n_elements(inlist_new))
@@ -212,14 +207,10 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
       fileradar_sub2[ee]=strmid(fileradar_sub[ee], 0, filetestradar[ee])
       fileradarname[ee]=reform(fileradar_sub2[ee])
       ;This is just to get the radar name and isn't the actual charachter length of the entire file name!
-      print,'inlist_new[ee]: ',inlist_new[ee] 
       filenamelength[ee]=strlen(indir+strcompress(year[aa])+'/GRtoDPRGMI.'+fileradarname[ee]+'.')
-      print,'filenamelength[ee]: ',filenamelength[ee]
       filedate[ee]=strmid(inlist_new[ee], filenamelength[ee], 6)
       filedate2[ee]=string(filedate[ee])
-      slashpos = strpos(inlist_new[ee],'/', /REVERSE_SEARCH)
-      new_filename2[ee]=strmid(inlist_new[ee], slashpos, 60) ;To ensure all orbit numbers are included
-;      new_filename2[ee]=strmid(inlist_new[ee], 78, 60) ;To ensure all orbit numbers are included
+      new_filename2[ee]=strmid(inlist_new[ee], 78, 60) ;To ensure all orbit numbers are included
       sub_newfilename[ee]=strlen(new_filename2[ee])-3 ;To get rid of the .gz
       sub_filename2[ee]=strmid(new_filename2[ee], 0, sub_newfilename[ee])
       new_filename[ee]=reform(sub_filename2[ee])
@@ -304,7 +295,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
       total_nKuKa=2
       total_nPhsBnN=5
       total_len_atime_ID=19
-      total_len_site_ID=10
+      total_len_site_ID=4
 
       ;To create the arrays and set "no values" equal to -999
       mvi=-999 ;Integer
@@ -789,8 +780,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
 	large_atimeNearestApproach[ff,0:18] = atimeNearestApproach[*]
 	large_timeSweepStart[ff,0:file_elev-1] = timeSweepStart[*]
         large_atimeSweepStart[ff,0:18,0:file_elev-1] = atimeSweepStart[*,*]
-;	large_site_ID[ff,0:3] = site_ID[*]
-	large_site_ID[ff,*] = site_ID[*]
+	large_site_ID[ff,0:3] = site_ID[*]
         large_site_lat[ff] = site_lat
         large_site_lon[ff] = site_lon
         large_site_elev[ff] = site_elev
@@ -1088,7 +1078,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
      grid_nKuKa=2
      grid_nPhsBnN=5
      grid_len_atime_ID=19
-     grid_len_site_ID=10
+     grid_len_site_ID=4
      grid_nr_xgrid=1466
      grid_nr_ygrid=776
      grid_nr_zgrid=17
