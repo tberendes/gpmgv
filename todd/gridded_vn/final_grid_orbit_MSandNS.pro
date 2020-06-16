@@ -107,18 +107,18 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
 
   ;We need to find the radar name and date before we can find the orbit numbers!
 ;  radar_sub=strmid(filename, 11, 6) ;Making the radar name 6 to avoid everything being -1
-  radar_sub=strmid(filename, 11, 8) ;Making the radar name 8 to avoid everything being -1
+  radar_sub=strmid(filename, 11, 10) ;Making the radar name 8 to avoid everything being -1
   testradar=strpos(radar_sub[*], '.')
   radar_sub2=strarr(n_elements(filename))
   radarname=strarr(n_elements(filename))
   namelength=intarr(n_elements(filename))
-  date=lonarr(n_elements(filename))
+  date=strarr(n_elements(filename))
   date2=string(date) ;so we can find the string lenght!
   orbitlength=intarr(n_elements(filename))
   orbitnr_sub2=strarr(n_elements(filename))
   orbitnr_sub=lonarr(n_elements(filename))
   testorbit=intarr(n_elements(filename))
-  orbitnr=lonarr(n_elements(filename))
+  orbitnr=strarr(n_elements(filename))
 
   ;For the number of TOTAL files for each year:
   for bb=0, n_elements(filename)-1 do begin
@@ -128,9 +128,10 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
     namelength[bb]=strlen('GRtoDPRGMI.'+radarname[bb]+'.')  
     date[bb]=strmid(filename[bb], namelength[bb], 6)
     date2[bb]=string(date[bb])
+    print ,"date[bb]: ",date[bb], " radarname[bb]: ", radarname[bb]
  
     orbitlength[bb]=strlen('GRtoDPRGMI.'+strcompress(radarname[bb])+'.'+strcompress(date2[bb]))
-    orbitnr_sub2[bb]=strmid(filename[bb], orbitlength[bb], 6) ;To account for varying orbit numbers
+    orbitnr_sub2[bb]=strmid(filename[bb], orbitlength[bb]+1, 6) ;To account for varying orbit numbers
     testorbit[bb]=strpos(orbitnr_sub2[bb], '.')
     orbitnr_sub[bb]=strmid(orbitnr_sub2[bb], 0, testorbit[bb])
     orbitnr[bb]=reform(orbitnr_sub[bb])
@@ -181,16 +182,16 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
            
     ;We need to find the radar name and date again (for only the files we are looking at)
     ;We are now also including the entire directory and not just the filename
-    pathlen = n_elements(indir)+n_elements('GRtoDPRGMI.')+n_elements(year[aa])+1 ; add one for trailing dot
+    pathlen = strpos(inlist_new,'/',/REVERSE_SEARCH) +strlen('GRtoDPRGMI.')+1 ; add one for trailing dot 
     print, 'pathlen ', pathlen
-    fileradar_sub=strmid(inlist_new, pathlen-1, 8) ;Making the radar name 8 to avoid everything being -1    
+    fileradar_sub=strmid(inlist_new, pathlen, 10) ; catch up to 10 char site names   
 ;    fileradar_sub=strmid(inlist_new, 89, 6) ;Making the radar name 6 to avoid everything being -1
     filetestradar=strpos(fileradar_sub[*], '.')
     fileradar_sub2=strarr(n_elements(inlist_new))
     fileradarname=strarr(n_elements(inlist_new))
     filenamelength=intarr(n_elements(inlist_new))
-    filedate=lonarr(n_elements(inlist_new))
-    filedate2=string(filedate) ;so we can find the string lenght again
+    filedate=strarr(n_elements(inlist_new))
+;    filedate2=string(filedate) ;so we can find the string lenght again
     new_filename2=strarr(n_elements(inlist_new))
     sub_newfilename=new_filename2 ;To set the same string arrays
     sub_filename2=new_filename2
@@ -209,16 +210,21 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
     nr_files=n_elements(inlist_new)
      
     for ee=0, n_elements(inlist_new)-1 do begin
-      fileradar_sub2[ee]=strmid(fileradar_sub[ee], 0, filetestradar[ee])
+      slashpos = strpos(inlist_new[ee],'/', /REVERSE_SEARCH)
+      print,'slashpos: ',slashpos
+      fileradar_sub2[ee]=strmid(fileradar_sub[ee], 0, filetestradar[ee]+1)
       fileradarname[ee]=reform(fileradar_sub2[ee])
       ;This is just to get the radar name and isn't the actual charachter length of the entire file name!
       print,'inlist_new[ee]: ',inlist_new[ee] 
-      filenamelength[ee]=strlen(indir+strcompress(year[aa])+'/GRtoDPRGMI.'+fileradarname[ee]+'.')
+;      filenamelength[ee]=strlen(indir+strcompress(year[aa])+'/GRtoDPRGMI.'+fileradarname[ee]+'.')
+
+      print,'fileradarname[ee]: ',fileradarname[ee]
+      filenamelength[ee]=slashpos+1+strlen('GRtoDPRGMI.') +strlen(fileradarname[ee]) + 1 ; add for dot and one past dot
       print,'filenamelength[ee]: ',filenamelength[ee]
-      filedate[ee]=strmid(inlist_new[ee], filenamelength[ee], 6)
-      filedate2[ee]=string(filedate[ee])
-      slashpos = strpos(inlist_new[ee],'/', /REVERSE_SEARCH)
-      new_filename2[ee]=strmid(inlist_new[ee], slashpos, 60) ;To ensure all orbit numbers are included
+      filedate[ee]=strmid(inlist_new[ee], filenamelength[ee]-1, 6)
+      print,'filedate[ee]: ',filedate[ee]
+;      filedate2[ee]=string(filedate[ee])
+      new_filename2[ee]=strmid(inlist_new[ee], slashpos+1, 60) ;To ensure all orbit numbers are included
 ;      new_filename2[ee]=strmid(inlist_new[ee], 78, 60) ;To ensure all orbit numbers are included
       sub_newfilename[ee]=strlen(new_filename2[ee])-3 ;To get rid of the .gz
       sub_filename2[ee]=strmid(new_filename2[ee], 0, sub_newfilename[ee])
@@ -790,7 +796,7 @@ for aa = 0, n_elements(year)-1 do begin  ;for the years listed
 	large_timeSweepStart[ff,0:file_elev-1] = timeSweepStart[*]
         large_atimeSweepStart[ff,0:18,0:file_elev-1] = atimeSweepStart[*,*]
 ;	large_site_ID[ff,0:3] = site_ID[*]
-	large_site_ID[ff,*] = site_ID[*]
+	large_site_ID[ff] = site_ID
         large_site_lat[ff] = site_lat
         large_site_lon[ff] = site_lon
         large_site_elev[ff] = site_elev
