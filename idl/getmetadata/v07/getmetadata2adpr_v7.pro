@@ -78,6 +78,7 @@ Height = 3.0   ; Altitude above ground (km)
 ; NULLS)
 ; find, open the input file listing 2ADPR HDF files and NEXRAD sites/lats/lons
 FILES4META = GETENV("GETMYMETA")
+print, "FILES4META "+FILES4META
 OPENR, lun0, FILES4META, ERROR=err, /GET_LUN
 tmpdirname = FILE_DIRNAME(FILES4META)
 datadirpos = STRPOS(tmpdirname, '/tmp')
