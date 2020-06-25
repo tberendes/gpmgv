@@ -159,6 +159,9 @@ FUNCTION read_2akaku_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2re
          '2AKa' : swathHeaderID = h5a_open_name(sw_group_id, $
                                                 sname+'_SwathHeader')
          '2AKu' : swathHeaderID = h5a_open_name(sw_group_id, 'SwathHeader')
+         '2AKaX' : swathHeaderID = h5a_open_name(sw_group_id, $
+                                                sname+'_SwathHeader')
+         '2AKuX' : swathHeaderID = h5a_open_name(sw_group_id, 'SwathHeader')
       ENDCASE
       ppsSwathHeader = h5a_read(swathHeaderID)
       ; extract the individual swath header values from the formatted string
@@ -280,6 +283,8 @@ FUNCTION read_2akaku_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2re
    CASE prodname OF
        '2AKa' : outStruc = { FileHeader:filestruc, HS:HS, FS:FS }
        '2AKu' : outStruc = { FileHeader:filestruc, FS:FS }
+       '2AKaX' : outStruc = { FileHeader:filestruc, HS:HS, FS:FS }
+       '2AKuX' : outStruc = { FileHeader:filestruc, FS:FS }
         ELSE  : message, "Illegal product '" + prodname + $
                          "', must be '2AKa', '2AKu', '2AKaX', or '2AKuX'"
    ENDCASE
