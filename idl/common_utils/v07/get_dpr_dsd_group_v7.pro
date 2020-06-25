@@ -3,7 +3,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; get_dpr_dsd_group.pro         Bob Morris, GPM GV/SAIC   May 2013
+; get_dpr_dsd_group_v7.pro         Bob Morris, GPM GV/SAIC   May 2013
 ;
 ; DESCRIPTION
 ; Given the HDF5 ID of its parent group, gets each data element for the DPR,
@@ -32,13 +32,15 @@
 ; - Removed the logic of testing for a specific number of members, just check
 ;   for a minimum number of variables.  In cases of new/unknown variables in
 ;   group return valid structure instead of -1 flag.
+; 06/25/20  Berendes/UAH
+; - changes for V07 files
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
 ;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
 ;-
 
-FUNCTION get_dpr_dsd_group, group_id, prodgroup, READ_ALL=read_all
+FUNCTION get_dpr_dsd_group_v7, group_id, prodgroup, READ_ALL=read_all
 
    all = KEYWORD_SET(read_all)
 
@@ -66,9 +68,8 @@ FUNCTION get_dpr_dsd_group, group_id, prodgroup, READ_ALL=read_all
 ;   print, "No. Members = ", nmbrs
    ; the number of members expected varies depending on the swath ID
    CASE swathname OF
+      'FS' : n_expect = 2
       'HS' : n_expect = 2
-      'MS' : IF product EQ '2ADPR' THEN n_expect = 1 ELSE n_expect = 2
-      'NS' : n_expect = 2
       ELSE : message, "Unknown swath type given in prodgroup: "+swathname
    ENDCASE
 

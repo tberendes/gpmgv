@@ -210,7 +210,7 @@ FUNCTION read_2akaku_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2re
 
       ; get the DSD structure for this swath
       ptr_dsd = ptr_new(/allocate_heap)
-      *ptr_dsd = get_dpr_dsd_group(sw_group_id, prodgroup, READ_ALL=all)
+      *ptr_dsd = get_dpr_dsd_group_v7(sw_group_id, prodgroup, READ_ALL=all)
       IF (verbose1) THEN help, *ptr_dsd
 
       ; get the FLG structure for this swath
