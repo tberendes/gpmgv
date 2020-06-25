@@ -194,7 +194,7 @@ FUNCTION read_2adpr_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
 
       ; get the SLV structure for this swath
       ptr_slv = ptr_new(/allocate_heap)
-      *ptr_slv = get_dpr_slv_group(sw_group_id, prodgroup, READ_ALL=all)
+      *ptr_slv = get_dpr_slv_group_v7(sw_group_id, prodgroup, READ_ALL=all)
       IF (verbose1) THEN help, *ptr_slv
 
       ; get the SRT structure for this swath
