@@ -68,7 +68,9 @@ endif
    GATE_SPACE = BIN_SPACE_FS
    print, '' & print, "Reading file: ", file_2adpr & print, ''
    
-   ; #$@#$@#$@#$!@#$ commented out for testing #@$@#$@#%!@#%!@#%$!@#$@$#@
+; #$@#$@#$@#$!@#$  testing, remove following line and uncoment Case #@$@#$@#%!@#%!@#%$!@#$@$#@
+dpr_data = read_2akaku_hdf5_v7(file_2adpr, SCAN=DPR_scantype)
+
 ;   CASE Instrument OF
    ;#######################################  Start here ###########################################
 ;    'DPRX' : dpr_data = read_2adpr_hdf5_v7(file_2adpr, SCAN=DPR_scantype)
@@ -77,6 +79,7 @@ endif
 ;      'Ku' : dpr_data = read_2akaku_hdf5_v7(file_2adpr, SCAN=DPR_scantype)
 ;      ELSE : message, "Illegal data source '"+Instrument+"', only DPR or Ku allowed."
 ;   ENDCASE
+
 
    ; check dpr_data structure for read failures
    IF SIZE(dpr_data, /TYPE) NE 8 THEN $
