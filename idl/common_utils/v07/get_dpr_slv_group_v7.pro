@@ -3,7 +3,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; get_dpr_slv_group.pro         Bob Morris, GPM GV/SAIC   May 2013
+; get_dpr_slv_group_v7.pro         Bob Morris, GPM GV/SAIC   May 2013
 ;
 ; DESCRIPTION
 ; Given the HDF5 ID of its parent group, gets each data element for the DPR,
@@ -36,13 +36,15 @@
 ; - Added reading and output of paramNUBF variable for V04x files for READ_ALL.
 ; 07/27/16  Morris/GPM GV/SAIC
 ; - Added epsilon to the list of variables to be read by default.
+; 06/25/20  Berendes/UAH
+; - changes for V07 files
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
 ;       <Matt Schwaller> mathew.r.schwaller@nasa.gov
 ;-
 
-FUNCTION get_dpr_slv_group, group_id, prodgroup, READ_ALL=read_all
+FUNCTION get_dpr_slv_group_v7, group_id, prodgroup, READ_ALL=read_all
 
    all = KEYWORD_SET(read_all)
 
@@ -72,8 +74,7 @@ FUNCTION get_dpr_slv_group, group_id, prodgroup, READ_ALL=read_all
    ; - these are V03x counts, expect one more in V04x
    CASE swathname OF
       'HS' : n_expect = 15
-      'MS' : IF product EQ '2ADPR' THEN n_expect = 12 ELSE n_expect = 15
-      'NS' : n_expect = 15
+      'FS' : n_expect = 15
       ELSE : message, "Unknown swath type given in prodgroup: "+swathname
    ENDCASE
 
