@@ -69,7 +69,9 @@ endif
    print, '' & print, "Reading file: ", file_2adpr & print, ''
    CASE Instrument OF
    ;#######################################  Start here ###########################################
+    'DPRX' : dpr_data = read_2adpr_hdf5_v7(file_2adpr, SCAN=DPR_scantype)
      'DPR' : dpr_data = read_2adpr_hdf5_v7(file_2adpr, SCAN=DPR_scantype)
+     'KuX' : dpr_data = read_2akaku_hdf5_v7(file_2adpr, SCAN=DPR_scantype)
       'Ku' : dpr_data = read_2akaku_hdf5_v7(file_2adpr, SCAN=DPR_scantype)
       ELSE : message, "Illegal data source '"+Instrument+"', only DPR or Ku allowed."
    ENDCASE
