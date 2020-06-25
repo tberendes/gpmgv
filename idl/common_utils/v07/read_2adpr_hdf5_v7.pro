@@ -169,7 +169,7 @@ FUNCTION read_2adpr_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
 
       ; get the Experimental structure for this swath
       ptr_exp = ptr_new(/allocate_heap)
-      *ptr_exp = get_dpr_experimental_group(sw_group_id, prodgroup, READ_ALL=all)
+      *ptr_exp = get_dpr_experimental_group_v7(sw_group_id, prodgroup, READ_ALL=all)
       IF (verbose1) THEN help, *ptr_exp
 
       ; get the CSF structure for this swath
