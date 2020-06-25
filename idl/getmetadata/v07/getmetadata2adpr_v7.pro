@@ -129,8 +129,9 @@ While not (EOF(lun0)) Do Begin
 ; parse the file pathname to get the Instrument ID (DPR or Ku)
    parsed2a=strsplit( file_2aDPR, '/', /extract )
    Instrument = parsed2a[4]
-   IF (Instrument NE 'DPR' AND Instrument NE 'Ku') THEN $
-      message, "Illegal data source '"+Instrument+"', only DPR or Ku allowed."
+; $$$$$$$$$$$$ commented this out for testing $$$$$$$$$$$$$$$$$$
+;   IF (Instrument NE 'DPR' AND Instrument NE 'Ku' Instrument NE 'DPRX' AND Instrument NE 'KuX') THEN $
+;      message, "Illegal data source '"+Instrument+"', only DPR or Ku allowed."
 
 ; Check status of file_2aDPR before proceeding - may need to pare down file
 ; extensions.
