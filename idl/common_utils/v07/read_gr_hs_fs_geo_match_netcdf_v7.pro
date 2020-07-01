@@ -4,7 +4,9 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; read_gr_hs_ms_ns_geo_match_netcdf.pro        Morris/SAIC/GPM_GV      Feb 2016
+; created from read_gr_hs_ms_ns_geo_match_netcdf.pro
+;
+; read_gr_hs_fs_geo_match_netcdf_v7.pro        Berendes, UAH, 6/29/20
 ;
 ; DESCRIPTION
 ; -----------
@@ -35,16 +37,9 @@
 ; data_HS              Structure containing all the DPR-matched GR data variables
 ;                      for the HS swath.  Structure is defined and created in this
 ;                      routine, replacing the input parameter value.
-; data_MS              Structure containing all the DPR-matched GR data variables
-;                      for the MS swath.  Structure is defined and created in this
+; data_FS              Structure containing all the DPR-matched GR data variables
+;                      for the FS swath.  Structure is defined and created in this
 ;                      routine, replacing the input parameter value.
-; data_NS              Structure containing all the DPR-matched GR data variables
-;                      for the NS swath.  Structure is defined and created in this
-;                      routine, replacing the input parameter value.
-;                      -- The parameter values data_HS, data_MS, and data_NS
-;                         must be non-null in the call this this function if
-;                         their corresponding data structure is to be returned,
-;                         otherwise data for the swath are read and discarded.
 ;
 ; RETURNS
 ; -------
@@ -54,6 +49,8 @@
 ; -------
 ; 02/29/2016  Morris/SAIC/GPM-GV
 ; - Created from read_dprgmi_geo_match_netcdf.pro.
+; 09/04/18 Berendes, UAH
+;  - Added mods for SWE variables
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -62,20 +59,19 @@
 ;-
 ;===============================================================================
 
-FUNCTION read_gr_hs_ms_ns_geo_match_netcdf, ncfile, matchupmeta=matchupmeta, $
+FUNCTION read_gr_hs_fs_geo_match_netcdf_v7, ncfile, matchupmeta=matchupmeta, $
     sweepsmeta=sweepsmeta, sitemeta=sitemeta, fieldflags=fieldFlags, $
-    filesmeta=filesmeta, DATA_HS=data_HS, DATA_MS=data_MS, DATA_NS=data_NS
-
+    filesmeta=filesmeta, DATA_HS=data_HS, DATA_FS=data_FS
 
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
-@dpr_params.inc
+@dpr_params_v7.inc
 
 status = 0
 
 ncid1 = NCDF_OPEN( ncfile )
 IF ( N_Elements(ncid1) EQ 0 ) THEN BEGIN
    print, ''
-   print, "ERROR from read_gr_hs_ms_ns_geo_match_netcdf:"
+   print, "ERROR from read_gr_hs_fs_geo_match_netcdf_v7:"
    print, "File copy ", ncfile, " is not a valid netCDF file!"
    print, ''
    status = 1
@@ -89,7 +85,7 @@ IF ( attstruc.ngatts GT 0 ) THEN BEGIN
    typeversion = ncdf_attname(ncid1, 0, /global)
    IF ( typeversion NE 'DPR_Version' ) THEN BEGIN
       print, ''
-      print, "ERROR from read_gr_hs_ms_ns_geo_match_netcdf:"
+      print, "ERROR from read_gr_hs_fs_geo_match_netcdf_v7:"
       print, "File copy ", ncfile, " is not a GR-DPR matchup file!"
       print, ''
       status = 1
@@ -97,7 +93,7 @@ IF ( attstruc.ngatts GT 0 ) THEN BEGIN
    ENDIF
 ENDIF ELSE BEGIN
    print, ''
-   print, "ERROR from read_gr_hs_ms_ns_geo_match_netcdf:"
+   print, "ERROR from read_gr_hs_fs_geo_match_netcdf_v7:"
    print, "File copy ", ncfile, " has no global attributes!"
    print, ''
    status = 1
@@ -110,7 +106,7 @@ versid = NCDF_VARID(ncid1, 'version')
 NCDF_ATTGET, ncid1, versid, 'long_name', vers_def_byte
 vers_def = string(vers_def_byte)
 IF ( vers_def ne 'Geo Match File Version' ) THEN BEGIN
-   print, "ERROR from read_gr_hs_ms_ns_geo_match_netcdf:"
+   print, "ERROR from read_gr_hs_fs_geo_match_netcdf_v7:"
    print, "File ", ncfile, " is not a valid geo_match netCDF file!"
    status = 1
    goto, ErrorExit
@@ -139,34 +135,23 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      fpdimid = NCDF_DIMID(ncid1, 'fpdim_HS')
      NCDF_DIMINQ, ncid1, fpdimid, FPDIMNAME, nprfp_HS
      matchupmeta.num_footprints_HS = nprfp_HS         ; redundant with numRays_HS
-     fpdimid = NCDF_DIMID(ncid1, 'fpdim_MS')
-     NCDF_DIMINQ, ncid1, fpdimid, FPDIMNAME, nprfp_MS
-     matchupmeta.num_footprints_MS = nprfp_MS         ; redundant with numRays_MS
-     fpdimid = NCDF_DIMID(ncid1, 'fpdim_NS')
-     NCDF_DIMINQ, ncid1, fpdimid, FPDIMNAME, nprfp_NS
-     matchupmeta.num_footprints_NS = nprfp_NS         ; redundant with numRays_NS
+     fpdimid = NCDF_DIMID(ncid1, 'fpdim_FS')
+     NCDF_DIMINQ, ncid1, fpdimid, FPDIMNAME, nprfp_FS
+     matchupmeta.num_footprints_FS = nprfp_FS         ; redundant with numRays_FS
      NCDF_VARGET, ncid1, 'startScan_HS', scan_s
      matchupmeta.startScan_HS = scan_s
-     NCDF_VARGET, ncid1, 'startScan_MS', scan_s
-     matchupmeta.startScan_MS = scan_s
-     NCDF_VARGET, ncid1, 'startScan_NS', scan_s
-     matchupmeta.startScan_NS = scan_s
+     NCDF_VARGET, ncid1, 'startScan_FS', scan_s
+     matchupmeta.startScan_FS = scan_s
      NCDF_VARGET, ncid1, 'endScan_HS', scan_e
      matchupmeta.endScan_HS = scan_e
-     NCDF_VARGET, ncid1, 'endScan_MS', scan_e
-     matchupmeta.endScan_MS = scan_e
-     NCDF_VARGET, ncid1, 'endScan_NS', scan_e
-     matchupmeta.endScan_NS = scan_e
+     NCDF_VARGET, ncid1, 'endScan_FS', scan_e
+     matchupmeta.endScan_FS = scan_e
      NCDF_VARGET, ncid1, 'numRays_HS', num_rays
      matchupmeta.num_rays_HS = num_rays         ; redundant with num_footprints_HS
-     NCDF_VARGET, ncid1, 'numRays_MS', num_rays
-     matchupmeta.num_rays_MS = num_rays         ; redundant with num_footprints_MS
-     NCDF_VARGET, ncid1, 'numRays_NS', num_rays
-     matchupmeta.num_rays_NS = num_rays         ; redundant with num_footprints_NS
+     NCDF_VARGET, ncid1, 'numRays_FS', num_rays
+     matchupmeta.num_rays_FS = num_rays         ; redundant with num_footprints_FS
      NCDF_VARGET, ncid1, 'have_swath_HS', have_swath_HS
      matchupmeta.have_swath_HS = have_swath_HS
-     NCDF_VARGET, ncid1, 'have_swath_MS', have_swath_MS
-     matchupmeta.have_swath_MS = have_swath_MS
      ncdf_attget, ncid1, 'GV_UF_Z_field', gr_UF_field_byte, /global
      matchupmeta.GV_UF_Z_field = STRING(gr_UF_field_byte)
      hidimid = NCDF_DIMID(ncid1, 'hidim')
@@ -218,7 +203,7 @@ IF N_Elements(sweepsmeta) NE 0 THEN BEGIN
      IF TOTAL( ABS(elevorder-ascorder) ) NE 0 THEN BEGIN
        ; we have not coded for the out-of-order situation, so bail out
         message, 'Elevation angles not in order!'
-        ;PRINT, 'read_gr_hs_ms_ns_geo_match_netcdf(): Elevation angles not in order! Resorting data.'
+        ;PRINT, 'read_gr_hs_fs_geo_match_netcdf_v7(): Elevation angles not in order! Resorting data.'
         ;sortflag=1
      ENDIF
      arr_structs = REPLICATE(sweepsmeta,ncnz)  ; need one struct per sweep/elev.
@@ -239,7 +224,7 @@ ENDIF ELSE BEGIN
      IF TOTAL( ABS(elevorder-ascorder) ) NE 0 THEN BEGIN
        ; we have not coded for the out-of-order situation, so bail out
         message, 'Elevation angles not in order!'
-        ;PRINT, 'read_gr_hs_ms_ns_geo_match_netcdf(): Elevation angles not in order! Resorting data.'
+        ;PRINT, 'read_gr_hs_fs_geo_match_netcdf_v7(): Elevation angles not in order! Resorting data.'
         ;sortflag=1
      ENDIF
 ENDELSE
@@ -283,15 +268,17 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      fieldFlags.have_GR_N2 = have_GR_N2
      NCDF_VARGET, ncid1, 'have_GR_blockage', have_blockage
      fieldFlags.have_GR_blockage = have_blockage
+     NCDF_VARGET, ncid1, 'have_GR_SWE', have_GR_SWE
+     fieldFlags.have_GR_SWE = have_GR_SWE
 ENDIF
 
 
-; define the three swaths in the DPR product, we need separate variables
+; define the two swaths in the DPR product, we need separate variables
 ; for each swath for the GR science variables
-swath = ['HS','MS','NS']
+swath = ['HS','FS']
 
 ; get the science/geometry/time data for each swath type
-for iswa=0,2 do begin
+for iswa=0,1 do begin
 
    NCDF_VARGET, ncid1, 'Year_'+swath[iswa], Year
    NCDF_VARGET, ncid1, 'Month_'+swath[iswa], Month
@@ -361,6 +348,30 @@ for iswa=0,2 do begin
    NCDF_VARGET, ncid1, 'DPRlongitude_'+swath[iswa], DPRlongitude
    NCDF_VARGET, ncid1, 'scanNum_'+swath[iswa], scanNum
    NCDF_VARGET, ncid1, 'rayNum_'+swath[iswa], rayNum
+   NCDF_VARGET, ncid1, 'GR_SWEDP_'+swath[iswa], GR_SWEDP
+   NCDF_VARGET, ncid1, 'GR_SWEDP_StdDev_'+swath[iswa], GR_SWEDP_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWEDP_Max_'+swath[iswa], GR_SWEDP_Max
+   NCDF_VARGET, ncid1, 'n_gr_swedp_rejected_'+swath[iswa], n_gr_swedp_rejected
+   NCDF_VARGET, ncid1, 'GR_SWE25_'+swath[iswa], GR_SWE25
+   NCDF_VARGET, ncid1, 'GR_SWE25_StdDev_'+swath[iswa], GR_SWE25_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWE25_Max_'+swath[iswa], GR_SWE25_Max
+   NCDF_VARGET, ncid1, 'n_gr_swe25_rejected_'+swath[iswa], n_gr_swe25_rejected
+   NCDF_VARGET, ncid1, 'GR_SWE50_'+swath[iswa], GR_SWE50
+   NCDF_VARGET, ncid1, 'GR_SWE50_StdDev_'+swath[iswa], GR_SWE50_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWE50_Max_'+swath[iswa], GR_SWE50_Max
+   NCDF_VARGET, ncid1, 'n_gr_swe50_rejected_'+swath[iswa], n_gr_swe50_rejected
+   NCDF_VARGET, ncid1, 'GR_SWE75_'+swath[iswa], GR_SWE75
+   NCDF_VARGET, ncid1, 'GR_SWE75_StdDev_'+swath[iswa], GR_SWE75_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWE75_Max_'+swath[iswa], GR_SWE75_Max
+   NCDF_VARGET, ncid1, 'n_gr_swe75_rejected_'+swath[iswa], n_gr_swe75_rejected
+   NCDF_VARGET, ncid1, 'GR_SWEMQT_'+swath[iswa], GR_SWEMQT
+   NCDF_VARGET, ncid1, 'GR_SWEMQT_StdDev_'+swath[iswa], GR_SWEMQT_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWEMQT_Max_'+swath[iswa], GR_SWEMQT_Max
+   NCDF_VARGET, ncid1, 'n_gr_swemqt_rejected_'+swath[iswa], n_gr_swemqt_rejected
+   NCDF_VARGET, ncid1, 'GR_SWEMRMS_'+swath[iswa], GR_SWEMRMS
+   NCDF_VARGET, ncid1, 'GR_SWEMRMS_StdDev_'+swath[iswa], GR_SWEMRMS_StdDev
+   NCDF_VARGET, ncid1, 'GR_SWEMRMS_Max_'+swath[iswa], GR_SWEMRMS_Max
+   NCDF_VARGET, ncid1, 'n_gr_swemrms_rejected_'+swath[iswa], n_gr_swemrms_rejected
 
   ; copy the swath-specific data variables into anonymous structure, use
   ; TEMPORARY to avoid making a copy of the variable when loading to struct
@@ -401,6 +412,24 @@ for iswa=0,2 do begin
                  GR_RR_rainrate : TEMPORARY(GR_RR_rainrate), $
                  GR_RR_rainrate_StdDev : TEMPORARY(GR_RR_rainrate_StdDev), $
                  GR_RR_rainrate_Max : TEMPORARY(GR_RR_rainrate_Max), $
+                 GR_SWEDP : TEMPORARY(GR_SWEDP), $
+                 GR_SWEDP_StdDev : TEMPORARY(GR_SWEDP_StdDev), $
+                 GR_SWEDP_Max : TEMPORARY(GR_SWEDP_Max), $
+                 GR_SWE25 : TEMPORARY(GR_SWE25), $
+                 GR_SWE25_StdDev : TEMPORARY(GR_SWE25_StdDev), $
+                 GR_SWE25_Max : TEMPORARY(GR_SWE25_Max), $
+                 GR_SWE50 : TEMPORARY(GR_SWE50), $
+                 GR_SWE50_StdDev : TEMPORARY(GR_SWE50_StdDev), $
+                 GR_SWE50_Max : TEMPORARY(GR_SWE50_Max), $
+                 GR_SWE75 : TEMPORARY(GR_SWE75), $
+                 GR_SWE75_StdDev : TEMPORARY(GR_SWE75_StdDev), $
+                 GR_SWE75_Max : TEMPORARY(GR_SWE75_Max), $
+                 GR_SWEMQT : TEMPORARY(GR_SWEMQT), $
+                 GR_SWEMQT_StdDev : TEMPORARY(GR_SWEMQT_StdDev), $
+                 GR_SWEMQT_Max : TEMPORARY(GR_SWEMQT_Max), $
+                 GR_SWEMRMS : TEMPORARY(GR_SWEMRMS), $
+                 GR_SWEMRMS_StdDev : TEMPORARY(GR_SWEMRMS_StdDev), $
+                 GR_SWEMRMS_Max : TEMPORARY(GR_SWEMRMS_Max), $
                  GR_HID : TEMPORARY(GR_HID), $
                  GR_Dzero : TEMPORARY(GR_Dzero), $
                  GR_Dzero_StdDev : TEMPORARY(GR_Dzero_StdDev), $
@@ -427,6 +456,12 @@ for iswa=0,2 do begin
                  n_gr_nw_rejected : TEMPORARY(n_gr_nw_rejected), $
                  n_gr_dm_rejected : TEMPORARY(n_gr_dm_rejected), $
                  n_gr_n2_rejected : TEMPORARY(n_gr_n2_rejected), $
+                 n_gr_swedp_rejected : TEMPORARY(n_gr_swedp_rejected), $
+                 n_gr_swe25_rejected : TEMPORARY(n_gr_swe25_rejected), $
+                 n_gr_swe50_rejected : TEMPORARY(n_gr_swe50_rejected), $
+                 n_gr_swe75_rejected : TEMPORARY(n_gr_swe75_rejected), $
+                 n_gr_swemqt_rejected : TEMPORARY(n_gr_swemqt_rejected), $
+                 n_gr_swemrms_rejected : TEMPORARY(n_gr_swemrms_rejected), $
                  n_gr_expected : TEMPORARY(n_gr_expected), $
                  DPRlatitude : TEMPORARY(DPRlatitude), $
                  DPRlongitude : TEMPORARY(DPRlongitude), $
@@ -439,8 +474,7 @@ for iswa=0,2 do begin
 
    CASE swath[iswa] OF
       'HS' : IF ARG_PRESENT(data_HS) THEN data_HS = TEMPORARY(tempstruc)
-      'MS' : IF ARG_PRESENT(data_MS) THEN data_MS = TEMPORARY(tempstruc)
-      'NS' : IF ARG_PRESENT(data_NS) THEN data_NS = TEMPORARY(tempstruc)
+      'FS' : IF ARG_PRESENT(data_FS) THEN data_FS = TEMPORARY(tempstruc)
    ENDCASE
 
 endfor

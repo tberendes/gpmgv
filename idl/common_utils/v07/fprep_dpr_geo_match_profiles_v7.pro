@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; fprep_dpr_geo_match_profiles.pro
+; fprep_dpr_geo_match_profiles_v7.pro
 ; - Morris/SAIC/GPM_GV  July 2013
 ;
 ; DESCRIPTION
@@ -350,7 +350,7 @@
 ;===============================================================================
 
 
-FUNCTION fprep_dpr_geo_match_profiles, ncfilepr, heights_in, $
+FUNCTION fprep_dpr_geo_match_profiles_v7, ncfilepr, heights_in, $
     PCT_ABV_THRESH=pctAbvThresh, GV_CONVECTIVE=gvconvective, $
     GV_STRATIFORM=gvstratiform, S2KU=s2ku, PTRgeometa=ptr_geometa, $
     PTRsweepmeta=ptr_sweepmeta, PTRsitemeta=ptr_sitemeta, $
@@ -386,6 +386,38 @@ FUNCTION fprep_dpr_geo_match_profiles, ncfilepr, heights_in, $
     PTRstmTopHgt=ptr_stmTopHgt, PTRbbHgt=ptr_bbHeight, PTRbbStatus=ptr_bbstatus, $
     PTRqualityData=ptr_qualityData, $
 
+   ; MRMS RR variables
+    PTRmrmsrrlow=ptr_mrmsrrlow, $
+    PTRmrmsrrmed=ptr_mrmsrrmed, $
+    PTRmrmsrrhigh=ptr_mrmsrrhigh, $
+    PTRmrmsrrveryhigh=ptr_mrmsrrveryhigh, $
+   ; MRMS guage ratio variables
+    PTRmrmsgrlow=ptr_mrmsgrlow, $
+    PTRmrmsgrmed=ptr_mrmsgrmed, $
+    PTRmrmsgrhigh=ptr_mrmsgrhigh, $
+    PTRmrmsgrveryhigh=ptr_mrmsgrveryhigh, $
+   ; MRMS precip type histogram variables
+    PTRmrmsptlow=ptr_mrmsptlow, $
+    PTRmrmsptmed=ptr_mrmsptmed, $
+    PTRmrmspthigh=ptr_mrmspthigh, $
+    PTRmrmsptveryhigh=ptr_mrmsptveryhigh, $
+   ; MRMS RQI percent variables
+    PTRmrmsrqiplow=ptr_mrmsrqiplow, $
+    PTRmrmsrqipmed=ptr_mrmsrqipmed, $
+    PTRmrmsrqiphigh=ptr_mrmsrqiphigh, $
+    PTRmrmsrqipveryhigh=ptr_mrmsrqipveryhigh, $
+    
+	; TAB 9/4/18
+    PTRswedp=ptr_swedp, $
+    PTRswe25=ptr_swe25, $
+    PTRswe50=ptr_swe50, $
+    PTRswe75=ptr_swe75, $
+    PTRswemqt=ptr_swemqt, $
+    PTRswemrms=ptr_swemrms, $
+;    PTRswedp=ptr_swedp, PTRswedpstddev=ptr_swedpstddev, PTRswedpmax=ptr_swedpmax, $
+
+    PTRMRMSHID=ptr_MRMS_HID, $
+
    ; derived/computed variables
     PTRtop=ptr_top, PTRbotm=ptr_botm, PTRlat=ptr_lat, PTRlon=ptr_lon, $
     PTRxCorners=ptr_xCorner, PTRyCorners=ptr_yCorner, PTRbbProx=ptr_bbProx, $
@@ -413,10 +445,10 @@ FUNCTION fprep_dpr_geo_match_profiles, ncfilepr, heights_in, $
 
 
 ; "include" file for structs returned from read_dpr_geo_match_netcdf()
-;@dpr_geo_match_nc_structs.inc  ; instead, call GET_DPR_GEO_MATCH_NC_STRUCT()
+;@dpr_geo_match_nc_structs_v7.inc  ; instead, call GET_DPR_GEO_MATCH_NC_STRUCT_v7()
 
 ; "include" file for PR data constants
-@dpr_params.inc
+@dpr_params_v7.inc
 
 status = 1   ; init return status to FAILED
 
@@ -477,11 +509,11 @@ cpstatus = uncomp_file( ncfilepr, ncfile1 )
 if (cpstatus eq 'OK') then begin
 
  ; create <<initialized>> structures to hold the metadata variables
-  mygeometa=GET_DPR_GEO_MATCH_NC_STRUCT('matchup')  ;{ dpr_geo_match_meta }
-  mysweeps=GET_DPR_GEO_MATCH_NC_STRUCT('sweeps')    ;{ gr_sweep_meta }
-  mysite=GET_DPR_GEO_MATCH_NC_STRUCT('site')        ;{ gr_site_meta }
-  myflags=GET_DPR_GEO_MATCH_NC_STRUCT('fields')     ;{ dpr_gr_field_flags }
-  myfiles=GET_DPR_GEO_MATCH_NC_STRUCT( 'files' )
+  mygeometa=GET_DPR_GEO_MATCH_NC_STRUCT_v7('matchup')  ;{ dpr_geo_match_meta }
+  mysweeps=GET_DPR_GEO_MATCH_NC_STRUCT_v7('sweeps')    ;{ gr_sweep_meta }
+  mysite=GET_DPR_GEO_MATCH_NC_STRUCT_v7('site')        ;{ gr_site_meta }
+  myflags=GET_DPR_GEO_MATCH_NC_STRUCT_v7('fields')     ;{ dpr_gr_field_flags }
+  myfiles=GET_DPR_GEO_MATCH_NC_STRUCT_v7( 'files' )
 
  ; read the file to populate only the mygeometa structure with just the counts
  ; of DPR rays, GR elevation angles, and HID categories in the matchup data,
@@ -489,7 +521,7 @@ if (cpstatus eq 'OK') then begin
  ; 2nd call to read_dpr_geo_match_netcdf()
    CATCH, error
    IF error EQ 0 THEN BEGIN
-      status = read_dpr_geo_match_netcdf( ncfile1, matchupmeta=mygeometa, $
+      status = read_dpr_geo_match_netcdf_v7( ncfile1, matchupmeta=mygeometa, $
                                               DIMS_ONLY=1 )
    ENDIF ELSE BEGIN
       help,!error_state,/st
@@ -632,6 +664,31 @@ if (cpstatus eq 'OK') then begin
   ENDELSE
   bbHeight=fltarr(nfp)
   nearSurfRain=fltarr(nfp)
+  mrmsrrlow=fltarr(nfp)
+  mrmsrrmed=fltarr(nfp)
+  mrmsrrhigh=fltarr(nfp)
+  mrmsrrveryhigh=fltarr(nfp)
+  mrmsgrlow=fltarr(nfp)
+  mrmsgrmed=fltarr(nfp)
+  mrmsgrhigh=fltarr(nfp)
+  mrmsgrveryhigh=fltarr(nfp)
+  mrmsptlow=fltarr(nfp)
+  mrmsptmed=fltarr(nfp)
+  mrmspthigh=fltarr(nfp)
+  mrmsptveryhigh=fltarr(nfp)
+  mrmsrqiplow=fltarr(nfp)
+  mrmsrqipmed=fltarr(nfp)
+  mrmsrqiphigh=fltarr(nfp)
+  mrmsrqipveryhigh=fltarr(nfp)
+  swedp=fltarr(nfp)
+  swe25=fltarr(nfp)
+  swe50=fltarr(nfp)
+  swe75=fltarr(nfp)
+  swemqt=fltarr(nfp)
+  swemrms=fltarr(nfp)
+
+  if mygeometa.num_MRMS_categories GT 0 then  MRMS_HID=intarr(nfp, mygeometa.num_MRMS_categories)
+ 
   nearSurfRain_Comb=fltarr(nfp)
   rnflag=intarr(nfp)
   rntype=intarr(nfp)
@@ -654,7 +711,8 @@ if (cpstatus eq 'OK') then begin
 
    CATCH, error
    IF error EQ 0 THEN BEGIN
-    status = read_dpr_geo_match_netcdf( ncfile1, matchupmeta=mygeometa,        $
+    status = read_dpr_geo_match_netcdf_v7( ncfile1, $
+    matchupmeta=mygeometa,        $
     sweepsmeta=mysweeps, sitemeta=mysite, fieldflags=myflags,                  $
     filesmeta=myfiles,                                                         $
 
@@ -692,6 +750,37 @@ if (cpstatus eq 'OK') then begin
    ; sample horizontal/vertical location variables:
     topHeight=top, bottomHeight=botm, xCorners=xCorner, yCorners=yCorner,      $
     latitude=lat, longitude=lon, DPRlatitude=DPR_lat, DPRlongitude=DPR_lon,    $
+
+   ; MRMS RR variables
+    mrmsrrlow=mrmsrrlow, $
+    mrmsrrmed=mrmsrrmed, $
+    mrmsrrhigh=mrmsrrhigh, $
+    mrmsrrveryhigh=mrmsrrveryhigh, $
+   ; MRMS guage ratio variables
+    mrmsgrlow=mrmsgrlow, $
+    mrmsgrmed=mrmsgrmed, $
+    mrmsgrhigh=mrmsgrhigh, $
+    mrmsgrveryhigh=mrmsgrveryhigh, $
+   ; MRMS precip type histogram variables
+    mrmsptlow=mrmsptlow, $
+    mrmsptmed=mrmsptmed, $
+    mrmspthigh=mrmspthigh, $
+    mrmsptveryhigh=mrmsptveryhigh, $
+   ; MRMS RQI percent variables
+    mrmsrqiplow=mrmsrqiplow, $
+    mrmsrqipmed=mrmsrqipmed, $
+    mrmsrqiphigh=mrmsrqiphigh, $
+    mrmsrqipveryhigh=mrmsrqipveryhigh, $
+    swedp=swedp, $
+    swe25=swe25, $
+    swe50=swe50, $
+    swe75=swe75, $
+    swemqt=swemqt, $
+    swemrms=swemrms, $
+;    swedpmax=swedpmax, $
+;    swedpstddev=swedpstddev, $
+    
+    hidmrms=MRMS_HID, $
 
    ; surface-level DPR rainrate variables and misc. footprint characteristics:
     sfcraindpr=nearSurfRain, sfcraincomb=nearSurfRain_Comb, bbhgt=BBHeight,    $
@@ -737,14 +826,10 @@ endelse
                   RAYSPERSCAN = RAYSPERSCAN_HS
                   GATE_SPACE = BIN_SPACE_HS
                END
-        'MS' : BEGIN
-                  RAYSPERSCAN = RAYSPERSCAN_MS
-                  GATE_SPACE = BIN_SPACE_NS_MS
+        'FS' : BEGIN
+                  RAYSPERSCAN = RAYSPERSCAN_FS
+                  GATE_SPACE = BIN_SPACE_NS_FS
               END
-        'NS' : BEGIN
-                  RAYSPERSCAN = RAYSPERSCAN_NS
-                  GATE_SPACE = BIN_SPACE_NS_MS
-               END
         ELSE : message, "Illegal scan type '"+DPR_scantype+"'"
      ENDCASE
      IF MAX(ray_range) GT RAYSPERSCAN THEN BEGIN
@@ -967,6 +1052,29 @@ IF ( nswp GT 1 ) THEN BEGIN
    rnTypeApp = rnType
    nearSurfRainApp = nearSurfRain
    nearSurfRain_CombApp = nearSurfRain_Comb
+	mrmsrrlowApp = mrmsrrlow
+	mrmsrrmedApp = mrmsrrmed
+	mrmsrrhighApp = mrmsrrhigh
+	mrmsrrveryhighApp = mrmsrrveryhigh
+	mrmsgrlowApp = mrmsgrlow
+	mrmsgrmedApp = mrmsgrmed
+	mrmsgrhighApp = mrmsgrhigh
+	mrmsgrveryhighApp = mrmsgrveryhigh
+	mrmsptlowApp = mrmsptlow
+	mrmsptmedApp = mrmsptmed
+	mrmspthighApp = mrmspthigh
+	mrmsptveryhighApp = mrmsptveryhigh
+	mrmsrqiplowApp = mrmsrqiplow
+	mrmsrqipmedApp = mrmsrqipmed
+	mrmsrqiphighApp = mrmsrqiphigh
+	mrmsrqipveryhighApp = mrmsrqipveryhigh
+	
+	; TAB 9/4/18
+;	swedpApp = swedp
+;	swe25App = swe25
+;	swe50App = swe50
+;	swe75App = swe75
+   
    pr_indexApp = pr_index
    bbStatusApp=bbStatus
    BBHeightApp=BBHeight
@@ -998,6 +1106,30 @@ IF ( nswp GT 1 ) THEN BEGIN
          qualityData = [qualityData, qualityDataAPP]     ; "" qualityData
       ENDIF
       IF nc_file_version EQ 1.3 THEN maxzraw250 = [maxzraw250, maxzraw250APP]
+      
+      ; TAB TODO: FIX: need to check for MRMS data presence
+      mrmsrrlow = [mrmsrrlow,mrmsrrlowApp]
+	  mrmsrrmed = [mrmsrrmed,mrmsrrmedApp]
+	  mrmsrrhigh = [mrmsrrhigh,mrmsrrhighApp]
+	  mrmsrrveryhigh = [mrmsrrveryhigh,mrmsrrveryhighApp]
+	  mrmsgrlow = [mrmsgrlow,mrmsgrlowApp]
+	  mrmsgrmed = [mrmsgrmed,mrmsgrmedApp]
+	  mrmsgrhigh = [mrmsgrhigh,mrmsgrhighApp]
+	  mrmsgrveryhigh = [mrmsgrveryhigh,mrmsgrveryhighApp]
+	  mrmsptlow = [mrmsptlow,mrmsptlowApp]
+	  mrmsptmed = [mrmsptmed,mrmsptmedApp]
+	  mrmspthigh = [mrmspthigh,mrmspthighApp]
+	  mrmsptveryhigh = [mrmsptveryhigh,mrmsptveryhighApp]
+      mrmsrqiplow = [mrmsrqiplow,mrmsrqiplowApp]
+	  mrmsrqipmed = [mrmsrqipmed,mrmsrqipmedApp]
+	  mrmsrqiphigh = [mrmsrqiphigh,mrmsrqiphighApp]
+	  mrmsrqipveryhigh = [mrmsrqipveryhigh,mrmsrqipveryhighApp]
+	  
+;	  swedp = [swedp,swedpApp]
+;	  swe25 = [swe25,swe25App]
+;	  swe50 = [swe50,swe50App]
+;	  swe75 = [swe75,swe75App]
+      
    ENDFOR
 ENDIF
 
@@ -1120,6 +1252,28 @@ rnFlag = rnFlag[idxpractual2d]
 rnType = rnType[idxpractual2d]
 landOceanFlag = landOceanFlag[idxpractual2d]
 nearSurfRain = nearSurfRain[idxpractual2d]
+mrmsrrlow = mrmsrrlow[idxpractual2d]
+mrmsrrmed = mrmsrrmed[idxpractual2d]
+mrmsrrhigh = mrmsrrhigh[idxpractual2d]
+mrmsrrveryhigh = mrmsrrveryhigh[idxpractual2d]
+mrmsgrlow = mrmsgrlow[idxpractual2d]
+mrmsgrmed = mrmsgrmed[idxpractual2d]
+mrmsgrhigh = mrmsgrhigh[idxpractual2d]
+mrmsgrveryhigh = mrmsgrveryhigh[idxpractual2d]
+mrmsptlow = mrmsptlow[idxpractual2d]
+mrmsptmed = mrmsptmed[idxpractual2d]
+mrmspthigh = mrmspthigh[idxpractual2d]
+mrmsptveryhigh = mrmsptveryhigh[idxpractual2d]
+mrmsrqiplow = mrmsrqiplow[idxpractual2d]
+mrmsrqipmed = mrmsrqipmed[idxpractual2d]
+mrmsrqiphigh = mrmsrqiphigh[idxpractual2d]
+mrmsrqipveryhigh = mrmsrqipveryhigh[idxpractual2d]
+swedp = swedp[idxpractual2d]
+swe25 = swe25[idxpractual2d]
+swe50 = swe50[idxpractual2d]
+swe75 = swe75[idxpractual2d]
+swemqt = swemqt[idxpractual2d]
+swemrms = swemrms[idxpractual2d]
 nearSurfRain_Comb = nearSurfRain_Comb[idxpractual2d]
 bbStatus = bbStatus[idxpractual2d]
 clutterStatus = clutterStatus[idxpractual2d]
@@ -1304,6 +1458,28 @@ rnFlag = REFORM( rnFlag, countactual, nswp )
 rnType = REFORM( rnType, countactual, nswp )
 landOceanFlag = REFORM( landOceanFlag, countactual, nswp )
 nearSurfRain = REFORM( nearSurfRain, countactual, nswp )
+mrmsrrlow = REFORM( mrmsrrlow, countactual, nswp )
+mrmsrrmed = REFORM( mrmsrrmed, countactual, nswp )
+mrmsrrhigh = REFORM( mrmsrrhigh, countactual, nswp )
+mrmsrrveryhigh = REFORM( mrmsrrveryhigh, countactual, nswp )
+mrmsgrlow = REFORM( mrmsgrlow, countactual, nswp )
+mrmsgrmed = REFORM( mrmsgrmed, countactual, nswp )
+mrmsgrhigh = REFORM( mrmsgrhigh, countactual, nswp )
+mrmsgrveryhigh = REFORM( mrmsgrveryhigh, countactual, nswp )
+mrmsptlow = REFORM( mrmsptlow, countactual, nswp )
+mrmsptmed = REFORM( mrmsptmed, countactual, nswp )
+mrmspthigh = REFORM( mrmspthigh, countactual, nswp )
+mrmsptveryhigh = REFORM( mrmsptveryhigh, countactual, nswp )
+mrmsrqiplow = REFORM( mrmsrqiplow, countactual, nswp )
+mrmsrqipmed = REFORM( mrmsrqipmed, countactual, nswp )
+mrmsrqiphigh = REFORM( mrmsrqiphigh, countactual, nswp )
+mrmsrqipveryhigh = REFORM( mrmsrqipveryhigh, countactual, nswp )
+swedp = REFORM(swedp, countactual, nswp )
+swe25 = REFORM(swe25, countactual, nswp )
+swe50 = REFORM(swe50, countactual, nswp )
+swe75 = REFORM(swe75, countactual, nswp )
+swemqt = REFORM(swemqt, countactual, nswp )
+swemrms = REFORM(swemrms, countactual, nswp )
 nearSurfRain_Comb = REFORM( nearSurfRain_Comb, countactual, nswp )
 pr_index = REFORM( pr_index, countactual, nswp )
 bbStatus = REFORM( bbStatus, countactual, nswp )
@@ -1571,6 +1747,32 @@ IF nc_file_version GT 1.0 THEN BEGIN
    IF PTR_VALID(ptr_qualityData) THEN *ptr_qualityData = qualityData
 ENDIF
 IF PTR_VALID(ptr_nearSurfRain) THEN *ptr_nearSurfRain = nearSurfRain
+IF PTR_VALID(ptr_mrmsrrlow) THEN *ptr_mrmsrrlow = mrmsrrlow
+IF PTR_VALID(ptr_mrmsrrmed) THEN *ptr_mrmsrrmed = mrmsrrmed
+IF PTR_VALID(ptr_mrmsrrhigh) THEN *ptr_mrmsrrhigh = mrmsrrhigh
+IF PTR_VALID(ptr_mrmsrrveryhigh) THEN *ptr_mrmsrrveryhigh = mrmsrrveryhigh
+IF PTR_VALID(ptr_mrmsgrlow) THEN *ptr_mrmsgrlow = mrmsgrlow
+IF PTR_VALID(ptr_mrmsgrmed) THEN *ptr_mrmsgrmed = mrmsgrmed
+IF PTR_VALID(ptr_mrmsgrhigh) THEN *ptr_mrmsgrhigh = mrmsgrhigh
+IF PTR_VALID(ptr_mrmsgrveryhigh) THEN *ptr_mrmsgrveryhigh = mrmsgrveryhigh
+IF PTR_VALID(ptr_mrmsptlow) THEN *ptr_mrmsptlow = mrmsptlow
+IF PTR_VALID(ptr_mrmsptmed) THEN *ptr_mrmsptmed = mrmsptmed
+IF PTR_VALID(ptr_mrmspthigh) THEN *ptr_mrmspthigh = mrmspthigh
+IF PTR_VALID(ptr_mrmsptveryhigh) THEN *ptr_mrmsptveryhigh = mrmsptveryhigh
+IF PTR_VALID(ptr_mrmsrqiplow) THEN *ptr_mrmsrqiplow = mrmsrqiplow
+IF PTR_VALID(ptr_mrmsrqipmed) THEN *ptr_mrmsrqipmed = mrmsrqipmed
+IF PTR_VALID(ptr_mrmsrqiphigh) THEN *ptr_mrmsrqiphigh = mrmsrqiphigh
+IF PTR_VALID(ptr_mrmsrqipveryhigh) THEN *ptr_mrmsrqipveryhigh = mrmsrqipveryhigh
+IF PTR_VALID(ptr_swedp) THEN *ptr_swedp = swedp
+IF PTR_VALID(ptr_swe25) THEN *ptr_swe25 = swe25
+IF PTR_VALID(ptr_swe50) THEN *ptr_swe50 = swe50
+IF PTR_VALID(ptr_swe75) THEN *ptr_swe75 = swe75
+IF PTR_VALID(ptr_swemqt) THEN *ptr_swemqt = swemqt
+IF PTR_VALID(ptr_swemrms) THEN *ptr_swemrms = swemrms
+
+IF PTR_VALID(ptr_MRMS_HID) AND mygeometa.num_MRMS_categories GT 0 THEN $
+   *ptr_MRMS_HID = MRMS_HID
+
 IF PTR_VALID(ptr_nearSurfRain_Comb) THEN $
     *ptr_nearSurfRain_Comb = nearSurfRain_Comb
 IF PTR_VALID(ptr_rnFlag) THEN *ptr_rnFlag = rnFlag

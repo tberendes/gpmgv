@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; read_dpr_geo_match_netcdf.pro           Morris/SAIC/GPM_GV      July 2013
+; read_dpr_geo_match_netcdf_v7.pro           Morris/SAIC/GPM_GV      July 2013
 ;
 ; DESCRIPTION
 ; -----------
@@ -292,13 +292,18 @@
 ; 06/20/18 by Bob Morris, GPM GV (SAIC)
 ;  - Added reading of new global variables PR_2APR_file and PR_2BPRTMI_File
 ;    and output to filesmeta struct to support PR version 8 processing.
+; 09/04/18 Berendes, UAH
+;  - Added mods for SWE variables
+; 06/25/20  Berendes/UAH
+; - changes for V07 files, FS and HS scans only
+;
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
 ;-
 ;===============================================================================
 
-FUNCTION read_dpr_geo_match_netcdf, ncfile, DIMS_ONLY=dims_only,          $
+FUNCTION read_dpr_geo_match_netcdf_v7, ncfile, DIMS_ONLY=dims_only,          $
    ; metadata structures/parameters
     matchupmeta=matchupmeta, sweepsmeta=sweepsmeta, sitemeta=sitemeta,        $
     fieldflags=fieldFlags, filesmeta=filesmeta,                               $
@@ -315,7 +320,13 @@ FUNCTION read_dpr_geo_match_netcdf, ncfile, DIMS_ONLY=dims_only,          $
     gv_nw_reject_int=gv_nw_reject, gv_dm_reject_int=gv_dm_reject,             $
     gv_n2_reject_int=gv_n2_reject, gv_zdr_reject_int=gv_zdr_reject,           $
     gv_kdp_reject_int=gv_kdp_reject, gv_RHOhv_reject_int=gv_RHOhv_reject,     $
-
+    gv_swedp_reject_int=gv_swedp_reject, $
+    gv_swe25_reject_int=gv_swe25_reject, $
+    gv_swe50_reject_int=gv_swe50_reject, $
+    gv_swe75_reject_int=gv_swe75_reject, $
+    gv_swemqt_reject_int=gv_swemqt_reject, $
+    gv_swemrms_reject_int=gv_swemrms_reject, $
+    
    ; horizontally (GV) and vertically (DPR Z, rain) averaged values at elevs.:
     dbzgv=threeDreflect, dbzraw=ZFactorMeasured, dbzcor=ZFactorCorrected,     $
     dbz250raw=ZFactorMeasured250m, dbz250cor=ZFactorCorrected250m,            $
@@ -347,6 +358,41 @@ FUNCTION read_dpr_geo_match_netcdf, ncfile, DIMS_ONLY=dims_only,          $
    ; spatial parameters for DPR at earth surface level:
     DPRlatitude=DPRlatitude, DPRlongitude=DPRlongitude,                       $
 
+   ; MRMS RR variables
+    mrmsrrlow=mrmsrrlow, $
+    mrmsrrmed=mrmsrrmed, $
+    mrmsrrhigh=mrmsrrhigh, $
+    mrmsrrveryhigh=mrmsrrveryhigh, $
+   ; MRMS guage ratio variables
+    mrmsgrlow=mrmsgrlow, $
+    mrmsgrmed=mrmsgrmed, $
+    mrmsgrhigh=mrmsgrhigh, $
+    mrmsgrveryhigh=mrmsgrveryhigh, $
+   ; MRMS precip type histogram variables
+    mrmsptlow=mrmsptlow, $
+    mrmsptmed=mrmsptmed, $
+    mrmspthigh=mrmspthigh, $
+    mrmsptveryhigh=mrmsptveryhigh, $
+   ; MRMS RQI percent variables
+    mrmsrqiplow=mrmsrqiplow, $
+    mrmsrqipmed=mrmsrqipmed, $
+    mrmsrqiphigh=mrmsrqiphigh, $
+    mrmsrqipveryhigh=mrmsrqipveryhigh, $
+    
+    ; snow variables
+    swedp=swedp, $
+; not using max, stddev at the moment
+;    swedp_max=swedp_max, $
+;    swedp_stddev=swedp_stddev, $
+    swe25=swe25, $
+    swe50=swe50, $
+    swe75=swe75, $
+    swemqt=swemqt, $
+    swemrms=swemrms, $
+    
+   ; horizontally summarized GR Hydromet Identifier category at elevs.:
+    hidmrms=mrmshid,                                                             $
+
    ; DPR science values at earth surface level, or as ray summaries:
     sfcraindpr=PrecipRateSurface, sfcraincomb=SurfPrecipRate, bbhgt=BBheight, $
     sfctype_int=LandSurfaceType, rainflag_int=FlagPrecip,                     $
@@ -356,7 +402,7 @@ FUNCTION read_dpr_geo_match_netcdf, ncfile, DIMS_ONLY=dims_only,          $
 
 
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
-@dpr_params.inc
+@dpr_params_v7.inc
 
 status = 0
 
@@ -472,6 +518,17 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.num_HID_categories = nhidcats
      NCDF_VARGET, ncid1, versid, ncversion  ; get/assign this variable again later
      matchupmeta.nc_file_version = ncversion
+     ; MRMS categories
+     MRMS_dimid = NCDF_DIMID(ncid1, 'mrms_mask')
+;     if MRMS_dimid ne -1 then begin
+     if MRMS_dimid ge 0 then begin
+     	NCDF_DIMINQ, ncid1, MRMS_dimid, MRMSDIMNAME, mrmscats
+     	matchupmeta.num_MRMS_categories = mrmscats
+     endif else begin
+        print,'No MRMS categories in data file'
+        matchupmeta.num_MRMS_categories = 0;
+     endelse
+
 ENDIF
 
 ; skip the rest of the variable/attribute reading and assignment if caller only
@@ -620,9 +677,16 @@ FOR ncattnum = 0, N_ELEMENTS(parsed)-1 DO BEGIN
       'GR_file' : status=PREPARE_NCVAR( ncid1, thisncatt, GR_file_byte, $
                                         STRUCT=filesmeta, TAG='file_1CUF', $
                                         /GLOBAL_ATTRIBUTE, /BYTE )
+; not currently using these, for now don't bother reading
+; if we do decide to use, need to add in dpr_geo_match_nc_structs.inc and set up like the field variables 
+; not the file variables
+      'MRMS_Mask_categories' : status=PREPARE_NCVAR( ncid1, thisncatt, mrms_mask_categories, $
+                                        STRUCT=matchupmeta, $
+                                       /GLOBAL_ATTRIBUTE, /BYTE )
       ELSE : BEGIN
                message, "Unknown GRtoDPR netCDF global attribute '"+thisncatt+"'", /INFO
-               status=1
+; TAB 9/20/17 figure out what to do about this, unused variables
+;               status=1
              END
    ENDCASE
    IF status NE 0 THEN GOTO, ErrorExit
@@ -749,6 +813,10 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                 STRUCT=fieldFlags )
       'have_TypePrecip' : status=PREPARE_NCVAR( ncid1, thisncvar, have_TypePrecip, $
                                                 STRUCT=fieldFlags )
+      'have_MRMS' : status=PREPARE_NCVAR( ncid1, thisncvar, have_mrms, $
+                                              STRUCT=fieldFlags )
+      'have_GR_SWE' : status=PREPARE_NCVAR( ncid1, thisncvar, have_swe, $
+                                              STRUCT=fieldFlags )
       'n_gr_expected' : status=PREPARE_NCVAR( ncid1, thisncvar, gvexpect, $
                                               DIM2SORT=2, IDXSORT=idxsort )
       'n_gr_z_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gvreject, $
@@ -800,6 +868,18 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
                                                   DIM2SORT=2, IDXSORT=idxsort )
       'n_dpr_nw_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, dpr_nw_reject, $
                                                   DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swedp_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swedp_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swe25_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swe25_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swe50_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swe50_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swe75_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swe75_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swemqt_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swemqt_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
+      'n_gr_swemrms_rejected' : status=PREPARE_NCVAR( ncid1, thisncvar, gv_swemrms_reject, $
+                                                 DIM2SORT=2, IDXSORT=idxsort )
       'GR_Z' : status=PREPARE_NCVAR( ncid1, thisncvar, threeDreflect, $
                                      DIM2SORT=2, IDXSORT=idxsort )
       'GR_Z_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, threeDreflectMax, $
@@ -919,21 +999,59 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'BBstatus' : status=PREPARE_NCVAR( ncid1, thisncvar, BBstatus )
       'qualityData' : status=PREPARE_NCVAR( ncid1, thisncvar, qualityData)
       'clutterStatus' : status=PREPARE_NCVAR( ncid1, thisncvar, clutterStatus )
+      'PrecipMeanLow' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrrlow )
+      'PrecipMeanMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrrmed )
+      'PrecipMeanHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrrhigh )
+      'PrecipMeanVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrrveryhigh )
+      'GuageRatioMeanLow' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsgrlow )
+      'GuageRatioMeanMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsgrmed )
+      'GuageRatioMeanHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsgrhigh )
+      'GuageRatioMeanVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsgrveryhigh )
+      'MaskLow' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsptlow )
+      'MaskMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsptmed )
+      'MaskHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmspthigh )
+      'MaskVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsptveryhigh )
+      'RqiPercentLow' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqiplow )
+      'RqiPercentMed' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipmed )
+      'RqiPercentHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqiphigh )
+      'RqiPercentVeryHigh' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmsrqipveryhigh )
+      'GR_SWEDP' : status=PREPARE_NCVAR( ncid1, thisncvar, swedp )
+      'GR_SWEDP_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swedp_max)
+      'GR_SWEDP_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swedp_stddev)
+      'GR_SWE25' : status=PREPARE_NCVAR( ncid1, thisncvar, swe25 )
+      'GR_SWE25_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swe25_max)
+      'GR_SWE25_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swe25_stddev)
+      'GR_SWE50' : status=PREPARE_NCVAR( ncid1, thisncvar, swe50 )
+      'GR_SWE50_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swe50_max)
+      'GR_SWE50_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swe50_stddev)
+      'GR_SWE75' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75 )
+      'GR_SWE75_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75_max)
+      'GR_SWE75_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swe75_stddev)
+      'GR_SWEMQT' : status=PREPARE_NCVAR( ncid1, thisncvar, swemqt )
+      'GR_SWEMQT_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swemqt_max)
+      'GR_SWEMQT_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swemqt_stddev)
+      'GR_SWEMRMS' : status=PREPARE_NCVAR( ncid1, thisncvar, swemrms )
+      'GR_SWEMRMS_Max' : status=PREPARE_NCVAR( ncid1, thisncvar, swemrms_max)
+      'GR_SWEMRMS_StdDev' : status=PREPARE_NCVAR( ncid1, thisncvar, swemrms_stddev)
+      'MRMS_HID' : status=PREPARE_NCVAR( ncid1, thisncvar, mrmshid)
+
        ELSE : BEGIN
                  message, "Unknown GRtoDPR netCDF variable '"+thisncvar+"'", /INFO
-                 status=1
+; TAB 9/20/17 figure out what to do about this, unused variables
+       ;          status=1
+help, status
               END
    ENDCASE
    IF status NE 0 THEN GOTO, ErrorExit
 ENDFOR
+
 
 ; HANDLE REQUESTS FOR ADDITIONAL VARIABLE(S) DERIVED FROM THOSE IN THE FILE
 IF N_Elements(rayIndex) NE 0 THEN BEGIN
   ; figure out which swath we have, as it affects computation of ray_index
    CASE STRUPCASE(DPR_scantype) OF
       'HS' : RAYSPERSCAN = RAYSPERSCAN_HS
-      'MS' : RAYSPERSCAN = RAYSPERSCAN_MS
-      'NS' : RAYSPERSCAN = RAYSPERSCAN_NS
+      'FS' : RAYSPERSCAN = RAYSPERSCAN_FS
       ELSE : BEGIN
                 message, "Illegal scan type '"+DPR_scantype+"'", /INFO
                 status = 1
