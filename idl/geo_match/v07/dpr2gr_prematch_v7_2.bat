@@ -58,7 +58,7 @@ cd, PRO_DIR
 ; non_pps_files = 1
  declutter = 0
 
-;.compile dpr2gr_prematch_v7.pro
+.compile dpr2gr_prematch_v7.pro
 ;restore, file='/home/tberendes/git/gpmgv/todd/geo_match/dpr2gr_prematch.sav'
 
 dpr2gr_prematch_v7, control_file, GPM_ROOT=gpm_root, DIRDPR=dirdpr, $
@@ -69,4 +69,4 @@ dpr2gr_prematch_v7, control_file, GPM_ROOT=gpm_root, DIRDPR=dirdpr, $
    NON_PPS_FILES=non_pps_files, DECLUTTER=declutter
 
 ;resolve_all
-;save, /routines, file='/home/tberendes/git/gpmgv/todd/geo_match/dpr2gr_prematch.sav'
+;save, /routines, file='/home/tberendes/git/gpmgv/todd/geo_match/v07/dpr2gr_prematch_v7.sav'

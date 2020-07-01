@@ -45,14 +45,14 @@ FUNCTION get_dpr_geo_match_nc_struct_v7, typename
 ;        'fields_gmi'   : the_struc = field_flags_gmi     ; deferred
 ;        'fields_swath' : the_struc = field_flags_swath   ; deferred
         ELSE : BEGIN
-               print, 'Illegal type requested in get_dpr_geo_match_nc_struct(): ', typename
+               print, 'Illegal type requested in get_dpr_geo_match_nc_struct_v7(): ', typename
                print, "Allowable type values include only one of the following: "
                print, "matchup sweeps site fields files"
                the_struc = -1
                END
      ENDCASE
   ENDIF ELSE BEGIN
-     print, 'Incorrect number of parameters in get_dpr_geo_match_nc_struct(), one expected.'
+     print, 'Incorrect number of parameters in get_dpr_geo_match_nc_struct_v7(), one expected.'
      the_struc = -1
   ENDELSE
 
