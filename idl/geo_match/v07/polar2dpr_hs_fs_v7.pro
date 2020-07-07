@@ -869,7 +869,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                 END
          'FS' : BEGIN
                    RAYSPERSCAN = RAYSPERSCAN_FS
-                   GATE_SPACE = BIN_SPACE_NS_FS
+                   GATE_SPACE = BIN_SPACE_FS
                    ptr_swath = data_DPR.FS   ; grab FS lat/lon and cut to inner swath
                 END
          ELSE : message, "Illegal scan type '"+DPR_scantype+"'"
