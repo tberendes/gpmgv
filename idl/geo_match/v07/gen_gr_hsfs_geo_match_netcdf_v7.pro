@@ -195,7 +195,7 @@ ncdf_attput, cdfid, 'GR_file', origGRFileName, /global
 
 fpdimid_HS = ncdf_dimdef(cdfid, 'fpdim_HS', numpts_HS>1)  ; # of HS footprints in range
 fpdimid_FS = ncdf_dimdef(cdfid, 'fpdim_FS', numpts_FS>1)  ; # of FS footprints in range
-fpdimid = [ fpdimid_HS, fpdimid_FS,]            ; match to "swath" array, above
+fpdimid = [ fpdimid_HS, fpdimid_FS]            ; match to "swath" array, above
 eldimid = ncdf_dimdef(cdfid, 'elevationAngle', N_ELEMENTS(elev_angles))
 xydimid = ncdf_dimdef(cdfid, 'xydim', 4)        ; for 4 corners of a DPR footprint
 hidimid = ncdf_dimdef(cdfid, 'hidim', 15)       ; for Hydromet ID Categories
