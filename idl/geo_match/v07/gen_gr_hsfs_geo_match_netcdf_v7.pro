@@ -46,7 +46,7 @@
 ;-------------------------------------------------------------------------------
 ;-
 
-FUNCTION gen_gr_hsfs_geo_match_netcdf_v7, geo_match_nc_file, numpts_HS, numpts_DS, $
+FUNCTION gen_gr_hsfs_geo_match_netcdf_v7, geo_match_nc_file, numpts_HS, numpts_FS, $
                                          elev_angles, numscans_HS, $
                                          numscans_FS, gv_UF_field, $
                                          DPR_vers, siteID, dprgrfiles, $
@@ -70,7 +70,8 @@ IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
    geo_match_vers = GEO_MATCH_FILE_VERSION
 ENDIF
 
-IF ( N_PARAMS() LT 12 ) THEN GOTO, versionOnly
+;IF ( N_PARAMS() LT 12 ) THEN GOTO, versionOnly
+IF ( N_PARAMS() LT 10 ) THEN GOTO, versionOnly
 
 ; Create the output dir for the netCDF file, if needed:
 OUTDIR = FILE_DIRNAME(geo_match_nc_file)
