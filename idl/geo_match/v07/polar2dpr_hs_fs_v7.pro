@@ -977,7 +977,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   ; Create a netCDF file with the proper dimensions, passing the global
   ; attribute values along
 
-   ncfile = gen_gr_hsfs_geo_match_netcdf( fname_netCDF, $
+   ncfile = gen_gr_hsfs_geo_match_netcdf_v7( fname_netCDF, $
                                             num_fp_by_source[0], $
                                             num_fp_by_source[1], $
                                             tocdf_elev_angle, $
