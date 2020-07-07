@@ -390,7 +390,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    ENDIF ELSE BEGIN
       print, '' & print, "Reading file: ", file_2ADPR & print, ''
      ; read both swaths, but only default variables
-      data_DPR = read_2adpr_hdf5( file_2ADPR )
+      data_DPR = read_2adpr_hdf5_v7( file_2ADPR )
       IF SIZE(data_DPR, /TYPE) NE 8 THEN BEGIN
          PRINT, ""
          PRINT, "ERROR reading fields from ", file_2ADPR
