@@ -205,7 +205,7 @@ function wgetCStypes4date() {
        do
          # set up the product types and subsets that we want for this satellite
          case $satellite in
-            GPM )  subsets='AKradars BrazilRadars CONUS DARW KORA KOREA KWAJ Guam Hawaii SanJuanPR Finland AUS-East AUS-West Tasmania Reunion Azores Argentina
+            GPM )  subsets='AKradars BrazilRadars CONUS DARW KORA KOREA KWAJ Guam Hawaii SanJuanPR Finland AUS-East AUS-West Tasmania Reunion Azores Argentina'
                    datatypes='1C-R 2A 2B'
                    ;;
            TRMM )  subsets='CONUS DARW KORA KOREA KWAJ AUS-East AUS-West Reunion Azores Serpong'
