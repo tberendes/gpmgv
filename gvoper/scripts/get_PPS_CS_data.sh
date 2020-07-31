@@ -70,6 +70,15 @@
 #    10/02/17      - Morris - Modified TRMM filename format processing to match
 #                             new convention for V05A / TRMM v8 in included
 #                             function wgetCStypes4date().  Added TRMM subsets
+#    11/07/17      - Berendes added Reunion to GPM subset 
+#    11/08/17      - Morris - Added the Reunion subset for constellation also.
+#    11/09/17      - Morris - Added test for existence of both version AND
+#                             subset subdirectories when deciding whether to
+#                             call update_CS_dirs.sh.
+#    04/04/18      - Berendes added Azores to subsets 
+#    07/10/18      - Berendes added Serpong to TRMM subsets 
+#    12/12/18      - Berendes added Argentina to subsets 
+#
 #                             AUS-East and AUS-West for v8 reprocessing.
 #
 ################################################################################
@@ -196,13 +205,13 @@ function wgetCStypes4date() {
        do
          # set up the product types and subsets that we want for this satellite
          case $satellite in
-            GPM )  subsets='AKradars BrazilRadars CONUS DARW KORA KOREA KWAJ Guam Hawaii SanJuanPR Finland AUS-East AUS-West Tasmania'
+            GPM )  subsets='AKradars BrazilRadars CONUS DARW KORA KOREA KWAJ Guam Hawaii SanJuanPR Finland AUS-East AUS-West Tasmania Reunion Azores Argentina
                    datatypes='1C-R 2A 2B'
                    ;;
-           TRMM )  subsets='CONUS DARW KORA KOREA KWAJ AUS-East AUS-West'
+           TRMM )  subsets='CONUS DARW KORA KOREA KWAJ AUS-East AUS-West Reunion Azores Serpong'
                    datatypes='1C-R 2A 2B'
                    ;;
-              * )  subsets='AKradars BrazilRadars CONUS DARW KOREA KWAJ Guam Hawaii SanJuanPR Finland'
+              * )  subsets='AKradars BrazilRadars CONUS DARW KOREA KWAJ Guam Hawaii SanJuanPR Finland Reunion Azores Argentina'
                    datatypes='1C-R 2A'
                    ;;
          esac
@@ -297,7 +306,7 @@ function wgetCStypes4date() {
                              # directory structure.  Update the version and year/month/day
                              # subdirs for the latter as needed.  Catalog moved files in
                              # 'gpmgv' database table 'orbit_subset_product'
-                             targetVersDir=${CS_BASE}/${satellite}/${Instrument}/${Algo}/${Version}
+                             targetVersDir=${CS_BASE}/${satellite}/${Instrument}/${Algo}/${Version}/${subset}
                              if [ ! -s $targetVersDir ]
                                then
                                  echo "Creating baseline directory $targetVersDir for $thisPPSfile"
