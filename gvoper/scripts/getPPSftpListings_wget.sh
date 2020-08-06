@@ -166,7 +166,7 @@ until [ "$runagain" = 'n' ]
      tries=tries+1
      echo "Try = ${tries}, max = 10." | tee -a $LOG_FILE
      echo "Running following command from `pwd` :"
-     echo wget --user=${USER} --password="${PW}" -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftp_url*" ${FTPS}
+     echo wget --user=${USER} --password="${PW}" --ftps-fallback-to-ftp -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftp_url*" ${FTPS}
 
 # ******* run mirror command here ********
      #${MIRCMD} | tee -a $LOG_FILE

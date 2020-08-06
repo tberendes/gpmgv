@@ -178,7 +178,8 @@ function wgetCStypes4date() {
 
 # ftp configuration for downloads
  ftpServer=arthurhou.pps.eosdis.nasa.gov
- ftpURL='ftp://'$ftpServer
+ #ftpURL='ftp://'$ftpServer
+ ftpURL='ftps://'$ftpServer
  #USERPASS=kenneth.r.morris@nasa.gov
  USERPASS=todd.a.berendes@nasa.gov
 
@@ -232,7 +233,7 @@ function wgetCStypes4date() {
                  if [ -s $SATSUBTYPE_TEMP ]
                    then
                      # use wget to download the file(s) listed in $SATSUBTYPE_TEMP
-                     wget -P $2  --user=$USERPASS --password=$USERPASS -B ${ftpURL} -i $SATSUBTYPE_TEMP
+                     wget -P $2  --user=$USERPASS --password=$USERPASS --ftps-fallback-to-ftp -B ${ftpURL} -i $SATSUBTYPE_TEMP
 
                      # check our success and catalog downloaded file(s) in database
                      for thisPPSfilepath in `cat $SATSUBTYPE_TEMP`
