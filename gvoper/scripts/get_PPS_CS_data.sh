@@ -445,15 +445,19 @@ GOT_FILES='n'    # added this on 11/20/15 after finding this bug in other script
 if [ -s $FILES2DO ]
   then
     echo "Getting PPS ftp_url_YYYYMMDDhhmm.txt files:" | tee -a $LOG_FILE
-    ${BIN_DIR}/getPPSftpListings.sh
+#    ${BIN_DIR}/getPPSftpListings.sh
+    ${BIN_DIR}/getPPSftpListings_wget.sh
     if [ -s ${LOG_DIR}/PPSftpListings.${rundate}.log ]
       then
         # we have a valid mirror log file, check if for successful retrieval(s)
-        grep Got ${LOG_DIR}/PPSftpListings.${rundate}.log
+#        grep Got ${LOG_DIR}/PPSftpListings.${rundate}.log
+        grep ftp_url_ ${LOG_DIR}/PPSftpListings.${rundate}.log
         if [ $? -eq 0 ]
           then
             # grab the names of the downloaded ftp_url files and write to FILES2DO
-            URLFILES=`grep Got ${LOG_DIR}/PPSftpListings.${rundate}.log | cut -f2 -d ' '`
+#            URLFILES=`grep Got ${LOG_DIR}/PPSftpListings.${rundate}.log | cut -f2 -d ' '`
+# TAB 8/6/20 modified to handle wget output
+            URLFILES=`grep ftp_url_ ${LOG_DIR}/PPSftpListings.${rundate}.log | cut -f4 -d" "`
         fi
       else
         echo "No valid ftp_url files downloaded by getPPSftpListings.sh, exiting."
@@ -473,6 +477,8 @@ if [ -s $FILES2DO ]
 
     for fdate in `echo $URLFILES`
       do
+        # TAB 8/6/20 added to strip off wget URL from ftp_url filename
+		fdate=`basename $fdate`
         #  Get the complete representation of date: YYYYMMDD
         fulldate=`echo ${fdate} | cut -c 9-16`
         #  Get the subdirectory on the ftp site under which our day's data are located,
