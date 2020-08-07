@@ -284,7 +284,7 @@ done
 # could be more efficient than calling psql in a loop to insert 1 row at a time!
 if [ -s $MIR_LOG_FILE ]
   then
-    mail -s 'mirror update' -c "todd.a.berendes@nasa.gov" < $MIR_LOG_FILE
+    mail -s 'mirror update' todd.a.berendes@nasa.gov < $MIR_LOG_FILE
     echo "" | tee -a $LOG_FILE
     # see if any data files were actually downloaded, exit now if none
     grep ftp_url ${MIR_LOG_FILE} > /dev/null
