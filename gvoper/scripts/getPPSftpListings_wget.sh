@@ -165,8 +165,8 @@ until [ "$runagain" = 'n' ]
   do
      tries=tries+1
      echo "Try = ${tries}, max = 10." | tee -a $LOG_FILE
-     echo "Running following command from `pwd` :"
-     echo wget --user=${USER} --password="${PW}" --ftps-fallback-to-ftp -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftp_url*" ${FTPS}
+     #echo "Running following command from `pwd` :"
+     #echo wget --user=${USER} --password="${PW}" --ftps-fallback-to-ftp -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftp_url*" ${FTPS}
 
 # ******* run mirror command here ********
      #${MIRCMD} | tee -a $LOG_FILE
@@ -284,6 +284,7 @@ done
 # could be more efficient than calling psql in a loop to insert 1 row at a time!
 if [ -s $MIR_LOG_FILE ]
   then
+    mail -s 'mirror update' -c "todd.a.berendes@nasa.gov" < $MIR_LOG_FILE
     echo "" | tee -a $LOG_FILE
     # see if any data files were actually downloaded, exit now if none
     grep ftp_url ${MIR_LOG_FILE} > /dev/null
