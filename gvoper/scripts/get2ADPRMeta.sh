@@ -35,6 +35,10 @@
 #           the get_PPS_CS_data log file so that it doesn't get identified as
 #           the pathname of a new 2AKu file following modification of the
 #           get_PPS_CS_data.sh script to accept reprocessed data files.
+# 8/10/20 - Berendes - fixed parsing of wget output to change "`" in grep 
+#		    to "'", upgrade of OS from Centos 6 to 8 broke this.  This is a
+#           fragile setup, depending on wget to not change screen output on download
+#           TODO:  make more robust parsing of filenames to run metadata extraction on
 #
 ################################################################################
 
@@ -227,8 +231,13 @@ for yymmdd in `cat $FILES2DO`
 #    grep 2A $MIR_LOG_FILE | grep $INSTRUMENT | grep orbit_subset \
 #      | grep -Ev '(INSERT|Making|DARW|Already|gvoper)' \
 #      | cut -f2 -d '>' | sed 's/ `//' | sed "s/'//" | tee $filepaths2ADPR
+
+# TAB 8/10/20 wget screen output changed "`" to "'" during file download
+#    grep 2A${INSTRUMENT} $MIR_LOG_FILE | grep -v replaced_PPS_files | grep "\->" \
+#      | cut -f2 -d '>' | sed 's/ `//' | sed "s/'//" | tee $filepaths2ADPR
+      
     grep 2A${INSTRUMENT} $MIR_LOG_FILE | grep -v replaced_PPS_files | grep "\->" \
-      | cut -f2 -d '>' | sed 's/ `//' | sed "s/'//" | tee $filepaths2ADPR
+      | cut -f2 -d '>' | sed "s/ '//" | sed "s/'//" | tee $filepaths2ADPR
 
     if [ -s $filepaths2ADPR ]
       then
