@@ -30,7 +30,7 @@ BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
-PPS_VERSION="V05A"        # controls which DPR products we process
+PPS_VERSION="V06A"        # controls which DPR products we process
 export PPS_VERSION
 INSTRUMENT_ID="Ku"
 export INSTRUMENT_ID
