@@ -235,6 +235,11 @@ for yymmdd in `cat $FILES2DO`
 # TAB 8/10/20 wget screen output changed "`" to "'" during file download
 #    grep 2A${INSTRUMENT} $MIR_LOG_FILE | grep -v replaced_PPS_files | grep "\->" \
 #      | cut -f2 -d '>' | sed 's/ `//' | sed "s/'//" | tee $filepaths2ADPR
+#Old wget output from Centos 6
+#`/data/tmp/PPS_CS/2A-CS-AUS-East.GPM.Ku.V8-20180723.20200721-S090712-E091438.036335.V06A.HDF5' -> `/data/gpmgv/orbit_subset/GPM/Ku/2AKu/V06A/AUS-East/2020/07/21/2A-CS-AUS-East.GPM.Ku.V8-20180723.20200721-S090712-E091438.036335.V06A.HDF5'
+#
+#New wget output
+#renamed '/data/tmp/PPS_CS/2A-CS-CONUS.GPM.Ku.V8-20180723.20200802-S201128-E202007.036529.V06A.HDF5' -> '/data/gpmgv/orbit_subset/GPM/Ku/2AKu/V06A/CONUS/2020/08/02/2A-CS-CONUS.GPM.Ku.V8-20180723.20200802-S201128-E202007.036529.V06A.HDF5'
       
     grep 2A${INSTRUMENT} $MIR_LOG_FILE | grep -v replaced_PPS_files | grep "\->" \
       | cut -f2 -d '>' | sed "s/ '//" | sed "s/'//" | tee $filepaths2ADPR
