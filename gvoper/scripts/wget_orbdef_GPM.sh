@@ -53,6 +53,7 @@
 #
 #  HISTORY
 #    Aug 2016 - Morris - Created from wget_GT7_GPM.sh.
+#    08/06/20 - Berendes - Changed wget to ftps and user to todd.a.berendes@nasa.gov
 #
 ################################################################################
 
@@ -83,8 +84,10 @@ LOG_DIR=/data/logs
 rundate=`date -u +%y%m%d`
 LOG_FILE=${LOG_DIR}/wget_orbdef_GPM.${rundate}.log
 PATH=${PATH}:${BIN_DIR}
-USERPASS=kenneth.r.morris@nasa.gov
-FIXEDPATH='ftp://arthurhou.pps.eosdis.nasa.gov/gpmdata/geolocation'
+#USERPASS=kenneth.r.morris@nasa.gov
+USERPASS=todd.a.berendes@nasa.gov
+#FIXEDPATH='ftp://arthurhou.pps.eosdis.nasa.gov/gpmdata/geolocation'
+FIXEDPATH='ftps://arthurhou.pps.eosdis.nasa.gov/gpmdata/geolocation'
 
 umask 0002
 
@@ -151,7 +154,7 @@ if [ ${pgproccount} -lt 3 ]
       >> /tmp/PG_MAIL_ERROR_MSG.txt
     echo "NEED TO RESTART POSTGRESQL ON ${HOST}." >> /tmp/PG_MAIL_ERROR_MSG.txt
     mailx -s 'postgresql down on ds1-gpmgv' makofski@radar.gsfc.nasa.gov \
-      -c kenneth.r.morris@nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
+      -c todd.a.berendes@nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
     cat /tmp/PG_MAIL_ERROR_MSG.txt | tee -a $LOG_FILE
     exit 1
   else
@@ -211,7 +214,7 @@ for datepath in `echo $ctdate1 $ctdate2 | sort -u`
     mkdir -p -v ${GEO_DATA}/${yyyymmpath} | tee -a $LOG_FILE
 
     wget -r -nc -np -nH --cut-dirs=4 -o ${TEMPFILE} -P ${GEO_DATA}/${yyyymmpath} -AORBDEF.txt\
-         --user=$USERPASS --password=$USERPASS $FIXEDPATH/${yyyymmpath}/
+         --user=$USERPASS --password=$USERPASS --ftps-fallback-to-ftp $FIXEDPATH/${yyyymmpath}/
 
     cat ${TEMPFILE} | grep saved | grep ORBDEF.txt | cut -f2 -d '“' | cut -f1 -d '”' > $FILES2DO
     if [ -s $FILES2DO ]

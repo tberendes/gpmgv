@@ -48,6 +48,7 @@
 #  HISTORY
 #    May 2015 - Morris - Created from wgetCTdailies.sh.
 #    Jun 2016 - Morris - Fixed argument to mkdir for current day GT block.
+#    08/06/20 - Berendes - Changed wget to ftps and user to todd.a.berendes@nasa.gov
 #
 ################################################################################
 
@@ -78,8 +79,10 @@ rundate=`date -u +%y%m%d`
 LOG_FILE=${LOG_DIR}/wget_GT7_GPM.${rundate}.log
 PATH=${PATH}:${BIN_DIR}
 ZZZ=1
-USERPASS=kenneth.r.morris@nasa.gov
-FIXEDPATH='ftp://arthurhou.pps.eosdis.nasa.gov/gpmdata/coincidence'
+#USERPASS=kenneth.r.morris@nasa.gov
+USERPASS=todd.a.berendes@nasa.gov
+#FIXEDPATH='ftp://arthurhou.pps.eosdis.nasa.gov/gpmdata/coincidence'
+FIXEDPATH='ftps://arthurhou.pps.eosdis.nasa.gov/gpmdata/coincidence'
 
 umask 0002
 
@@ -116,7 +119,7 @@ if [ ${pgproccount} -lt 3 ]
       >> /tmp/PG_MAIL_ERROR_MSG.txt
     echo "NEED TO RESTART POSTGRESQL ON ${HOST}." >> /tmp/PG_MAIL_ERROR_MSG.txt
     mailx -s 'postgresql down on ds1-gpmgv' makofski@radar.gsfc.nasa.gov \
-      -c kenneth.r.morris@nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
+      -c todd.a.berendes@nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
     cat /tmp/PG_MAIL_ERROR_MSG.txt | tee -a $LOG_FILE
     exit 1
   else
@@ -278,7 +281,7 @@ for sat in GPM
                   app_id = 'wgetGT${sat}' AND datestamp = '$file';"\
                   | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
              else
-                wget -P ${GT_DATA}/${yeardir}  --user=$USERPASS --password=$USERPASS \
+                wget -P ${GT_DATA}/${yeardir}  --user=$USERPASS --password=$USERPASS --ftps-fallback-to-ftp \
                   $FIXEDPATH/${daydir}/${TARGET_GT}
                 ctfile=`ls ${GT_DATA}/${yeardir}/${TARGET_GT}`
                 if [ $? = 0 ]
@@ -350,7 +353,7 @@ for sat in GPM
            do
               tries=tries+1
               echo "Try = ${tries}, max = 2." | tee -a $LOG_FILE
-              wget -P ${GT_DATA}/${yeardir}  --user=$USERPASS --password=$USERPASS \
+              wget -P ${GT_DATA}/${yeardir}  --user=$USERPASS --password=$USERPASS --ftps-fallback-to-ftp \
                 $FIXEDPATH/${daydir}/${TARGET_GT}
               ctfile=`ls ${GT_DATA}/${yeardir}/${TARGET_GT}`
               if [ $? = 0 ]

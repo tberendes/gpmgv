@@ -73,6 +73,7 @@
 #    10/29/14 - Morris - Belatedly added METOPB to the satellite list
 #    09/11/15 - Morris - Removing TRMM and F15 from satellite list
 #    07/26/16 - Morris - Added F19 and NPP to satellite list
+#    08/06/20 - Berendes - Changed wget to ftps and user to todd.a.berendes@nasa.gov
 #
 ################################################################################
 
@@ -95,8 +96,10 @@ rundate=`date -u +%y%m%d`
 LOG_FILE=${LOG_DIR}/wgetCTdailies.${rundate}.log
 PATH=${PATH}:${BIN_DIR}
 ZZZ=10
-USERPASS=kenneth.r.morris@nasa.gov
-FIXEDPATH='ftp://arthurhou.pps.eosdis.nasa.gov/gpmdata/coincidence'
+#USERPASS=kenneth.r.morris@nasa.gov
+USERPASS=todd.a.berendes@nasa.gov
+#FIXEDPATH='ftp://arthurhou.pps.eosdis.nasa.gov/gpmdata/coincidence'
+FIXEDPATH='ftps://arthurhou.pps.eosdis.nasa.gov/gpmdata/coincidence'
 
 umask 0002
 
@@ -138,7 +141,7 @@ if [ ${pgproccount} -lt 3 ]
       >> /tmp/PG_MAIL_ERROR_MSG.txt
     echo "NEED TO RESTART POSTGRESQL ON ${HOST}." >> /tmp/PG_MAIL_ERROR_MSG.txt
     mailx -s 'postgresql down on ds1-gpmgv' makofski@radar.gsfc.nasa.gov \
-      -c kenneth.r.morris@nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
+      -c todd.a.berendes@nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
     cat /tmp/PG_MAIL_ERROR_MSG.txt | tee -a $LOG_FILE
     exit 1
   else
@@ -306,7 +309,7 @@ for sat in GPM GCOMW1 F16 F17 F18 F19 METOPA METOPB NOAA18 NOAA19 NPP
                      exit 1
                 fi
              else
-                wget -P ${CT_DATA}/${daydir}  --user=$USERPASS --password=$USERPASS \
+                wget -P ${CT_DATA}/${daydir}  --user=$USERPASS --password=$USERPASS --ftps-fallback-to-ftp \
                   $FIXEDPATH/${daydir}/${TARGET_CT}
                 ctfile=`ls ${CT_DATA}/${daydir}/${TARGET_CT}`
                 if [ $? = 0 ]
@@ -392,7 +395,7 @@ for sat in GPM GCOMW1 F16 F17 F18 F19 METOPA METOPB NOAA18 NOAA19 NPP
            do
               tries=tries+1
               echo "Try = ${tries}, max = 2." | tee -a $LOG_FILE
-              wget -P ${CT_DATA}/${daydir}  --user=$USERPASS --password=$USERPASS \
+              wget -P ${CT_DATA}/${daydir}  --user=$USERPASS --password=$USERPASS --ftps-fallback-to-ftp \
                 $FIXEDPATH/${daydir}/${TARGET_CT}
               ctfile=`ls ${CT_DATA}/${daydir}/${TARGET_CT}`
               if [ $? = 0 ]
