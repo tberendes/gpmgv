@@ -1194,7 +1194,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          IF ( precise_range[ray_num,subset_scan_num] LE max_ranges[0] ) THEN BEGIN
            ; add point to subarrays for DPR 1-D index and for DPR scanand ray num and
            ; footprint lat/lon
-            dpr_master_idx[numDPRrays] = dpr_index_all[ray_num,scan_num] ; for GPM
+            ; dpr_master_idx[numDPRrays] = dpr_index_all[ray_num,scan_num] ; for GPM
+            dpr_master_idx[numDPRrays] = dpr_index_all[0,ray_num,scan_num] ; for V07 use size for freq 0 for FS scan, same for both freq
             dpr_scan_num[numDPRrays] = scan_num
             dpr_ray_num[numDPRrays] = ray_num
             dpr_lat_sfc[numDPRrays] = prlats[ray_num,scan_num]
