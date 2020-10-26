@@ -38,6 +38,8 @@
 ; - Added epsilon to the list of variables to be read by default.
 ; 06/25/20  Berendes/UAH
 ; - changes for V07 files
+; 10/26/20  Berendes/UAH
+; - Added precipWaterIntegrated to the list of variables to be read by default.
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -103,7 +105,7 @@ FUNCTION get_dpr_slv_group_v7, group_id, prodgroup, READ_ALL=read_all
                               precipRateESurface = h5d_read(dtID)
                      'precipRateNearSurface' : $
                            precipRateNearSurface = h5d_read(dtID)
-                     'precipWaterIntegrated' : IF all THEN $
+                     'precipWaterIntegrated' : $
                            precipWaterIntegrated = h5d_read(dtID)
                                 'qualitySLV' : IF all THEN qualitySLV = $
                                                h5d_read(dtID)
@@ -177,6 +179,7 @@ FUNCTION get_dpr_slv_group_v7, group_id, prodgroup, READ_ALL=read_all
                     precipRate : precipRate, $
                     precipRateESurface : precipRateESurface, $
                     precipRateNearSurface : precipRateNearSurface, $
+                    precipWaterIntegrated : precipWaterIntegrated, $
                     zFactorCorrected : zFactorCorrected }
    ENDELSE
 
