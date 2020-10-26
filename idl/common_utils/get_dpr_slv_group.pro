@@ -46,6 +46,7 @@ FUNCTION get_dpr_slv_group, group_id, prodgroup, READ_ALL=read_all
 
    all = KEYWORD_SET(read_all)
 
+print,'all: ', all
    gname = 'SLV'
    label = prodgroup+'/'+gname      ; label info for data structure
    ; pull the swath name out of prodgroup string, it follows '__'
@@ -68,6 +69,7 @@ FUNCTION get_dpr_slv_group, group_id, prodgroup, READ_ALL=read_all
 
    nmbrs = h5g_get_nmembers(group_id, gname)
 ;   print, "No. Members = ", nmbrs
+   print, "No. Members = ", nmbrs
    ; the minimum number of members expected varies depending on the swath ID
    ; - these are V03x counts, expect one more in V04x
    CASE swathname OF
@@ -83,6 +85,7 @@ FUNCTION get_dpr_slv_group, group_id, prodgroup, READ_ALL=read_all
       for immbr = 0, nmbrs-1 do begin
          dtnames[immbr] = h5g_get_member_name(group_id, gname, immbr)
 ;         print, dtnames[immbr]
+         print, dtnames[immbr]
          dtID = h5d_open(ss_group_id, dtnames[immbr])
          CASE dtnames[immbr] OF
                              'binEchoBottom' : IF all THEN binEchoBottom = $
