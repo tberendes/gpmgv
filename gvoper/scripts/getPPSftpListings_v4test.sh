@@ -106,7 +106,7 @@ if [ ${pgproccount} -lt 3 ]
       >> /tmp/PG_MAIL_ERROR_MSG.txt
     echo "NEED TO RESTART POSTGRESQL ON ${HOST}." >> /tmp/PG_MAIL_ERROR_MSG.txt
     mailx -s 'postgresql down on ${HOST}' \
-      -c kenneth.r.morris@nasa.gov,todd.a.berendes@nasa.gov \
+      -c todd.a.berendes@nasa.gov,denise.a.berendes@nasa.gov \
       makofski@radar.gsfc.nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
     cat /tmp/PG_MAIL_ERROR_MSG.txt | tee -a $LOG_FILE
     exit 1

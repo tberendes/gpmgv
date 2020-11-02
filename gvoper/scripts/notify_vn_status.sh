@@ -177,11 +177,11 @@ done
 
 if [ -s $VN_STATUS_FILE ]
   then
-    mail -s 'Processing status on ds1-gpmgv' -c "kbobmorris@hotmail.com,todd.a.berendes@nasa.gov" \
-         kenneth.r.morris@nasa.gov < $VN_STATUS_FILE
+    mail -s 'Processing status on ds1-gpmgv' -c "denise.a.berendes@nasa.gov" \
+         todd.a.berendes@nasa.gov < $VN_STATUS_FILE
     cat $VN_STATUS_FILE >> $LOG_FILE
   else
-    mail -s 'Processing status missing on ds1-gpmgv' kenneth.r.morris@nasa.gov
+    mail -s 'Processing status missing on ds1-gpmgv' todd.a.berendes@nasa.gov
 fi
 
 echo "See log file $LOG_FILE and status summary $VN_STATUS_FILE"

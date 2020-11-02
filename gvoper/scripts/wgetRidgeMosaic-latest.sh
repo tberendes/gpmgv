@@ -106,7 +106,7 @@ if [ ${pgproccount} -lt 3 ]
             echo "UNABLE TO RESTART POSTGRESQL ON ds1-gpmgv." >> $DBERRMSG_FILE
 	    # \ makofski@radar.gsfc.nasa.gov -c
             mailx -s 'postgresql down on ds1-gpmgv' makofski@radar.gsfc.nasa.gov \
-                  -c kenneth.r.morris@nasa.gov < $DBERRMSG_FILE
+                  -c todd.a.berendes@nasa.gov,denise.a.berendes@nasa.gov < $DBERRMSG_FILE
             cat $DBERRMSG_FILE | tee -a $LOG_FILE
           else
 	    echo "${pgproccount} Postgres processes active, should be >= 3." \
@@ -121,7 +121,7 @@ if [ ${pgproccount} -lt 3 ]
           >> $DBERRMSG_FILE
         echo "NOTE: HAD TO RESTART POSTGRESQL ON ds1-gpmgv." >> $DBERRMSG_FILE
         mailx -s 'postgresql restart on ds1-gpmgv' makofski@radar.gsfc.nasa.gov \
-              -c kenneth.r.morris@nasa.gov < $DBERRMSG_FILE
+              -c todd.a.berendes@nasa.gov,denise.a.berendes@nasa.gov < $DBERRMSG_FILE
         cat $DBERRMSG_FILE | tee -a $LOG_FILE
     fi
   else
@@ -152,7 +152,7 @@ if [ ${pgproccount} -lt 3 ]
 	      >> $DBERRMSG_FILE
             echo "NEED TO RESTART POSTGRESQL ON ${HOST}." >> $DBERRMSG_FILE
             mailx -s 'postgresql error on ds1-gpmgv' makofski@radar.gsfc.nasa.gov \
-                  -c kenneth.r.morris@nasa.gov < $DBERRMSG_FILE
+                  -c todd.a.berendes@nasa.gov,denise.a.berendes@nasa.gov < $DBERRMSG_FILE
             cat $DBERRMSG_FILE | tee -a $LOG_FILE
           else
 	    echo "Removing temp file ${HELDTEMPFILE}:" | tee -a $LOG_FILE
