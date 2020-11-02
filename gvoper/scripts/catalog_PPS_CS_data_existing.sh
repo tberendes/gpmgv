@@ -2,7 +2,7 @@
 #
 ################################################################################
 #
-#  catalog_PPS_CS_data.sh     Morris/SAIC/GPM GV     March 2014
+#  catalog_PPS_CS_data_existing.sh     Morris/SAIC/GPM GV     March 2014
 #
 #  DESCRIPTION
 #    Catalogs coincidence subset (CS) satellite files previously downloaded
@@ -20,7 +20,7 @@
 #
 #  LOGS
 #    Output for day's script run logged to daily log file
-#    catalog_PPS_CS_data.YYYYMMDD.log in data/logs subdirectory.
+#    catalog_PPS_CS_data_existing.YYYYMMDD.log in data/logs subdirectory.
 #
 #  CONSTRAINTS
 #    - User must have write privileges in CS_BASE and its subdirectories,
@@ -36,6 +36,10 @@
 #                    and subsets of interest.
 #                  - Added check of Postgres status before starting.
 #                  - Modified to run under 'gvoper'.
+#    11/09/17      - Added test for existence of both version AND subset subdirs
+#                    when deciding whether to call update_CS_dirs.sh.  Added the
+#                    Reunion subset for all satellites.
+#    7/19/18       - Berendes added Azores and Serpong(TRMM only)
 #
 ################################################################################
 
@@ -140,13 +144,13 @@ cd $TMP_CS_DATA
        do
          # set up the product types and subsets that we want for this satellite
          case $satellite in
-            GPM )  subsets='AKradars BrazilRadars CONUS DARW KORA KOREA KWAJ Guam Hawaii SanJuanPR Finland AUS-East AUS-West Tasmania'
+            GPM )  subsets='AKradars BrazilRadars CONUS DARW KORA KOREA KWAJ Guam Hawaii SanJuanPR Finland AUS-East AUS-West Tasmania Reunion Azores'
                    datatypes='1C-R 2A 2B'
                    ;;
-           TRMM )  subsets='CONUS DARW KORA KOREA KWAJ'
+           TRMM )  subsets='CONUS DARW KORA KOREA KWAJ Reunion Azores Serpong'
                    datatypes='1C-R 2A 2B'
                    ;;
-              * )  subsets='AKradars BrazilRadars CONUS DARW KOREA KWAJ Guam Hawaii SanJuanPR Finland'
+              * )  subsets='AKradars BrazilRadars CONUS DARW KOREA KWAJ Guam Hawaii SanJuanPR Finland Reunion Azores'
                    datatypes='1C-R 2A'
                    ;;
          esac
@@ -232,7 +236,7 @@ cd $TMP_CS_DATA
                              # directory structure.  Update the version and year/month/day
                              # subdirs for the latter as needed.  Catalog moved files in
                              # 'gpmgv' database table 'orbit_subset_product'
-                             targetVersDir=${CS_BASE}/${satellite}/${Instrument}/${Algo}/${Version}
+                             targetVersDir=${CS_BASE}/${satellite}/${Instrument}/${Algo}/${Version}/${subset}
                              if [ ! -s $targetVersDir ]
                                then
                                  echo "Creating baseline directory $targetVersDir for $thisPPSfile"

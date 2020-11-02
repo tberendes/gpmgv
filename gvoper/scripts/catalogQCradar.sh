@@ -74,6 +74,8 @@
 #    February 2016 - Morris/SAIC/GPM GV - Added missing Brazil radar ID: SF1.
 #    October 2017 - Morris/SAIC/GPM GV - Allowing NPOL IDs from NPOL1 to NPOL9,
 #                                        not just NPOL1.
+#    May 2018 - Berendes - added .cf pattern to filenames
+#    Sept 2018 - Berendes - added matching block for Reunion data
 #
 ################################################################################
 
@@ -176,13 +178,25 @@ case $type in
                           then
                             echo "Catalog DP file: $pathless"
                             # check the file pattern
-                            echo $pathless | egrep '[A-Z]{4}_[0-9]{4}_[0-9]{4}_[0-9]{6}(_rhi)*\.uf.*' > /dev/null
+                            echo $pathless | egrep '[A-Z]{4}_[0-9]{4}_[0-9]{4}_[0-9]{6}(_rhi)*\.(uf|cf|nc).*' > /dev/null
                             if [ $? = 1 ]
                               then
                                 case $2 in
+#  this needs to go in the "legacy" section since filename doesn't have 4 char pattern to start
+#                                   Reunion )
+#                                         # check the file pattern
+#                                          echo $pathless | egrep 'Reunion_[0-9]{4}_[0-9]{4}_[0-9]{6}(_rhi)*\.(uf|cf)*' > /dev/null
+#                                          if [ $? = 1 ]
+#                                            then
+#                                              echo "Bad Reunion filename: $pathless"
+#                                              return
+#                                            else
+#                                              dtime=`echo $pathless | cut -f4 -d'_' | awk '{print \
+#                                                     substr($1,1,2)":"substr($1,3,2)}'`
+#                                          fi ;;
                                    NPOL )
                                          # check the file pattern
-                                          echo $pathless | egrep '(npol|NPOL)[1-9]_[0-9]{4}_[0-9]{4}_[0-9]{6}(_rhi)*\.uf*' > /dev/null
+                                          echo $pathless | egrep '(npol|NPOL)[1-9]_[0-9]{4}_[0-9]{4}_[0-9]{6}(_rhi)*\.(uf|cf)*' > /dev/null
                                           if [ $? = 1 ]
                                             then
                                               echo "Bad NPOL DP 1CUF filename: $pathless"
@@ -193,18 +207,21 @@ case $type in
                                           fi ;;
                                    DARW )
                                          # check the file pattern for CPol, only take those with "_PPI"
-                                         echo $pathless | egrep 'CPol+[_a-z]*[_0-9]*_PPI.UF.*' > /dev/null
+                                         #echo $pathless | egrep 'CPol+[_a-z]*[_0-9]*_PPI.(UF|CF).*' > /dev/null
+                                         echo $pathless | egrep 'CPOL_[0-9]{4}_[0-9]{4}_[0-9]{6}.nc*' > /dev/null
                                          if [ $? = 1 ]
                                            then
                                              echo "Bad DARW (CPol) 1CUF filename: $pathless"
                                              return
                                            else
-                                             dtime=`echo $pathless | cut -f5 -d'_' | awk '{print \
+                                             #dtime=`echo $pathless | cut -f5 -d'_' | awk '{print \
+                                             #       substr($1,1,2)":"substr($1,3,2)}'`
+                                             dtime=`echo $pathless | cut -f4 -d'_' | awk '{print \
                                                     substr($1,1,2)":"substr($1,3,2)}'`
                                          fi ;;
                                     CP2 )
                                          # check the file pattern for CPol, only take those with "_PPI"
-                                         echo $pathless | egrep 'CP2+[_a-z]*[_0-9]*_PPI.UF.*' > /dev/null
+                                         echo $pathless | egrep 'CP2+[_a-z]*[_0-9]*_PPI.(UF|CF).*' > /dev/null
                                          if [ $? = 1 ]
                                            then
                                              echo "Bad CP2 (Brisbane) 1CUF filename: $pathless"
@@ -215,10 +232,10 @@ case $type in
                                          fi ;;
 AL1 | JG1 | MC1 | NT1 | PE1 | SF1 | ST1 | SV1 | TM1 )
                                          # check the file pattern for Brazil radars
-                                         echo $pathless | egrep '[A-Z]{2}1_[0-9]{4}_[0-9]{4}_[0-9]{6}\.uf.*' > /dev/null
+                                         echo $pathless | egrep '[A-Z]{2}1_[0-9]{4}_[0-9]{4}_[0-9]{6}\.(uf|cf).*' > /dev/null
                                          if [ $? = 1 ]
                                            then
-                                             echo "Bad CP2 (Brisbane) 1CUF filename: $pathless"
+                                             echo "Bad BrazilRadars filename: $pathless"
                                              return
                                            else
                                              dtime=`echo $pathless | cut -f4 -d'_' | awk '{print \
@@ -235,7 +252,7 @@ AL1 | JG1 | MC1 | NT1 | PE1 | SF1 | ST1 | SV1 | TM1 )
                           else
                             echo "Catalog legacy 1CUF file: $pathless"
                             # check the file pattern
-                            echo $pathless | egrep '[0-9]{6}\.[0-9][0-9]?\.[A-Z]{4}\.[0-9]\.[0-9]{4}\.uf.*' > /dev/null
+                            echo $pathless | egrep '[0-9]{6}\.[0-9][0-9]?\.[A-Z]{4}\.[0-9]\.[0-9]{4}\.(uf|cf).*' > /dev/null
                             if [ $? = 1 ]
                               then
                                 echo "Bad legacy 1CUF filename: $pathless"

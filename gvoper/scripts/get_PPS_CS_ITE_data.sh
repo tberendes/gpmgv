@@ -65,6 +65,9 @@
 #                             and uses app_id tag of 'get_ITE_CS' in the
 #                             appstatus table in the gpmgv database.  Also
 #                             updated PPS user ID and password.
+#    03/14/18      - Morris - Added MELB subset to TRMM for v8 ITE.
+#    07/06/18      - Morris - Added TRMM to case statement for formatting of
+#                             Algo variable to support any PR v8 ITE ingest.
 #
 ################################################################################
 
@@ -187,7 +190,7 @@ function wgetCStypes4date() {
             GPM )  subsets='AKradars BrazilRadars CONUS DARW KORA KOREA KWAJ Guam Hawaii SanJuanPR Finland'
                    datatypes='1C 2A 2B'
                    ;;
-           TRMM )  subsets='CONUS DARW KORA KOREA KWAJ'
+           TRMM )  subsets='CONUS DARW KORA KOREA KWAJ MELB'
                    datatypes='1C 2A 2B'
                    ;;
               * )  subsets='AKradars BrazilRadars CONUS DARW KOREA KWAJ Guam Hawaii SanJuanPR Finland'
@@ -238,8 +241,23 @@ function wgetCStypes4date() {
                                  # just use '2AGPROF' as algorithm name
                                  Algo=2AGPROF
                                else
-                                 # apply special cases for GPM non-GPROF
+                                 # apply special cases for TRMM and GPM non-GPROF
+                                 # -- TRMM file names for V06+ are now same format as GPM
                                  case $satellite in
+                                   TRMM ) prodTypeLong=`echo $thisPPSfile | cut -f 1 -d '.'`
+                                          # see if we have '-' in 1st file subfield, e.g. '2A-CS-KWAJ'
+                                          echo $prodTypeLong | grep '-' > /dev/null
+                                          if [ $? = 0 ]
+                                            then
+                                              # have a compound product type/subset field, cut out type
+                                              prodType=`echo $prodTypeLong | cut -f1 -d '-'`
+                                            else
+                                              # have a simple type indicator, use as-is
+                                              prodType=$prodTypeLong
+                                          fi
+                                          # concatenate type and Instrument
+                                          Algo=${prodType}${Instrument}  # e.g., '2APR', '2BPRTMI'
+                                          ;;
                                     GPM ) prodTypeLong=`echo $thisPPSfile | cut -f 1 -d '.'`
                                           # see if we have '-' in 1st file subfield, e.g. '2A-CS-KWAJ'
                                           echo $prodTypeLong | grep '-' > /dev/null
