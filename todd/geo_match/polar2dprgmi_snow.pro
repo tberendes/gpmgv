@@ -1112,9 +1112,15 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          PSDparamLowNode = (*ptr_swath.PTR_DATASETS).PSDparamLowNode
          correctedReflectFactor = $
                 (*ptr_swath.PTR_DATASETS).correctedReflectFactor  ;nKuKa
+         ; TAB: put new stuff for additional fields here:       
+                
          phaseBinNodes = (*ptr_swath.PTR_DATASETS).phaseBinNodes
          pia = (*ptr_swath.PTR_DATASETS).pia                      ;nKuKa
          precipTotWaterCont = (*ptr_swath.PTR_DATASETS).precipTotWaterCont
+         precipTotWaterContSigma = (*ptr_swath.PTR_DATASETS).precipTotWaterContSigma
+         cloudLiqWaterCont = (*ptr_swath.PTR_DATASETS).cloudLiqWaterCont
+         cloudIceWaterCont = (*ptr_swath.PTR_DATASETS).cloudIceWaterCont
+         tbSim = (*ptr_swath.PTR_DATASETS).simulatedBrightTemp
          precipTotPSDparamHigh = (*ptr_swath.PTR_DATASETS).precipTotPSDparamHigh
          precipTotPSDparamLow = (*ptr_swath.PTR_DATASETS).precipTotPSDparamLow
          precipTotRate = (*ptr_swath.PTR_DATASETS).precipTotRate
@@ -1399,6 +1405,11 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_surfaceElevation = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_zeroDegAltitude = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_zeroDegBin = MAKE_ARRAY(numDPRrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_tbSim_19v = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_tbSim_37v = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_tbSim_89v = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_tbSim_183_3v = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
+
      ; deal with the variables with the extra dimension for the MS swath
      ; -- create once, write twice (Ku and Ka MS values)
       IF idxKuKa[swathID] EQ 0 THEN BEGIN
@@ -1594,6 +1605,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_precipTotWaterCont = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_precipTotWaterContSigma = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_cloudLiqWaterCont = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_cloudIceWaterCont = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_n_precipTotPSDparamHigh_rejected = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
       tocdf_n_precipTotPSDparamLow_rejected = $
@@ -1601,6 +1618,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_n_precipTotRate_rejected = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
       tocdf_n_precipTotWaterCont_rejected = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_n_precipTotWaterContSigma_rejected = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_n_cloudLiqWaterCont_rejected = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_n_cloudIceWaterCont_rejected = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
      ; deal with the extra dimension for correctedReflectFactor for MS swath
      ; -- create once, write twice (Ku and Ka MS values)
@@ -1638,6 +1661,15 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          tocdf_phaseBinNodes[*,prgoodidx] = phaseBinNodes[*,pr_idx_2get]
          tocdf_zeroDegAltitude[prgoodidx] = zeroDegAltitude[pr_idx_2get]
          tocdf_zeroDegBin[prgoodidx] = zeroDegBin[pr_idx_2get]
+;tbSim_19v = 3rd nemiss index
+;tbSim_37v = 6th nemiss index
+;tbSim_89v = 8th nemiss index
+;tbSim_183_3v = 12th nemiss index 
+         tocdf_tbSim_19v[prgoodidx] = tbSim[2,pr_idx_2get]
+         tocdf_tbSim_37v[prgoodidx] = tbSim[5,pr_idx_2get]
+         tocdf_tbSim_89v[prgoodidx] = tbSim[7,pr_idx_2get]
+         tocdf_tbSim_183_3v[prgoodidx] = tbSim[11,pr_idx_2get]
+
         ; deal with the extra dimension for these variables for MS swath
          CASE (DPR_scantype) OF
             'MS' : BEGIN
@@ -1714,6 +1746,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'zeroDegAltitude_'+DPR_scantype, tocdf_zeroDegAltitude
       NCDF_VARPUT, ncid, 'zeroDegBin_'+DPR_scantype, tocdf_zeroDegBin
       NCDF_VARPUT, ncid, 'phaseBinNodes_'+DPR_scantype, tocdf_phaseBinNodes
+      NCDF_VARPUT, ncid, 'tbSim_19v_'+DPR_scantype, tocdf_tbSim_19v
+      NCDF_VARPUT, ncid, 'tbSim_37v_'+DPR_scantype, tocdf_tbSim_37v
+      NCDF_VARPUT, ncid, 'tbSim_89v_'+DPR_scantype, tocdf_tbSim_89v
+      NCDF_VARPUT, ncid, 'tbSim_183_3v_'+DPR_scantype, tocdf_tbSim_183_3v
 
      ;  Write sweep-level results/flags to netcdf file
 
@@ -1852,6 +1888,9 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'precipTotPSDparamLow_'+DPR_scantype, tocdf_precipTotPSDparamLow
       NCDF_VARPUT, ncid, 'precipTotRate_'+DPR_scantype, tocdf_precipTotRate
       NCDF_VARPUT, ncid, 'precipTotWaterCont_'+DPR_scantype, tocdf_precipTotWaterCont
+      NCDF_VARPUT, ncid, 'precipTotWaterContSigma_'+DPR_scantype, tocdf_precipTotWaterContSigma
+      NCDF_VARPUT, ncid, 'cloudLiqWaterCont_'+DPR_scantype, tocdf_cloudLiqWaterCont
+      NCDF_VARPUT, ncid, 'cloudIceWaterCont_'+DPR_scantype, tocdf_cloudIceWaterCont
       NCDF_VARPUT, ncid, 'n_dpr_expected_'+DPR_scantype, tocdf_n_dpr_expected
       NCDF_VARPUT, ncid, 'n_precipTotPSDparamHigh_rejected_'+DPR_scantype, $
                    tocdf_n_precipTotPSDparamHigh_rejected
@@ -1861,6 +1900,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                    tocdf_n_precipTotRate_rejected
       NCDF_VARPUT, ncid, 'n_precipTotWaterCont_rejected_'+DPR_scantype, $
                    tocdf_n_precipTotWaterCont_rejected
+      NCDF_VARPUT, ncid, 'n_precipTotWaterContSigma_rejected_'+DPR_scantype, $
+                   tocdf_n_precipTotWaterContSigma_rejected
+      NCDF_VARPUT, ncid, 'n_cloudLiqWaterCont_rejected_'+DPR_scantype, $
+                   tocdf_n_cloudLiqWaterCont_rejected
+      NCDF_VARPUT, ncid, 'n_cloudIceWaterCont_rejected_'+DPR_scantype, $
+                   tocdf_n_cloudIceWaterCont_rejected
       IF DPR_scantype EQ 'NS' THEN BEGIN
         ; write variables for the NS swath with only Ku values that have both
         ; Ku and Ka values in the MS swath instance

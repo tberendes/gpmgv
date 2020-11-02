@@ -47,7 +47,16 @@
 ;  - Added processing of GR Dm and N2 dual-pol fields for version 1.3 file.
 ; 11/19/16 by Bob Morris, GPM GV (SAIC)
 ;  - Added DPRGMI stormTopAltitude field for version 1.3 file.
-;
+; 10/26/20 by Todd Berendes (UAH)
+;    Added new fields for: 
+;		precipTotWaterContSigma
+;		cloudLiqWaterCont
+;		cloudIceWaterCont
+;		simulatedBrightTemp 
+;			tbSim_19v = 3rd nemiss index
+;			tbSim_37v = 6th nemiss index
+;			tbSim_89v = 8th nemiss index
+;			tbSim_183_3v = 12th nemiss index
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -844,6 +853,50 @@ for iswa=0,1 do begin
    ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
+;TAB 10/26/20 added new variables, need to check units
+   this_varid = ncdf_vardef(cdfid, 'precipTotWaterContSigma_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI precipTotWaterContSigma for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'cloudLiqWaterCont'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI cloudLiqWaterCont for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'cloudIceWaterCont'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI cloudIceWaterCont for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'tbSim_19v'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI simulatedBrightTemp 19v for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'K'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'tbSim_37v'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI simulatedBrightTemp 37v for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'K'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'tbSim_89v'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI simulatedBrightTemp 89v for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'K'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'tbSim_183_3v'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI simulatedBrightTemp 183_3v for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'K'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+
    rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotPSDparamHigh_rejected_'+swath[iswa], $
                               [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, rainrejvarid, 'long_name', $
@@ -871,6 +924,26 @@ for iswa=0,1 do begin
                 +swath[iswa]+' swath'
    ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
 
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotWaterContSigma_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in precipTotWaterContSigma average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_cloudLiqWaterCont_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in cloudLiqWaterCont average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_cloudIceWaterCont_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in cloudIceWaterCont average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
 
    ; DPRGMI single-level fields of same no. of dimensions for each swath
 

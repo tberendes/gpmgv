@@ -41,6 +41,12 @@
 ; - Added V05 datasets columnCloudLiqSigma, columnVaporSigma, errorOfDataFit,
 ;   multiScatSurface, skinTempSigma, subFootVariability, surfEmissSigma, and
 ;   tenMeterWindSigma.
+; 10/26/20 by Todd Berendes (UAH)
+;    added the following to default variables returned: 
+;		precipTotWaterContSigma
+;		cloudLiqWaterCont
+;		cloudIceWaterCont
+;		simulatedBrightTemp 
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -68,10 +74,8 @@ FUNCTION get_cmb_datasets, group_id, label, READ_ALL=read_all
                         'airPressure' : IF all THEN airPressure = h5d_read(dtID)
                      'airTemperature' : IF all THEN airTemperature = $
                                         h5d_read(dtID)
-                  'cloudIceWaterCont' : IF all THEN cloudIceWaterCont = $
-                                        h5d_read(dtID)
-                  'cloudLiqWaterCont' : IF all THEN cloudLiqWaterCont = $
-                                        h5d_read(dtID)
+                  'cloudIceWaterCont' : cloudIceWaterCont = h5d_read(dtID)
+                  'cloudLiqWaterCont' : cloudLiqWaterCont = h5d_read(dtID)
                 'columnCloudLiqSigma' : IF all THEN columnCloudLiqSigma = $
                                         h5d_read(dtID)
                    'columnVaporSigma' : IF all THEN columnVaporSigma = $
@@ -90,15 +94,13 @@ FUNCTION get_cmb_datasets, group_id, label, READ_ALL=read_all
                       'phaseBinNodes' : phaseBinNodes = h5d_read(dtID)
                                 'pia' : pia = h5d_read(dtID)
                  'precipTotWaterCont' : precipTotWaterCont = h5d_read(dtID)
-            'precipTotWaterContSigma' : IF all THEN precipTotWaterContSigma = $
-                                        h5d_read(dtID)
+            'precipTotWaterContSigma' : precipTotWaterContSigma = h5d_read(dtID)
               'precipTotPSDparamHigh' : precipTotPSDparamHigh = h5d_read(dtID)
                'precipTotPSDparamLow' : precipTotPSDparamLow = h5d_read(dtID)
                       'precipTotRate' : precipTotRate = h5d_read(dtID)
                  'precipTotRateSigma' : IF all THEN precipTotRateSigma = $
                                         h5d_read(dtID)
-                'simulatedBrightTemp' : IF all THEN simulatedBrightTemp = $
-                                        h5d_read(dtID)
+                'simulatedBrightTemp' : simulatedBrightTemp = h5d_read(dtID)
                     'skinTemperature' : IF all THEN skinTemperature = $
                                         h5d_read(dtID)
                       'skinTempSigma' : IF all THEN skinTempSigma = $
@@ -203,7 +205,11 @@ FUNCTION get_cmb_datasets, group_id, label, READ_ALL=read_all
                          phaseBinNodes : phaseBinNodes, $
                          pia : pia, $
                          precipTotWaterCont : precipTotWaterCont, $
+                         precipTotWaterContSigma : precipTotWaterContSigma, $
                          precipTotPSDparamHigh : precipTotPSDparamHigh, $
+                         cloudLiqWaterCont : cloudLiqWaterCont, $
+                         cloudIceWaterCont : cloudIceWaterCont, $
+                         simulatedBrightTemp : simulatedBrightTemp, $
                          precipTotPSDparamLow : precipTotPSDparamLow, $
                          precipTotRate : precipTotRate, $
                          surfPrecipTotRate : surfPrecipTotRate }

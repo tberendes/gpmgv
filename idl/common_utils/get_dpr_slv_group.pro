@@ -36,6 +36,8 @@
 ; - Added reading and output of paramNUBF variable for V04x files for READ_ALL.
 ; 07/27/16  Morris/GPM GV/SAIC
 ; - Added epsilon to the list of variables to be read by default.
+; 10/26/20  Berendes/UAH
+; - Added precipWaterIntegrated to the list of variables to be read by default.
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov

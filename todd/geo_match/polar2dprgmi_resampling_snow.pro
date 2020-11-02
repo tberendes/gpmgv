@@ -513,6 +513,9 @@
          n_precipTotPSDparamLow_rejected = 0UL  ; # gates below DPR rainrate cutoff
          n_precipTotRate_rejected = 0UL
          n_precipTotWaterCont_rejected = 0UL
+         n_precipTotWaterContSigma_rejected = 0UL
+         n_cloudLiqWaterCont_rejected = 0UL
+         n_cloudIceWaterCont_rejected = 0UL
          clutterStatus = 0UL           ; result of clutter-free proximity for volume
 
 ; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
@@ -796,6 +799,31 @@
                                        1.0, 0.0,                            $
                                        numDPRgates, lowestClutterFreeBin )
                   n_precipTotWaterCont_rejected = dpr_gates_expected - numDPRgates
+                  
+                  numDPRgates = 0
+                  precipTotWaterContSigma_avg = get_dpr_layer_average(           $
+                                       topCorrGate, botmCorrGate,           $
+                                       scandpr, raydpr, precipTotWaterContSigma, $
+                                       1.0, 0.0,                            $
+                                       numDPRgates, lowestClutterFreeBin )
+                  n_precipTotWaterContSigma_rejected = dpr_gates_expected - numDPRgates
+                  
+                  numDPRgates = 0
+                  cloudLiqWaterCont_avg = get_dpr_layer_average(           $
+                                       topCorrGate, botmCorrGate,           $
+                                       scandpr, raydpr, cloudLiqWaterCont, $
+                                       1.0, 0.0,                            $
+                                       numDPRgates, lowestClutterFreeBin )
+                  n_cloudLiqWaterCont_rejected = dpr_gates_expected - numDPRgates
+                  
+                  numDPRgates = 0
+                  cloudIceWaterCont_avg = get_dpr_layer_average(           $
+                                       topCorrGate, botmCorrGate,           $
+                                       scandpr, raydpr, cloudIceWaterCont, $
+                                       1.0, 0.0,                            $
+                                       numDPRgates, lowestClutterFreeBin )
+                  n_cloudIceWaterCont_rejected = dpr_gates_expected - numDPRgates
+                  
 
                ENDIF ELSE BEGIN
                  ; all bins to average are below lowestClutterFreeBin
@@ -810,7 +838,13 @@
                   precipTotRate_avg = SRAIN_BELOW_THRESH
                   n_precipTotRate_rejected = dpr_gates_expected
                   precipTotWaterCont_avg = SRAIN_BELOW_THRESH
+                  precipTotWaterContSigma_avg = SRAIN_BELOW_THRESH
+                  cloudLiqWaterCont_avg = SRAIN_BELOW_THRESH
+                  cloudIceWaterCont_avg = SRAIN_BELOW_THRESH
                   n_precipTotWaterCont_rejected = dpr_gates_expected
+                  n_precipTotWaterContSigma_rejected = dpr_gates_expected
+                  n_cloudLiqWaterCont_rejected = dpr_gates_expected
+                  n_cloudIceWaterCont_rejected = dpr_gates_expected
                ENDELSE             ; clutterStatus NE 2
 
 
@@ -1287,6 +1321,9 @@
                precipTotPSDparamLow_avg[*] = SRAIN_BELOW_THRESH
                precipTotRate_avg = SRAIN_BELOW_THRESH
                precipTotWaterCont_avg = SRAIN_BELOW_THRESH
+               precipTotWaterContSigma_avg = SRAIN_BELOW_THRESH
+               cloudLiqWaterCont_avg = SRAIN_BELOW_THRESH
+               cloudIceWaterCont_avg = SRAIN_BELOW_THRESH
                meantop = 0.0    ; should calculate something for this
                meanbotm = 0.0   ; ditto
             ENDIF
@@ -1388,6 +1425,9 @@
                   tocdf_precipTotPSDparamLow[*,jpr,ielev] = precipTotPSDparamLow_avg
                   tocdf_precipTotRate[jpr,ielev] = precipTotRate_avg
                   tocdf_precipTotWaterCont[jpr,ielev] = precipTotWaterCont_avg
+                  tocdf_precipTotWaterContSigma[jpr,ielev] = precipTotWaterContSigma_avg
+                  tocdf_cloudLiqWaterCont[jpr,ielev] = cloudLiqWaterCont_avg
+                  tocdf_cloudIceWaterCont[jpr,ielev] = cloudIceWaterCont_avg
                   tocdf_top_hgt[jpr,ielev] = meantop
                   tocdf_botm_hgt[jpr,ielev] = meanbotm
          ENDIF ELSE BEGIN
@@ -1481,6 +1521,9 @@
                           tocdf_precipTotPSDparamLow[*,jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_precipTotRate[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_precipTotWaterCont[jpr,ielev] = FLOAT_OFF_EDGE
+                          tocdf_precipTotWaterContSigma[jpr,ielev] = FLOAT_OFF_EDGE
+                          tocdf_cloudLiqWaterCont[jpr,ielev] = FLOAT_OFF_EDGE
+                          tocdf_cloudIceWaterCont[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_top_hgt[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_botm_hgt[jpr,ielev] = FLOAT_OFF_EDGE
                        END
@@ -1571,6 +1614,9 @@
                           tocdf_precipTotPSDparamLow[*,jpr,ielev] = Z_MISSING
                           tocdf_precipTotRate[jpr,ielev] = Z_MISSING
                           tocdf_precipTotWaterCont[jpr,ielev] = Z_MISSING
+                          tocdf_precipTotWaterContSigma[jpr,ielev] = Z_MISSING
+                          tocdf_cloudLiqWaterCont[jpr,ielev] = Z_MISSING
+                          tocdf_cloudIceWaterCont[jpr,ielev] = Z_MISSING
                           tocdf_top_hgt[jpr,ielev] = Z_MISSING
                           tocdf_botm_hgt[jpr,ielev] = Z_MISSING
                        END
@@ -1632,6 +1678,12 @@
                                UINT(n_precipTotRate_rejected)
          tocdf_n_precipTotWaterCont_rejected[jpr,ielev] = $
                                UINT(n_precipTotWaterCont_rejected)
+         tocdf_n_precipTotWaterContSigma_rejected[jpr,ielev] = $
+                               UINT(n_precipTotWaterContSigma_rejected)
+         tocdf_n_cloudLiqWaterCont_rejected[jpr,ielev] = $
+                               UINT(n_cloudLiqWaterCont_rejected)
+         tocdf_n_cloudIceWaterCont_rejected[jpr,ielev] = $
+                               UINT(n_cloudIceWaterCont_rejected)
 
       ENDFOR  ; each DPR subarray point: jpr=0, numDPRrays-1
 
