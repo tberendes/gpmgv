@@ -890,7 +890,7 @@ for iswa=0,1 do begin
    ncdf_attput, cdfid, this_varid, 'units', 'K'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-   this_varid = ncdf_vardef(cdfid, 'tbSim_183_3v_'+swath[iswa], [fpdimid[iswa])
+   this_varid = ncdf_vardef(cdfid, 'tbSim_183_3v_'+swath[iswa], [fpdimid[iswa]])
    ncdf_attput, cdfid, this_varid, 'long_name', $
                 '2B-DPRGMI simulatedBrightTemp 183_3v for '+swath[iswa]+' swath'
    ncdf_attput, cdfid, this_varid, 'units', 'K'
