@@ -93,7 +93,7 @@ if [ ${pgproccount} -lt 3 ]
       >> /tmp/PG_MAIL_ERROR_MSG.txt
     echo "NEED TO RESTART POSTGRESQL ON ${HOST}." >> /tmp/PG_MAIL_ERROR_MSG.txt
     mailx -s 'postgresql down on ${HOST}' \
-      -c todd.a.berendes@nasa.gov \
+      -c "todd.a.berendes@nasa.gov,denise.a.berendes@nasa.gov" \
       makofski@radar.gsfc.nasa.gov < /tmp/PG_MAIL_ERROR_MSG.txt
     cat /tmp/PG_MAIL_ERROR_MSG.txt | tee -a $LOG_FILE
     exit 1
@@ -284,7 +284,7 @@ done
 # could be more efficient than calling psql in a loop to insert 1 row at a time!
 if [ -s $MIR_LOG_FILE ]
   then
-    mail -s 'mirror update' todd.a.berendes@nasa.gov < $MIR_LOG_FILE
+    mail -s 'mirror update' -c "denise.a.berendes@nasa.gov" todd.a.berendes@nasa.gov < $MIR_LOG_FILE
     echo "" | tee -a $LOG_FILE
     # see if any data files were actually downloaded, exit now if none
     grep ftp_url ${MIR_LOG_FILE} > /dev/null
