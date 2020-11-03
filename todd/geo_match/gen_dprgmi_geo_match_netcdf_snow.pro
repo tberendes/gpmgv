@@ -872,25 +872,25 @@ for iswa=0,1 do begin
    ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-   this_varid = ncdf_vardef(cdfid, 'tbSim_19v_'+swath[iswa], [fpdimid[iswa],eldimid])
+   this_varid = ncdf_vardef(cdfid, 'tbSim_19v_'+swath[iswa], [fpdimid[iswa]])
    ncdf_attput, cdfid, this_varid, 'long_name', $
                 '2B-DPRGMI simulatedBrightTemp 19v for '+swath[iswa]+' swath'
    ncdf_attput, cdfid, this_varid, 'units', 'K'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-   this_varid = ncdf_vardef(cdfid, 'tbSim_37v_'+swath[iswa], [fpdimid[iswa],eldimid])
+   this_varid = ncdf_vardef(cdfid, 'tbSim_37v_'+swath[iswa], [fpdimid[iswa]])
    ncdf_attput, cdfid, this_varid, 'long_name', $
                 '2B-DPRGMI simulatedBrightTemp 37v for '+swath[iswa]+' swath'
    ncdf_attput, cdfid, this_varid, 'units', 'K'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-   this_varid = ncdf_vardef(cdfid, 'tbSim_89v_'+swath[iswa], [fpdimid[iswa],eldimid])
+   this_varid = ncdf_vardef(cdfid, 'tbSim_89v_'+swath[iswa], [fpdimid[iswa]])
    ncdf_attput, cdfid, this_varid, 'long_name', $
                 '2B-DPRGMI simulatedBrightTemp 89v for '+swath[iswa]+' swath'
    ncdf_attput, cdfid, this_varid, 'units', 'K'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-   this_varid = ncdf_vardef(cdfid, 'tbSim_183_3v_'+swath[iswa], [fpdimid[iswa],eldimid])
+   this_varid = ncdf_vardef(cdfid, 'tbSim_183_3v_'+swath[iswa], [fpdimid[iswa])
    ncdf_attput, cdfid, this_varid, 'long_name', $
                 '2B-DPRGMI simulatedBrightTemp 183_3v for '+swath[iswa]+' swath'
    ncdf_attput, cdfid, this_varid, 'units', 'K'

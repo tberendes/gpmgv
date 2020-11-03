@@ -1121,6 +1121,14 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          cloudLiqWaterCont = (*ptr_swath.PTR_DATASETS).cloudLiqWaterCont
          cloudIceWaterCont = (*ptr_swath.PTR_DATASETS).cloudIceWaterCont
          tbSim = (*ptr_swath.PTR_DATASETS).simulatedBrightTemp
+;tbSim_19v = 3rd nemiss index
+;tbSim_37v = 6th nemiss index
+;tbSim_89v = 8th nemiss index
+;tbSim_183_3v = 12th nemiss index 
+         tbSim_19v = reform(tbSim[2,*,*])
+         tbSim_37v = reform(tbSim[5,*,*])
+         tbSim_89v = reform(tbSim[7,*,*])
+         tbSim_183_3v = reform(tbSim[11,*,*])
          precipTotPSDparamHigh = (*ptr_swath.PTR_DATASETS).precipTotPSDparamHigh
          precipTotPSDparamLow = (*ptr_swath.PTR_DATASETS).precipTotPSDparamLow
          precipTotRate = (*ptr_swath.PTR_DATASETS).precipTotRate
@@ -1661,14 +1669,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          tocdf_phaseBinNodes[*,prgoodidx] = phaseBinNodes[*,pr_idx_2get]
          tocdf_zeroDegAltitude[prgoodidx] = zeroDegAltitude[pr_idx_2get]
          tocdf_zeroDegBin[prgoodidx] = zeroDegBin[pr_idx_2get]
-;tbSim_19v = 3rd nemiss index
-;tbSim_37v = 6th nemiss index
-;tbSim_89v = 8th nemiss index
-;tbSim_183_3v = 12th nemiss index 
-         tocdf_tbSim_19v[prgoodidx] = tbSim[2,pr_idx_2get]
-         tocdf_tbSim_37v[prgoodidx] = tbSim[5,pr_idx_2get]
-         tocdf_tbSim_89v[prgoodidx] = tbSim[7,pr_idx_2get]
-         tocdf_tbSim_183_3v[prgoodidx] = tbSim[11,pr_idx_2get]
+         tocdf_tbSim_19v[prgoodidx] = tbSim_19v[pr_idx_2get]
+         tocdf_tbSim_37v[prgoodidx] = tbSim_37v[pr_idx_2get]
+         tocdf_tbSim_89v[prgoodidx] = tbSim_89v[pr_idx_2get]
+         tocdf_tbSim_183_3v[prgoodidx] = tbSim183_3v[pr_idx_2get]
 
         ; deal with the extra dimension for these variables for MS swath
          CASE (DPR_scantype) OF
