@@ -1672,7 +1672,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          tocdf_tbSim_19v[prgoodidx] = tbSim_19v[pr_idx_2get]
          tocdf_tbSim_37v[prgoodidx] = tbSim_37v[pr_idx_2get]
          tocdf_tbSim_89v[prgoodidx] = tbSim_89v[pr_idx_2get]
-         tocdf_tbSim_183_3v[prgoodidx] = tbSim183_3v[pr_idx_2get]
+         tocdf_tbSim_183_3v[prgoodidx] = tbSim_183_3v[pr_idx_2get]
 
         ; deal with the extra dimension for these variables for MS swath
          CASE (DPR_scantype) OF
