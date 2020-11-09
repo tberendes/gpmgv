@@ -624,7 +624,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                             UF_FIELD=rr_field2get )
    IF ( rr_vol_num LT 0 )  THEN BEGIN
       PRINT, ""
-      PRINT, "Error finding 'RR' volume in radar structure from file: ", file_1CUF
+      PRINT, "No 'RR' volume in radar structure from file: ", file_1CUF
       PRINT, ""
       have_gv_rr = 0
    ENDIF ELSE BEGIN
