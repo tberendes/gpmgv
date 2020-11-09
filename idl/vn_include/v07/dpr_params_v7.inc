@@ -74,6 +74,7 @@ nPSDlo = 2              ; no. of DPRGMI low-resolution PSD parameters
 nBnPSDlo = 9            ; no. of bin indices of DPRGMI low-resolution PSD param.
 nKuKa = 2               ; no. of DPRGMI Ku and Ka for some MS swath vars.
 DPR_ROI = 7.3           ; radius of influence (km) for GR bins included in vol. avg.
+nfreqDPR = 2 			; no. of DPR FS frequencies (Ku, Ka)
 
 ; program-specific Special Values for netCDF grid output
 BB_MISSING = -1

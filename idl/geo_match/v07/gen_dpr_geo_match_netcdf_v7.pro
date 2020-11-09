@@ -85,6 +85,8 @@
 ;    now.
 ; 8/30/18 by Todd Berendes (UAH)
 ;    Added new snow equivalent RR fields, changed version to 1.22
+; 9/28/20 by Todd Berendes (UAH)
+;    Added new GPM integrated PW fields for liquid and solid
 ;    Modified for GPM V7
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
@@ -445,6 +447,11 @@ haveSWEvarid = ncdf_vardef(cdfid, 'have_GR_SWE', /short)
 ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
              'data exists flag for ground radar snowfall water equivalent rate'
 ncdf_attput, cdfid, haveSWEvarid, '_FillValue', NO_DATA_PRESENT
+
+havepwatIntegratedvarid = ncdf_vardef(cdfid, 'have_pwatIntegrated', /short)
+ncdf_attput, cdfid, havepwatIntegratedvarid, 'long_name', $
+             'data exists flag for GPM integrated pw, liquid and ice'
+ncdf_attput, cdfid, havepwatIntegratedvarid, '_FillValue', NO_DATA_PRESENT
 
 havedbzrawvarid = ncdf_vardef(cdfid, 'have_ZFactorMeasured', /short)
 ncdf_attput, cdfid, havedbzrawvarid, 'long_name', $
@@ -1107,6 +1114,21 @@ rayidxvarid = ncdf_vardef(cdfid, 'rayNum', [fpdimid], /short)
 ncdf_attput, cdfid, rayidxvarid, 'long_name', $
             'product-relative zero-based array index of DPR ray number'
 ncdf_attput, cdfid, rayidxvarid, '_FillValue', INT_RANGE_EDGE
+
+; TAB 9/28/20 Added new PW fields
+;For the precipWaterIntegrated…make it two variables in the VN (e.g., pwatIntegrated_liquid, pwatIntegrated_solid):
+
+;    pwatIntegrated_liquid = 1st LS index
+;    pwatIntegrated_solid = 2nd LS index
+pwatIntegrated_liquidvarid = ncdf_vardef(cdfid, 'pwatIntegrated_liquid', [fpdimid])
+ncdf_attput, cdfid, pwatIntegrated_liquidvarid, 'long_name', $
+            'Precipitation water vertically integrated'
+ncdf_attput, cdfid, pwatIntegrated_liquidvarid, '_FillValue', -9999.9
+
+pwatIntegrated_solidvarid = ncdf_vardef(cdfid, 'pwatIntegrated_solid', [fpdimid])
+ncdf_attput, cdfid, pwatIntegrated_solidvarid, 'long_name', $
+            'Precipitation water vertically integrated'
+ncdf_attput, cdfid, pwatIntegrated_solidvarid, '_FillValue', -9999.9
 
 ; Data time/location variables
 

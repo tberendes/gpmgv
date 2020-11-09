@@ -252,6 +252,8 @@
 ;    different PPS Version from the 2A file.
 ; 09/04/18 Berendes, UAH
 ;  - Added mods for SWE variables
+; 09/30/20 Berendes, UAH
+;  - Added pwat_integ_liquid and pwat_integ_solid variables
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -385,6 +387,9 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          dpr_Nw = REFORM( (*ptr_swath.PTR_SLV).PARAMDSD[0,*,*,*] )
          dpr_Dm = REFORM( (*ptr_swath.PTR_SLV).PARAMDSD[1,*,*,*] )
       ENDELSE
+      ; TAB 9/30/20 
+      pwat_integ_liquid = REFORM( (*ptr_swath.PTR_SLV).precipWaterIntegrated[0,*,*] )
+      pwat_integ_solid = REFORM( (*ptr_swath.PTR_SLV).precipWaterIntegrated[1,*,*] )
    ENDIF ELSE BEGIN
       message, "Invalid pointer to PTR_SLV.", /INFO
       goto, bailOut
@@ -536,6 +541,10 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_BBstatus = MAKE_ARRAY(numDPRrays, /int, VALUE=INT_RANGE_EDGE)
       tocdf_qualityData = MAKE_ARRAY(numDPRrays, /long, VALUE=LONG(INT_RANGE_EDGE))
       tocdf_heightStormTop = MAKE_ARRAY(numDPRrays, /int, VALUE=INT_RANGE_EDGE)
+      
+      ; TAB 9/30/20 
+      tocdf_pwat_integ_liquid = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_pwat_integ_solid = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
 
      ; Create new subarrays of dimensions (numDPRrays, num_elevations_out) for each
      ;   3-D science and status variable: 
@@ -655,6 +664,11 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          tocdf_heightStormTop[prgoodidx] = heightStormTop[pr_idx_2get]
          tocdf_rayNum = data_GR2DPR.RAYNUM
          tocdf_scanNum = data_GR2DPR.SCANNUM
+         
+         ; TAB 9/30/20 
+      	 tocdf_pwat_integ_liquid[prgoodidx] = pwat_integ_liquid[pr_idx_2get]
+      	 tocdf_pwat_integ_solid[prgoodidx] = pwat_integ_solid[pr_idx_2get]
+         
      ENDIF ELSE BEGIN
          PRINT, ""
          PRINT, "No valid (non zero) DPR footprints found for ", siteID, ", skipping."
@@ -676,6 +690,11 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          tocdf_landocean[predgeidx] = INT_OFF_EDGE
          tocdf_qualityData[predgeidx] = LONG(INT_OFF_EDGE)
          tocdf_heightStormTop[predgeidx] = INT_OFF_EDGE
+         
+         ; TAB 9/30/20
+         tocdf_pwat_integ_liquid[predgeidx] = FLOAT_OFF_EDGE
+      	 tocdf_pwat_integ_solid[predgeidx] = FLOAT_OFF_EDGE
+         
       ENDIF
 
    ENDIF ELSE BEGIN
@@ -1051,6 +1070,11 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
      NCDF_VARPUT, ncid, 'have_BBstatus', DATA_PRESENT
    NCDF_VARPUT, ncid, 'qualityData', tocdf_qualityData       ; data
     NCDF_VARPUT, ncid, 'have_qualityData', DATA_PRESENT    ; data presence flag
+    
+   ; TAB 9/30/20
+   NCDF_VARPUT, ncid, 'pwatIntegrated_liquid', tocdf_pwat_integ_liquid
+   NCDF_VARPUT, ncid, 'pwatIntegrated_solid', tocdf_pwat_integ_solid   
+    NCDF_VARPUT, ncid, 'have_pwatIntegrated', DATA_PRESENT    ; data presence flag
 
 ;  Write sweep-level results/flags to netcdf file & close it up
 
