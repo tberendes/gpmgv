@@ -447,6 +447,11 @@ ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
              'data exists flag for ground radar snowfall water equivalent rate'
 ncdf_attput, cdfid, haveSWEvarid, '_FillValue', NO_DATA_PRESENT
 
+havepwatIntegratedvarid = ncdf_vardef(cdfid, 'have_pwatIntegrated', /short)
+ncdf_attput, cdfid, havepwatIntegratedvarid, 'long_name', $
+             'data exists flag for GPM integrated pw, liquid and ice'
+ncdf_attput, cdfid, havepwatIntegratedvarid, '_FillValue', NO_DATA_PRESENT
+
 havedbzrawvarid = ncdf_vardef(cdfid, 'have_ZFactorMeasured', /short)
 ncdf_attput, cdfid, havedbzrawvarid, 'long_name', $
              'data exists flag for ZFactorMeasured'

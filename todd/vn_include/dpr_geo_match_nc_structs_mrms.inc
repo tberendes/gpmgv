@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; dpr_geo_match_nc_structs.inc          Morris/SAIC/GPM_GV      July 2013
+; dpr_geo_match_nc_structs_mrms.inc          Morris/SAIC/GPM_GV      July 2013
 ;
 ; DESCRIPTION
 ; -----------
@@ -190,7 +190,8 @@ field_flags =  { dpr_gr_field_flags,                        $
                  have_qualityData:         NO_DATA_PRESENT, $
                  have_clutterStatus:       NO_DATA_PRESENT,  $
                  have_mrms:       		NO_DATA_PRESENT,  $
-                 have_GR_SWE:       	NO_DATA_PRESENT  $
+                 have_GR_SWE:       	NO_DATA_PRESENT,  $
+                 have_pwatIntegrated:       	NO_DATA_PRESENT  $
                }
 
 ;field_flags_gmi =  { gmi_gr_field_flags,                           $

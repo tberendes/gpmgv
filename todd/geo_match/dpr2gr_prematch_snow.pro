@@ -299,7 +299,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 ; "Include" file for names, paths, etc.:
 @environs.inc
 ; for structures to be read from GR netCDF file
-@dpr_geo_match_nc_structs_snow.inc
+@dpr_geo_match_nc_structs_mrms.inc
 
    decluttered = KEYWORD_SET(declutter)
 
@@ -1080,6 +1080,7 @@ PRO dpr2gr_prematch_scan_snow, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ; TAB 9/30/20
    NCDF_VARPUT, ncid, 'pwatIntegrated_liquid', tocdf_pwat_integ_liquid
    NCDF_VARPUT, ncid, 'pwatIntegrated_solid', tocdf_pwat_integ_solid   
+    NCDF_VARPUT, ncid, 'have_pwatIntegrated', DATA_PRESENT    ; data presence flag
 
 ;  Write sweep-level results/flags to netcdf file & close it up
 
@@ -1262,7 +1263,7 @@ PRO dpr2gr_prematch_snow, control_file, GPM_ROOT=gpmroot, DIRDPR=dir2adpr, $
 ; "Include" file for names, paths, etc.:
 @environs.inc
 ; for structures to be read from GR netCDF file
-@dpr_geo_match_nc_structs_snow.inc
+@dpr_geo_match_nc_structs_mrms.inc
 
 decluttered = KEYWORD_SET(declutter)
 

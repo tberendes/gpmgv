@@ -628,7 +628,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                             UF_FIELD=rr_field2get )
    IF ( rr_vol_num LT 0 )  THEN BEGIN
       PRINT, ""
-      PRINT, "Error finding 'RR' volume in radar structure from file: ", file_1CUF
+      PRINT, "No 'RR' volume in radar structure from file: ", file_1CUF
       PRINT, ""
       have_gv_rr = 0
    ENDIF ELSE BEGIN
@@ -1195,6 +1195,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
            ; add point to subarrays for DPR 1-D index and for DPR scanand ray num and
            ; footprint lat/lon
             ; dpr_master_idx[numDPRrays] = dpr_index_all[ray_num,scan_num] ; for GPM
+            ; NOTE**** will need to create FS_KU and FS_KA versions of this 
+            ; TAB 10/22/20 need mods to handle two frequencies of DPR FS
             dpr_master_idx[numDPRrays] = dpr_index_all[0,ray_num,scan_num] ; for V07 use size for freq 0 for FS scan, same for both freq
             dpr_scan_num[numDPRrays] = scan_num
             dpr_ray_num[numDPRrays] = ray_num
