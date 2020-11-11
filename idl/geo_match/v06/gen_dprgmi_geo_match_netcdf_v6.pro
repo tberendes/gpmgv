@@ -1,5 +1,5 @@
 ;+
-; Copyright © 2016, United States Government as represented by the
+; Copyright © 2014, United States Government as represented by the
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
@@ -9,18 +9,16 @@
 ;
 ;-------------------------------------------------------------------------------
 ;
-; gen_gr_hsfs_geo_match_netcdf_v7.pro    Todd Berendes, UAH   July 1, 2020
-; adapted from gen_gr_hsmsns_geo_match_netcdf.pro for GPM V7
+; gen_dprgmi_geo_match_netcdf_v6.pro    Bob Morris, GPM GV (SAIC)    May 2014
 ;
 ; DESCRIPTION:
-; Using the "special values" parameters in the 'include' file dpr_params_v7.inc,
+; Using the "special values" parameters in the 'include' file dpr_params.inc,
 ; the path parameters in environs.inc, and supplied parameters for the filename,
-; number of DPR footprints in the matchup for each "swath" (HS,FS), the array
-; of elevation angles in the ground radar volume scan, the number of scans in
-; the input 2A-DPR subset file for each swath type, and global variables for the
+; number of DPR footprints in the matchup for each swath (MS, NS), the array of
+; elevation angles in the ground radar volume scan, the number of scans in the
+; input 2B_DPRGMI subset file for each swath type, and global variables for the
 ; UF data field used for GR reflectivity and various dual-pol fields, and the
-; DPR product version, creates an empty matchup netCDF file holding the volume-
-; matched GR variables ONLY, for each swath's DPR footprints.
+; DPR product version, creates an empty DPRGMI/GR matchup netCDF file.
 ;
 ; The netCDF file name supplied is expected to be a complete file basename and
 ; to contain fields for YYMMDD, the GPM orbit number, and the ID of the ground
@@ -28,16 +26,37 @@
 ; pre-existence, uniqueness, or conformance is performed in this module.
 ;
 ; HISTORY:
-; 02/26/2016 by Bob Morris, GPM GV (SAIC)
-;  - Created from features within gen_dpr_geo_match_netcdf.pro
-;    and gen_dprgmi_geo_match_netcdf.pro
-; 03/06/16 by Bob Morris, GPM GV (SAIC)
-;  - Added swath-invariant global variable GR_ROI_km.
-; 8/27/18 by Todd Berendes, UAH
-;    added new variables for snowfall water equivalent rate in the VN data using one of 
-;    the new polarimetric relationships suggested by Bukocvic et al (2017)
-;    call them SWERR1
-;
+; 05/05/2013 by Bob Morris, GPM GV (SAIC)
+;  - Created from gen_dpr_geo_match_netcdf.pro.
+; 10/13/2014 by Bob Morris, GPM GV (SAIC)
+;  - Added have_swath_MS flag variable to indicate whether there is data for the
+;    MS swath variables, and made sure to define at least one footprint for the
+;    MS swath if numpts_MS is zero so that these variables are included in the
+;    file.
+; 11/10/14 by Bob Morris, GPM GV (SAIC)
+;  - Added processing of GR RC and RP rainrate fields for version 1.1 file.
+; 06/16/15 by Bob Morris, GPM GV (SAIC)
+;  - Added zeroDegAltitude and zeroDegBin fields to substitute for bright band
+;    height not available in the 2BDPRGMI.
+; 12/22/15 by Bob Morris, GPM GV (SAIC)
+;  - Added GR_blockage swath variables and existence flag for version 1.2 file.
+; 04/19/16 by Bob Morris, GPM GV (SAIC)
+;  - Added clutterStatus variables for both swaths/instruments for version 1.21
+;    file.
+; 07/11/16 by Bob Morris, GPM GV (SAIC)
+;  - Added processing of GR Dm and N2 dual-pol fields for version 1.3 file.
+; 11/19/16 by Bob Morris, GPM GV (SAIC)
+;  - Added DPRGMI stormTopAltitude field for version 1.3 file.
+; 10/26/20 by Todd Berendes (UAH)
+;    Added new fields for: 
+;		precipTotWaterContSigma
+;		cloudLiqWaterCont
+;		cloudIceWaterCont
+;		simulatedBrightTemp 
+;			tbSim_19v = 3rd nemiss index
+;			tbSim_37v = 6th nemiss index
+;			tbSim_89v = 8th nemiss index
+;			tbSim_183_3v = 12th nemiss index
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -46,34 +65,28 @@
 ;-------------------------------------------------------------------------------
 ;-
 
-FUNCTION gen_gr_hsfs_geo_match_netcdf_v7, geo_match_nc_file, numpts_HS, numpts_FS, $
-                                         elev_angles, numscans_HS, $
-                                         numscans_FS, gv_UF_field, $
-                                         DPR_vers, siteID, dprgrfiles, $
-                                         GEO_MATCH_VERS=geo_match_vers, $
-                                         NON_PPS_FILES=non_pps_files
+FUNCTION gen_dprgmi_geo_match_netcdf_v6, geo_match_nc_file, numpts_MS, numpts_NS, $
+                                      elev_angles, numscans_MS, numscans_NS, $
+                                      gv_UF_field, DPR_vers, siteID, $
+                                      dprgrfiles, GEO_MATCH_VERS=geo_match_vers
 
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc
 ; "Include" files for constants, names, paths, etc.
 @environs.inc   ; for file prefixes, netCDF file definition version
-@dpr_params_v7.inc  ; for the type-specific fill values
+@dpr_params.inc  ; for the type-specific fill values
 
-; for debugging
-!EXCEPT=2
-
-; TAB 8/27/18 changed version to 1.1 from 1.0 for new snow water equivalent field
-;GEO_MATCH_FILE_VERSION=1.1   ; hard code inside function now, not from "Include"
-; TAB 11/10/20 changed version to 2.0 from 1.1
-GEO_MATCH_FILE_VERSION=2.0
+; TAB 2/4/19 incremented version for new snow fields
+;GEO_MATCH_FILE_VERSION=1.31   ; hard code inside function now, not from "Include"
+; TAB 11/10/20 changed version to 2.0 from 1.31 for additional GPM fields
+GEO_MATCH_FILE_VERSION=2.0   ; hard code inside function now, not from "Include"
 
 IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
   ; assign optional keyword parameter value for "versionOnly" calling mode
    geo_match_vers = GEO_MATCH_FILE_VERSION
 ENDIF
 
-;IF ( N_PARAMS() LT 12 ) THEN GOTO, versionOnly
-IF ( N_PARAMS() LT 10 ) THEN GOTO, versionOnly
+IF ( N_PARAMS() LT 9 ) THEN GOTO, versionOnly
 
 ; Create the output dir for the netCDF file, if needed:
 OUTDIR = FILE_DIRNAME(geo_match_nc_file)
@@ -81,12 +94,15 @@ spawn, 'mkdir -p ' + OUTDIR
 
 cdfid = ncdf_create(geo_match_nc_file, /CLOBBER)
 
-; define the 2 scan types (swaths) in the DPR product
-; - we need separate variables for each swath for the science variables
-swath = ['HS','FS']
+; define the two swaths in the DPRGMI product, we need separate variables
+; for each swath for the science variables
+swath = ['MS','NS']
 
 ; global variables -- THE FIRST GLOBAL VARIABLE MUST BE 'DPR_Version'
 ncdf_attput, cdfid, 'DPR_Version', DPR_vers, /global
+;ncdf_attput, cdfid, 'DPR_ScanType', scanType, /global
+;ncdf_attput, cdfid, 'GR_UF_Z_field', gr_UF_field, /global
+
 
 ; determine whether gv_UF_field is a scalar character or a structure, and write
 ; global values for UF field IDs accordingly
@@ -158,21 +174,19 @@ ncdf_attput, cdfid, 'GV_UF_N2_field', n2uf, /global
 ; on each file type being in a fixed order in the array, but let's make things
 ; complicated and search for patterns
 
-PPS_NAMED = 1 - KEYWORD_SET(non_pps_files)
-IF ( PPS_NAMED EQ 1 ) THEN BEGIN
+IF ( N_PARAMS() EQ 10 ) THEN BEGIN
    idxfiles = lonarr( N_ELEMENTS(dprgrfiles) )
 
-   idxDPR = WHERE(STRMATCH(dprgrfiles, '2A*.GPM.DPR*', /FOLD_CASE) EQ 1, countDPR)
-   if countDPR EQ 1 THEN BEGIN
-     ; got to strjoin to collapse the degenerate string array to simple string
-      origDPRFileName = ''+STRJOIN(STRTRIM(dprgrfiles[idxDPR],2))
-      idxfiles[idxDPR] = 1
+   idxCOMB = WHERE(STRMATCH(dprgrfiles,'2B*.GPM.DPRGMI*', /FOLD_CASE) EQ 1, countCOMB)
+   if countCOMB EQ 1 THEN BEGIN
+      origCOMBFileName = STRJOIN(STRTRIM(dprgrfiles[idxCOMB],2))
+      idxfiles[idxCOMB] = 1
    endif else begin
-      idxDPR = WHERE(STRPOS(dprgrfiles,'no_2ADPR_file') GE 0, countDPR)
-      if countDPR EQ 1 THEN BEGIN
-         origDPRFileName = ''+STRJOIN(STRTRIM(dprgrfiles[idxDPR],2))
-         idxfiles[idxDPR] = 1
-      endif ELSE origDPRFileName='no_2ADPR_file'
+      idxCOMB = WHERE(STRPOS(dprgrfiles,'no_2BCMB_file') GE 0, countCOMB)
+      if countCOMB EQ 1 THEN BEGIN
+         origCOMBFileName = STRJOIN(STRTRIM(dprgrfiles[idxCOMB],2))
+         idxfiles[idxCOMB] = 1
+      endif ELSE origCOMBFileName='no_2BCMB_file'
    endelse
 
    idxgr = WHERE(idxfiles EQ 0, countgr)
@@ -185,26 +199,29 @@ IF ( PPS_NAMED EQ 1 ) THEN BEGIN
    endelse
 
 ENDIF ELSE BEGIN
-  ; rely on positions to set file names
-   origDPRFileName  = ''+STRJOIN(STRTRIM(dprgrfiles[0],2))
-   origGRFileName   = ''+STRJOIN(STRTRIM(dprgrfiles[1],2))
+   origCOMBFileName='Unspecified'
+   origGRFileName='Unspecified'
 ENDELSE
 
-ncdf_attput, cdfid, 'DPR_2ADPR_file', origDPRFileName, /global
+ncdf_attput, cdfid, 'DPR_2BCMB_file', origCOMBFileName, /global
 ncdf_attput, cdfid, 'GR_file', origGRFileName, /global
 
 
-; field dimensions
+; field dimensions.  See dpr_params.inc for fixed values like nPSDlo, nKuKa, etc.
 
-fpdimid_HS = ncdf_dimdef(cdfid, 'fpdim_HS', numpts_HS>1)  ; # of HS footprints in range
-fpdimid_FS = ncdf_dimdef(cdfid, 'fpdim_FS', numpts_FS>1)  ; # of FS footprints in range
-fpdimid = [ fpdimid_HS, fpdimid_FS]            ; match to "swath" array, above
+fpdimid_MS = ncdf_dimdef(cdfid, 'fpdim_MS', numpts_MS>1)  ; # of MS footprints in range
+fpdimid_NS = ncdf_dimdef(cdfid, 'fpdim_NS', numpts_NS)  ; # of NS footprints in range
+fpdimid = [ fpdimid_MS, fpdimid_NS ]                    ; match to "swath" array, above
 eldimid = ncdf_dimdef(cdfid, 'elevationAngle', N_ELEMENTS(elev_angles))
 xydimid = ncdf_dimdef(cdfid, 'xydim', 4)        ; for 4 corners of a DPR footprint
 hidimid = ncdf_dimdef(cdfid, 'hidim', 15)       ; for Hydromet ID Categories
-timedimid_HS = ncdf_dimdef(cdfid, 'timedimid_HS', numscans_HS>1)  ; # of HS scans in range
-timedimid_FS = ncdf_dimdef(cdfid, 'timedimid_FS', numscans_FS>1)  ; # of FS scans in range
-timedimid = [ timedimid_HS, timedimid_FS ]        ; match to "swath" array, above
+nPSDlo_dimid = ncdf_dimdef(cdfid, 'nPSDlo', nPSDlo)  ; no. of low-res PSD parms.
+nBnPSDlo_dimid = ncdf_dimdef(cdfid, 'nBnPSDlo', nBnPSDlo)  ; no. of bins of low-res PSD parms.
+nKuKa_dimid = ncdf_dimdef(cdfid, 'nKuKa', nKuKa)    ; no. of Ku and Ka for some MS swath vars.
+nPhsBnN_dimid = ncdf_dimdef(cdfid, 'nPhsBnN', nPhsBnN)  ; no. of phase bin nodes
+timedimid_MS = ncdf_dimdef(cdfid, 'timedimid_MS', numscans_MS>1)  ; # of MS scans in range
+timedimid_NS = ncdf_dimdef(cdfid, 'timedimid_NS', numscans_NS)  ; # of NS scans in range
+timedimid = [ timedimid_MS, timedimid_NS ]                      ; match to "swath" array, above
 
 
 ; Elevation Angles coordinate variable
@@ -214,16 +231,11 @@ ncdf_attput, cdfid, elvarid, 'long_name', $
             'Radar Sweep Elevation Angles'
 ncdf_attput, cdfid, elvarid, 'units', 'degrees'
 
-; are there any HS and/or FS scan points in the GR range limit?
+; are there any MS scan points in the GR range limit?
 
-haveswathvarid = ncdf_vardef(cdfid, 'have_swath_HS', /short)
+haveswathvarid = ncdf_vardef(cdfid, 'have_swath_MS', /short)
 ncdf_attput, cdfid, haveswathvarid, 'long_name', $
-             'data exists flag for HS swath'
-ncdf_attput, cdfid, haveswathvarid, '_FillValue', NO_DATA_PRESENT
-
-haveswathvarid = ncdf_vardef(cdfid, 'have_swath_FS', /short)
-ncdf_attput, cdfid, haveswathvarid, 'long_name', $
-             'data exists flag for FS swath'
+             'data exists flag for MS swath'
 ncdf_attput, cdfid, haveswathvarid, '_FillValue', NO_DATA_PRESENT
 
 ; scanTime components, one datetime per scan, swath-specific
@@ -274,7 +286,6 @@ for iswa=0,1 do begin
                 'Ending DPR '+swath[iswa]+' overlap scan in original dataset, zero-based'
    ncdf_attput, cdfid, escansid, '_FillValue', LONG(INT_RANGE_EDGE)
 
-  ; note that these values are redundant with fpdim_HS, fpdim_MS, fpdim_NS
    nraysid = ncdf_vardef(cdfid, 'numRays_'+swath[iswa], /short)
    ncdf_attput, cdfid, nraysid, 'long_name', $
                 'Number of DPR '+swath[iswa]+' rays per scan in original datasets'
@@ -289,17 +300,23 @@ ncdf_attput, cdfid, rngthreshid, 'long_name', $
 ncdf_attput, cdfid, rngthreshid, '_FillValue', FLOAT_RANGE_EDGE
 ncdf_attput, cdfid, rngthreshid, 'units', 'km'
 
+prdbzthreshid = ncdf_vardef(cdfid, 'DPR_dBZ_min')
+ncdf_attput, cdfid, prdbzthreshid, 'long_name', $
+             'minimum DPR bin dBZ required for a *complete* DPR vertical average'
+ncdf_attput, cdfid, prdbzthreshid, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, prdbzthreshid, 'units', 'dBZ'
+
 gvdbzthreshid = ncdf_vardef(cdfid, 'GR_dBZ_min')
 ncdf_attput, cdfid, gvdbzthreshid, 'long_name', $
              'minimum GR bin dBZ required for a *complete* GR horizontal average'
 ncdf_attput, cdfid, gvdbzthreshid, '_FillValue', FLOAT_RANGE_EDGE
 ncdf_attput, cdfid, gvdbzthreshid, 'units', 'dBZ'
 
-ROIid = ncdf_vardef(cdfid, 'GR_ROI_km')
-ncdf_attput, cdfid, ROIid, 'long_name', $
-             'Radius of Influence (km) used for GR horizontal averaging'
-ncdf_attput, cdfid, ROIid, '_FillValue', FLOAT_RANGE_EDGE
-ncdf_attput, cdfid, ROIid, 'units', 'km'
+rainthreshid = ncdf_vardef(cdfid, 'rain_min')
+ncdf_attput, cdfid, rainthreshid, 'long_name', $
+             'minimum DPR rainrate required for a *complete* DPR vertical average'
+ncdf_attput, cdfid, rainthreshid, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, rainthreshid, 'units', 'mm/h'
 
 
 ; Data existence (non-fill) flags for GR fields.  Not swath-specific.
@@ -370,7 +387,7 @@ ncdf_attput, cdfid, haveBLKvarid, 'long_name', $
 ncdf_attput, cdfid, haveBLKvarid, '_FillValue', NO_DATA_PRESENT
 
 ; TAB 8/27/18 added new variables for snowfall water equivalent rate in the VN data using one of 
-; the new polarimetric relationships suggested by Bukocvic et al (2017) and Pierre Kirstetter
+; the new polarimetric relationships suggested by Bukocvic et al (2017)
 haveSWEvarid = ncdf_vardef(cdfid, 'have_GR_SWE', /short)
 ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
              'data exists flag for ground radar snowfall water equivalent rate'
@@ -587,8 +604,7 @@ for iswa=0,1 do begin
    ncdf_attput, cdfid, gvDMmaxvarid, '_FillValue', FLOAT_RANGE_EDGE
 
    gvN2varid = ncdf_vardef(cdfid, 'GR_N2_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, gvN2varid, 'long_name', $
-                'Tokay Normalized Intercept Parameter'
+   ncdf_attput, cdfid, gvN2varid, 'long_name', 'Tokay Normalized Intercept Parameter'
    ncdf_attput, cdfid, gvN2varid, 'units', '1/(mm*m^3)'
    ncdf_attput, cdfid, gvN2varid, '_FillValue', FLOAT_RANGE_EDGE
 
@@ -607,114 +623,6 @@ for iswa=0,1 do begin
    BLKvarid = ncdf_vardef(cdfid, 'GR_blockage_'+swath[iswa], [fpdimid[iswa],eldimid])
    ncdf_attput, cdfid, BLKvarid, 'long_name', 'ground radar blockage fraction'
    ncdf_attput, cdfid, BLKvarid, '_FillValue', FLOAT_RANGE_EDGE
-
-; TAB 8/27/18 added new variables for snowfall water equivalent rate in the VN data using one of 
-; the new polarimetric relationships suggested by Bukocvic et al (2017)
-   SWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, SWEDPvarid, 'long_name', 'GV snowfall water equivalent rate, Bukocvic et al (2017)'
-   ncdf_attput, cdfid, SWEDPvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, SWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
-
-   stddevgvSWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, stddevgvSWEDPvarid, 'long_name', $
-             'Standard Deviation of GV snowfall water equivalent rate, Bukocvic et al (2017)'
-   ncdf_attput, cdfid, stddevgvSWEDPvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, stddevgvSWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
-
-   gvmaxSWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, gvmaxSWEDPvarid, 'long_name', $
-             'Sample Maximum GV snowfall water equivalent rate, Bukocvic et al (2017)'
-   ncdf_attput, cdfid, gvmaxSWEDPvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, gvmaxSWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
-   
-   ; Z only relationships
-   SWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, SWE25varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 25%'
-   ncdf_attput, cdfid, SWE25varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, SWE25varid, '_FillValue', FLOAT_RANGE_EDGE
-
-   stddevgvSWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, stddevgvSWE25varid, 'long_name', $
-             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 25%'
-   ncdf_attput, cdfid, stddevgvSWE25varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, stddevgvSWE25varid, '_FillValue', FLOAT_RANGE_EDGE
-
-   gvmaxSWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, gvmaxSWE25varid, 'long_name', $
-             'Sample Maximum GV snowfall water equivalent rate,  PQPE conditional quantiles 25%'
-   ncdf_attput, cdfid, gvmaxSWE25varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, gvmaxSWE25varid, '_FillValue', FLOAT_RANGE_EDGE
-   
-   SWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, SWE50varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 50%'
-   ncdf_attput, cdfid, SWE50varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, SWE50varid, '_FillValue', FLOAT_RANGE_EDGE
-
-   stddevgvSWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, stddevgvSWE50varid, 'long_name', $
-             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 50%'
-   ncdf_attput, cdfid, stddevgvSWE50varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, stddevgvSWE50varid, '_FillValue', FLOAT_RANGE_EDGE
-
-   gvmaxSWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, gvmaxSWE50varid, 'long_name', $
-             'Sample Maximum GV snowfall water equivalent rate,  PQPE conditional quantiles 50%'
-   ncdf_attput, cdfid, gvmaxSWE50varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, gvmaxSWE50varid, '_FillValue', FLOAT_RANGE_EDGE
-   
-   SWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, SWE75varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 75%'
-   ncdf_attput, cdfid, SWE75varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, SWE75varid, '_FillValue', FLOAT_RANGE_EDGE
-
-   stddevgvSWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, stddevgvSWE75varid, 'long_name', $
-             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 75%'
-   ncdf_attput, cdfid, stddevgvSWE75varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, stddevgvSWE75varid, '_FillValue', FLOAT_RANGE_EDGE
-
-   gvmaxSWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, gvmaxSWE75varid, 'long_name', $
-             'Sample Maximum GV snowfall water equivalent rate,  PQPE conditional quantiles 75%'
-   ncdf_attput, cdfid, gvmaxSWE75varid, 'units', 'mm/h'
-   ncdf_attput, cdfid, gvmaxSWE75varid, '_FillValue', FLOAT_RANGE_EDGE
-
-   SWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, SWEMQTvarid, 'long_name', 'GV snowfall water equivalent rate, Marquette relationship'
-   ncdf_attput, cdfid, SWEMQTvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, SWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
-
-   stddevgvSWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, stddevgvSWEMQTvarid, 'long_name', $
-             'Standard Deviation of GV snowfall water equivalent rate, Marquette relationship'
-   ncdf_attput, cdfid, stddevgvSWEMQTvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, stddevgvSWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
-
-   gvmaxSWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, gvmaxSWEMQTvarid, 'long_name', $
-             'Sample Maximum GV snowfall water equivalent rate,  Marquette relationship'
-   ncdf_attput, cdfid, gvmaxSWEMQTvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, gvmaxSWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
-
-   SWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, SWEMRMSvarid, 'long_name', 'GV snowfall water equivalent rate, MRMS relationship'
-   ncdf_attput, cdfid, SWEMRMSvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, SWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
-
-   stddevgvSWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, 'long_name', $
-             'Standard Deviation of GV snowfall water equivalent rate, MRMS relationship'
-   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
-
-   gvmaxSWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
-   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, 'long_name', $
-             'Sample Maximum GV snowfall water equivalent rate, MRMS relationship'
-   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, 'units', 'mm/h'
-   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
-   
-
-;*******************
 
    gvrejvarid = ncdf_vardef(cdfid, 'n_gr_z_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gvrejvarid, 'long_name', $
@@ -751,36 +659,6 @@ for iswa=0,1 do begin
              'number of bins below rain_min in GR_RR_rainrate average'
    ncdf_attput, cdfid, gv_rr_rejvarid, '_FillValue', INT_RANGE_EDGE
 
-   gv_swedp_rejvarid = ncdf_vardef(cdfid, 'n_gr_swedp_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
-   ncdf_attput, cdfid, gv_swedp_rejvarid, 'long_name', $
-             'number of bins below rain_min in GR_SWEDP_rainrate average'
-   ncdf_attput, cdfid, gv_swedp_rejvarid, '_FillValue', INT_RANGE_EDGE
-
-   gv_swe25_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe25_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
-   ncdf_attput, cdfid, gv_swe25_rejvarid, 'long_name', $
-             'number of bins below rain_min in GR_SWE25_rainrate average'
-   ncdf_attput, cdfid, gv_swe25_rejvarid, '_FillValue', INT_RANGE_EDGE
-
-   gv_swe50_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe50_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
-   ncdf_attput, cdfid, gv_swe50_rejvarid, 'long_name', $
-             'number of bins below rain_min in GR_SWE50_rainrate average'
-   ncdf_attput, cdfid, gv_swe50_rejvarid, '_FillValue', INT_RANGE_EDGE
-
-   gv_swe75_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe75_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
-   ncdf_attput, cdfid, gv_swe75_rejvarid, 'long_name', $
-             'number of bins below rain_min in GR_SWE75_rainrate average'
-   ncdf_attput, cdfid, gv_swe75_rejvarid, '_FillValue', INT_RANGE_EDGE
-
-   gv_swemqt_rejvarid = ncdf_vardef(cdfid, 'n_gr_swemqt_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
-   ncdf_attput, cdfid, gv_swemqt_rejvarid, 'long_name', $
-             'number of bins below rain_min in GR_SWEMQT_rainrate average'
-   ncdf_attput, cdfid, gv_swemqt_rejvarid, '_FillValue', INT_RANGE_EDGE
-
-   gv_swemrms_rejvarid = ncdf_vardef(cdfid, 'n_gr_swemrms_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
-   ncdf_attput, cdfid, gv_swemrms_rejvarid, 'long_name', $
-             'number of bins below rain_min in GR_SWEMRMS_rainrate average'
-   ncdf_attput, cdfid, gv_swemrms_rejvarid, '_FillValue', INT_RANGE_EDGE
-
    gv_hid_rejvarid = ncdf_vardef(cdfid, 'n_gr_hid_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_hid_rejvarid, 'long_name', $
              'number of bins with undefined HID in GR_HID histogram'
@@ -796,12 +674,12 @@ for iswa=0,1 do begin
              'number of bins with missing Nw in GR_Nw average'
    ncdf_attput, cdfid, gv_nw_rejvarid, '_FillValue', INT_RANGE_EDGE
 
-   gv_dm_rejvarid = ncdf_vardef(cdfid, 'n_gr_dm_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_dm_rejvarid = ncdf_vardef(cdfid, 'n_gr_dm_rejected_'+swath[iswa], [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_dm_rejvarid, 'long_name', $
                 'number of bins with missing Dm in GR_Dm average'
    ncdf_attput, cdfid, gv_dm_rejvarid, '_FillValue', INT_RANGE_EDGE
 
-   gv_n2_rejvarid = ncdf_vardef(cdfid, 'n_gr_n2_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_n2_rejvarid = ncdf_vardef(cdfid, 'n_gr_n2_rejected_'+swath[iswa], [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_n2_rejvarid, 'long_name', $
                 'number of bins with missing N2 in GR_N2 average'
    ncdf_attput, cdfid, gv_n2_rejvarid, '_FillValue', INT_RANGE_EDGE
@@ -810,7 +688,308 @@ for iswa=0,1 do begin
    ncdf_attput, cdfid, gvexpvarid, 'long_name', $
              'number of bins in GR_Z average'
    ncdf_attput, cdfid, gvexpvarid, '_FillValue', INT_RANGE_EDGE
+   
+   ; TAB 8/27/18 added new variables for snowfall water equivalent rate in the VN data using one of 
+; the new polarimetric relationships suggested by Bukocvic et al (2017)
 
+;***********  
+   SWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWEDPvarid, 'long_name', 'GV snowfall water equivalent rate, Bukocvic et al (2017)'
+   ncdf_attput, cdfid, SWEDPvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWEDPvarid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, Bukocvic et al (2017)'
+   ncdf_attput, cdfid, stddevgvSWEDPvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWEDPvarid = ncdf_vardef(cdfid, 'GR_SWEDP_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWEDPvarid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate, Bukocvic et al (2017)'
+   ncdf_attput, cdfid, gvmaxSWEDPvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWEDPvarid, '_FillValue', FLOAT_RANGE_EDGE
+   
+   gv_swedp_rejvarid = ncdf_vardef(cdfid, 'n_gr_swedp_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swedp_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWEDP average'
+   ncdf_attput, cdfid, gv_swedp_rejvarid, '_FillValue', INT_RANGE_EDGE
+   
+   SWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWE25varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 25%'
+   ncdf_attput, cdfid, SWE25varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWE25varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWE25varid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 25%'
+   ncdf_attput, cdfid, stddevgvSWE25varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWE25varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWE25varid = ncdf_vardef(cdfid, 'GR_SWE25_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWE25varid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate, PQPE conditional quantiles 25%'
+   ncdf_attput, cdfid, gvmaxSWE25varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWE25varid, '_FillValue', FLOAT_RANGE_EDGE
+   
+   gv_SWE25_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe25_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_SWE25_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWE25 average'
+   ncdf_attput, cdfid, gv_SWE25_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   SWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWE50varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 50%'
+   ncdf_attput, cdfid, SWE50varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWE50varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWE50varid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 50%'
+   ncdf_attput, cdfid, stddevgvSWE50varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWE50varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWE50varid = ncdf_vardef(cdfid, 'GR_SWE50_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWE50varid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate, PQPE conditional quantiles 50%'
+   ncdf_attput, cdfid, gvmaxSWE50varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWE50varid, '_FillValue', FLOAT_RANGE_EDGE
+   
+   gv_SWE50_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe50_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_SWE50_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWE50 average'
+   ncdf_attput, cdfid, gv_SWE50_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   SWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWE75varid, 'long_name', 'GV snowfall water equivalent rate, PQPE conditional quantiles 75%'
+   ncdf_attput, cdfid, SWE75varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWE75varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWE75varid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, PQPE conditional quantiles 75%'
+   ncdf_attput, cdfid, stddevgvSWE75varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWE75varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWE75varid = ncdf_vardef(cdfid, 'GR_SWE75_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWE75varid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate, PQPE conditional quantiles 75%'
+   ncdf_attput, cdfid, gvmaxSWE75varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWE75varid, '_FillValue', FLOAT_RANGE_EDGE
+   
+   gv_SWE75_rejvarid = ncdf_vardef(cdfid, 'n_gr_swe75_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_SWE75_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWE75 average'
+   ncdf_attput, cdfid, gv_SWE75_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   SWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWEMQTvarid, 'long_name', 'GV snowfall water equivalent rate, Marquette relationship'
+   ncdf_attput, cdfid, SWEMQTvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWEMQTvarid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, Marquette relationship'
+   ncdf_attput, cdfid, stddevgvSWEMQTvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWEMQTvarid = ncdf_vardef(cdfid, 'GR_SWEMQT_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWEMQTvarid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate,  Marquette relationship'
+   ncdf_attput, cdfid, gvmaxSWEMQTvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWEMQTvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gv_swemqt_rejvarid = ncdf_vardef(cdfid, 'n_gr_swemqt_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swemqt_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWEMQT_rainrate average'
+   ncdf_attput, cdfid, gv_swemqt_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   SWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, SWEMRMSvarid, 'long_name', 'GV snowfall water equivalent rate, MRMS relationship'
+   ncdf_attput, cdfid, SWEMRMSvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, SWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   stddevgvSWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, 'long_name', $
+             'Standard Deviation of GV snowfall water equivalent rate, MRMS relationship'
+   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, stddevgvSWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvmaxSWEMRMSvarid = ncdf_vardef(cdfid, 'GR_SWEMRMS_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, 'long_name', $
+             'Sample Maximum GV snowfall water equivalent rate, MRMS relationship'
+   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, 'units', 'mm/h'
+   ncdf_attput, cdfid, gvmaxSWEMRMSvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gv_swemrms_rejvarid = ncdf_vardef(cdfid, 'n_gr_swemrms_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_swemrms_rejvarid, 'long_name', $
+             'number of bins below rain_min in GR_SWEMRMS_rainrate average'
+   ncdf_attput, cdfid, gv_swemrms_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+;*******************
+   
+
+   ; DPRGMI swath-level fields of same no. of dimensions for each swath
+
+   this_varid = ncdf_vardef(cdfid, 'precipTotPSDparamHigh_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI precipTotPSDparamHigh for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'mm_Dm'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'precipTotPSDparamLow_'+swath[iswa], $
+                            [nPSDlo_dimid, fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI precipTotPSDparamLow for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'Nw_mu'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'precipTotRate_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI precipTotRate for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'precipTotWaterCont_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI precipTotWaterCont for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+;TAB 10/26/20 added new variables, need to check units
+   this_varid = ncdf_vardef(cdfid, 'precipTotWaterContSigma_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI precipTotWaterContSigma for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'cloudLiqWaterCont_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI cloudLiqWaterCont for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'cloudIceWaterCont_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI cloudIceWaterCont for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'tbSim_19v_'+swath[iswa], [fpdimid[iswa]])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI simulatedBrightTemp 19v for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'K'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'tbSim_37v_'+swath[iswa], [fpdimid[iswa]])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI simulatedBrightTemp 37v for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'K'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'tbSim_89v_'+swath[iswa], [fpdimid[iswa]])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI simulatedBrightTemp 89v for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'K'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'tbSim_183_3v_'+swath[iswa], [fpdimid[iswa]])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI simulatedBrightTemp 183_3v for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'K'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotPSDparamHigh_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in precipTotPSDparamHigh average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotPSDparamLow_rejected_'+swath[iswa], $
+                             [nPSDlo_dimid, fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in precipTotPSDparamLow average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotRate_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in precipTotRate average for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotWaterCont_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in precipTotWaterCont average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotWaterContSigma_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in precipTotWaterContSigma average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_cloudLiqWaterCont_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in cloudLiqWaterCont average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   rainrejvarid = ncdf_vardef(cdfid, 'n_cloudIceWaterCont_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in cloudIceWaterCont average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+   ; DPRGMI single-level fields of same no. of dimensions for each swath
+
+   this_varid = ncdf_vardef(cdfid, 'precipitationType_'+swath[iswa], [fpdimid[iswa]], /long)
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+                '2B-DPRGMI precipitationType for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'Categorical'
+   ncdf_attput, cdfid, this_varid, '_FillValue', LONG(INT_RANGE_EDGE)
+
+   this_varid = ncdf_vardef(cdfid, 'surfPrecipTotRate_'+swath[iswa], [fpdimid[iswa]])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI surfPrecipTotRate for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'mm/h'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'surfaceElevation_'+swath[iswa], [fpdimid[iswa]])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI surfaceElevation for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'm'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'zeroDegAltitude_'+swath[iswa], [fpdimid[iswa]])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI zeroDegAltitude for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'm'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'zeroDegBin_'+swath[iswa], [fpdimid[iswa]], /short)
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI zeroDegBin for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'N/A'
+   ncdf_attput, cdfid, this_varid, '_FillValue', INT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'surfaceType_'+swath[iswa], [fpdimid[iswa]], /long)
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI surfaceType for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'Categorical'
+   ncdf_attput, cdfid, this_varid, '_FillValue', LONG(INT_RANGE_EDGE)
+
+   this_varid = ncdf_vardef(cdfid, 'phaseBinNodes_'+swath[iswa], [nPhsBnN_dimid, fpdimid[iswa]], /short)
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+            '2B-DPRGMI phaseBinNodes for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'None'
+   ncdf_attput, cdfid, this_varid, '_FillValue', INT_RANGE_EDGE
 
    sfclatvarid = ncdf_vardef(cdfid, 'DPRlatitude_'+swath[iswa], [fpdimid[iswa]])
    ncdf_attput, cdfid, sfclatvarid, 'long_name', $
@@ -834,6 +1013,149 @@ for iswa=0,1 do begin
                 'product-relative zero-based DPR ray number for '+swath[iswa]+' swath'
    ncdf_attput, cdfid, rayidxvarid, '_FillValue', INT_RANGE_EDGE
 
+   ; DPRGMI fields where no. of dimensions varies for each swath
+
+   IF ( swath[iswa] EQ 'MS' ) THEN BEGIN
+     ; include the extra dimension "nKuKa" for MS swath
+
+      this_varid = ncdf_vardef(cdfid, 'ellipsoidBinOffset_'+swath[iswa], $
+                               [nKuKa_dimid, fpdimid[iswa]])
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Ku and Ka ellipsoidBinOffset for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'm'
+      ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'lowestClutterFreeBin_'+swath[iswa], $
+                               [nKuKa_dimid, fpdimid[iswa]], /short)
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Ku and Ka lowestClutterFreeBin for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'None'
+      ncdf_attput, cdfid, this_varid, '_FillValue', INT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'clutterStatus_'+swath[iswa], $
+                               [nKuKa_dimid, fpdimid[iswa], eldimid], /short)
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  'Matchup Ku and Ka clutterStatus for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'None'
+      ncdf_attput, cdfid, this_varid, '_FillValue', INT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'precipitationFlag_'+swath[iswa], $
+                               [nKuKa_dimid, fpdimid[iswa]], /long)
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Ku and Ka precipitationFlag for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'Categorical'
+      ncdf_attput, cdfid, this_varid, '_FillValue', LONG(INT_RANGE_EDGE)
+
+      this_varid = ncdf_vardef(cdfid, 'surfaceRangeBin_'+swath[iswa], $
+                               [nKuKa_dimid, fpdimid[iswa]], /short)
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Ku and Ka surfaceRangeBin for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'None'
+      ncdf_attput, cdfid, this_varid, '_FillValue', INT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'correctedReflectFactor_'+swath[iswa], $
+                               [nKuKa_dimid, fpdimid[iswa],eldimid])
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Ku and Ka Corrected Reflectivity Factor for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'dBZ'
+      ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'pia_'+swath[iswa], [nKuKa_dimid, fpdimid[iswa]])
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Ku and Ka Path Integrated Attenuation for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'dB'
+      ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'stormTopAltitude_'+swath[iswa], $
+                               [nKuKa_dimid, fpdimid[iswa]])
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Ku and Ka stormTopAltitude for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'm'
+      ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+      corZrejvarid = ncdf_vardef(cdfid, 'n_correctedReflectFactor_rejected_'+swath[iswa], $
+                                 [nKuKa_dimid, fpdimid[iswa],eldimid], /short)
+      ncdf_attput, cdfid, corZrejvarid, 'long_name', $
+                'numbers of Ku and Ka bins below DPR_dBZ_min in '+ $
+                'correctedReflectFactor average for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, corZrejvarid, '_FillValue', INT_RANGE_EDGE
+
+      prexpvarid = ncdf_vardef(cdfid, 'n_dpr_expected_'+swath[iswa], $
+                               [nKuKa_dimid, fpdimid[iswa],eldimid], /short)
+      ncdf_attput, cdfid, prexpvarid, 'long_name', $
+                   'numbers of expected Ku and Ka bins in DPR averages for '+ $
+                   swath[iswa]+' swath'
+      ncdf_attput, cdfid, prexpvarid, '_FillValue', INT_RANGE_EDGE
+
+   ENDIF ELSE BEGIN
+     ; define same variables for NS, but exclude the extra dimension "nKuKa"
+
+      this_varid = ncdf_vardef(cdfid, 'ellipsoidBinOffset_'+swath[iswa], $
+                               [fpdimid[iswa]])
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI ellipsoidBinOffset for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'm'
+      ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'lowestClutterFreeBin_'+swath[iswa], $
+                               [fpdimid[iswa]], /short)
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI lowestClutterFreeBin for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'None'
+      ncdf_attput, cdfid, this_varid, '_FillValue', INT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'clutterStatus_'+swath[iswa], $
+                               [fpdimid[iswa], eldimid], /short)
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  'Matchup clutterStatus for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'None'
+      ncdf_attput, cdfid, this_varid, '_FillValue', INT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'precipitationFlag_'+swath[iswa], $
+                               [fpdimid[iswa]], /long)
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI precipitationFlag for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'Categorical'
+      ncdf_attput, cdfid, this_varid, '_FillValue', LONG(INT_RANGE_EDGE)
+
+      this_varid = ncdf_vardef(cdfid, 'surfaceRangeBin_'+swath[iswa], $
+                               [fpdimid[iswa]], /short)
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI surfaceRangeBin for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'None'
+      ncdf_attput, cdfid, this_varid, '_FillValue', INT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'correctedReflectFactor_'+swath[iswa], $
+                               [fpdimid[iswa],eldimid])
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Corrected Reflectivity Factor for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'dBZ'
+      ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'pia_'+swath[iswa], [fpdimid[iswa]])
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI Path Integrated Attenuation for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'dB'
+      ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+      this_varid = ncdf_vardef(cdfid, 'stormTopAltitude_'+swath[iswa], [fpdimid[iswa]])
+      ncdf_attput, cdfid, this_varid, 'long_name', $
+                  '2B-DPRGMI stormTopAltitude for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, this_varid, 'units', 'm'
+      ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+      corZrejvarid = ncdf_vardef(cdfid, 'n_correctedReflectFactor_rejected_'+swath[iswa], $
+                                 [fpdimid[iswa],eldimid], /short)
+      ncdf_attput, cdfid, corZrejvarid, 'long_name', $
+                   'number of bins below DPR_dBZ_min in correctedReflectFactor average'
+      ncdf_attput, cdfid, corZrejvarid, '_FillValue', INT_RANGE_EDGE
+
+      prexpvarid = ncdf_vardef(cdfid, 'n_dpr_expected_'+swath[iswa], $
+                               [fpdimid[iswa],eldimid], /short)
+      ncdf_attput, cdfid, prexpvarid, 'long_name', $
+                   'number of expected bins in DPR averages for '+swath[iswa]+' swath'
+      ncdf_attput, cdfid, prexpvarid, '_FillValue', INT_RANGE_EDGE
+   ENDELSE
 endfor   ; swaths
 
 ; Data time/location variables
@@ -890,8 +1212,7 @@ FOR iel = 0,N_ELEMENTS(elev_angles)-1 DO BEGIN
    ncdf_varput, cdfid, agvtimevarid, '01-01-1970 00:00:00', OFFSET=[0,iel]
 ENDFOR
 ncdf_varput, cdfid, vnversvarid, GEO_MATCH_FILE_VERSION ;GEO_MATCH_NC_FILE_VERS
-IF numpts_HS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_HS', DATA_PRESENT
-IF numpts_FS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_FS', DATA_PRESENT
+IF numpts_MS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_MS', DATA_PRESENT
 
 ncdf_close, cdfid
 

@@ -9,13 +9,12 @@
 ;
 ;-------------------------------------------------------------------------------
 ;
-; gen_gr_hsfs_geo_match_netcdf_v7.pro    Todd Berendes, UAH   July 1, 2020
-; adapted from gen_gr_hsmsns_geo_match_netcdf.pro for GPM V7
+; gen_gr_hsmsns_geo_match_netcdf_v6.pro    Bob Morris, GPM GV (SAIC)    Feb 2016
 ;
 ; DESCRIPTION:
-; Using the "special values" parameters in the 'include' file dpr_params_v7.inc,
+; Using the "special values" parameters in the 'include' file dpr_params.inc,
 ; the path parameters in environs.inc, and supplied parameters for the filename,
-; number of DPR footprints in the matchup for each "swath" (HS,FS), the array
+; number of DPR footprints in the matchup for each "swath" (HS,MS,NS), the array
 ; of elevation angles in the ground radar volume scan, the number of scans in
 ; the input 2A-DPR subset file for each swath type, and global variables for the
 ; UF data field used for GR reflectivity and various dual-pol fields, and the
@@ -46,9 +45,9 @@
 ;-------------------------------------------------------------------------------
 ;-
 
-FUNCTION gen_gr_hsfs_geo_match_netcdf_v7, geo_match_nc_file, numpts_HS, numpts_FS, $
-                                         elev_angles, numscans_HS, $
-                                         numscans_FS, gv_UF_field, $
+FUNCTION gen_gr_hsmsns_geo_match_netcdf_v6, geo_match_nc_file, numpts_HS, numpts_MS, $
+                                         numpts_NS, elev_angles, numscans_HS, $
+                                         numscans_MS, numscans_NS, gv_UF_field, $
                                          DPR_vers, siteID, dprgrfiles, $
                                          GEO_MATCH_VERS=geo_match_vers, $
                                          NON_PPS_FILES=non_pps_files
@@ -57,23 +56,22 @@ FUNCTION gen_gr_hsfs_geo_match_netcdf_v7, geo_match_nc_file, numpts_HS, numpts_F
 @grid_def.inc
 ; "Include" files for constants, names, paths, etc.
 @environs.inc   ; for file prefixes, netCDF file definition version
-@dpr_params_v7.inc  ; for the type-specific fill values
+@dpr_params.inc  ; for the type-specific fill values
 
 ; for debugging
 !EXCEPT=2
 
 ; TAB 8/27/18 changed version to 1.1 from 1.0 for new snow water equivalent field
 ;GEO_MATCH_FILE_VERSION=1.1   ; hard code inside function now, not from "Include"
-; TAB 11/10/20 changed version to 2.0 from 1.1
-GEO_MATCH_FILE_VERSION=2.0
+; TAB 11/10/20 changed version to 2.0 from 1.1 
+GEO_MATCH_FILE_VERSION=2.0   ; hard code inside function now, not from "Include"
 
 IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
   ; assign optional keyword parameter value for "versionOnly" calling mode
    geo_match_vers = GEO_MATCH_FILE_VERSION
 ENDIF
 
-;IF ( N_PARAMS() LT 12 ) THEN GOTO, versionOnly
-IF ( N_PARAMS() LT 10 ) THEN GOTO, versionOnly
+IF ( N_PARAMS() LT 12 ) THEN GOTO, versionOnly
 
 ; Create the output dir for the netCDF file, if needed:
 OUTDIR = FILE_DIRNAME(geo_match_nc_file)
@@ -81,9 +79,9 @@ spawn, 'mkdir -p ' + OUTDIR
 
 cdfid = ncdf_create(geo_match_nc_file, /CLOBBER)
 
-; define the 2 scan types (swaths) in the DPR product
+; define the 3 scan types (swaths) in the DPR product
 ; - we need separate variables for each swath for the science variables
-swath = ['HS','FS']
+swath = ['HS','MS','NS']
 
 ; global variables -- THE FIRST GLOBAL VARIABLE MUST BE 'DPR_Version'
 ncdf_attput, cdfid, 'DPR_Version', DPR_vers, /global
@@ -197,14 +195,16 @@ ncdf_attput, cdfid, 'GR_file', origGRFileName, /global
 ; field dimensions
 
 fpdimid_HS = ncdf_dimdef(cdfid, 'fpdim_HS', numpts_HS>1)  ; # of HS footprints in range
-fpdimid_FS = ncdf_dimdef(cdfid, 'fpdim_FS', numpts_FS>1)  ; # of FS footprints in range
-fpdimid = [ fpdimid_HS, fpdimid_FS]            ; match to "swath" array, above
+fpdimid_MS = ncdf_dimdef(cdfid, 'fpdim_MS', numpts_MS>1)  ; # of MS footprints in range
+fpdimid_NS = ncdf_dimdef(cdfid, 'fpdim_NS', numpts_NS)    ; # of NS footprints in range
+fpdimid = [ fpdimid_HS, fpdimid_MS, fpdimid_NS ]            ; match to "swath" array, above
 eldimid = ncdf_dimdef(cdfid, 'elevationAngle', N_ELEMENTS(elev_angles))
 xydimid = ncdf_dimdef(cdfid, 'xydim', 4)        ; for 4 corners of a DPR footprint
 hidimid = ncdf_dimdef(cdfid, 'hidim', 15)       ; for Hydromet ID Categories
 timedimid_HS = ncdf_dimdef(cdfid, 'timedimid_HS', numscans_HS>1)  ; # of HS scans in range
-timedimid_FS = ncdf_dimdef(cdfid, 'timedimid_FS', numscans_FS>1)  ; # of FS scans in range
-timedimid = [ timedimid_HS, timedimid_FS ]        ; match to "swath" array, above
+timedimid_MS = ncdf_dimdef(cdfid, 'timedimid_MS', numscans_MS>1)  ; # of MS scans in range
+timedimid_NS = ncdf_dimdef(cdfid, 'timedimid_NS', numscans_NS)  ; # of NS scans in range
+timedimid = [ timedimid_HS, timedimid_MS, timedimid_NS ]        ; match to "swath" array, above
 
 
 ; Elevation Angles coordinate variable
@@ -214,21 +214,21 @@ ncdf_attput, cdfid, elvarid, 'long_name', $
             'Radar Sweep Elevation Angles'
 ncdf_attput, cdfid, elvarid, 'units', 'degrees'
 
-; are there any HS and/or FS scan points in the GR range limit?
+; are there any HS and/or MS scan points in the GR range limit?
 
 haveswathvarid = ncdf_vardef(cdfid, 'have_swath_HS', /short)
 ncdf_attput, cdfid, haveswathvarid, 'long_name', $
              'data exists flag for HS swath'
 ncdf_attput, cdfid, haveswathvarid, '_FillValue', NO_DATA_PRESENT
 
-haveswathvarid = ncdf_vardef(cdfid, 'have_swath_FS', /short)
+haveswathvarid = ncdf_vardef(cdfid, 'have_swath_MS', /short)
 ncdf_attput, cdfid, haveswathvarid, 'long_name', $
-             'data exists flag for FS swath'
+             'data exists flag for MS swath'
 ncdf_attput, cdfid, haveswathvarid, '_FillValue', NO_DATA_PRESENT
 
 ; scanTime components, one datetime per scan, swath-specific
 
-for iswa=0,1 do begin
+for iswa=0,2 do begin
    tvarid = ncdf_vardef(cdfid, 'Year_'+swath[iswa], timedimid[iswa], /short)
    ncdf_attput, cdfid, tvarid, 'long_name', 'Year of DPR '+swath[iswa]+' scan'
    ncdf_attput, cdfid, tvarid, '_FillValue', INT_RANGE_EDGE
@@ -263,7 +263,7 @@ endfor
 
 ; swath-varying first:
 
-for iswa=0,1 do begin
+for iswa=0,2 do begin
    sscansid = ncdf_vardef(cdfid, 'startScan_'+swath[iswa], /long)
    ncdf_attput, cdfid, sscansid, 'long_name', $
                 'Starting DPR '+swath[iswa]+' overlap scan in original dataset, zero-based'
@@ -377,7 +377,7 @@ ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
 ncdf_attput, cdfid, haveSWEvarid, '_FillValue', NO_DATA_PRESENT
 
 
-for iswa=0,1 do begin
+for iswa=0,2 do begin
 
    ; sweep-level fields, all swath-specific, of same no. of dimensions for each swath
 
@@ -891,7 +891,7 @@ FOR iel = 0,N_ELEMENTS(elev_angles)-1 DO BEGIN
 ENDFOR
 ncdf_varput, cdfid, vnversvarid, GEO_MATCH_FILE_VERSION ;GEO_MATCH_NC_FILE_VERS
 IF numpts_HS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_HS', DATA_PRESENT
-IF numpts_FS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_FS', DATA_PRESENT
+IF numpts_MS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_MS', DATA_PRESENT
 
 ncdf_close, cdfid
 

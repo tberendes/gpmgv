@@ -9,14 +9,14 @@
 ;
 ;-------------------------------------------------------------------------------
 ;
-; gen_dpr_geo_match_netcdf_v7.pro    Bob Morris, GPM GV (SAIC)    June 2013
+; gen_dpr_geo_match_netcdf_v6.pro    Bob Morris, GPM GV (SAIC)    June 2013
 ;
 ; DESCRIPTION:
-; Using the "special values" parameters in the 'include' file dpr_params_v7.inc,
+; Using the "special values" parameters in the 'include' file dpr_params.inc,
 ; the path parameters in environs.inc, and supplied parameters for the filename,
 ; number of DPR footprints in the matchup, the array of elevation angles in the
 ; ground radar volume scan, and global variables for the UF data field used for
-; GR reflectivity, the DPR scan type (HS, FS) and the DPR product version,
+; GR reflectivity, the DPR scan type (HS, MS, or NS) and the DPR product version,
 ; creates an empty DPR/GR matchup netCDF file in directory OUTDIR.
 ;
 ; The input file name supplied is expected to be a complete file basename and
@@ -87,7 +87,6 @@
 ;    Added new snow equivalent RR fields, changed version to 1.22
 ; 9/28/20 by Todd Berendes (UAH)
 ;    Added new GPM integrated PW fields for liquid and solid
-;    Modified for GPM V7
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -95,7 +94,7 @@
 ;-------------------------------------------------------------------------------
 ;-
 
-FUNCTION gen_dpr_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, $
+FUNCTION gen_dpr_geo_match_netcdf_v6, geo_match_nc_file, numpts, elev_angles, $
                                    gv_UF_field, scanType, DPR_vers, siteID, $
                                    dprgrfiles, DECLUTTERED=decluttered, $
                                    GEO_MATCH_VERS=geo_match_vers, $
@@ -105,7 +104,7 @@ FUNCTION gen_dpr_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, $
 @grid_def.inc
 ; "Include" files for constants, names, paths, etc.
 @environs.inc   ; for file prefixes, netCDF file definition version
-@dpr_params_v7.inc  ; for the type-specific fill values
+@dpr_params.inc  ; for the type-specific fill values
 
 ; for debugging
 !EXCEPT=2
