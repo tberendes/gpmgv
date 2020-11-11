@@ -1382,9 +1382,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   ; separate version into integer and decimal parts, with 2 decimal places
    verarr=strsplit(string(matchup_file_version,FORMAT='(F0.2)'),'.',/extract)
   ; strip trailing zero from version string decimal part, if any
-   verarr1_len = STRLEN(verarr[1])
-   IF verarr1_len GT 1 and STRMID(verarr[1], verarr1_len-1, 1) EQ '0' $
-      THEN verarr[1]=strmid(verarr[1], 0, l-1)
+   ; TAB 11/11/20 The following lines don't work, not sure why needed so removed
+   ;verarr1_len = STRLEN(verarr[1])
+   ;IF verarr1_len GT 1 and STRMID(verarr[1], verarr1_len-1, 1) EQ '0' $
+   ;   THEN verarr[1]=strmid(verarr[1], 0, l-1)
   ; substitute an underscore for the decimal point in matchup_file_version
    verstr=verarr[0]+'_'+verarr[1]
 
