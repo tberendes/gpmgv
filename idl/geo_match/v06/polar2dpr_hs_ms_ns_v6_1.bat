@@ -20,6 +20,7 @@ gpm_root='/data/gpmgv/orbit_subset'   ; for operational files
 IF ITE_OR_OPERATIONAL EQ 'I' THEN gpm_root='/data/emdata/orbit_subset'
 help, ITE_OR_OPERATIONAL, gpm_root
 ;exit
+; nc_name_add = '15dbzGRDPR'
 
 FILES4NC = GETENV("CONTROLFILE")
 PRO_DIR = getenv("IDL_PRO_DIR")
@@ -30,7 +31,7 @@ polar2dpr_hs_ms_ns_v6, FILES4NC, 100, SCORES=0, GPM_ROOT=gpm_root, $
            DIRGV='/data/gpmgv/gv_radar/finalQC_in', PLOT_PPIS=0, $
            NC_DIR='/data/gpmgv/netcdf/grmatch', DIR2ADPR='/.', DIR_BLOCK='/data/gpmgv/blockage', $
 ;           DPR_DBZ_MIN=15.0, DBZ_MIN=15.0, NC_NAME_ADD='15dbzGRDPR', non_pps_files=1
-           DPR_DBZ_MIN=15.0, DBZ_MIN=15.0, NC_NAME_ADD='15dbzGRDPR'
+           DPR_DBZ_MIN=15.0, DBZ_MIN=15.0, NC_NAME_ADD=nc_name_add
  
 ;resolve_all
 ;save, /routines, file='/home/tberendes/git/gpmgv/todd/geo_match/polar2dpr_hs_ms_ns_v6.sav'
