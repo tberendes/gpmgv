@@ -27,6 +27,7 @@ gpm_root='/data/gpmgv/orbit_subset'   ; for operational files
 IF ITE_OR_OPERATIONAL EQ 'I' THEN gpm_root='/data/emdata/orbit_subset'
 help, ITE_OR_OPERATIONAL, gpm_root
 
+; nc_name_add = '15dBZ_7km'
 FILES4NC = GETENV("CONTROLFILE")
 ;.compile polar2dprgmi_v6.pro
 PRO_DIR = getenv("IDL_PRO_DIR")
@@ -36,5 +37,5 @@ restore, './polar2dprgmi_v6.sav'
 polar2dprgmi_v6, FILES4NC, 100, GPM_ROOT=gpm_root, DIRCOMB='/.', $
    DIRGV='/data/gpmgv/gv_radar/finalQC_in', NC_DIR='/data/gpmgv/netcdf/geo_match', $
    DIR_BLOCK='/data/gpmgv/blockage', plot_ppis=0, DPR_DBZ_MIN=15.0, DBZ_MIN=15.0, $
-   NC_NAME_ADD='15dBZ_7km', use_dpr_roi=1
+   NC_NAME_ADD=nc_name_add, use_dpr_roi=1
 
