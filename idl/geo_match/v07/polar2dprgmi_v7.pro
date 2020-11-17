@@ -1424,7 +1424,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
      ; -- create once, write twice (Ku and Ka FS values)
       IF idxKuKa[swathID] EQ 0 THEN BEGIN
          CASE (DPR_scantype) OF
-            'MS' : BEGIN
+            'FS' : BEGIN
                    tocdf_ellipsoidBinOffset = MAKE_ARRAY(nKuKa,numDPRrays, /float, $
                                                 VALUE=FLOAT_RANGE_EDGE)
                    tocdf_lowestClutterFreeBin = MAKE_ARRAY(nKuKa,numDPRrays, /int, $
