@@ -222,7 +222,7 @@ ENDIF
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
-@dpr_params.inc
+@dpr_params_v7.inc
 ; "Include" file for names, paths, etc.:
 @environs.inc
 

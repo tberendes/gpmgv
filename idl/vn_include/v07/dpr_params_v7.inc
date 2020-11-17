@@ -52,6 +52,7 @@
 
 ; general DPR parameters
 RAYSPERSCAN_FS = 49
+RAYSPERSCAN_NS = 49
 RAYSPERSCAN_HS = 24
 NUM_RANGE_FS = 176   ; number of bins in Ku Normal and Ka Matched rays
 NUM_RANGE_HS = 88       ; number of bins in Ka HS scan rays
