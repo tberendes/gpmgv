@@ -29,7 +29,7 @@ help, ITE_OR_OPERATIONAL, gpm_root
 
 ; nc_name_add = '15dBZ_7km'
 FILES4NC = GETENV("CONTROLFILE")
-;.compile polar2dprgmi_v6.pro
+;.compile polar2dprgmi_v7.pro
 PRO_DIR = getenv("IDL_PRO_DIR")
 cd, PRO_DIR
 restore, './polar2dprgmi_v7.sav'
