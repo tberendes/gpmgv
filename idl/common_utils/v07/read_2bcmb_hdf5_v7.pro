@@ -128,6 +128,7 @@ FUNCTION read_2bcmb_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
       IF TOTAL( STRCMP(onescan,['FS','NS']) ) NE 1.0 THEN BEGIN
           message, "Requested Scan type " + onescan + $
                " not valid for 2BDPRGMI product - must be FS, NS or left unspecified."
+      ENDIF
    ENDIF 
    ; get the data variables for the swath group(s)
    snames=['FS','NS']
