@@ -842,11 +842,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   ; Begin first-time inner loop over swath/source types: HS/Ka, MS/Ka/Ku, NS/Ku
   ; just to get information needed to dimension the netCDF variables
 
-   swathIDs = ['HS','FS']
-   instruments = ['Ka','Ku']
-  ; indices for finding correct subarray in MS swath for variables
-  ; with the nKuKa dimension:
-   idxKuKa = [0,1,0]
+   swathIDs = ['HS','FS', 'FS']
+   instruments = ['Ka','Ku','Ka']
+  ; indices for finding correct subarray in FS swath for variables
+  ; with the nKuKa(nfreq) dimension:
+;   idxKuKa = [0,1,0]
+   idxKuKa = [0,0,1]
 
   ; holds number of in-range footprints for each swath/source combo, for setting
   ; dimensions in the matchup netCDF file
