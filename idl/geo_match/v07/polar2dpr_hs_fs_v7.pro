@@ -1087,9 +1087,9 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       if countZenithGood eq 0 then begin
          print, "scan not available in DPR file, filling with missing values..."
          if STRUPCASE(DPR_scantype) eq 'FS' then begin
-         	NCDF_VARPUT, cdfid, 'have_swath_FS_'+instrumentID, NO_DATA_PRESENT
+         	NCDF_VARPUT, ncid, 'have_swath_FS_'+instrumentID, NO_DATA_PRESENT
          endif else begin
-         	NCDF_VARPUT, cdfid, 'have_swath_HS', NO_DATA_PRESENT
+         	NCDF_VARPUT, ncid, 'have_swath_HS', NO_DATA_PRESENT
          endelse
          ; TAB TODO: need to write out initialized, missing values for swath
          
