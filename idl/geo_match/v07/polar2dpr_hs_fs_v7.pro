@@ -1085,7 +1085,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       zenithValid =  WHERE( localZenithAngle GE 0L, countZenithGood )
       
       if countZenithGood eq 0 then begin
-         message, "scan not available in DPR file, filling with missing values..."
+         print, "scan not available in DPR file, filling with missing values..."
          if STRUPCASE(DPR_scantype) eq 'FS' then begin
          	NCDF_VARPUT, cdfid, 'have_swath_FS_'+instrumentID, NO_DATA_PRESENT
          endif else begin
