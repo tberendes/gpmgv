@@ -235,7 +235,7 @@ ncdf_attput, cdfid, haveswathvarid, '_FillValue', NO_DATA_PRESENT
 
 ; scanTime components, one datetime per scan, swath-specific
 
-for iswa=N_ELEMENTS(swath)-1 do begin
+for iswa=0,N_ELEMENTS(swath)-1 do begin
    tvarid = ncdf_vardef(cdfid, 'Year_'+swath[iswa], timedimid[iswa], /short)
    ncdf_attput, cdfid, tvarid, 'long_name', 'Year of DPR '+swath[iswa]+' scan'
    ncdf_attput, cdfid, tvarid, '_FillValue', INT_RANGE_EDGE
@@ -270,7 +270,7 @@ endfor
 
 ; swath-varying first:
 
-for iswa=N_ELEMENTS(swath)-1 do begin
+for iswa=0,N_ELEMENTS(swath)-1 do begin
    sscansid = ncdf_vardef(cdfid, 'startScan_'+swath[iswa], /long)
    ncdf_attput, cdfid, sscansid, 'long_name', $
                 'Starting DPR '+swath[iswa]+' overlap scan in original dataset, zero-based'
@@ -384,7 +384,7 @@ ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
 ncdf_attput, cdfid, haveSWEvarid, '_FillValue', NO_DATA_PRESENT
 
 
-for iswa=N_ELEMENTS(swath)-1 do begin
+for iswa=0,N_ELEMENTS(swath)-1 do begin
 
    ; sweep-level fields, all swath-specific, of same no. of dimensions for each swath
 
