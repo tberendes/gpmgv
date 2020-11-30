@@ -1069,15 +1069,39 @@ WHILE NOT (EOF(lun0)) DO BEGIN
         prlats = (*ptr_swath.PTR_DATASETS).LATITUDE
      ENDIF ELSE message, "Invalid pointer to PTR_DATASETS."
 
+; TAB 11/25/20 use idxKuKa for indexing FS swath frequencies, use reform
       IF PTR_VALID(ptr_swath.PTR_PRE) THEN BEGIN
          binClutterFreeBottom = (*ptr_swath.PTR_PRE).binClutterFreeBottom
          rainFlag = (*ptr_swath.PTR_PRE).FLAGPRECIP
-         localZenithAngle = (*ptr_swath.PTR_PRE).localZenithAngle
-         binRealSurface = (*ptr_swath.PTR_PRE).BINREALSURFACE
+         if STRUPCASE(DPR_scantype) eq 'FS' then begin
+         	localZenithAngle = reform((*ptr_swath.PTR_PRE).localZenithAngle[idxKuKa[swathID],*,*]) ; in FS indexed by frequency
+         	binRealSurface = reform((*ptr_swath.PTR_PRE).BINREALSURFACE[idxKuKa[swathID],*,*]) ; in FS indexed by frequency         
+         endif else begin ; HS scan only one frequency
+         	localZenithAngle = (*ptr_swath.PTR_PRE).localZenithAngle
+         	binRealSurface = (*ptr_swath.PTR_PRE).BINREALSURFACE
+         endelse
       ENDIF ELSE message, "Invalid pointer to PTR_PRE."
+      
+      zenithValid =  WHERE( localZenithAngle GE 0L, countZenithGood )
+      
+      if countZenithGood eq 0 then begin
+         message, "scan not available in DPR file, filling with missing values..."
+         if STRUPCASE(DPR_scantype) eq 'FS' then begin
+         	NCDF_VARPUT, cdfid, 'have_swath_FS_'+instrumentID, NO_DATA_PRESENT
+         endif else begin
+         	NCDF_VARPUT, cdfid, 'have_swath_HS', NO_DATA_PRESENT
+         endelse
+         ; TAB TODO: need to write out initialized, missing values for swath
+         
+      	 continue
+      endif
 
       IF PTR_VALID(ptr_swath.PTR_SLV) THEN BEGIN
-         dbz_corr = (*ptr_swath.PTR_SLV).ZFACTORCORRECTED
+         if STRUPCASE(DPR_scantype) eq 'FS' then begin
+         	dbz_corr = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[idxKuKa[swathID],*,*])  ; in FS indexed by frequency
+         endif else begin ; HS scan only one frequency
+         	dbz_corr = (*ptr_swath.PTR_SLV).ZFACTORCORRECTED
+         endelse
       ENDIF ELSE message, "Invalid pointer to PTR_SLV."
 
       dpr_index_all = LINDGEN(SIZE(localZenithAngle, /DIMENSIONS))
@@ -1195,10 +1219,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          IF ( precise_range[ray_num,subset_scan_num] LE max_ranges[0] ) THEN BEGIN
            ; add point to subarrays for DPR 1-D index and for DPR scanand ray num and
            ; footprint lat/lon
-            ; dpr_master_idx[numDPRrays] = dpr_index_all[ray_num,scan_num] ; for GPM
-            ; NOTE**** will need to create FS_KU and FS_KA versions of this 
-            ; TAB 10/22/20 need mods to handle two frequencies of DPR FS
-            dpr_master_idx[numDPRrays] = dpr_index_all[0,ray_num,scan_num] ; for V07 use size for freq 0 for FS scan, same for both freq
+            dpr_master_idx[numDPRrays] = dpr_index_all[ray_num,scan_num] ; for GPM
             dpr_scan_num[numDPRrays] = scan_num
             dpr_ray_num[numDPRrays] = ray_num
             dpr_lat_sfc[numDPRrays] = prlats[ray_num,scan_num]
@@ -1523,156 +1544,163 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 
   ; ============================================================================
 
+; TAB Change DPR_scantype to DPR_scantype+'_'+instrumentID for FS scans (Ku, Ka)
+   if STRUPCASE(DPR_scantype) eq 'FS' then begin
+   		scan_instrument = DPR_scantype+'_'+instrumentID
+   endif else begin
+   		scan_instrument = DPR_scantype  
+   endelse
+
 
 ;  Write single-level results/flags to netcdf file
 
-   NCDF_VARPUT, ncid, 'DPRlatitude_'+DPR_scantype, tocdf_lat_sfc
-   NCDF_VARPUT, ncid, 'DPRlongitude_'+DPR_scantype, tocdf_lon_sfc
-   NCDF_VARPUT, ncid, 'rayNum_'+DPR_scantype, tocdf_rayNum
-   NCDF_VARPUT, ncid, 'scanNum_'+DPR_scantype, tocdf_scanNum
-   NCDF_VARPUT, ncid, 'Year_'+DPR_scantype, tocdf_Year
-   NCDF_VARPUT, ncid, 'Month_'+DPR_scantype, tocdf_Month
-   NCDF_VARPUT, ncid, 'DayOfMonth_'+DPR_scantype, tocdf_DayOfMonth
-   NCDF_VARPUT, ncid, 'Hour_'+DPR_scantype, tocdf_Hour
-   NCDF_VARPUT, ncid, 'Minute_'+DPR_scantype, tocdf_Minute
-   NCDF_VARPUT, ncid, 'Second_'+DPR_scantype, tocdf_Second
-   NCDF_VARPUT, ncid, 'Millisecond_'+DPR_scantype, tocdf_Millisecond
-   NCDF_VARPUT, ncid, 'startScan_'+DPR_scantype, tocdf_startScan
-   NCDF_VARPUT, ncid, 'endScan_'+DPR_scantype, tocdf_endScan
+   NCDF_VARPUT, ncid, 'DPRlatitude_'+scan_instrument, tocdf_lat_sfc
+   NCDF_VARPUT, ncid, 'DPRlongitude_'+scan_instrument, tocdf_lon_sfc
+   NCDF_VARPUT, ncid, 'rayNum_'+scan_instrument, tocdf_rayNum
+   NCDF_VARPUT, ncid, 'scanNum_'+scan_instrument, tocdf_scanNum
+   NCDF_VARPUT, ncid, 'Year_'+scan_instrument, tocdf_Year
+   NCDF_VARPUT, ncid, 'Month_'+scan_instrument, tocdf_Month
+   NCDF_VARPUT, ncid, 'DayOfMonth_'+scan_instrument, tocdf_DayOfMonth
+   NCDF_VARPUT, ncid, 'Hour_'+scan_instrument, tocdf_Hour
+   NCDF_VARPUT, ncid, 'Minute_'+scan_instrument, tocdf_Minute
+   NCDF_VARPUT, ncid, 'Second_'+scan_instrument, tocdf_Second
+   NCDF_VARPUT, ncid, 'Millisecond_'+scan_instrument, tocdf_Millisecond
+   NCDF_VARPUT, ncid, 'startScan_'+scan_instrument, tocdf_startScan
+   NCDF_VARPUT, ncid, 'endScan_'+scan_instrument, tocdf_endScan
   ; note that these values are redundant with fpdim_HS, fpdim_MS, fpdim_NS
   ; specified at file creation by passing num_fp_by_source[] values
-   NCDF_VARPUT, ncid, 'numRays_'+DPR_scantype, numPRinrange
+   NCDF_VARPUT, ncid, 'numRays_'+scan_instrument, numPRinrange
 
 ;  Write sweep-level results/flags to netcdf file & close it up
 
   ; Geometry variables first
-   NCDF_VARPUT, ncid, 'latitude_'+DPR_scantype, tocdf_lat
-   NCDF_VARPUT, ncid, 'longitude_'+DPR_scantype, tocdf_lon
-   NCDF_VARPUT, ncid, 'xCorners_'+DPR_scantype, tocdf_x_poly
-   NCDF_VARPUT, ncid, 'yCorners_'+DPR_scantype, tocdf_y_poly
-   NCDF_VARPUT, ncid, 'topHeight_'+DPR_scantype, tocdf_top_hgt
-   NCDF_VARPUT, ncid, 'bottomHeight_'+DPR_scantype, tocdf_botm_hgt
+   NCDF_VARPUT, ncid, 'latitude_'+scan_instrument, tocdf_lat
+   NCDF_VARPUT, ncid, 'longitude_'+scan_instrument, tocdf_lon
+   NCDF_VARPUT, ncid, 'xCorners_'+scan_instrument, tocdf_x_poly
+   NCDF_VARPUT, ncid, 'yCorners_'+scan_instrument, tocdf_y_poly
+   NCDF_VARPUT, ncid, 'topHeight_'+scan_instrument, tocdf_top_hgt
+   NCDF_VARPUT, ncid, 'bottomHeight_'+scan_instrument, tocdf_botm_hgt
 
   ; GR variables next
-   NCDF_VARPUT, ncid, 'GR_Z_'+DPR_scantype, tocdf_gr_dbz             ; data
+   NCDF_VARPUT, ncid, 'GR_Z_'+scan_instrument, tocdf_gr_dbz             ; data
     NCDF_VARPUT, ncid, 'have_GR_Z', DATA_PRESENT       ; data presence flag
-   NCDF_VARPUT, ncid, 'GR_Z_StdDev_'+DPR_scantype, tocdf_gr_stddev    ; data
-   NCDF_VARPUT, ncid, 'GR_Z_Max_'+DPR_scantype, tocdf_gr_max          ; data
+   NCDF_VARPUT, ncid, 'GR_Z_StdDev_'+scan_instrument, tocdf_gr_stddev    ; data
+   NCDF_VARPUT, ncid, 'GR_Z_Max_'+scan_instrument, tocdf_gr_max          ; data
    IF ( have_gv_rc ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_RC_rainrate_'+DPR_scantype, tocdf_gr_rc            ; data
+      NCDF_VARPUT, ncid, 'GR_RC_rainrate_'+scan_instrument, tocdf_gr_rc            ; data
        NCDF_VARPUT, ncid, 'have_GR_RC_rainrate', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_RC_rainrate_StdDev_'+DPR_scantype, tocdf_gr_rc_stddev
-      NCDF_VARPUT, ncid, 'GR_RC_rainrate_Max_'+DPR_scantype, tocdf_gr_rc_max
+      NCDF_VARPUT, ncid, 'GR_RC_rainrate_StdDev_'+scan_instrument, tocdf_gr_rc_stddev
+      NCDF_VARPUT, ncid, 'GR_RC_rainrate_Max_'+scan_instrument, tocdf_gr_rc_max
    ENDIF
    IF ( have_gv_rp ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_RP_rainrate_'+DPR_scantype, tocdf_gr_rp            ; data
+      NCDF_VARPUT, ncid, 'GR_RP_rainrate_'+scan_instrument, tocdf_gr_rp            ; data
        NCDF_VARPUT, ncid, 'have_GR_RP_rainrate', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_RP_rainrate_StdDev_'+DPR_scantype, tocdf_gr_rp_stddev
-      NCDF_VARPUT, ncid, 'GR_RP_rainrate_Max_'+DPR_scantype, tocdf_gr_rp_max
+      NCDF_VARPUT, ncid, 'GR_RP_rainrate_StdDev_'+scan_instrument, tocdf_gr_rp_stddev
+      NCDF_VARPUT, ncid, 'GR_RP_rainrate_Max_'+scan_instrument, tocdf_gr_rp_max
    ENDIF
    IF ( have_gv_rr ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_RR_rainrate_'+DPR_scantype, tocdf_gr_rr            ; data
+      NCDF_VARPUT, ncid, 'GR_RR_rainrate_'+scan_instrument, tocdf_gr_rr            ; data
        NCDF_VARPUT, ncid, 'have_GR_RR_rainrate', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_RR_rainrate_StdDev_'+DPR_scantype, tocdf_gr_rr_stddev
-      NCDF_VARPUT, ncid, 'GR_RR_rainrate_Max_'+DPR_scantype, tocdf_gr_rr_max
+      NCDF_VARPUT, ncid, 'GR_RR_rainrate_StdDev_'+scan_instrument, tocdf_gr_rr_stddev
+      NCDF_VARPUT, ncid, 'GR_RR_rainrate_Max_'+scan_instrument, tocdf_gr_rr_max
    ENDIF
    IF ( have_gv_zdr ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_Zdr_'+DPR_scantype, tocdf_gr_zdr            ; data
+      NCDF_VARPUT, ncid, 'GR_Zdr_'+scan_instrument, tocdf_gr_zdr            ; data
        NCDF_VARPUT, ncid, 'have_GR_Zdr', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_Zdr_StdDev_'+DPR_scantype, tocdf_gr_zdr_stddev     ; data
-      NCDF_VARPUT, ncid, 'GR_Zdr_Max_'+DPR_scantype, tocdf_gr_zdr_max            ; data
+      NCDF_VARPUT, ncid, 'GR_Zdr_StdDev_'+scan_instrument, tocdf_gr_zdr_stddev     ; data
+      NCDF_VARPUT, ncid, 'GR_Zdr_Max_'+scan_instrument, tocdf_gr_zdr_max            ; data
    ENDIF
    IF ( have_gv_kdp ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_Kdp_'+DPR_scantype, tocdf_gr_kdp            ; data
+      NCDF_VARPUT, ncid, 'GR_Kdp_'+scan_instrument, tocdf_gr_kdp            ; data
        NCDF_VARPUT, ncid, 'have_GR_Kdp', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_Kdp_StdDev_'+DPR_scantype, tocdf_gr_kdp_stddev     ; data
-      NCDF_VARPUT, ncid, 'GR_Kdp_Max_'+DPR_scantype, tocdf_gr_kdp_max            ; data
+      NCDF_VARPUT, ncid, 'GR_Kdp_StdDev_'+scan_instrument, tocdf_gr_kdp_stddev     ; data
+      NCDF_VARPUT, ncid, 'GR_Kdp_Max_'+scan_instrument, tocdf_gr_kdp_max            ; data
    ENDIF
    IF ( have_gv_rhohv ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_RHOhv_'+DPR_scantype, tocdf_gr_rhohv            ; data
+      NCDF_VARPUT, ncid, 'GR_RHOhv_'+scan_instrument, tocdf_gr_rhohv            ; data
        NCDF_VARPUT, ncid, 'have_GR_RHOhv', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_RHOhv_StdDev_'+DPR_scantype, tocdf_gr_rhohv_stddev     ; data
-      NCDF_VARPUT, ncid, 'GR_RHOhv_Max_'+DPR_scantype, tocdf_gr_rhohv_max            ; data
+      NCDF_VARPUT, ncid, 'GR_RHOhv_StdDev_'+scan_instrument, tocdf_gr_rhohv_stddev     ; data
+      NCDF_VARPUT, ncid, 'GR_RHOhv_Max_'+scan_instrument, tocdf_gr_rhohv_max            ; data
    ENDIF
    IF ( have_gv_hid ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_HID_'+DPR_scantype, tocdf_gr_hid            ; data
+      NCDF_VARPUT, ncid, 'GR_HID_'+scan_instrument, tocdf_gr_hid            ; data
        NCDF_VARPUT, ncid, 'have_GR_HID', DATA_PRESENT      ; data presence flag
    ENDIF
    IF ( have_gv_dzero ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_Dzero_'+DPR_scantype, tocdf_gr_dzero            ; data
+      NCDF_VARPUT, ncid, 'GR_Dzero_'+scan_instrument, tocdf_gr_dzero            ; data
        NCDF_VARPUT, ncid, 'have_GR_Dzero', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_Dzero_StdDev_'+DPR_scantype, tocdf_gr_dzero_stddev     ; data
-      NCDF_VARPUT, ncid, 'GR_Dzero_Max_'+DPR_scantype, tocdf_gr_dzero_max            ; data
+      NCDF_VARPUT, ncid, 'GR_Dzero_StdDev_'+scan_instrument, tocdf_gr_dzero_stddev     ; data
+      NCDF_VARPUT, ncid, 'GR_Dzero_Max_'+scan_instrument, tocdf_gr_dzero_max            ; data
    ENDIF
    IF ( have_gv_nw ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_Nw_'+DPR_scantype, tocdf_gr_nw            ; data
+      NCDF_VARPUT, ncid, 'GR_Nw_'+scan_instrument, tocdf_gr_nw            ; data
        NCDF_VARPUT, ncid, 'have_GR_Nw', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_Nw_StdDev_'+DPR_scantype, tocdf_gr_nw_stddev     ; data
-      NCDF_VARPUT, ncid, 'GR_Nw_Max_'+DPR_scantype, tocdf_gr_nw_max            ; data
+      NCDF_VARPUT, ncid, 'GR_Nw_StdDev_'+scan_instrument, tocdf_gr_nw_stddev     ; data
+      NCDF_VARPUT, ncid, 'GR_Nw_Max_'+scan_instrument, tocdf_gr_nw_max            ; data
    ENDIF
    IF ( have_gv_dm ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_Dm_'+DPR_scantype, tocdf_gr_dm             ; data
+      NCDF_VARPUT, ncid, 'GR_Dm_'+scan_instrument, tocdf_gr_dm             ; data
        NCDF_VARPUT, ncid, 'have_GR_Dm', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_Dm_StdDev_'+DPR_scantype, tocdf_gr_dm_stddev      ; data
-      NCDF_VARPUT, ncid, 'GR_Dm_Max_'+DPR_scantype, tocdf_gr_dm_max            ; data
+      NCDF_VARPUT, ncid, 'GR_Dm_StdDev_'+scan_instrument, tocdf_gr_dm_stddev      ; data
+      NCDF_VARPUT, ncid, 'GR_Dm_Max_'+scan_instrument, tocdf_gr_dm_max            ; data
    ENDIF
    IF ( have_gv_n2 ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_N2_'+DPR_scantype, tocdf_gr_n2             ; data
+      NCDF_VARPUT, ncid, 'GR_N2_'+scan_instrument, tocdf_gr_n2             ; data
        NCDF_VARPUT, ncid, 'have_GR_N2', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_N2_StdDev_'+DPR_scantype, tocdf_gr_n2_stddev      ; data
-      NCDF_VARPUT, ncid, 'GR_N2_Max_'+DPR_scantype, tocdf_gr_n2_max            ; data
+      NCDF_VARPUT, ncid, 'GR_N2_StdDev_'+scan_instrument, tocdf_gr_n2_stddev      ; data
+      NCDF_VARPUT, ncid, 'GR_N2_Max_'+scan_instrument, tocdf_gr_n2_max            ; data
    ENDIF
    IF ( have_gv_blockage ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_blockage_'+DPR_scantype, tocdf_gr_blockage      ; data
+      NCDF_VARPUT, ncid, 'GR_blockage_'+scan_instrument, tocdf_gr_blockage      ; data
        NCDF_VARPUT, ncid, 'have_GR_blockage', DATA_PRESENT      ; data presence flag
    ENDIF
    if ( have_gv_swe ) then begin
       NCDF_VARPUT, ncid, 'have_GR_SWE', DATA_PRESENT      ; data presence flag
-      NCDF_VARPUT, ncid, 'GR_SWEDP_'+DPR_scantype, tocdf_gr_swedp            ; data
-      NCDF_VARPUT, ncid, 'GR_SWEDP_StdDev_'+DPR_scantype, tocdf_gr_swedp_stddev
-      NCDF_VARPUT, ncid, 'GR_SWEDP_Max_'+DPR_scantype, tocdf_gr_swedp_max   
+      NCDF_VARPUT, ncid, 'GR_SWEDP_'+scan_instrument, tocdf_gr_swedp            ; data
+      NCDF_VARPUT, ncid, 'GR_SWEDP_StdDev_'+scan_instrument, tocdf_gr_swedp_stddev
+      NCDF_VARPUT, ncid, 'GR_SWEDP_Max_'+scan_instrument, tocdf_gr_swedp_max   
 
-      NCDF_VARPUT, ncid, 'GR_SWE25_'+DPR_scantype, tocdf_gr_swe25            ; data
-      NCDF_VARPUT, ncid, 'GR_SWE25_StdDev_'+DPR_scantype, tocdf_gr_swe25_stddev
-      NCDF_VARPUT, ncid, 'GR_SWE25_Max_'+DPR_scantype, tocdf_gr_swe25_max   
+      NCDF_VARPUT, ncid, 'GR_SWE25_'+scan_instrument, tocdf_gr_swe25            ; data
+      NCDF_VARPUT, ncid, 'GR_SWE25_StdDev_'+scan_instrument, tocdf_gr_swe25_stddev
+      NCDF_VARPUT, ncid, 'GR_SWE25_Max_'+scan_instrument, tocdf_gr_swe25_max   
 
-      NCDF_VARPUT, ncid, 'GR_SWE50_'+DPR_scantype, tocdf_gr_swe50            ; data
-      NCDF_VARPUT, ncid, 'GR_SWE50_StdDev_'+DPR_scantype, tocdf_gr_swe50_stddev
-      NCDF_VARPUT, ncid, 'GR_SWE50_Max_'+DPR_scantype, tocdf_gr_swe50_max   
+      NCDF_VARPUT, ncid, 'GR_SWE50_'+scan_instrument, tocdf_gr_swe50            ; data
+      NCDF_VARPUT, ncid, 'GR_SWE50_StdDev_'+scan_instrument, tocdf_gr_swe50_stddev
+      NCDF_VARPUT, ncid, 'GR_SWE50_Max_'+scan_instrument, tocdf_gr_swe50_max   
 
-      NCDF_VARPUT, ncid, 'GR_SWE75_'+DPR_scantype, tocdf_gr_swe75            ; data
-      NCDF_VARPUT, ncid, 'GR_SWE75_StdDev_'+DPR_scantype, tocdf_gr_swe75_stddev
-      NCDF_VARPUT, ncid, 'GR_SWE75_Max_'+DPR_scantype, tocdf_gr_swe75_max   
+      NCDF_VARPUT, ncid, 'GR_SWE75_'+scan_instrument, tocdf_gr_swe75            ; data
+      NCDF_VARPUT, ncid, 'GR_SWE75_StdDev_'+scan_instrument, tocdf_gr_swe75_stddev
+      NCDF_VARPUT, ncid, 'GR_SWE75_Max_'+scan_instrument, tocdf_gr_swe75_max   
  
-      NCDF_VARPUT, ncid, 'GR_SWEMQT_'+DPR_scantype, tocdf_gr_swemqt            ; data
-      NCDF_VARPUT, ncid, 'GR_SWEMQT_StdDev_'+DPR_scantype, tocdf_gr_swemqt_stddev
-      NCDF_VARPUT, ncid, 'GR_SWEMQT_Max_'+DPR_scantype, tocdf_gr_swemqt_max   
+      NCDF_VARPUT, ncid, 'GR_SWEMQT_'+scan_instrument, tocdf_gr_swemqt            ; data
+      NCDF_VARPUT, ncid, 'GR_SWEMQT_StdDev_'+scan_instrument, tocdf_gr_swemqt_stddev
+      NCDF_VARPUT, ncid, 'GR_SWEMQT_Max_'+scan_instrument, tocdf_gr_swemqt_max   
 
-      NCDF_VARPUT, ncid, 'GR_SWEMRMS_'+DPR_scantype, tocdf_gr_swemrms            ; data
-      NCDF_VARPUT, ncid, 'GR_SWEMRMS_StdDev_'+DPR_scantype, tocdf_gr_swemrms_stddev
-      NCDF_VARPUT, ncid, 'GR_SWEMRMS_Max_'+DPR_scantype, tocdf_gr_swemrms_max   
+      NCDF_VARPUT, ncid, 'GR_SWEMRMS_'+scan_instrument, tocdf_gr_swemrms            ; data
+      NCDF_VARPUT, ncid, 'GR_SWEMRMS_StdDev_'+scan_instrument, tocdf_gr_swemrms_stddev
+      NCDF_VARPUT, ncid, 'GR_SWEMRMS_Max_'+scan_instrument, tocdf_gr_swemrms_max   
       
    endif
 
-   NCDF_VARPUT, ncid, 'n_gr_z_rejected_'+DPR_scantype, tocdf_gr_rejected
-   NCDF_VARPUT, ncid, 'n_gr_rc_rejected_'+DPR_scantype, tocdf_gr_rc_rejected
-   NCDF_VARPUT, ncid, 'n_gr_rp_rejected_'+DPR_scantype, tocdf_gr_rp_rejected
-   NCDF_VARPUT, ncid, 'n_gr_rr_rejected_'+DPR_scantype, tocdf_gr_rr_rejected
-   NCDF_VARPUT, ncid, 'n_gr_zdr_rejected_'+DPR_scantype, tocdf_gr_zdr_rejected
-   NCDF_VARPUT, ncid, 'n_gr_kdp_rejected_'+DPR_scantype, tocdf_gr_kdp_rejected
-   NCDF_VARPUT, ncid, 'n_gr_rhohv_rejected_'+DPR_scantype, tocdf_gr_rhohv_rejected
-   NCDF_VARPUT, ncid, 'n_gr_hid_rejected_'+DPR_scantype, tocdf_gr_hid_rejected
-   NCDF_VARPUT, ncid, 'n_gr_dzero_rejected_'+DPR_scantype, tocdf_gr_dzero_rejected
-   NCDF_VARPUT, ncid, 'n_gr_nw_rejected_'+DPR_scantype, tocdf_gr_nw_rejected
-   NCDF_VARPUT, ncid, 'n_gr_dm_rejected_'+DPR_scantype, tocdf_gr_dm_rejected
-   NCDF_VARPUT, ncid, 'n_gr_n2_rejected_'+DPR_scantype, tocdf_gr_n2_rejected
-   NCDF_VARPUT, ncid, 'n_gr_swedp_rejected_'+DPR_scantype, tocdf_gr_swedp_rejected
-   NCDF_VARPUT, ncid, 'n_gr_swe25_rejected_'+DPR_scantype, tocdf_gr_swe25_rejected
-   NCDF_VARPUT, ncid, 'n_gr_swe50_rejected_'+DPR_scantype, tocdf_gr_swe50_rejected
-   NCDF_VARPUT, ncid, 'n_gr_swe75_rejected_'+DPR_scantype, tocdf_gr_swe75_rejected
-   NCDF_VARPUT, ncid, 'n_gr_swemqt_rejected_'+DPR_scantype, tocdf_gr_swemqt_rejected
-   NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected_'+DPR_scantype, tocdf_gr_swemrms_rejected
-   NCDF_VARPUT, ncid, 'n_gr_expected_'+DPR_scantype, tocdf_gr_expected
+   NCDF_VARPUT, ncid, 'n_gr_z_rejected_'+scan_instrument, tocdf_gr_rejected
+   NCDF_VARPUT, ncid, 'n_gr_rc_rejected_'+scan_instrument, tocdf_gr_rc_rejected
+   NCDF_VARPUT, ncid, 'n_gr_rp_rejected_'+scan_instrument, tocdf_gr_rp_rejected
+   NCDF_VARPUT, ncid, 'n_gr_rr_rejected_'+scan_instrument, tocdf_gr_rr_rejected
+   NCDF_VARPUT, ncid, 'n_gr_zdr_rejected_'+scan_instrument, tocdf_gr_zdr_rejected
+   NCDF_VARPUT, ncid, 'n_gr_kdp_rejected_'+scan_instrument, tocdf_gr_kdp_rejected
+   NCDF_VARPUT, ncid, 'n_gr_rhohv_rejected_'+scan_instrument, tocdf_gr_rhohv_rejected
+   NCDF_VARPUT, ncid, 'n_gr_hid_rejected_'+scan_instrument, tocdf_gr_hid_rejected
+   NCDF_VARPUT, ncid, 'n_gr_dzero_rejected_'+scan_instrument, tocdf_gr_dzero_rejected
+   NCDF_VARPUT, ncid, 'n_gr_nw_rejected_'+scan_instrument, tocdf_gr_nw_rejected
+   NCDF_VARPUT, ncid, 'n_gr_dm_rejected_'+scan_instrument, tocdf_gr_dm_rejected
+   NCDF_VARPUT, ncid, 'n_gr_n2_rejected_'+scan_instrument, tocdf_gr_n2_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swedp_rejected_'+scan_instrument, tocdf_gr_swedp_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe25_rejected_'+scan_instrument, tocdf_gr_swe25_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe50_rejected_'+scan_instrument, tocdf_gr_swe50_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swe75_rejected_'+scan_instrument, tocdf_gr_swe75_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swemqt_rejected_'+scan_instrument, tocdf_gr_swemqt_rejected
+   NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected_'+scan_instrument, tocdf_gr_swemrms_rejected
+   NCDF_VARPUT, ncid, 'n_gr_expected_'+scan_instrument, tocdf_gr_expected
 
    skippedSwath:
 

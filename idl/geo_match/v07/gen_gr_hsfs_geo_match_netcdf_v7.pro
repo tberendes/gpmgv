@@ -81,9 +81,9 @@ spawn, 'mkdir -p ' + OUTDIR
 
 cdfid = ncdf_create(geo_match_nc_file, /CLOBBER)
 
-; define the 2 scan types (swaths) in the DPR product
+; define the 3 scan types (swaths) in the DPR product
 ; - we need separate variables for each swath for the science variables
-swath = ['HS','FS']
+swath = ['HS','FS_Ku','FS_Ka']
 
 ; global variables -- THE FIRST GLOBAL VARIABLE MUST BE 'DPR_Version'
 ncdf_attput, cdfid, 'DPR_Version', DPR_vers, /global
@@ -197,14 +197,16 @@ ncdf_attput, cdfid, 'GR_file', origGRFileName, /global
 ; field dimensions
 
 fpdimid_HS = ncdf_dimdef(cdfid, 'fpdim_HS', numpts_HS>1)  ; # of HS footprints in range
-fpdimid_FS = ncdf_dimdef(cdfid, 'fpdim_FS', numpts_FS>1)  ; # of FS footprints in range
-fpdimid = [ fpdimid_HS, fpdimid_FS]            ; match to "swath" array, above
+fpdimid_FS_Ku = ncdf_dimdef(cdfid, 'fpdim_FS_Ku', numpts_FS>1)  ; # of FS footprints in range
+fpdimid_FS_Ka = ncdf_dimdef(cdfid, 'fpdim_FS_Ka', numpts_FS>1)  ; # of FS footprints in range
+fpdimid = [ fpdimid_HS, fpdimid_FS_Ku, fpdimid_FS_Ka]            ; match to "swath" array, above
 eldimid = ncdf_dimdef(cdfid, 'elevationAngle', N_ELEMENTS(elev_angles))
 xydimid = ncdf_dimdef(cdfid, 'xydim', 4)        ; for 4 corners of a DPR footprint
 hidimid = ncdf_dimdef(cdfid, 'hidim', 15)       ; for Hydromet ID Categories
 timedimid_HS = ncdf_dimdef(cdfid, 'timedimid_HS', numscans_HS>1)  ; # of HS scans in range
-timedimid_FS = ncdf_dimdef(cdfid, 'timedimid_FS', numscans_FS>1)  ; # of FS scans in range
-timedimid = [ timedimid_HS, timedimid_FS ]        ; match to "swath" array, above
+timedimid_FS_Ku = ncdf_dimdef(cdfid, 'timedimid_FS_Ku', numscans_FS>1)  ; # of FS scans in range
+timedimid_FS_Ka = ncdf_dimdef(cdfid, 'timedimid_FS_Ka', numscans_FS>1)  ; # of FS scans in range
+timedimid = [ timedimid_HS, timedimid_FS_Ku, timedimid_FS_Ka ]        ; match to "swath" array, above
 
 
 ; Elevation Angles coordinate variable
@@ -221,14 +223,19 @@ ncdf_attput, cdfid, haveswathvarid, 'long_name', $
              'data exists flag for HS swath'
 ncdf_attput, cdfid, haveswathvarid, '_FillValue', NO_DATA_PRESENT
 
-haveswathvarid = ncdf_vardef(cdfid, 'have_swath_FS', /short)
+haveswathvarid = ncdf_vardef(cdfid, 'have_swath_FS_Ku', /short)
 ncdf_attput, cdfid, haveswathvarid, 'long_name', $
-             'data exists flag for FS swath'
+             'data exists flag for FS_Ku swath'
+ncdf_attput, cdfid, haveswathvarid, '_FillValue', NO_DATA_PRESENT
+
+haveswathvarid = ncdf_vardef(cdfid, 'have_swath_FS_Ka', /short)
+ncdf_attput, cdfid, haveswathvarid, 'long_name', $
+             'data exists flag for FS_Ka swath'
 ncdf_attput, cdfid, haveswathvarid, '_FillValue', NO_DATA_PRESENT
 
 ; scanTime components, one datetime per scan, swath-specific
 
-for iswa=0,1 do begin
+for iswa=N_ELEMENTS(swath)-1 do begin
    tvarid = ncdf_vardef(cdfid, 'Year_'+swath[iswa], timedimid[iswa], /short)
    ncdf_attput, cdfid, tvarid, 'long_name', 'Year of DPR '+swath[iswa]+' scan'
    ncdf_attput, cdfid, tvarid, '_FillValue', INT_RANGE_EDGE
@@ -263,7 +270,7 @@ endfor
 
 ; swath-varying first:
 
-for iswa=0,1 do begin
+for iswa=N_ELEMENTS(swath)-1 do begin
    sscansid = ncdf_vardef(cdfid, 'startScan_'+swath[iswa], /long)
    ncdf_attput, cdfid, sscansid, 'long_name', $
                 'Starting DPR '+swath[iswa]+' overlap scan in original dataset, zero-based'
@@ -377,7 +384,7 @@ ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
 ncdf_attput, cdfid, haveSWEvarid, '_FillValue', NO_DATA_PRESENT
 
 
-for iswa=0,1 do begin
+for iswa=N_ELEMENTS(swath)-1 do begin
 
    ; sweep-level fields, all swath-specific, of same no. of dimensions for each swath
 
@@ -891,7 +898,8 @@ FOR iel = 0,N_ELEMENTS(elev_angles)-1 DO BEGIN
 ENDFOR
 ncdf_varput, cdfid, vnversvarid, GEO_MATCH_FILE_VERSION ;GEO_MATCH_NC_FILE_VERS
 IF numpts_HS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_HS', DATA_PRESENT
-IF numpts_FS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_FS', DATA_PRESENT
+IF numpts_FS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_FS_Ku', DATA_PRESENT
+IF numpts_FS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_FS_Ka', DATA_PRESENT
 
 ncdf_close, cdfid
 

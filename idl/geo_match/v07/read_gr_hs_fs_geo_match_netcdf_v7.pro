@@ -61,7 +61,7 @@
 
 FUNCTION read_gr_hs_fs_geo_match_netcdf_v7, ncfile, matchupmeta=matchupmeta, $
     sweepsmeta=sweepsmeta, sitemeta=sitemeta, fieldflags=fieldFlags, $
-    filesmeta=filesmeta, DATA_HS=data_HS, DATA_FS=data_FS
+    filesmeta=filesmeta, DATA_HS=data_HS, DATA_FS_Ku=data_FS_Ku, DATA_FS_Ka=data_FS_Ka
 
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
 @dpr_params_v7.inc
@@ -273,9 +273,9 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
 ENDIF
 
 
-; define the two swaths in the DPR product, we need separate variables
+; define the three swaths in the DPR product, we need separate variables
 ; for each swath for the GR science variables
-swath = ['HS','FS']
+swath = ['HS','FS_Ku','FS_Ka']
 
 ; get the science/geometry/time data for each swath type
 for iswa=0,1 do begin
@@ -474,7 +474,8 @@ for iswa=0,1 do begin
 
    CASE swath[iswa] OF
       'HS' : IF ARG_PRESENT(data_HS) THEN data_HS = TEMPORARY(tempstruc)
-      'FS' : IF ARG_PRESENT(data_FS) THEN data_FS = TEMPORARY(tempstruc)
+      'FS_Ku' : IF ARG_PRESENT(data_FS_Ku) THEN data_FS_Ku = TEMPORARY(tempstruc)
+      'FS_Ka' : IF ARG_PRESENT(data_FS_Ka) THEN data_FS_Ka = TEMPORARY(tempstruc)
    ENDCASE
 
 endfor
