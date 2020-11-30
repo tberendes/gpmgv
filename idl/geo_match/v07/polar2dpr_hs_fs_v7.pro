@@ -1098,7 +1098,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 
       IF PTR_VALID(ptr_swath.PTR_SLV) THEN BEGIN
          if STRUPCASE(DPR_scantype) eq 'FS' then begin
-         	dbz_corr = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[idxKuKa[swathID],*,*])  ; in FS indexed by frequency
+         	dbz_corr = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[idxKuKa[swathID],*,*,*])  ; in FS indexed by frequency
          endif else begin ; HS scan only one frequency
          	dbz_corr = (*ptr_swath.PTR_SLV).ZFACTORCORRECTED
          endelse
