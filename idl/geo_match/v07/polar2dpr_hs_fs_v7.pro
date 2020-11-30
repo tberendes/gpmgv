@@ -1238,9 +1238,9 @@ WHILE NOT (EOF(lun0)) DO BEGIN
             botmCorrGate = dpr_gate_num_for_height( 0.75, GATE_SPACE,  $
                               cos_inc_angle, ray_num, scan_num, binRealSurface )
 ; comment these three lines
-            PRINT, "GATES AT 0.75 and 19.25 KM, and GATE_SPACE: ", $
-                    botmCorrGate, topCorrGate, GATE_SPACE
-            help, dbz_corr
+;            PRINT, "GATES AT 0.75 and 19.25 KM, and GATE_SPACE: ", $
+;                    botmCorrGate, topCorrGate, GATE_SPACE
+;            help, dbz_corr
             dbz_ray_avg = get_dpr_layer_average(topCorrGate, botmCorrGate,   $
                              scan_num, ray_num, dbz_corr, 1.0, $
                              DPR_DBZ_MIN, numDPRgates )
