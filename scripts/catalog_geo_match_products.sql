@@ -25,6 +25,7 @@ delete from geo_match_product_temp where pathname in (select pathname from geo_m
 
 update geo_match_product_temp set event_num =-99;
 
+-- update to psql 10 required "row" be added
 update geo_match_product_temp set (event_num) = row(overpass_event.event_num) from overpass_event where geo_match_product_temp.sat_id = overpass_event.sat_id and geo_match_product_temp.radar_id = overpass_event.radar_id and geo_match_product_temp.orbit = overpass_event.orbit;
 
 select 'No matching event_num', * from geo_match_product_temp where event_num = -99;
