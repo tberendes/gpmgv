@@ -1401,7 +1401,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   ; strip trailing zero from version string decimal part, if any
    verarr1_len = STRLEN(verarr[1])
    IF verarr1_len GT 1 and STRMID(verarr[1], verarr1_len-1, 1) EQ '0' $
-      THEN verarr[1]=strmid(verarr[1], 0, l-1)
+      THEN verarr[1]=strmid(verarr[1], 0, verarr1_len-1)
   ; substitute an underscore for the decimal point in matchup_file_version
    verstr=verarr[0]+'_'+verarr[1]
 
