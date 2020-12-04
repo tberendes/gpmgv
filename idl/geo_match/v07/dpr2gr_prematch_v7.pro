@@ -1717,7 +1717,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 
       for iscan = 0, N_ELEMENTS(DPR_SCANS)-1 DO BEGIN
          DPR_scantype = DPR_scans[iscan]
-         CASE STRUPCASE(DPR_scantype) OF
+         CASE DPR_scantype OF
            'HS' : data_GR2DPR = DATA_HS
            'FS' : begin
 			      CASE Instrument_ID OF
