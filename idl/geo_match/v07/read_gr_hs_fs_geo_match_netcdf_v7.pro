@@ -37,9 +37,9 @@
 ; data_HS              Structure containing all the DPR-matched GR data variables
 ;                      for the HS swath.  Structure is defined and created in this
 ;                      routine, replacing the input parameter value.
-; data_FS              Structure containing all the DPR-matched GR data variables
-;                      for the FS swath.  Structure is defined and created in this
-;                      routine, replacing the input parameter value.
+; data_FS_Ku           Structures containing all the DPR-matched GR data variables
+; data_FS_Ka           for the FS Ku and Ka swaths.  Structures are defined and created in this
+;                      routine, replacing the input parameter values.
 ;
 ; RETURNS
 ; -------

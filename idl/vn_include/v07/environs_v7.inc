@@ -5,7 +5,7 @@
 ;
 ;-------------------------------------------------------------------------------
 ;
-; environs.inc    Bob Morris, GPM GV (SAIC)    March 2007
+; environs_v7.inc    Bob Morris, GPM GV (SAIC)    March 2007
 ;
 ; DESCRIPTION
 ; -------------
@@ -38,6 +38,7 @@
 ; 03/24/2016  Morris         - Added parameter GR_DPR_GEO_MATCH_NCDIR
 ; 10/18/2017  Morris         - Added parameters TRMMDATA_ROOT, DIR_2APR, and
 ;                              DIR_2BPRTMI for TRMM Version 8 support
+; 12/1/2020   Berendes		 - mods for GPM V7
 ;
 ;-------------------------------------------------------------------------------
 ;
@@ -86,8 +87,8 @@ DPR_GEO_MATCH_PRE = 'GRtoDPR.'
 DPR_GMI_MATCH_PRE = 'DPRtoGMI.'
 DPR_GMI_MATCH_NCDIR = '/dpr_gmi_match'  ; subdir for output dpr2gmi netCDF files
 COMB_GEO_MATCH_PRE = 'GRtoDPRGMI.'
-GR_DPR_GEO_MATCH_PRE = 'GRtoDPR_HS_MS_NS.'
-GR_DPR_GEO_MATCH_NCDIR = '/grmatch'  ; subdir for polar2dpr_hs_ms_ns netCDF files
+GR_DPR_GEO_MATCH_PRE = 'GRtoDPR_HS_FS.'
+GR_DPR_GEO_MATCH_NCDIR = '/grmatch'  ; subdir for polar2dpr_hs_fs netCDF files
 
 ; netCDF template files internal/temporary
 PR_NCGRIDTEMPLATE = TMP_DIR + '/templatePRgrids' + NC_FILE_EXT

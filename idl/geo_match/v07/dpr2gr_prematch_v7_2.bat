@@ -45,7 +45,7 @@ cd, PRO_DIR
 ;VERSION2MATCH='V06A'
 ;VERSION2MATCH='V03B'
  VERSION2MATCH='V06X'
- gr_nc_version = '1_1'
+ gr_nc_version = '2_0'
  plot_PPIs = 0
  scores = 0
 ; nc_dir = ''

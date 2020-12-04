@@ -13,7 +13,7 @@
 ;
 ; DESCRIPTION:
 ; Using the "special values" parameters in the 'include' file dpr_params.inc,
-; the path parameters in environs.inc, and supplied parameters for the filename,
+; the path parameters in environs_v7.inc, and supplied parameters for the filename,
 ; number of DPR footprints in the matchup for each swath (FS, NS), the array of
 ; elevation angles in the ground radar volume scan, the number of scans in the
 ; input 2B_DPRGMI subset file for each swath type, and global variables for the
@@ -75,7 +75,7 @@ FUNCTION gen_dprgmi_geo_match_netcdf_v7, geo_match_nc_file, numpts_FS, numpts_NS
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc
 ; "Include" files for constants, names, paths, etc.
-@environs.inc   ; for file prefixes, netCDF file definition version
+@environs_v7.inc   ; for file prefixes, netCDF file definition version
 @dpr_params.inc  ; for the type-specific fill values
 
 ; TAB 2/4/19 incremented version for new snow fields

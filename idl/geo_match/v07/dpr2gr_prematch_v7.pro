@@ -42,7 +42,7 @@
 ; parameter DIR_GR_NC gives the non-default top level directory under which the
 ; GR matchup netcdf files are located.  If DIR_GR_NC is not specified then the
 ; top-level directory defaults to NCGRIDS_ROOT+GEO_MATCH_NCDIR.  The components
-; for these default paths are defined in the environs.inc file.  All file path
+; for these default paths are defined in the environs_v7.inc file.  All file path
 ; optional parameter values must begin with a leading slash (e.g., '/mydata')
 ; and be enclosed in quotes, as shown.  Optional binary keyword parameters
 ; control immediate output of DPR-GR reflectivity differences (/SCORES) and
@@ -63,7 +63,7 @@
 ; netCDF files will be written.  It is created if it does not yet exist.  If
 ; a value for NC_FILE is not provided, then a default value is derived as a
 ; concatenation of the variables NCGRIDS_ROOT+GEO_MATCH_NCDIR defined in the
-; environs.inc "Include" file.  If the binary parameter FLAT_NCPATH is
+; environs_v7.inc "Include" file.  If the binary parameter FLAT_NCPATH is
 ; set then the output netCDF files are written directly under the NC_FILE
 ; directory (legacy behavior).  Otherwise a hierarchical subdirectory tree is
 ; (as needed) created under the NC_FILE directory, of the form:
@@ -84,25 +84,25 @@
 ; GPM_ROOT=gpmroot - Non-default value of the top-level "common" directory under
 ;                    which the GPM 2ADPR, 2AKu, and 2AKa files are located.  If
 ;                    unspecified, defaults to GPMDATA_ROOT value defined in the
-;                    IDL "Include" file "environs.inc".
+;                    IDL "Include" file "environs_v7.inc".
 ;
 ; DIRDPR=dir2adpr  - Non-default value of the mid-level "common" directory under
 ;                    which the GPM 2ADPR files are located.  This is the part of
 ;                    the path between gpmroot and the partial 2ADPR file name
 ;                    listed in the control file.  If unspecified, defaults to
 ;                    the DIR_2ADPR value defined in the IDL "Include" file
-;                    environs.inc.  If the combination of gpmroot, '/', and the
+;                    environs_v7.inc.  If the combination of gpmroot, '/', and the
 ;                    partial 2ADPR file name in the control file is the complete
 ;                    pathname to the 2A file, then the DIRDPR parameter must be
 ;                    specified with the value '/.' (e.g., DIRDPR='/.').
 ;
 ; DIRKU=dir2aku - As in DIRDPR=dir2adpr, but for processing of a 2AKu matchup.
 ;                 If unspecified, defaults to the DIR_2AKU value defined in the
-;                 IDL "Include" file environs.inc.
+;                 IDL "Include" file environs_v7.inc.
 ;
 ; DIRKA=dir2aka - As in DIRDPR=dir2adpr, but for processing of a 2AKa matchup.
 ;                 If unspecified, defaults to the DIR_2AKA value defined in the
-;                 IDL "Include" file environs.inc.
+;                 IDL "Include" file environs_v7.inc.
 ;
 ;
 ; DIR_GV_NC=dir_gv_nc - Non-default value of the top-level "common" directory
@@ -115,7 +115,7 @@
 ;                       If unspecified, defaults to the combined path value:
 ;                          NCGRIDS_ROOT+GR_DPR_GEO_MATCH_NCDIR
 ;                       of these two variables as defined in the IDL "Include"
-;                       file environs.inc.
+;                       file environs_v7.inc.
 ;
 ; GR_NC_VERSION=gr_nc_version - Non-default value of the GRtoDPR_HS_FS netCDF
 ;                               matchup file version to be used.  Default='1_0'
@@ -270,6 +270,8 @@ PRO skip_gr_events, lun, nsites
    ENDFOR
 END
 
+;===============================================================================
+
 ;*******************************************************************************
 ;
 ; dpr2gr_prematch_scan_v7
@@ -297,30 +299,38 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
 @dpr_params_v7.inc
 ; "Include" file for names, paths, etc.:
-@environs.inc
+@environs_v7.inc
 ; for structures to be read from GR netCDF file
 @dpr_geo_match_nc_structs_v7.inc
 
    decluttered = KEYWORD_SET(declutter)
+   
+   DO_KUKA = 0
+   ; initialize to Ku
+   indexKuKa = 0
 
    DO_RAIN_CORR = 1   ; set flag to do 3-D rain_corr processing by default
 
    ; get the group structures for the specified scantype, tags vary by swathname
-   CASE STRUPCASE(DPR_scantype) OF
+   SWITCH STRUPCASE(DPR_scantype) OF
       'HS' : BEGIN
                 RAYSPERSCAN = RAYSPERSCAN_HS
                 GATE_SPACE = BIN_SPACE_HS
                 ELLIPSOID_BIN_DPR = ELLIPSOID_BIN_HS
                 ptr_swath = dpr_data.HS
+                break
              END
+      'FS_ka' : indexKuKa = 1 ; set to Ka
+      'FS_Ku' : DO_KUKA = 1 ; KuKa will already be default to Ku
       'FS' : BEGIN
                 RAYSPERSCAN = RAYSPERSCAN_FS
                 GATE_SPACE = BIN_SPACE_FS
                 ELLIPSOID_BIN_DPR = ELLIPSOID_BIN_FS
                 DO_RAIN_CORR = 0   ; set flag to skip 3-D rainrate
                 ptr_swath = dpr_data.FS
+                break
              END
-   ENDCASE
+   ENDSWITCH
 
    ; get the number of scans in the dataset
    SAMPLE_RANGE = ptr_swath.SWATHHEADER.NUMBERSCANSBEFOREGRANULE $
@@ -359,12 +369,18 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ENDELSE
 
    IF PTR_VALID(ptr_swath.PTR_PRE) THEN BEGIN
-      dbz_meas = (*ptr_swath.PTR_PRE).ZFACTORMEASURED
-      binRealSurface = (*ptr_swath.PTR_PRE).BINREALSURFACE
+   	  if DO_KUKA then begin
+	      dbz_meas = reform((*ptr_swath.PTR_PRE).ZFACTORMEASURED[indexKuKa,*,*,*]) ; in FS indexed by frequency
+	      binRealSurface = reform((*ptr_swath.PTR_PRE).BINREALSURFACE[indexKuKa,*,*]) ; in FS indexed by frequency
+	      localZenithAngle = reform((*ptr_swath.PTR_PRE).localZenithAngle[indexKuKa,*,*]) ; in FS indexed by frequency   	  
+   	  endif else begin
+	      dbz_meas = (*ptr_swath.PTR_PRE).ZFACTORMEASURED
+	      binRealSurface = (*ptr_swath.PTR_PRE).BINREALSURFACE
+	      localZenithAngle = (*ptr_swath.PTR_PRE).localZenithAngle
+	  endelse
       binClutterFreeBottom = (*ptr_swath.PTR_PRE).binClutterFreeBottom
       landOceanFlag = (*ptr_swath.PTR_PRE).LANDSURFACETYPE
       rainFlag = (*ptr_swath.PTR_PRE).FLAGPRECIP
-      localZenithAngle = (*ptr_swath.PTR_PRE).localZenithAngle
       heightStormTop = (*ptr_swath.PTR_PRE).heightStormTop
    ENDIF ELSE BEGIN
       message, "Invalid pointer to PTR_PRE.", /INFO
@@ -372,11 +388,17 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ENDELSE
 
    IF PTR_VALID(ptr_swath.PTR_SLV) THEN BEGIN
-      dbz_corr = (*ptr_swath.PTR_SLV).ZFACTORCORRECTED
+   	  if DO_KUKA then begin
+	      dbz_corr = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[indexKuKa,*,*,*]) ; in FS indexed by frequency
+	      piaFinal = reform((*ptr_swath.PTR_SLV).piaFinal[indexKuKa,*,*]) ; in FS indexed by frequency
+   	  endif else begin
+	      dbz_corr = (*ptr_swath.PTR_SLV).ZFACTORCORRECTED
+	      piaFinal = (*ptr_swath.PTR_SLV).piaFinal
+	  endelse
+
       epsilon = (*ptr_swath.PTR_SLV).EPSILON
       rain_corr = (*ptr_swath.PTR_SLV).PRECIPRATE
       surfRain_corr = (*ptr_swath.PTR_SLV).PRECIPRATEESURFACE
-      piaFinal = (*ptr_swath.PTR_SLV).piaFinal
       ; MS swath in 2A-DPR product does not have paramDSD, deal with it here
       ; - if there is no paramDSD its structure element is the string "UNDEFINED"
       type_paramdsd = SIZE( (*ptr_swath.PTR_SLV).PARAMDSD, /TYPE )
@@ -1011,7 +1033,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
   ; dimensions, also passing the global attribute values along
    ncfile = gen_dpr_geo_match_netcdf_v7( fname_netCDF, numDPRrays, $
                                       tocdf_elev_angle, ufstruct, $
-                                      STRUPCASE(DPR_scantype), DPR_version, $
+                                      DPR_scantype, DPR_version, $
+;                                      STRUPCASE(DPR_scantype), DPR_version, $
                                       siteID, infileNameArr, $
                                       DECLUTTERED=decluttered, $
                                       NON_PPS_FILES=non_pps_files )
@@ -1255,7 +1278,7 @@ PRO dpr2gr_prematch_v7, control_file, GPM_ROOT=gpmroot, DIRDPR=dir2adpr, $
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
 @dpr_params_v7.inc
 ; "Include" file for names, paths, etc.:
-@environs.inc
+@environs_v7.inc
 ; for structures to be read from GR netCDF file
 @dpr_geo_match_nc_structs_v7.inc
 
@@ -1266,7 +1289,7 @@ DPR_version = '0'
 
 ;IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '1_0' ELSE BEGIN
 ; 8/30/18 TAB changed default version of grverstr to 1_1
-IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '1_1' ELSE BEGIN
+IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '2_0' ELSE BEGIN
   ; check whether we have '.' or '_' between the units and decimal places
    IF STRPOS(gr_nc_version, '.') NE -1 THEN BEGIN
      ; substitute an underscore for the decimal point
@@ -1280,7 +1303,7 @@ ENDELSE
 
 ; ***************************** Local configuration ****************************
 
-; where provided, override file path default values from environs.inc:
+; where provided, override file path default values from environs_v7.inc:
 in_base_dir = NCGRIDS_ROOT+GR_DPR_GEO_MATCH_NCDIR ; default root dir for GR netCDF
 IF N_ELEMENTS(dir_gv_nc) EQ 1 THEN in_base_dir = dir_gv_nc
 
@@ -1526,7 +1549,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                     goto, bailOut
                  ENDIF
                  ; 2ADPR has all HS and FS scan/swath types, read them all at once
-                 DPR_scans = ['HS', 'FS']
+                 DPR_scans = ['HS', 'FS_Ku', 'FS_Ka']
                  print, '' & print, "Reading file: ", file_2adpr & print, ''
                  dpr_data = read_2adpr_hdf5(file_2adpr)
                  dpr_file_read = origFileDPRName
@@ -1667,7 +1690,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                         matchupmeta=mygeometa, sweepsmeta=mysweeps, $
                         sitemeta=mysite, fieldflags=myflags, $
                         filesmeta=myfiles, DATA_HS=data_HS, $
-                        DATA_FS=data_FS)
+                        DATA_FS_Ku=data_FS_Ku, DATA_FS_Ka=data_FS_Ka)
          ENDIF ELSE BEGIN
             help,!error_state,/st
             Catch, /Cancel
@@ -1696,7 +1719,14 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          DPR_scantype = DPR_scans[iscan]
          CASE STRUPCASE(DPR_scantype) OF
            'HS' : data_GR2DPR = DATA_HS
-           'FS' : data_GR2DPR = DATA_FS
+           'FS' : begin
+			      CASE Instrument_ID OF
+			          'Ka' : data_GR2DPR = DATA_FS_Ka
+			          'Ku' : data_GR2DPR = DATA_FS_Ku
+			      ENDCASE
+           		  end
+           'FS_Ku' : data_GR2DPR = DATA_FS_Ku
+           'FS_ka' : data_GR2DPR = DATA_FS_Ka
          ENDCASE
 
         ; check for the case of no footprints for the swath

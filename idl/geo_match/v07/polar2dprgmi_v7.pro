@@ -19,7 +19,7 @@
 ; a mandatory parameter for the procedure.  Optional parameters (GPM_ROOT and
 ; DIRxx) allow for non-default local paths to the DPRGMI and GR files whose
 ; partial pathnames are listed in the control file.  The defaults for these
-; paths are as specified in the environs.inc file.  All file path optional
+; paths are as specified in the environs_v7.inc file.  All file path optional
 ; parameter values must begin with a leading slash (e.g., '/mydata') and be
 ; enclosed in quotes, as shown.  Optional binary keyword parameters control
 ; immediate output of DPRGMI-GR reflectivity differences (/SCORES), plotting
@@ -40,7 +40,7 @@
 ; The optional parameter NC_FILE specifies the directory to which the output
 ; netCDF files will be written.  It is created if it does not yet exist.  Its
 ; default value is derived from the variables NCGRIDS_ROOT+GEO_MATCH_NCDIR as
-; specified in the environs.inc file.  If the binary parameter FLAT_NCPATH is
+; specified in the environs_v7.inc file.  If the binary parameter FLAT_NCPATH is
 ; set then the output netCDF files are written directly under the NC_FILE
 ; directory (legacy behavior).  Otherwise a hierarchical subdirectory tree is
 ; (as needed) created under the NC_FILE directory, of the form:
@@ -224,7 +224,7 @@ ENDIF
 ; "Include" file for DPR-product-specific parameters (i.e., RAYSPERSCAN):
 @dpr_params_v7.inc
 ; "Include" file for names, paths, etc.:
-@environs.inc
+@environs_v7.inc
 
 ; set to a constant, until database supports DPR product version override values
 DPR_version = '0'
@@ -232,7 +232,7 @@ DPR_version = '0'
 
 ; ***************************** Local configuration ****************************
 
-   ; where provided, override file path default values from environs.inc:
+   ; where provided, override file path default values from environs_v7.inc:
     in_base_dir =  GVDATA_ROOT ; default root dir for UF files
     IF N_ELEMENTS(dirgv)  EQ 1 THEN in_base_dir = dirgv
 

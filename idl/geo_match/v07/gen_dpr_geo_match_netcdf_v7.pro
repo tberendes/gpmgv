@@ -13,7 +13,7 @@
 ;
 ; DESCRIPTION:
 ; Using the "special values" parameters in the 'include' file dpr_params_v7.inc,
-; the path parameters in environs.inc, and supplied parameters for the filename,
+; the path parameters in environs_v7.inc, and supplied parameters for the filename,
 ; number of DPR footprints in the matchup, the array of elevation angles in the
 ; ground radar volume scan, and global variables for the UF data field used for
 ; GR reflectivity, the DPR scan type (HS, FS) and the DPR product version,
@@ -104,7 +104,7 @@ FUNCTION gen_dpr_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, $
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc
 ; "Include" files for constants, names, paths, etc.
-@environs.inc   ; for file prefixes, netCDF file definition version
+@environs_v7.inc   ; for file prefixes, netCDF file definition version
 @dpr_params_v7.inc  ; for the type-specific fill values
 
 ; for debugging
