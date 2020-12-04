@@ -1726,7 +1726,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 			      ENDCASE
            		  end
            'FS_Ku' : data_GR2DPR = DATA_FS_Ku
-           'FS_ka' : data_GR2DPR = DATA_FS_Ka
+           'FS_Ka' : data_GR2DPR = DATA_FS_Ka
          ENDCASE
 
         ; check for the case of no footprints for the swath
