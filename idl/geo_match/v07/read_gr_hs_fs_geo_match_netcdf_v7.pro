@@ -135,21 +135,30 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      fpdimid = NCDF_DIMID(ncid1, 'fpdim_HS')
      NCDF_DIMINQ, ncid1, fpdimid, FPDIMNAME, nprfp_HS
      matchupmeta.num_footprints_HS = nprfp_HS         ; redundant with numRays_HS
-     fpdimid = NCDF_DIMID(ncid1, 'fpdim_FS')
+     fpdimid = NCDF_DIMID(ncid1, 'fpdim_FS_Ku')
      NCDF_DIMINQ, ncid1, fpdimid, FPDIMNAME, nprfp_FS
-     matchupmeta.num_footprints_FS = nprfp_FS         ; redundant with numRays_FS
+     matchupmeta.num_footprints_FS_Ku = nprfp_FS         ; redundant with numRays_FS
+     fpdimid = NCDF_DIMID(ncid1, 'fpdim_FS_Ka')
+     NCDF_DIMINQ, ncid1, fpdimid, FPDIMNAME, nprfp_FS
+     matchupmeta.num_footprints_FS_Ka = nprfp_FS         ; redundant with numRays_FS
      NCDF_VARGET, ncid1, 'startScan_HS', scan_s
      matchupmeta.startScan_HS = scan_s
-     NCDF_VARGET, ncid1, 'startScan_FS', scan_s
-     matchupmeta.startScan_FS = scan_s
+     NCDF_VARGET, ncid1, 'startScan_FS_Ku', scan_s
+     matchupmeta.startScan_FS_Ku = scan_s
+     NCDF_VARGET, ncid1, 'startScan_FS_Ka', scan_s
+     matchupmeta.startScan_FS_Ka = scan_s
      NCDF_VARGET, ncid1, 'endScan_HS', scan_e
      matchupmeta.endScan_HS = scan_e
-     NCDF_VARGET, ncid1, 'endScan_FS', scan_e
-     matchupmeta.endScan_FS = scan_e
+     NCDF_VARGET, ncid1, 'endScan_FS_Ku', scan_e
+     matchupmeta.endScan_FS_Ku = scan_e
+     NCDF_VARGET, ncid1, 'endScan_FS_Ka', scan_e
+     matchupmeta.endScan_FS_Ka = scan_e
      NCDF_VARGET, ncid1, 'numRays_HS', num_rays
      matchupmeta.num_rays_HS = num_rays         ; redundant with num_footprints_HS
-     NCDF_VARGET, ncid1, 'numRays_FS', num_rays
-     matchupmeta.num_rays_FS = num_rays         ; redundant with num_footprints_FS
+     NCDF_VARGET, ncid1, 'numRays_FS_Ku', num_rays
+     matchupmeta.num_rays_FS_Ku = num_rays         ; redundant with num_footprints_FS
+     NCDF_VARGET, ncid1, 'numRays_FS_Ka', num_rays
+     matchupmeta.num_rays_FS_Ka = num_rays         ; redundant with num_footprints_FS
      NCDF_VARGET, ncid1, 'have_swath_HS', have_swath_HS
      matchupmeta.have_swath_HS = have_swath_HS
      ncdf_attget, ncid1, 'GV_UF_Z_field', gr_UF_field_byte, /global

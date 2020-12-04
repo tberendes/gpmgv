@@ -107,13 +107,17 @@ matchup_meta = { dpr_geo_match_meta,                           $
                  num_scans:             0,                     $
                  num_rays:              0,                     $
                  num_footprints_HS:     0,                     $
-                 num_footprints_FS:     0,                     $
+                 num_footprints_FS_Ku:     0,                     $
+                 num_footprints_FS_Ka:     0,                     $
                  startScan_HS:          0,                     $
                  endScan_HS:            0,                     $
                  num_rays_HS:           0,                     $
-                 startScan_FS:          0,                     $
-                 endScan_FS:            0,                     $
-                 num_rays_FS:           0,                     $
+                 startScan_FS_Ku:          0,                     $
+                 startScan_FS_Ka:          0,                     $
+                 endScan_FS_Ku:            0,                     $
+                 endScan_FS_Ka:            0,                     $
+                 num_rays_FS_Ku:           0,                     $
+                 num_rays_FS_Ka:           0,                     $
                  have_swath_HS:         NO_DATA_PRESENT,       $
                  rangeThreshold:        FLOAT_RANGE_EDGE,      $
                  GR_dBZ_min:            FLOAT_RANGE_EDGE,      $
