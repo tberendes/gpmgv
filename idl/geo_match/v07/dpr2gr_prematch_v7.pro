@@ -1527,7 +1527,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                  ; 2AKA has HS and FS scan/swath types, read them all at once
                  DPR_scans = ['HS', 'FS']
                  print, '' & print, "Reading file: ", file_2aka & print, ''
-                 dpr_data = read_2akaku_hdf5(file_2aka)
+                 dpr_data = read_2akaku_hdf5_v7(file_2aka)
                  dpr_file_read = origFileKaName
               END
        'KU' : BEGIN
@@ -1539,7 +1539,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                  ; 2AKU has only NS scan/swath type
                  DPR_scans = ['FS']
                  print, '' & print, "Reading file: ", file_2aku & print, ''
-                 dpr_data = read_2akaku_hdf5(file_2aku)
+                 dpr_data = read_2akaku_hdf5_v7(file_2aku)
                  dpr_file_read = origFileKuName
               END
       'DPR' : BEGIN
@@ -1551,7 +1551,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                  ; 2ADPR has all HS and FS scan/swath types, read them all at once
                  DPR_scans = ['HS', 'FS_Ku', 'FS_Ka']
                  print, '' & print, "Reading file: ", file_2adpr & print, ''
-                 dpr_data = read_2adpr_hdf5(file_2adpr)
+                 dpr_data = read_2adpr_hdf5_v7(file_2adpr)
                  dpr_file_read = origFileDPRName
               END
    ENDCASE
