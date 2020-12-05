@@ -1424,8 +1424,11 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       DPR_filepath = STRTRIM(parsed[7],2)
       CASE Instrument_ID OF
          'DPR' : origFileDPRName = DPR_filepath
+         'DPRX' : origFileDPRName = DPR_filepath
           'Ka' : origFileKaName = DPR_filepath
+          'KaX' : origFileKaName = DPR_filepath
           'Ku' : origFileKuName = DPR_filepath
+          'KuX' : origFileKuName = DPR_filepath
           ELSE : BEGIN
                     print, "Error(s) in DPR/Ka/Ku control file specification."
                     PRINT, "Line: ", dataPR
@@ -1516,8 +1519,9 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    file_2bcmb = GPMDATA_ROOT+DIR_COMB+"/"+origFileCMBName
 
   ; check Instrument_ID, filename, and DPR_scantype consistency
-   CASE STRUPCASE(Instrument_ID) OF
-       'KA' : BEGIN
+   SWITCH STRUPCASE(Instrument_ID) OF
+       'KA' : 
+       'KAX' : BEGIN
                  ; do we have a 2AKA filename?
                  IF FILE_BASENAME(origFileKaName) EQ 'no_2AKA_file' THEN BEGIN
                     message, "KA specified on control file line, but no " + $
@@ -1529,8 +1533,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                  print, '' & print, "Reading file: ", file_2aka & print, ''
                  dpr_data = read_2akaku_hdf5_v7(file_2aka)
                  dpr_file_read = origFileKaName
+                 break
               END
-       'KU' : BEGIN
+       'KU' : 
+       'KUX' : BEGIN
                  IF FILE_BASENAME(origFileKuName) EQ 'no_2AKU_file' THEN BEGIN
                     message, "KU specified on control file line, but no " + $
                              "valid 2A-KU file name: " + dataPR, /INFO
@@ -1541,8 +1547,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                  print, '' & print, "Reading file: ", file_2aku & print, ''
                  dpr_data = read_2akaku_hdf5_v7(file_2aku)
                  dpr_file_read = origFileKuName
+                 break
               END
-      'DPR' : BEGIN
+      'DPR' : 
+      'DPRX' : BEGIN
                  IF FILE_BASENAME(origFileDPRName) EQ 'no_2ADPR_file' THEN BEGIN
                     message, "DPR specified on control file line, but no " + $
                              "valid 2ADPR file name: " + dataPR, /INFO
@@ -1553,8 +1561,9 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                  print, '' & print, "Reading file: ", file_2adpr & print, ''
                  dpr_data = read_2adpr_hdf5_v7(file_2adpr)
                  dpr_file_read = origFileDPRName
+                 break
               END
-   ENDCASE
+   ENDSWITCH
 
    ; check dpr_data structure for read failures
    IF SIZE(dpr_data, /TYPE) NE 8 THEN BEGIN
@@ -1722,7 +1731,9 @@ WHILE NOT (EOF(lun0)) DO BEGIN
            'FS' : begin
 			      CASE Instrument_ID OF
 			          'Ka' : data_GR2DPR = DATA_FS_Ka
+			          'KaX' : data_GR2DPR = DATA_FS_Ka
 			          'Ku' : data_GR2DPR = DATA_FS_Ku
+			          'KuX' : data_GR2DPR = DATA_FS_Ku
 			      ENDCASE
            		  end
            'FS_Ku' : data_GR2DPR = DATA_FS_Ku
