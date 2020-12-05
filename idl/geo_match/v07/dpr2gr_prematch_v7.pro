@@ -1687,7 +1687,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       cpstatus = uncomp_file( gr_netcdf_file, ncfile1 )
       if (cpstatus eq 'OK') then begin
          data_HS=1  ; initialize to anything
-         data_FS=1  ; initialize to anything
+         data_FS_Ku=1  ; initialize to anything
+         data_FS_Ka=1  ; initialize to anything
          mygeometa={ dpr_geo_match_meta }
          mysweeps={ gr_sweep_meta }
          mysite={ gr_site_meta }
