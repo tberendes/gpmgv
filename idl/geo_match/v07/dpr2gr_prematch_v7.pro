@@ -1561,7 +1561,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                  ; 2ADPR has all HS and FS scan/swath types, read them all at once
                  DPR_scans = ['HS', 'FS_Ku', 'FS_Ka']
                  print, '' & print, "Reading file: ", file_2adpr & print, ''
-                 dpr_data = read_2adpr_hdf5_v7(file_2adpr)
+                 dpr_data = read_2adpr_hdf5_v7(file_2adpr, debug=1)
                  dpr_file_read = origFileDPRName
                  break
               END
