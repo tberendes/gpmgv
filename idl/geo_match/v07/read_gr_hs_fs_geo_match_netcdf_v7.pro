@@ -287,7 +287,7 @@ ENDIF
 swath = ['HS','FS_Ku','FS_Ka']
 
 ; get the science/geometry/time data for each swath type
-for iswa=0,1 do begin
+for iswa=0,N_ELEMENTS(swath)-1 do begin
 
    NCDF_VARGET, ncid1, 'Year_'+swath[iswa], Year
    NCDF_VARGET, ncid1, 'Month_'+swath[iswa], Month
