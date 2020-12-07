@@ -312,7 +312,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    DO_RAIN_CORR = 1   ; set flag to do 3-D rain_corr processing by default
 
    ; get the group structures for the specified scantype, tags vary by swathname
-   SWITCH STRUPCASE(DPR_scantype) OF
+   SWITCH DPR_scantype OF
       'HS' : BEGIN
                 RAYSPERSCAN = RAYSPERSCAN_HS
                 GATE_SPACE = BIN_SPACE_HS
@@ -330,6 +330,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                 ptr_swath = dpr_data.FS
                 break
              END
+       ELSE: message, 'dpr2gr_prematch: error, unknown scan type '+DPR_scantype
    ENDSWITCH
 
 	help, ptr_swath
