@@ -1037,7 +1037,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ncfile = gen_dpr_geo_match_netcdf_v7( fname_netCDF, numDPRrays, $
                                       tocdf_elev_angle, ufstruct, $
                                       DPR_scantype, DPR_version, $
-;                                      STRUPCASE(DPR_scantype), DPR_version, $
+;                                      DPR_scantype, DPR_version, $
                                       siteID, infileNameArr, $
                                       DECLUTTERED=decluttered, $
                                       NON_PPS_FILES=non_pps_files )
@@ -1757,12 +1757,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
            ; generate the GRtoDPR netcdf matchup file path/name
             IF N_ELEMENTS(ncnameadd) EQ 1 THEN BEGIN
                fname_netCDF = NC_OUTDIR+'/'+DPR_GEO_MATCH_PRE+siteID+'.'+DATESTAMP+'.' $
-                              +orbit+'.'+DPR_version+'.'+STRUPCASE(Instrument_ID)+'.' $
-                              +STRUPCASE(DPR_scantype)+'.'+verstr+'.'+ncnameadd+NC_FILE_EXT
+                              +orbit+'.'+DPR_version+'.'+Instrument_ID+'.' $
+                              +DPR_scantype+'.'+verstr+'.'+ncnameadd+NC_FILE_EXT
             ENDIF ELSE BEGIN
                fname_netCDF = NC_OUTDIR+'/'+DPR_GEO_MATCH_PRE+siteID+'.'+DATESTAMP+'.' $
-                              +orbit+'.'+DPR_version+'.'+STRUPCASE(Instrument_ID)+'.' $
-                              +STRUPCASE(DPR_scantype)+'.'+verstr+NC_FILE_EXT
+                              +orbit+'.'+DPR_version+'.'+Instrument_ID+'.' $
+                              +DPR_scantype+'.'+verstr+NC_FILE_EXT
             ENDELSE
 
             dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
