@@ -333,8 +333,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
        ELSE: message, 'dpr2gr_prematch: error, unknown scan type '+DPR_scantype
    ENDSWITCH
 
-	help, ptr_swath
-	help, ptr_swath.SWATHHEADER
    ; get the number of scans in the dataset
    SAMPLE_RANGE = ptr_swath.SWATHHEADER.NUMBERSCANSBEFOREGRANULE $
                 + ptr_swath.SWATHHEADER.NUMBERSCANSGRANULE $
@@ -1562,7 +1560,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                  ; 2ADPR has all HS and FS scan/swath types, read them all at once
                  DPR_scans = ['HS', 'FS_Ku', 'FS_Ka']
                  print, '' & print, "Reading file: ", file_2adpr & print, ''
-                 dpr_data = read_2adpr_hdf5_v7(file_2adpr, debug=1)
+                 dpr_data = read_2adpr_hdf5_v7(file_2adpr)
                  dpr_file_read = origFileDPRName
                  break
               END
