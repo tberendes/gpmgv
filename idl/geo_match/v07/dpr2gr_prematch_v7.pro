@@ -1740,8 +1740,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
            		  end
            'FS_Ku' : data_GR2DPR = DATA_FS_Ku
            'FS_Ka' : data_GR2DPR = DATA_FS_Ka
+           else: message, 'unknown scan type: '+DPR_scantype
          ENDCASE
 
+		help, data_GR2DPR
         ; check for the case of no footprints for the swath
          IF data_GR2DPR.NUMRAYS GT 0 THEN BEGIN
            ; generate the output netcdf matchup file path
