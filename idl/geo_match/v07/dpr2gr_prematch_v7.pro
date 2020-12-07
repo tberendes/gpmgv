@@ -332,6 +332,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
              END
    ENDSWITCH
 
+	help, ptr_swath
+	help, ptr_swath.SWATHHEADER
    ; get the number of scans in the dataset
    SAMPLE_RANGE = ptr_swath.SWATHHEADER.NUMBERSCANSBEFOREGRANULE $
                 + ptr_swath.SWATHHEADER.NUMBERSCANSGRANULE $
