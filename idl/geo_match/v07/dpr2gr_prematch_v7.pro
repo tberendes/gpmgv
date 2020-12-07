@@ -320,7 +320,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                 ptr_swath = dpr_data.HS
                 break
              END
-      'FS_ka' : indexKuKa = 1 ; set to Ka
+      'FS_Ka' : indexKuKa = 1 ; set to Ka
       'FS_Ku' : DO_KUKA = 1 ; KuKa will already be default to Ku
       'FS' : BEGIN
                 RAYSPERSCAN = RAYSPERSCAN_FS
