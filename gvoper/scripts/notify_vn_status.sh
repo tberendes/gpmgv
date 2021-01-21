@@ -41,6 +41,8 @@
 #      but works.
 #    08/25/16 - Morris
 #    - Added orbit definition file processing reporting to script.
+#    01/21/21 - Berendes
+     - Changed ftp_url to ftps_url 
 #
 ################################################################################
 #        1         2         3         4         5         6         7         8
@@ -91,7 +93,7 @@ function extract_run_info() {
 #                                cat $1 | grep ERROR | grep -v table | tee -a $VN_STATUS_FILE ;;
 
      get_PPS_CS_data ) echo "PPS Subset files download status:" | tee -a $VN_STATUS_FILE
-                       for filetypes in `cat $1 | grep Got | grep -v ftp_url |  cut -f3- -d '-' \
+                       for filetypes in `cat $1 | grep Got | grep -v ftps_url |  cut -f3- -d '-' \
                                         | cut -f 1-4 -d '.' | sort -u`
                          do
                            numtype=`cat $1 | grep Got | grep $filetypes | wc -l`
