@@ -1,4 +1,5 @@
 -- fill a temp table with all rainy overpass info
+-- As of 2/20 now using 20 grid cell threshold
 
 select a.sat_id, a.radar_id, a.orbit, a.event_num, a.overpass_time, b.value/19.61 as pct_overlap, (c.value/b.value)*100 as pct_overlap_conv, (d.value/b.value)*100 as pct_overlap_strat, e.value as num_overlap_Rain_certain into temp rainy100by100temp
 from overpass_event a
