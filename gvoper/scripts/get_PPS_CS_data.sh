@@ -9,7 +9,7 @@
 #
 #       arthurhou.pps.eosdis.nasa.gov
 #
-#    as listed in daily ftp_url files posted there by the PPS.  Filters out CS
+#    as listed in daily ftps_url files posted there by the PPS.  Filters out CS
 #    file types not of interest to the GPM Validation Network.
 #
 #  ROUTINES CALLED
@@ -78,6 +78,7 @@
 #    04/04/18      - Berendes added Azores to subsets 
 #    07/10/18      - Berendes added Serpong to TRMM subsets 
 #    12/12/18      - Berendes added Argentina to subsets 
+#    1/21/21	   - Berendes changed to new ftps setup from PPS
 #
 #                             AUS-East and AUS-West for v8 reprocessing.
 #
@@ -445,23 +446,23 @@ GOT_FILES='n'    # added this on 11/20/15 after finding this bug in other script
 
 if [ -s $FILES2DO ]
   then
-    echo "Getting PPS ftp_url_YYYYMMDDhhmm.txt files:" | tee -a $LOG_FILE
+    echo "Getting PPS ftps_url_YYYYMMDDhhmm.txt files:" | tee -a $LOG_FILE
 #    ${BIN_DIR}/getPPSftpListings.sh
     ${BIN_DIR}/getPPSftpListings_wget.sh
     if [ -s ${LOG_DIR}/PPSftpListings.${rundate}.log ]
       then
         # we have a valid mirror log file, check if for successful retrieval(s)
 #        grep Got ${LOG_DIR}/PPSftpListings.${rundate}.log
-        grep ftp_url_ ${LOG_DIR}/PPSftpListings.${rundate}.log
+        grep ftps_url_ ${LOG_DIR}/PPSftpListings.${rundate}.log
         if [ $? -eq 0 ]
           then
-            # grab the names of the downloaded ftp_url files and write to FILES2DO
+            # grab the names of the downloaded ftps_url files and write to FILES2DO
 #            URLFILES=`grep Got ${LOG_DIR}/PPSftpListings.${rundate}.log | cut -f2 -d ' '`
 # TAB 8/6/20 modified to handle wget output
-            URLFILES=`grep ftp_url_ ${LOG_DIR}/PPSftpListings.${rundate}.log | cut -f4 -d" "`
+            URLFILES=`grep ftps_url_ ${LOG_DIR}/PPSftpListings.${rundate}.log | cut -f4 -d" "`
         fi
       else
-        echo "No valid ftp_url files downloaded by getPPSftpListings.sh, exiting."
+        echo "No valid ftps_url files downloaded by getPPSftpListings.sh, exiting."
         echo "Mark incomplete in database:" | tee -a $LOG_FILE
         echo "" | tee -a $LOG_FILE
         echo "UPDATE appstatus SET status = '$MISSING' WHERE \
@@ -478,10 +479,12 @@ if [ -s $FILES2DO ]
 
     for fdate in `echo $URLFILES`
       do
-        # TAB 8/6/20 added to strip off wget URL from ftp_url filename
+        # TAB 8/6/20 added to strip off wget URL from ftps_url filename
+        # 1/21/21 modify string positions for ftps_url instead of ftp_url
 		fdate=`basename $fdate`
         #  Get the complete representation of date: YYYYMMDD
-        fulldate=`echo ${fdate} | cut -c 9-16`
+#        fulldate=`echo ${fdate} | cut -c 9-16`
+        fulldate=`echo ${fdate} | cut -c 10-17`
         #  Get the subdirectory on the ftp site under which our day's data are located,
         #  in the format YYYY/MM/DD
         daydir=`echo $fulldate | awk '{print substr($1,1,4)"/"substr($1,5,2)"/"substr($1,7,2)}'`
@@ -489,11 +492,11 @@ if [ -s $FILES2DO ]
         wgetCStypes4date $fdate $TMP_CS_DATA
         if [ $? -eq 1 ]
           then
-            echo "Got data from ftp_url file $fdate" | tee -a $LOG_FILE
+            echo "Got data from ftps_url file $fdate" | tee -a $LOG_FILE
             GOT_FILES='y'
         else
             echo "" | tee -a $LOG_FILE
-            echo "No ftp_url file or failed data files for $fdate" | tee -a $LOG_FILE
+            echo "No ftps_url file or failed data files for $fdate" | tee -a $LOG_FILE
             echo "Mark incomplete in database:" | tee -a $LOG_FILE
             echo "" | tee -a $LOG_FILE
 	    echo "UPDATE appstatus SET status = '$INCOMPLETE' WHERE \

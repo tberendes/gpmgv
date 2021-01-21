@@ -40,6 +40,7 @@
 #    - Changed LOG_DIR to /data/logs and TMP_DIR to /data/tmp
 #    07/29/2020     - Berendes
 #    - Replaced mirror package with wget
+#    1/21/21	   - Berendes changed to new ftps setup from PPS
 #
 ################################################################################
 
@@ -172,7 +173,7 @@ until [ "$runagain" = 'n' ]
      #${MIRCMD} | tee -a $LOG_FILE
      #wget --user=${USER} --password="${PW}" -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftp_url*" ${FTPS} | tee -a $LOG_FILE
 
-     wget --user=${USER} --password="${PW}" --ftps-fallback-to-ftp -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftp_url*" ${FTPS}
+     wget --user=${USER} --password="${PW}" --ftps-fallback-to-ftp -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftps_url*" ${FTPS}
 	 status = $?
 	 
 # bailout mechanism for testing
@@ -211,7 +212,7 @@ length=${#FTPS}
 ((length=$length+1))
                         
 # cat list of downloaded ftp_url files to main log file
-cat $MIR_LOG_FILE | fgrep ${FPTS}ftp_url | cut -f4 -d" " | cut -c$length- >> $LOG_FILE
+cat $MIR_LOG_FILE | fgrep ${FPTS}ftps_url | cut -f4 -d" " | cut -c$length- >> $LOG_FILE
 
 # check exit status of wget 
 
@@ -287,7 +288,7 @@ if [ -s $MIR_LOG_FILE ]
     mail -s 'mirror update' -c "denise.a.berendes@nasa.gov" todd.a.berendes@nasa.gov < $MIR_LOG_FILE
     echo "" | tee -a $LOG_FILE
     # see if any data files were actually downloaded, exit now if none
-    grep ftp_url ${MIR_LOG_FILE} > /dev/null
+    grep ftps_url ${MIR_LOG_FILE} > /dev/null
     if [ $? != 0 ]
       then
         echo "No ftp listings files downloaded; exit." | tee -a $LOG_FILE

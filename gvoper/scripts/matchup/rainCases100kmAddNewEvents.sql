@@ -5,7 +5,7 @@ from overpass_event a
     JOIN event_meta_numeric b ON a.event_num = b.event_num AND b.metadata_id = 250199
     JOIN event_meta_numeric c ON a.event_num = c.event_num AND c.metadata_id = 230102
     JOIN event_meta_numeric d ON a.event_num = d.event_num AND d.metadata_id = 230101
-    JOIN event_meta_numeric e ON a.event_num = e.event_num AND e.metadata_id = 251105 and e.value >= 100 order by 4;
+    JOIN event_meta_numeric e ON a.event_num = e.event_num AND e.metadata_id = 251105 and e.value >= 20 order by 4;
 
 -- select all cases that aren't already in the permanent table, save in 2nd temp table:
 
