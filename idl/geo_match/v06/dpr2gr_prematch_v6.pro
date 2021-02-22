@@ -379,6 +379,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    
    ; TAB 2/16/21 added heightZeroDeg from VER
    IF PTR_VALID(ptr_swath.PTR_VER) THEN BEGIN
+      help, ptr_swath
       heightZeroDeg = (*ptr_swath.PTR_VER).HEIGHTZERODEG   
    ENDIF ELSE BEGIN
       message, "Invalid pointer to PTR_VER.", /INFO
