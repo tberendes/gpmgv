@@ -57,13 +57,13 @@ FUNCTION get_dpr_ver_group, group_id, prodgroup, READ_ALL=read_all
    Catch, /Cancel
 
    nmbrs = h5g_get_nmembers(group_id, gname)
-;   print, "No. Members = ", nmbrs
+   print, "VER group No. Members = ", nmbrs
    ; extract the 5 expected date/time field values one by one
    IF nmbrs GE 5 THEN BEGIN
       dtnames=STRARR(nmbrs)
       for immbr = 0, nmbrs-1 do begin
          dtnames[immbr] = h5g_get_member_name(group_id, gname, immbr)
-;        print, dtnames[immbr]
+        print, dtnames[immbr]
          dtID = h5d_open(ss_group_id, dtnames[immbr])
          CASE dtnames[immbr] OF
                    'attenuationNP' : IF all THEN attenuationNP = h5d_read(dtID)
