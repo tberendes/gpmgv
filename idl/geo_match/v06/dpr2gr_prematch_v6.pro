@@ -290,7 +290,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                NON_PPS_FILES=non_pps_files, DECLUTTER=declutter
 
 ; for debugging
-!EXCEPT=2
+;!EXCEPT=2
 
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc
@@ -374,6 +374,14 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       heightStormTop = (*ptr_swath.PTR_PRE).heightStormTop
    ENDIF ELSE BEGIN
       message, "Invalid pointer to PTR_PRE.", /INFO
+      goto, bailOut
+   ENDELSE
+   
+   ; TAB 2/16/21 added heightZeroDeg from VER
+   IF PTR_VALID(ptr_swath.PTR_VER) THEN BEGIN
+      heightZeroDeg = (*ptr_swath.PTR_VER).HEIGHTZERODEG   
+   ENDIF ELSE BEGIN
+      message, "Invalid pointer to PTR_VER.", /INFO
       goto, bailOut
    ENDELSE
 
@@ -551,6 +559,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       ; TAB 9/30/20 
       tocdf_pwat_integ_liquid = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_pwat_integ_solid = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_heightZeroDeg = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
 
      ; Create new subarrays of dimensions (numDPRrays, num_elevations_out) for each
      ;   3-D science and status variable: 
@@ -674,6 +683,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          ; TAB 9/30/20 
       	 tocdf_pwat_integ_liquid[prgoodidx] = pwat_integ_liquid[pr_idx_2get]
       	 tocdf_pwat_integ_solid[prgoodidx] = pwat_integ_solid[pr_idx_2get]
+      	 todcf_heightZeroDeg[prgoodidx] = heightZeroDeg[pr_idx_2get]
          
      ENDIF ELSE BEGIN
          PRINT, ""
@@ -700,6 +710,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          ; TAB 9/30/20
          tocdf_pwat_integ_liquid[predgeidx] = FLOAT_OFF_EDGE
       	 tocdf_pwat_integ_solid[predgeidx] = FLOAT_OFF_EDGE
+      	 tocdf_heightZeroDeg[predgeidx] = FLOAT_OFF_EDGE
          
       ENDIF
 
@@ -1081,6 +1092,9 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'pwatIntegrated_liquid', tocdf_pwat_integ_liquid
    NCDF_VARPUT, ncid, 'pwatIntegrated_solid', tocdf_pwat_integ_solid   
     NCDF_VARPUT, ncid, 'have_pwatIntegrated', DATA_PRESENT    ; data presence flag
+
+   NCDF_VARPUT, ncid, 'heightZeroDeg', tocdf_heightZeroDeg       ; data
+    NCDF_VARPUT, ncid, 'have_heightZeroDeg', DATA_PRESENT    ; data presence flag
 
 ;  Write sweep-level results/flags to netcdf file & close it up
 

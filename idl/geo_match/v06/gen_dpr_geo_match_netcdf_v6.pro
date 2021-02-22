@@ -107,7 +107,7 @@ FUNCTION gen_dpr_geo_match_netcdf_v6, geo_match_nc_file, numpts, elev_angles, $
 @dpr_params.inc  ; for the type-specific fill values
 
 ; for debugging
-!EXCEPT=2
+;!EXCEPT=2
 
 ; 8/30/18 TAB updated version to 1.22 from 1.21
 ;GEO_MATCH_FILE_VERSION=1.22
@@ -503,6 +503,11 @@ havestmtopvarid = ncdf_vardef(cdfid, 'have_heightStormTop', /short)
 ncdf_attput, cdfid, havestmtopvarid, 'long_name', $
              'data exists flag for heightStormTop'
 ncdf_attput, cdfid, havestmtopvarid, '_FillValue', NO_DATA_PRESENT
+
+haveheightZeroDegvarid = ncdf_vardef(cdfid, 'have_heightZeroDeg', /short)
+ncdf_attput, cdfid, haveheightZeroDegvarid, 'long_name', $
+             'data exists flag for heightZeroDeg'
+ncdf_attput, cdfid, haveheightZeroDegvarid, '_FillValue', NO_DATA_PRESENT
 
 havebbvarid = ncdf_vardef(cdfid, 'have_BBheight', /short)
 ncdf_attput, cdfid, havebbvarid, 'long_name', 'data exists flag for BBheight'
@@ -1130,6 +1135,14 @@ pwatIntegrated_solidvarid = ncdf_vardef(cdfid, 'pwatIntegrated_solid', [fpdimid]
 ncdf_attput, cdfid, pwatIntegrated_solidvarid, 'long_name', $
             'Precipitation water vertically integrated'
 ncdf_attput, cdfid, pwatIntegrated_solidvarid, '_FillValue', -9999.9
+
+; TAB 2/16/21 added heightZeroDeg
+heightZeroDegvarid = ncdf_vardef(cdfid, 'heightZeroDeg', [fpdimid])
+ncdf_attput, cdfid, heightZeroDegvarid, 'long_name', $
+            'Height of the level of 0 degree centigrade (msl)'
+ncdf_attput, cdfid, heightZeroDegvarid, '_FillValue', -9999.9
+ncdf_attput, cdfid, heightZeroDegvarid, 'units', 'meters'
+
 
 ; Data time/location variables
 
