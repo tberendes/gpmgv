@@ -68,7 +68,8 @@ FUNCTION get_dpr_ver_group, group_id, prodgroup, READ_ALL=read_all
          CASE dtnames[immbr] OF
                    'attenuationNP' : IF all THEN attenuationNP = h5d_read(dtID)
                       'binZeroDeg' : IF all THEN binZeroDeg = h5d_read(dtID)
-                   'heightZeroDeg' : IF all THEN heightZeroDeg = h5d_read(dtID)
+;                   'heightZeroDeg' : IF all THEN heightZeroDeg = h5d_read(dtID)
+                   'heightZeroDeg' : heightZeroDeg = h5d_read(dtID)
                            'piaNP' : piaNP = h5d_read(dtID)
             'sigmaZeroNPCorrected' : IF all THEN sigmaZeroNPCorrected = $
                                      h5d_read(dtID)
