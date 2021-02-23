@@ -99,7 +99,8 @@ FUNCTION get_dpr_ver_group, group_id, prodgroup, READ_ALL=read_all
                     sigmaZeroNPCorrected : sigmaZeroNPCorrected }
    ENDIF ELSE BEGIN
       VER_struc = { source : label, $
-                     piaNP : piaNP }
+                    heightZeroDeg : heightZeroDeg, $
+                    piaNP : piaNP }
    ENDELSE
 
 return, VER_struc
