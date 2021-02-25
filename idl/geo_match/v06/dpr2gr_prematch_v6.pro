@@ -338,7 +338,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       prlons = (*ptr_swath.PTR_DATASETS).LONGITUDE
       prlats = (*ptr_swath.PTR_DATASETS).LATITUDE
    ENDIF ELSE BEGIN
-      message, "Invalid pointer to PTR_DATASETS.", /INFO
+      message, "IDL Error Exit: Invalid pointer to PTR_DATASETS.", /INFO
       goto, bailOut
    ENDELSE
 
@@ -347,7 +347,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       bbstatus = (*ptr_swath.PTR_CSF).QUALITYBB       ; got to convert to TRMM?
       rainType = (*ptr_swath.PTR_CSF).TYPEPRECIP      ; got to convert to TRMM?
    ENDIF ELSE BEGIN
-      message, "Invalid pointer to PTR_CSF.", /INFO
+      message, "IDL Error Exit: Invalid pointer to PTR_CSF.", /INFO
       goto, bailOut
    ENDELSE
    idxrntypedefined = WHERE(rainType GE 0, countrndef)
@@ -360,7 +360,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    IF PTR_VALID(ptr_swath.PTR_FLG) THEN BEGIN
       qualityData = (*ptr_swath.PTR_FLG).QUALITYDATA  ; new variable to deal with
    ENDIF ELSE BEGIN
-      message, "Invalid pointer to PTR_FLG.", /INFO
+      message, "IDL Error Exit: Invalid pointer to PTR_FLG.", /INFO
       goto, bailOut
    ENDELSE
 
@@ -373,7 +373,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       localZenithAngle = (*ptr_swath.PTR_PRE).localZenithAngle
       heightStormTop = (*ptr_swath.PTR_PRE).heightStormTop
    ENDIF ELSE BEGIN
-      message, "Invalid pointer to PTR_PRE.", /INFO
+      message, "IDL Error Exit: Invalid pointer to PTR_PRE.", /INFO
       goto, bailOut
    ENDELSE
    
@@ -382,7 +382,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       ; help, *ptr_swath.PTR_VER
       heightZeroDeg = (*ptr_swath.PTR_VER).HEIGHTZERODEG   
    ENDIF ELSE BEGIN
-      message, "Invalid pointer to PTR_VER.", /INFO
+      message, "IDL Error Exit: Invalid pointer to PTR_VER.", /INFO
       goto, bailOut
    ENDELSE
 
@@ -406,7 +406,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       pwat_integ_liquid = REFORM( (*ptr_swath.PTR_SLV).precipWaterIntegrated[0,*,*] )
       pwat_integ_solid = REFORM( (*ptr_swath.PTR_SLV).precipWaterIntegrated[1,*,*] )
    ENDIF ELSE BEGIN
-      message, "Invalid pointer to PTR_SLV.", /INFO
+      message, "IDL Error Exit: Invalid pointer to PTR_SLV.", /INFO
       goto, bailOut
    ENDELSE
 
@@ -1035,7 +1035,7 @@ PRO dpr2gr_prematch_scan_v6, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                                       NON_PPS_FILES=non_pps_files )
 
    IF ( fname_netCDF EQ "NoGeoMatchFile" ) THEN BEGIN
-      message, "Error in creating output netCDF file "+fname_netCDF, /INFO
+      message, "IDL Error Exit: Error in creating output netCDF file "+fname_netCDF, /INFO
       goto, bailOut
    ENDIF
 
@@ -1361,14 +1361,14 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    parsed=STRSPLIT( dataPR, '|', /extract )
    parseoffset = 0
    IF N_ELEMENTS(parsed) LT 8 THEN BEGIN
-      message, "Incomplete DPR line in control file: "+dataPR, /INFO
+      message, "IDL Error Exit: Incomplete DPR line in control file: "+dataPR, /INFO
       goto, bailOut
    ENDIF
 
    orbit = parsed[0]
    nsites = FIX( parsed[1] )
    IF (nsites LE 0 OR nsites GT 99) THEN BEGIN
-      PRINT, "Illegal number of GR sites in control file: ", parsed[1]
+      PRINT, "IDL Error Exit: Illegal number of GR sites in control file: ", parsed[1]
       PRINT, "Line: ", dataPR
       PRINT, "Quitting processing."
       GOTO, bailOut
@@ -1519,7 +1519,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
        'KA' : BEGIN
                  ; do we have a 2AKA filename?
                  IF FILE_BASENAME(origFileKaName) EQ 'no_2AKA_file' THEN BEGIN
-                    message, "KA specified on control file line, but no " + $
+                    message, "IDL Error Exit: KA specified on control file line, but no " + $
                              "valid 2A-KA file name: " + dataPR, /INFO
                     goto, bailOut
                  ENDIF
@@ -1531,7 +1531,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
               END
        'KU' : BEGIN
                  IF FILE_BASENAME(origFileKuName) EQ 'no_2AKU_file' THEN BEGIN
-                    message, "KU specified on control file line, but no " + $
+                    message, "IDL Error Exit: KU specified on control file line, but no " + $
                              "valid 2A-KU file name: " + dataPR, /INFO
                     goto, bailOut
                  ENDIF
@@ -1543,7 +1543,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
               END
       'DPR' : BEGIN
                  IF FILE_BASENAME(origFileDPRName) EQ 'no_2ADPR_file' THEN BEGIN
-                    message, "DPR specified on control file line, but no " + $
+                    message, "IDL Error Exit: DPR specified on control file line, but no " + $
                              "valid 2ADPR file name: " + dataPR, /INFO
                     goto, bailOut
                  ENDIF
@@ -1557,7 +1557,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 
    ; check dpr_data structure for read failures
    IF SIZE(dpr_data, /TYPE) NE 8 THEN BEGIN
-      message, "Error reading data from: "+dpr_file_read, /INFO
+      message, "IDL Error Exit: Error reading data from: "+dpr_file_read, /INFO
       goto, bailOut
    ENDIF ELSE PRINT, "Extracting data fields from dpr_data structure."
    print, ''
@@ -1662,7 +1662,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       GRFILES = FILE_SEARCH(gr_netcdf_file + "*")
       IF GRFILES[0] EQ '' THEN BEGIN
          message, "Cannot find GR netCDF file: "+gr_netcdf_file, /INFO
-         goto, bailOut
+         goto, nextGRfile
+         ;goto, bailOut
       ENDIF
       IF N_ELEMENTS(GRFILES) NE 1 THEN BEGIN
          print, ''

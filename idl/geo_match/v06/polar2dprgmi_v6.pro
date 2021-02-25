@@ -300,7 +300,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    orbit = parsed[0]
    nsites = FIX( parsed[1] )
    IF (nsites LE 0 OR nsites GT 99) THEN BEGIN
-      PRINT, "Illegal number of GR sites in control file: ", parsed[1]
+      PRINT, "IDL Error Exit: Illegal number of GR sites in control file: ", parsed[1]
       PRINT, "Line: ", dataPR
       PRINT, "Quitting processing."
       GOTO, bailOut

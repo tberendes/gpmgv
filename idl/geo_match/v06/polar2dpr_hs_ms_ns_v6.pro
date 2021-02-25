@@ -261,7 +261,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    orbit = parsed[0]
    nsites = FIX( parsed[1] )
    IF (nsites LE 0 OR nsites GT 99) THEN BEGIN
-      PRINT, "Illegal number of GR sites in control file: ", parsed[1]
+      PRINT, "IDL Error Exit: Illegal number of GR sites in control file: ", parsed[1]
       PRINT, "Line: ", dataPR
       PRINT, "Quitting processing."
       GOTO, bailOut
@@ -540,7 +540,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    z_vol_num = get_site_specific_z_volume( siteID, radar, gv_z_field )
    IF ( z_vol_num LT 0 )  THEN BEGIN
       PRINT, ""
-      PRINT, "Error finding volume in radar structure from file ", file_1CUF
+      PRINT, "Error finding reflectivity volume in radar structure from file ", file_1CUF
       PRINT, ""
       GOTO, nextGRfile
    ENDIF ELSE ufstruct.CZ_ID = gv_z_field
