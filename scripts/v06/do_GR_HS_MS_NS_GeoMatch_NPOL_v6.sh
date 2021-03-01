@@ -459,7 +459,7 @@ echo " "
 #date | tee -a $LOG_FILE 2>&1  # time stamp for query performance evaluation
 
     
-if [ "$DO_NPOL" = "1" ]
+if [ "$DO_NPOL" = "0" ]
   then
    collate="collate_satsubprod_1cuf"	
 else
