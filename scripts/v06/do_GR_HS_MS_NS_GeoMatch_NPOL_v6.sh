@@ -684,8 +684,8 @@ ls -al $outfileall
 
 ##$#@$##############################################
 # TESING>>>>>>>>>>>>>>>>>>>>>>>
-echo "Exiting for test..."
-exit  # if uncommented, creates the control file for first date, and exits
+#echo "Exiting for test..."
+#exit  # if uncommented, creates the control file for first date, and exits
 
     if [ -s $outfileall ]
       then
