@@ -384,8 +384,10 @@ dateStart=`echo $ymdstart | awk \
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
 
-dateStart='2020-02-01'
-dateEnd='2020-02-02'
+#dateStart='2020-02-01'
+#dateEnd='2020-02-02'
+dateStart='2016-07-13'
+dateEnd='2016-07-14'
 
 echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
