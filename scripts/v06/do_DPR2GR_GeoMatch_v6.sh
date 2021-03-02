@@ -1,7 +1,7 @@
 #!/bin/sh
 ###############################################################################
 #
-# do_DPR2GR_GeoMatch_v6.sh    Morris/SAIC/GPM GV    March 2016
+# do_DPR2GR_GeoMatch_NPOL_v6.sh    Morris/SAIC/GPM GV    March 2016
 #
 # Wrapper to do DPR-GV NetCDF geometric matchups for DPR 2A-[DPR|Ka|Ku] files
 # already received and cataloged, for cases meeting predefined criteria.  This
@@ -40,7 +40,7 @@
 # SYNOPSIS
 # --------
 #
-#    do_DPR2GR_GeoMatch_v6.sh [OPTION]...
+#    do_DPR2GR_GeoMatch_NPOL_v6.sh [OPTION]...
 #
 #
 #    OPTIONS/ARGUMENTS:
@@ -67,6 +67,7 @@
 #                           the database says they have been run already (see NOTE).
 #                           Takes no argument value.
 #
+#	-n	MD or WA			Specify NPOL MD or WA					
 # NOTE:  When running dates that might have already had DPR-GV matchup sets
 #        run, the child script do_DPR2GR_geo_matchup4date_v6.sh will skip
 #        processing for these dates, as a check of the 'appstatus' table
@@ -105,6 +106,7 @@
 # 6/19/2017   Morris       - Changed default PPS_VERSION value to "V05A".
 # 8/31/2018   Berendes     - Added new snow equivalent RR fields and changed
 #							 version to 1.22
+#						   - force_flag is default behavior, so is now redundant
 #
 ###############################################################################
 
@@ -181,13 +183,14 @@ SKIP_NEWRAIN=1
 
 # If FORCE_MATCH is set to 1, ignore appstatus for date(s) and force (re)run of
 # matchups by child script do_DPR2GR_geo_matchup4date_v6.sh:
-FORCE_MATCH=0
-
+#FORCE_MATCH=0
+NPOL_SITE=""
+DO_NPOL=0
 # *************  UNSET THIS! *******************
 SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
 
 # override coded defaults with any optional user-specified values
-while getopts i:v:p:m:f option
+while getopts i:v:p:m:n:f option
   do
     case "${option}"
       in
@@ -195,10 +198,13 @@ while getopts i:v:p:m:f option
         v) PPS_VERSION=${OPTARG};;
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
-        f) FORCE_MATCH=1;;
+        n) NPOL_SITE=${OPTARG}
+           DO_NPOL=1;;
+#        f) FORCE_MATCH=1;;
         *) echo "Usage: "
            echo "do_DPR2GR_GeoMatch_v6.sh -i INSTRUMENT -v PPS_Version -p ParmSet " \
-                "-m GeoMatchVersion -f"
+                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA)"
+#                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA) -f"
            exit 1
     esac
 done
@@ -311,7 +317,7 @@ echo "PARAMETER_SET: $PARAMETER_SET" | tee -a $LOG_FILE
 echo "ALGORITHM: $ALGORITHM" | tee -a $LOG_FILE
 #echo "SWATH: $SWATH" | tee -a $LOG_FILE
 #echo "SKIP_NEWRAIN: $SKIP_NEWRAIN" | tee -a $LOG_FILE
-echo "FORCE_MATCH: $FORCE_MATCH" | tee -a $LOG_FILE
+#echo "FORCE_MATCH: $FORCE_MATCH" | tee -a $LOG_FILE
 echo "ITE_or_Operational: $ITE_or_Operational" | tee -a $LOG_FILE
 echo "COMBO: $COMBO" | tee -a $LOG_FILE
 echo "" | tee -a $LOG_FILE
@@ -378,8 +384,10 @@ dateStart=`echo $ymdstart | awk \
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
 
-dateStart='2020-02-01'
-dateEnd='2020-02-02'
+#dateStart='2020-02-01'
+#dateEnd='2020-02-02'
+dateStart='2016-07-13'
+dateEnd='2016-07-14'
 
 echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
@@ -392,6 +400,12 @@ echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 # have no routine ground radar acquisition (probably need to add to this list
 # of excluded subsets!).
 
+if [ "$DO_NPOL" = "1" ]
+  then
+	site_filter="AND C.RADAR_ID IN ('${NPOL_SITE}')"	
+else
+	site_filter=""
+fi
 DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
 "SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
 from eventsatsubrad_vw c JOIN orbit_subset_product o \
@@ -399,7 +413,7 @@ from eventsatsubrad_vw c JOIN orbit_subset_product o \
    and o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
    and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
    and c.overpass_time at time zone 'UTC' > '${dateStart}' \
-   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
+   and c.overpass_time at time zone 'UTC' < '${dateEnd}' ${site_filter} \
 JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 
 #echo "2014-03-19" > $datelist   # edit/uncomment to just run a specific date
@@ -412,6 +426,18 @@ echo " "
 
 #date | tee -a $LOG_FILE 2>&1  # time stamp for query performance evaluation
 
+    
+if [ "$DO_NPOL" = "0" ]
+  then
+	collate="collate_satsubprod_1cuf"	
+else
+   if [ $NPOL_SITE = "NPOL_WA" ]
+     then
+ 	   collate="collate_npol_wa_1cuf"	       
+   else
+ 	   collate="collate_npol_md_1cuf"	
+   fi
+fi
 # Step thru the dates one at a time, build an IDL control file for each date,
 # and run the day's matchups.
 
@@ -424,13 +450,13 @@ for thisdate in `cat $datelist`
    # ['filelist'] ('outfile') gets overwritten each time psql is called in the
    # loop over the [dates] (files for a date), so their content is copied in
    # append manner to 'outfileall', which is run-date-specific.
-    filelist=${TMP_DIR}/DPR_filelist4geoMatch_temp.txt
-    outfile=${TMP_DIR}/DPR_files_sites4geoMatch_temp.txt
+    filelist=${TMP_DIR}/DPR2GR_filelist4geoMatch_temp.txt
+    outfile=${TMP_DIR}/DPR2GR_files_sites4geoMatch_temp.txt
 
    # tag is used to distinguish the type and date of matchups to be executed
     tag=${ALGORITHM}.${SWATH}.${PPS_VERSION}.${yymmdd}
    # define the pathname of the final control file for the date and type
-    outfileall=${TMP_DIR}/DPR_files_sites4geoMatch.${tag}.txt
+    outfileall=${TMP_DIR}/DPR2GR_files_sites4geoMatch.${tag}.txt
 
     if [ -s $outfileall ]
       then
@@ -455,7 +481,7 @@ for thisdate in `cat $datelist`
      JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
         AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
-        AND d.version = '$PPS_VERSION' \
+        AND d.version = '$PPS_VERSION' ${site_filter} \
        JOIN rainy100inside100 r on (c.event_num=r.event_num) \
      where cast(nominal at time zone 'UTC' as date) = '${thisdate}' \
      group by 1,3,4,5,6,7,8 \
@@ -475,7 +501,6 @@ for thisdate in `cat $datelist`
    # - Again, we leave out the usual clause "left outer join geo_match_product",
    #   since SWATH="All" has no meaning to the entries in this table and the
    #   returned pathname would always be null
-
     for row in `cat $filelist | sed 's/ /_/'`
       do
         orbit=`echo $row | cut -f1 -d '|'`
@@ -486,13 +511,13 @@ for thisdate in `cat $datelist`
             b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
           into temp timediftmp
           from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
-	    collate_satsubprod_1cuf c \
+	    ${collate} c \
           where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
             and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num\
             and a.orbit = ${orbit} and c.subset = '${subset}'
             and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
             and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
-            and c.version = '$PPS_VERSION' \
+            and c.version = '$PPS_VERSION' ${site_filter} \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
             from timediftmp group by 1 order by 1;

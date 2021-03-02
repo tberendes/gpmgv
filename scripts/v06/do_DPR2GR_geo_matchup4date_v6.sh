@@ -123,7 +123,7 @@
 #                  file to be run by IDL.
 #      1/24/20:    Berendes   FORCE_MATCH default set to "1" and removed FORCE_MATCH
 #                         clause from final check that causes DB field to be 
-#                         set to "missing" if FORCE_MATCH is used.  I belive this
+#                         set to "missing" if FORCE_MATCH is used.  I believe this
 #                         is a pre-existing bug, and the date check is unnecessary 
 #                         in our current processing scheme since the parent script
 #                         checks for duplicates on each processing date and doesn't 
