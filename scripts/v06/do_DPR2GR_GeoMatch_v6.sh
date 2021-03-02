@@ -68,6 +68,10 @@
 #                           Takes no argument value.
 #
 #	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
+#
+#	-s	"YYYY-MM-DD" 	    Specify starting date				
+#	-e	"YYYY-MM-DD" 	    Specify ending date				
+#
 # NOTE:  When running dates that might have already had DPR-GV matchup sets
 #        run, the child script do_DPR2GR_geo_matchup4date_v6.sh will skip
 #        processing for these dates, as a check of the 'appstatus' table
@@ -108,6 +112,7 @@
 #							 version to 1.22
 #						   - force_flag is default behavior, so is now redundant
 # 3/2/2021	Berendes		 Added NPOL logic
+#							 Added starting and ending date parameters
 #
 ###############################################################################
 
@@ -187,11 +192,13 @@ SKIP_NEWRAIN=1
 #FORCE_MATCH=0
 NPOL_SITE=""
 DO_NPOL=0
+DO_START_DATE=0
+DO_END_DATE=0
 
 SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
 
 # override coded defaults with any optional user-specified values
-while getopts i:v:p:m:n:f option
+while getopts i:v:p:m:n:s:e:f option
   do
     case "${option}"
       in
@@ -201,10 +208,15 @@ while getopts i:v:p:m:n:f option
         m) GEO_MATCH_VERSION=${OPTARG};;
         n) NPOL_SITE=${OPTARG}
            DO_NPOL=1;;
+        s) starting_date=${OPTARG}
+           DO_START_DATE=1;;
+        e) ending_date=${OPTARG}
+           DO_END_DATE=1;;
 #        f) FORCE_MATCH=1;;
         *) echo "Usage: "
            echo "do_DPR2GR_GeoMatch_v6.sh -i INSTRUMENT -v PPS_Version -p ParmSet " \
-                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA)"
+                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA)" \
+                " -s \"YYYY-MM-DD\" -e \"YYYY-MM-DD\""
 #                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA) -f"
            exit 1
     esac
@@ -380,6 +392,15 @@ ymdstart=`offset_date $ymd -30`
 dateStart=`echo $ymdstart | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 
+if [ "$DO_START_DATE" = "1" ]
+  then
+     dateStart=$starting_date
+fi
+if [ "$DO_END_DATE" = "1" ]
+  then
+     dateEnd=$ending_date
+fi
+
 # OK, override the automatic date setup above and just specify the start
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
@@ -387,8 +408,8 @@ dateStart=`echo $ymdstart | awk \
 
 #dateStart='2020-02-01'
 #dateEnd='2020-02-02'
-dateStart='2016-07-13'
-dateEnd='2016-07-14'
+#dateStart='2016-07-13'
+#dateEnd='2016-07-14'
 
 echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 

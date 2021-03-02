@@ -58,6 +58,9 @@
 #                           volume matches for different dates.  See the related
 #                           script: do_DPRGMI_GeoMatch_from_ControlFiles.sh
 #
+#	-s	"YYYY-MM-DD" 	    Specify starting date				
+#	-e	"YYYY-MM-DD" 	    Specify ending date				
+#
 # # NOTE:  When running dates that might have already had DPRGMI-GR matchup sets#         run, the called script will skip these dates, as the 'appstatus' table#         will say that the date has already been done.  Delete the entries#         from this table where app_id='geo_match_COMB', either for the date(s)#         to be run, or for all dates.  EXCEPTION:  If script is called with the#         -f option (e.g., "do_DPRGMI_GeoMatch_v6.sh -f"), then the status of prior#         runs for the set of dates configured in the script will be ignored and#         the matchups will be re-run, possibly overwriting the existing files.# 
 #
 # HISTORY
@@ -74,6 +77,8 @@
 #                         - Added logic to configure GV_BASE_DIR by user ID.
 #                         - Changed BIN_DIR to ${GV_BASE_DIR}/scripts/matchup
 #                           for user gvoper's usage.
+# 3/2/2021	Berendes		 Added NPOL logic
+#							 Added starting and ending date parameters
 #
 ###############################################################################
 
@@ -152,14 +157,21 @@ FORCE_MATCH=0    # if 1, ignore appstatus for date(s) and (re)run matchups
 DO_RHI=0         # if 1, then matchup to RHI UF files
 SKIP_MATCHUPS=0  # if 1, then skip matchups and just do control files
 
+DO_START_DATE=0
+DO_END_DATE=0
+
 # override coded defaults with user-specified values
-while getopts v:p:d:m:kfrc option
+while getopts v:p:d:m:s:e:kfrc option
   do
     case "${option}"
       in
         v) PPS_VERSION=${OPTARG};;
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
+        s) starting_date=${OPTARG}
+           DO_START_DATE=1;;
+        e) ending_date=${OPTARG}
+           DO_END_DATE=1;;
         k) SKIP_NEWRAIN=1;;
         f) FORCE_MATCH=1;;
         r) DO_RHI=1
@@ -167,7 +179,8 @@ while getopts v:p:d:m:kfrc option
            exit 1 ;;
         c) SKIP_MATCHUPS=1;;
         *) echo "Usage: "
-           echo "do_DPRGMI_GeoMatch_v6.sh -v PPS_Version -p ParmSet -m GeoMatchVersion -[k|f|r|c]"
+           echo "do_DPRGMI_GeoMatch_v6.sh -v PPS_Version -p ParmSet -m GeoMatchVersion -[k|f|r|c]" \
+                " -s YYYY-MM-DD -e YYYY-MM-DD"
            exit 1
     esac
 done
@@ -311,16 +324,25 @@ ymdstart=`offset_date $ymd -90`
 dateStart=`echo $ymdstart | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 
+if [ "$DO_START_DATE" = "1" ]
+  then
+     dateStart=$starting_date
+fi
+if [ "$DO_END_DATE" = "1" ]
+  then
+     dateEnd=$ending_date
+fi
+
 # OK, override the automatic date setup above and just specify the start
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
 # comment out the next 2 lines.
 
-dateStart='2020-02-01'
-dateEnd='2020-02-02'
+#dateStart='2020-02-01'
+#dateEnd='2020-02-02'
 
-
-echo "Running GRtoDPRGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
+#echo "Running GRtoDPRGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
+echo "Running GRtoDPRGMI matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
 # GET THE LIST OF QUALIFYING 'RAINY' DATES FOR THIS MATCHUP CONFIGURATION.
 # Exclude events for orbit subsets where we have no routine ground radar

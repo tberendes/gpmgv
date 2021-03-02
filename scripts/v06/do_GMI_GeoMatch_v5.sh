@@ -64,6 +64,10 @@
 #                           and overwrite any existing matchups for a date even if
 #                           the database says they have been run already (see NOTE).
 #                           Takes no argument value.
+#
+#	-s	"YYYY-MM-DD" 	    Specify starting date				
+#	-e	"YYYY-MM-DD" 	    Specify ending date				
+#
 # # NOTE:  When running dates that might have already had GPROF-GR matchup sets#         run, the called script will skip these dates, as the 'appstatus' table#         will say that the date has already been done.  Delete the entries#         from this table where app_id='geo_match_gmi', either for the date(s)#         to be run, or for all dates.  EXCEPTION:  If script is called with the#         -f option (e.g., "do_GMI_GeoMatch.sh -f"), then the status of prior#         runs for the set of dates configured in the script will be ignored and#         the matchups will be re-run, possibly overwriting the existing files.# 
 #
 # 10/7/2014   Morris        Created from doGeoMatch4NewRainCases.sh and
@@ -73,6 +77,9 @@
 #                           Do only subsets 'AKradars','CONUS','KWAJ'.
 # 7/17/2017   Morris        Changed default PPS_VERSION to V05A.
 # 11/6/2018   Berendes	    Added BrazilRadars and Hawaii to subsets
+# 3/2/2021	Berendes		 Added NPOL logic
+#							 Added starting and ending date parameters
+#
 #
 ###############################################################################
 
@@ -128,8 +135,11 @@ export ALGORITHM1C
 GEO_MATCH_VERSION=1.2
 export GEO_MATCH_VERSION
 
+DO_START_DATE=0
+DO_END_DATE=0
+
 # override coded defaults with user-specified values
-while getopts s:i:v:p:m: option
+while getopts s:i:v:p:m:s:e: option
   do
     case "${option}"
       in
@@ -138,6 +148,10 @@ while getopts s:i:v:p:m: option
         v) PPS_VERSION=${OPTARG};;
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
+        s) starting_date=${OPTARG}
+           DO_START_DATE=1;;
+        e) ending_date=${OPTARG}
+           DO_END_DATE=1;;
     esac
 done
 
@@ -249,35 +263,20 @@ ymdstart=`offset_date $ymd -90`
 dateStart=`echo $ymdstart | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 
-#dateStart="2014-03-12"
-#dateEnd='2014-03-13'
-#dateStart="2014-09-19"
-#dateEnd='2015-09-19'
-#dateStart="2015-09-19"
-#dateEnd='2017-01-01'
+if [ "$DO_START_DATE" = "1" ]
+  then
+     dateStart=$starting_date
+fi
+if [ "$DO_END_DATE" = "1" ]
+  then
+     dateEnd=$ending_date
+fi
 
-#dateStart="2018-09-11"
-#dateEnd='2018-12-03'
+#dateStart='2020-01-13'
+#dateEnd='2020-01-28'
 
-#dateStart='2018-11-27'
-#dateEnd='2019-01-28'
-#dateStart='2019-01-25'
-
-#dateStart='2019-02-02'
-#dateEnd='2019-04-03'
-
-#dateStart='2019-04-01'
-#dateEnd='2019-07-08'
-#dateStart='2019-07-02'
-#dateEnd='2019-08-28'
-#dateStart='2019-08-26'
-#dateEnd='2020-01-13'
-dateStart='2020-01-13'
-dateEnd='2020-01-28'
-
-
-
-echo "Running GRtoGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
+#echo "Running GRtoGMI matchups for dates since $dateStart" | tee -a $LOG_FILE
+echo "Running GRtoGMI matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 
 # here's a much faster query pair with the "LEFT OUTER JOIN geo_match_product"
 # connected to a simple temp table

@@ -372,6 +372,15 @@ ymdstart=`offset_date $ymd -30`
 dateStart=`echo $ymdstart | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 
+if [ "$DO_START_DATE" = "1" ]
+  then
+     dateStart=$starting_date
+fi
+if [ "$DO_END_DATE" = "1" ]
+  then
+     dateEnd=$ending_date
+fi
+
 # OK, override the automatic date setup above and just specify the start
 # and end dates here in the code for an ad-hoc run.  Or to use the automatic
 # dates (such as running this script on a cron or in a data-driven mode), just
@@ -382,19 +391,7 @@ dateStart=`echo $ymdstart | awk \
 #dateStart='2016-07-13'
 #dateEnd='2016-07-14'
 
-if [ "$DO_START_DATE" = "1" ]
-  then
-     dateStart=start_date
-fi
-if [ "$DO_END_DATE" = "1" ]
-  then
-     dateEnd=end_date
-fi
-
 echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
-
-########### TESTING DELETE!!!!!!!!!!!!! ################
-exit
 
 # GET THE LIST OF QUALIFYING 'RAINY' DATES FOR THIS MATCHUP CONFIGURATION.
 # Exclude events for orbit subsets where we have no routine ground radar
