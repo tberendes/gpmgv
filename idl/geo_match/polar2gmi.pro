@@ -217,7 +217,8 @@ IF N_ELEMENTS(dir_block) EQ 1 THEN BEGIN
    ENDIF ELSE message, "DIR_BLOCK directory does not exist: "+dir_block
 ENDIF
 
-COMMON sample, start_sample, sample_range, num_range, NPIXEL_GMI, NSPECIES_GMI
+; TAB 3/2/21 removed this line, caused compile error
+;COMMON sample, start_sample, sample_range, num_range, NPIXEL_GMI, NSPECIES_GMI
 
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc
