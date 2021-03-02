@@ -143,7 +143,7 @@ while getopts s:i:v:p:m:s:e: option
   do
     case "${option}"
       in
-        s) SAT_ID=${OPTARG};;
+#        s) SAT_ID=${OPTARG};;
         i) INSTRUMENT_ID=${OPTARG};;
         v) PPS_VERSION=${OPTARG};;
         p) PARAMETER_SET=${OPTARG};;
