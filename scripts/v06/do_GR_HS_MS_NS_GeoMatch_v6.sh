@@ -74,6 +74,9 @@
 #                           Takes no argument value.
 #
 #	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
+#
+#	-s	"YYYY-MM-DD" 	    Specify starting date				
+#	-e	"YYYY-MM-DD" 	    Specify ending date				
 #    
 #
 # NOTE:  When running dates that have already had GR->DPR matchup sets run,
@@ -102,6 +105,7 @@
 #							 intended, the left outer join and "g.pathname is null"
 #							 clauses caused the flag to be ignored
 # 3/2/2021	Berendes		 Added NPOL logic
+#							 Added starting and ending date parameters
 #
 ###############################################################################
 
@@ -178,9 +182,11 @@ SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSE
 FORCE_MATCH=0
 NPOL_SITE=""
 DO_NPOL=0
+DO_START_DATE=0
+DO_END_DATE=0
 
 # override coded defaults with any optional user-specified values
-while getopts v:p:m:n:kf option
+while getopts v:p:m:n:s:e:kf option
   do
     case "${option}"
       in
@@ -189,11 +195,16 @@ while getopts v:p:m:n:kf option
         m) GEO_MATCH_VERSION=${OPTARG};;
         n) NPOL_SITE=${OPTARG}
            DO_NPOL=1;;
+        s) starting_date=${OPTARG}
+           DO_START_DATE=1;;
+        e) ending_date=${OPTARG}
+           DO_END_DATE=1;;
         k) SKIP_NEWRAIN=1;;
         f) FORCE_MATCH=1;;
         *) echo "Usage: "
            echo "do_GR_HS_MS_NS_GeoMatch.sh -v PPS_Version -p Parameter_Set " \
-                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA) -[k|f]"
+                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA) " \
+                " -s \"YYYY-MM-DD\" -e \"YYYY-MM-DD\" -[k|f]"
            exit 1
     esac
 done
@@ -368,10 +379,22 @@ dateStart=`echo $ymdstart | awk \
 
 #dateStart='2020-02-01'
 #dateEnd='2020-02-02'
-dateStart='2016-07-13'
-dateEnd='2016-07-14'
+#dateStart='2016-07-13'
+#dateEnd='2016-07-14'
+
+if [ "$DO_START_DATE" = "1" ]
+  then
+     dateStart=start_date
+fi
+if [ "$DO_END_DATE" = "1" ]
+  then
+     dateEnd=end_date
+fi
 
 echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
+
+########### TESTING DELETE!!!!!!!!!!!!! ################
+exit
 
 # GET THE LIST OF QUALIFYING 'RAINY' DATES FOR THIS MATCHUP CONFIGURATION.
 # Exclude events for orbit subsets where we have no routine ground radar
