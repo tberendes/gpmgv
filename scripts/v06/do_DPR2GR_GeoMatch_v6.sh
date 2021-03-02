@@ -1,7 +1,7 @@
 #!/bin/sh
 ###############################################################################
 #
-# do_DPR2GR_GeoMatch_NPOL_v6.sh    Morris/SAIC/GPM GV    March 2016
+# do_DPR2GR_GeoMatch_v6.sh    Morris/SAIC/GPM GV    March 2016
 #
 # Wrapper to do DPR-GV NetCDF geometric matchups for DPR 2A-[DPR|Ka|Ku] files
 # already received and cataloged, for cases meeting predefined criteria.  This
@@ -67,7 +67,7 @@
 #                           the database says they have been run already (see NOTE).
 #                           Takes no argument value.
 #
-#	-n	MD or WA			Specify NPOL MD or WA					
+#	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
 # NOTE:  When running dates that might have already had DPR-GV matchup sets
 #        run, the child script do_DPR2GR_geo_matchup4date_v6.sh will skip
 #        processing for these dates, as a check of the 'appstatus' table
@@ -107,6 +107,7 @@
 # 8/31/2018   Berendes     - Added new snow equivalent RR fields and changed
 #							 version to 1.22
 #						   - force_flag is default behavior, so is now redundant
+# 3/2/2021	Berendes		 Added NPOL logic
 #
 ###############################################################################
 
@@ -186,7 +187,7 @@ SKIP_NEWRAIN=1
 #FORCE_MATCH=0
 NPOL_SITE=""
 DO_NPOL=0
-# *************  UNSET THIS! *******************
+
 SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
 
 # override coded defaults with any optional user-specified values
