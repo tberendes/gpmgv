@@ -115,6 +115,14 @@
 #							 Added starting and ending date parameters
 #
 ###############################################################################
+echo ''
+echo ''
+echo '***************************************'
+echo ' ***  STARTING' $0  '***'
+date
+echo '***************************************'
+echo ''
+
 
 # set up the default and override configuration parameters
 
@@ -642,5 +650,12 @@ ls -al $outfileall
     fi
 
 done
+echo ''
+echo ''
+echo '***************************************'
+echo ' ***  DONE' $0  '***'
+date
+echo '***************************************'
+echo ''
 
 exit

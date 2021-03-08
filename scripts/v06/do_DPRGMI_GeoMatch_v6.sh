@@ -82,6 +82,14 @@
 #							 Added starting and ending date parameters
 #
 ###############################################################################
+echo ''
+echo ''
+echo '***************************************'
+echo ' ***  STARTING' $0  '***'
+date
+echo '***************************************'
+echo ''
+
 
 # set up the default and override configuration parameters
 
@@ -605,4 +613,13 @@ echo "=====================================================================" | t
 echo "" | tee -a $LOG_FILE
 
 echo "See log file: $LOG_FILE"
+
+echo ''
+echo ''
+echo '***************************************'
+echo ' ***  DONE' $0  '***'
+date
+echo '***************************************'
+echo ''
+
 exit
