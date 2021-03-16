@@ -170,7 +170,8 @@ SITE_ID=""
 DO_SITE=0
 
 # override coded defaults with user-specified values
-while getopts v:p:d:m:n:s:e:kfrc option
+#while getopts v:p:d:m:n:s:e:kfrc option # old options for rhi, not working
+while getopts v:p:d:m:r:n:s:e:kfc option
   do
     case "${option}"
       in
