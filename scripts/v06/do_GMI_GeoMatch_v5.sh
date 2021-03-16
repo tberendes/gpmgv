@@ -385,11 +385,11 @@ while read thisdate
 
 #       AND x.subset = d.subset AND x.product_type = '1CRXCAL' and x.version=d.version \
  #  group by 1,3,4,5,6,7,8 order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
-   echo $DBOUT2   | tee -a $LOG_FILE 2>&1
+#   echo $DBOUT2   | tee -a $LOG_FILE 2>&1
 #        AND c.subset IN ('AKradars','CONUS','KWAJ') \
-echo "Contents of ${TMP_DIR}/GMI_filelist4geoMatch_temp.txt:"
-cat ${TMP_DIR}/GMI_filelist4geoMatch_temp.txt
-echo "End listing."
+#echo "Contents of ${TMP_DIR}/GMI_filelist4geoMatch_temp.txt:"
+#cat ${TMP_DIR}/GMI_filelist4geoMatch_temp.txt
+#echo "End listing."
 #exit
    # - Get a list of ground radars where precip is occurring for each included orbit,
    #  and prepare this date's control file for IDL to do GMI-GR matchup file creation.
