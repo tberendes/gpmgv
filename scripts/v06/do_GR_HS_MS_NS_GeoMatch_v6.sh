@@ -622,7 +622,7 @@ fi
 		# e.g. row="38725|3|201221|AUS-East|V06A|DPR|All3|GPM/DPR/2ADPR/V06A/AUS-East/2020/12/21/2A-CS-AUS-East.GPM.DPR.V8-20180723.20201221-S232856-E233753.038725.V06A.HDF5"
 		
 		cnt=`cat $outfile | wc -l`
-		echo "filtered count = " $cnt
+		#echo "filtered count = " $cnt
      	orbit=`echo $row | cut -d"|" -f "1"`
      	orig_cnt=`echo $row | cut -d"|" -f "2"`
 		if [ "$cnt" != "$orig_cnt" ]
@@ -637,7 +637,7 @@ fi
 		else
      		f3_8=`echo $row | cut -d"|" -f "3-8"`
      		new_row=`echo ${orbit}"|"${cnt}"|"${f3_8}`
-     		echo $new_row
+     		#echo $new_row
 #        date | tee -a $LOG_FILE 2>&1
 
        		# Append the satellite-product-specific line followed by the
