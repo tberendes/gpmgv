@@ -65,6 +65,7 @@
 #                           the database says they have been run already (see NOTE).
 #                           Takes no argument value.
 #
+#   -r  SITE_ID             Limit to specific radar site					
 #	-s	"YYYY-MM-DD" 	    Specify starting date				
 #	-e	"YYYY-MM-DD" 	    Specify ending date				
 #
@@ -145,9 +146,11 @@ export GEO_MATCH_VERSION
 
 DO_START_DATE=0
 DO_END_DATE=0
+SITE_ID=""
+DO_SITE=0
 
 # override coded defaults with user-specified values
-while getopts s:i:v:p:m:s:e: option
+while getopts s:i:v:p:r:m:s:e: option
   do
     case "${option}"
       in
@@ -156,6 +159,8 @@ while getopts s:i:v:p:m:s:e: option
         v) PPS_VERSION=${OPTARG};;
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
+        r) SITE_ID=${OPTARG}
+           DO_SITE=1;;
         s) starting_date=${OPTARG}
            DO_START_DATE=1;;
         e) ending_date=${OPTARG}
@@ -279,6 +284,10 @@ if [ "$DO_END_DATE" = "1" ]
   then
      dateEnd=$ending_date
 fi
+if [ "$DO_SITE" = "1" ]
+  then
+	site_filter="AND C.RADAR_ID IN ('${SITE_ID}')"	
+fi
 
 #dateStart='2020-01-13'
 #dateEnd='2020-01-28'
@@ -295,7 +304,7 @@ from eventsatsubrad_vw c JOIN orbit_subset_product o \
  AND o.product_type = '${ALGORITHM2A}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
    and c.subset IN ('AKradars','CONUS','KWAJ','BrazilRadars','Hawaii') and c.nearest_distance<=${MAX_DIST} \
    and c.overpass_time at time zone 'UTC' > '${dateStart}' \
-   and c.overpass_time at time zone 'UTC' < '${dateEnd}' \
+   and c.overpass_time at time zone 'UTC' < '${dateEnd}' ${site_filter} \
 JOIN rainy100inside100 r on (c.event_num=r.event_num) \
 LEFT OUTER JOIN geo_match_product g on c.event_num=g.event_num \
    and g.pps_version='${PPS_VERSION}' and g.instrument_id='${INSTRUMENT_ID}' \
@@ -355,7 +364,7 @@ while read thisdate
      JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' \
         AND c.subset IN ('AKradars','CONUS','KWAJ','BrazilRadars','Hawaii') \
-        AND d.product_type = '${ALGORITHM2A}' and c.nearest_distance<=${MAX_DIST}\
+        AND d.product_type = '${ALGORITHM2A}' and c.nearest_distance<=${MAX_DIST} ${site_filter} \
        JOIN orbit_subset_product x ON x.sat_id=d.sat_id and x.orbit = d.orbit\
             AND x.subset = d.subset AND x.product_type = '1CRXCAL' and x.version='${PPS_XCAL_VERSION}' \
        LEFT OUTER JOIN geo_match_product b on ( c.event_num=b.event_num \
@@ -410,7 +419,8 @@ echo "End listing."
             and a.orbit = ${orbit} and c.subset = '${subset}'
             and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
             AND c.product_type = '${ALGORITHM2A}' and a.nearest_distance <= ${MAX_DIST} \
-            and c.version = '$PPS_VERSION' \
+            and c.version = '$PPS_VERSION' ${site_filter} \
+	        AND C.FILE1CUF NOT LIKE '%rhi%' \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
             from timediftmp group by 1 order by 1;
@@ -422,8 +432,34 @@ echo "End listing."
 # TAB removed null pathname check to allow repeats
 #            and pathname is null and c.version = '$PPS_VERSION' \
        # copy the temp file outputs from psql to the daily control file
-        echo $row >> $outfileall
-        cat $outfile >> $outfileall
+
+		# when we add in filtering by filename pattern, i.e. eliminate rhi GR scans, need to reset the count
+		# in the current "row" to the number of files returned, if there is not a non-rhi file within the time interval,
+	    # then the "count" in the "DBOUT2" query will not match the count of the entries returned by the "DBOUT3" query
+	    # and the control file will not parse properly.  Therefore, we need to update the count after the new list is 
+	    # returned from DBOUT3 query, and handle if the list is empty, need to skip row if file count is zero after filtering
+		# e.g. row="38725|3|201221|AUS-East|V06A|DPR|All3|GPM/DPR/2ADPR/V06A/AUS-East/2020/12/21/2A-CS-AUS-East.GPM.DPR.V8-20180723.20201221-S232856-E233753.038725.V06A.HDF5"
+		
+		cnt=`cat $outfile | wc -l`
+		#echo "filtered count = " $cnt
+     	orbit=`echo $row | cut -d"|" -f "1"`
+     	orig_cnt=`echo $row | cut -d"|" -f "2"`
+		if [ "$cnt" != "$orig_cnt" ]
+  		then
+  			echo "Filtered rhi files from orbit ${orbit}"
+  			echo "original radar file count = $orig_cnt new count = $cnt"
+  		fi
+     	
+		if [ "$cnt" = "0" ]
+  		then
+     		echo "All radar files filtered for orbit ${orbit}, skipping..."
+		else
+     		f3_8=`echo $row | cut -d"|" -f "3-8"`
+     		new_row=`echo ${orbit}"|"${cnt}"|"${f3_8}`
+
+        	echo $new_row >> $outfileall
+        	cat $outfile >> $outfileall
+        fi
     done
 
     echo ""

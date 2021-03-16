@@ -73,7 +73,8 @@
 #                           the database says they have been run already (see NOTE).
 #                           Takes no argument value.
 #
-#	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
+#	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA
+#   -r  SITE_ID             Limit to specific radar site					
 #
 #	-s	"YYYY-MM-DD" 	    Specify starting date				
 #	-e	"YYYY-MM-DD" 	    Specify ending date				
@@ -192,9 +193,11 @@ NPOL_SITE=""
 DO_NPOL=0
 DO_START_DATE=0
 DO_END_DATE=0
+SITE_ID=""
+DO_SITE=0
 
 # override coded defaults with any optional user-specified values
-while getopts v:p:m:n:s:e:kf option
+while getopts v:p:m:n:r:s:e:kf option
   do
     case "${option}"
       in
@@ -203,6 +206,8 @@ while getopts v:p:m:n:s:e:kf option
         m) GEO_MATCH_VERSION=${OPTARG};;
         n) NPOL_SITE=${OPTARG}
            DO_NPOL=1;;
+        r) SITE_ID=${OPTARG}
+           DO_SITE=1;;
         s) starting_date=${OPTARG}
            DO_START_DATE=1;;
         e) ending_date=${OPTARG}
@@ -407,11 +412,14 @@ echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 # and events where the entries in the geo_match_product table indicate that the
 # corresponding output matchup file (pathname attribute) already exists.
 
+site_filter=""
 if [ "$DO_NPOL" = "1" ]
   then
 	site_filter="AND C.RADAR_ID IN ('${NPOL_SITE}')"	
-else
-	site_filter=""
+fi
+if [ "$DO_SITE" = "1" ]
+  then
+	site_filter="AND C.RADAR_ID IN ('${SITE_ID}')"	
 fi
 
 # TAB MODIFIED 9/13/18, changed the date check to select dates even when the
@@ -438,19 +446,19 @@ fi
 	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
 	${previous_match_filter} order by 1 ;"`
 	
-	echo ''
-	echo "SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
-	from eventsatsubrad_vw c JOIN orbit_subset_product o \
-	  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
-	   and o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
-	   and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
-	   and c.overpass_time at time zone 'UTC' > '${dateStart}' \
-	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' ${site_filter} \
-	LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
-	   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
-	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' and g.geo_match_version=${GEO_MATCH_VERSION} ) \
-	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
-	${previous_match_filter} order by 1 ;"
+#	echo ''
+#	echo "SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
+#	from eventsatsubrad_vw c JOIN orbit_subset_product o \
+#	  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
+#	   and o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
+#	   and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
+#	   and c.overpass_time at time zone 'UTC' > '${dateStart}' \
+#	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' ${site_filter} \
+#	LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
+#	   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
+#	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' and g.geo_match_version=${GEO_MATCH_VERSION} ) \
+#	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+#	${previous_match_filter} order by 1 ;"
 	
 echo ''
 
@@ -539,24 +547,24 @@ fi
 	     group by 1,3,4,5,6,7,8 \
 	     order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
 	
-	echo "select c.orbit, count(*), \
-	       '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
-	'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
-	||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename\
-	       as file2a \
-	       from eventsatsubrad_vw c \
-	     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
-	        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
-	        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
-	        AND d.version = '$PPS_VERSION' ${site_filter} \
-	     left outer join geo_match_product b on \
-	      ( c.event_num=b.event_num and d.version=b.pps_version \
-	        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
-	        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' ) \
-	       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
-	     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' ${previous_match_filter} \
-	     group by 1,3,4,5,6,7,8 \
-	     order by c.orbit;" 
+#	echo "select c.orbit, count(*), \
+#	       '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
+#	'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
+#	||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename\
+#	       as file2a \
+#	       from eventsatsubrad_vw c \
+#	     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
+#	        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
+#	        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
+#	        AND d.version = '$PPS_VERSION' ${site_filter} \
+#	     left outer join geo_match_product b on \
+#	      ( c.event_num=b.event_num and d.version=b.pps_version \
+#	        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
+#	        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' ) \
+#	       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+#	     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' ${previous_match_filter} \
+#	     group by 1,3,4,5,6,7,8 \
+#	     order by c.orbit;" 
      
 echo "filelist:"
 cat $filelist
@@ -615,10 +623,11 @@ fi
 # returned in the first psql query (DBOUT2) will not be correct.  
 #	            AND C.FILE1CUF NOT LIKE '%rhi%' \
 
-		# if we add in filtering by filename pattern, i.e. eliminate rhi GR scans, need to reset the count
-		# in the current "row" to the number of files returned, otherwise there will be a parse error in the
-		# control file because file count will not match number of files listed in CF
-		# also need to skip row if file count is zero after filtering
+		# when we add in filtering by filename pattern, i.e. eliminate rhi GR scans, need to reset the count
+		# in the current "row" to the number of files returned, if there is not a non-rhi file within the time interval,
+	    # then the "count" in the "DBOUT2" query will not match the count of the entries returned by the "DBOUT3" query
+	    # and the control file will not parse properly.  Therefore, we need to update the count after the new list is 
+	    # returned from DBOUT3 query, and handle if the list is empty, need to skip row if file count is zero after filtering
 		# e.g. row="38725|3|201221|AUS-East|V06A|DPR|All3|GPM/DPR/2ADPR/V06A/AUS-East/2020/12/21/2A-CS-AUS-East.GPM.DPR.V8-20180723.20201221-S232856-E233753.038725.V06A.HDF5"
 		
 		cnt=`cat $outfile | wc -l`
@@ -628,7 +637,7 @@ fi
 		if [ "$cnt" != "$orig_cnt" ]
   		then
   			echo "Filtered rhi files from orbit ${orbit}"
-  			echo "original count = $orig_cnt new count = $cnt"
+  			echo "original radar file count = $orig_cnt new count = $cnt"
   		fi
      	
 		if [ "$cnt" = "0" ]

@@ -45,12 +45,6 @@
 #                           the database says they have been run already (see NOTE).
 #                           Takes no argument value.
 #
-#    -r                     If specified, then configure to run matchups to RHI
-#                           ground radar scans instead of the default PPI scans.
-#                           This capability is not yet supported, so this option
-#                           has no effect on the output.  Script will gracefully
-#                           exit if it is specified.
-#
 #    -c                     If specified, then configure to just create the control
 #                           files for the date range and defer running the volume
 #                           matches.  This helps support the mode where two
@@ -59,6 +53,7 @@
 #                           script: do_DPRGMI_GeoMatch_from_ControlFiles.sh
 #
 #	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
+#   -r  SITE_ID             Limit to specific radar site					
 #	-s	"YYYY-MM-DD" 	    Specify starting date				
 #	-e	"YYYY-MM-DD" 	    Specify ending date				
 #
@@ -171,6 +166,8 @@ NPOL_SITE=""
 DO_NPOL=0
 DO_START_DATE=0
 DO_END_DATE=0
+SITE_ID=""
+DO_SITE=0
 
 # override coded defaults with user-specified values
 while getopts v:p:d:m:n:s:e:kfrc option
@@ -188,9 +185,11 @@ while getopts v:p:d:m:n:s:e:kfrc option
            DO_END_DATE=1;;
         k) SKIP_NEWRAIN=1;;
         f) FORCE_MATCH=1;;
-        r) DO_RHI=1
-           echo "Option -r (do RHI matchups) is not yet supported."
-           exit 1 ;;
+        r) SITE_ID=${OPTARG}
+           DO_SITE=1;;
+#        r) DO_RHI=1
+#           echo "Option -r (do RHI matchups) is not yet supported."
+#           exit 1 ;;
         c) SKIP_MATCHUPS=1;;
         *) echo "Usage: "
            echo "do_DPRGMI_GeoMatch_v6.sh -v PPS_Version -p ParmSet -m GeoMatchVersion -[k|f|r|c]" \
@@ -362,11 +361,14 @@ echo "Running GRtoDPRGMI matchups from $dateStart to $dateEnd" | tee -a $LOG_FIL
 # Exclude events for orbit subsets where we have no routine ground radar
 # acquisition (probably need to add to this list of excluded subsets!).
 
+site_filter=""
 if [ "$DO_NPOL" = "1" ]
   then
 	site_filter="AND C.RADAR_ID IN ('${NPOL_SITE}')"	
-else
-	site_filter=""
+fi
+if [ "$DO_SITE" = "1" ]
+  then
+	site_filter="AND C.RADAR_ID IN ('${SITE_ID}')"	
 fi
 
 if [ "$FORCE_MATCH" = "1" ]
@@ -527,6 +529,7 @@ fi
 	            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}' \
 	            AND c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
 	            and c.version = '$PPS_VERSION' ${previous_match_filter} ${site_filter} \
+	            AND C.FILE1CUF NOT LIKE '%rhi%' \
 	          order by 3,9; \
 	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
 	            from timediftmp group by 1 order by 1; \
@@ -537,11 +540,37 @@ fi
 # this was at end of middle where clause, caused error in control file
 #	            AND C.FILE1CUF NOT LIKE '%rhi%' \
 
-       # Append the satellite-product-specific line followed by the
-       # ground-radar-specific control file line(s) to this date's control file
-       # ($outfileall) as instructions for IDL to do DPRGMI-GR matchup file creation.
-        echo $row >> $outfileall      # DPRGMI orbit subset product line
-        cat $outfile >> $outfileall   # matching ground radar line(s)
+
+		# when we add in filtering by filename pattern, i.e. eliminate rhi GR scans, need to reset the count
+		# in the current "row" to the number of files returned, if there is not a non-rhi file within the time interval,
+	    # then the "count" in the "DBOUT2" query will not match the count of the entries returned by the "DBOUT3" query
+	    # and the control file will not parse properly.  Therefore, we need to update the count after the new list is 
+	    # returned from DBOUT3 query, and handle if the list is empty, need to skip row if file count is zero after filtering
+		# e.g. row="38725|3|201221|AUS-East|V06A|DPR|All3|GPM/DPR/2ADPR/V06A/AUS-East/2020/12/21/2A-CS-AUS-East.GPM.DPR.V8-20180723.20201221-S232856-E233753.038725.V06A.HDF5"
+		
+		cnt=`cat $outfile | wc -l`
+		#echo "filtered count = " $cnt
+     	orbit=`echo $row | cut -d"|" -f "1"`
+     	orig_cnt=`echo $row | cut -d"|" -f "2"`
+		if [ "$cnt" != "$orig_cnt" ]
+  		then
+  			echo "Filtered rhi files from orbit ${orbit}"
+  			echo "original radar file count = $orig_cnt new count = $cnt"
+  		fi
+     	
+		if [ "$cnt" = "0" ]
+  		then
+     		echo "All radar files filtered for orbit ${orbit}, skipping..."
+		else
+     		f3_8=`echo $row | cut -d"|" -f "3-8"`
+     		new_row=`echo ${orbit}"|"${cnt}"|"${f3_8}`
+
+	       # Append the satellite-product-specific line followed by the
+	       # ground-radar-specific control file line(s) to this date's control file
+	       # ($outfileall) as instructions for IDL to do DPRGMI-GR matchup file creation.
+	        echo $new_row >> $outfileall      # DPRGMI orbit subset product line
+	        cat $outfile >> $outfileall   # matching ground radar line(s)
+	    fi
     done
 
     echo ""

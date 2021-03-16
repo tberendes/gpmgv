@@ -10,3 +10,6 @@ save, /routines, file='polar2dprgmi_v6.sav'
 .compile polar2gmi.pro
 resolve_all
 save, /routines, file='polar2gmi.sav'
+.compile rhi2dpr.pro
+resolve_all
+save, /routines, file='rhi2dpr.sav'

@@ -68,6 +68,7 @@
 #                           Takes no argument value.
 #
 #	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
+#   -r  SITE_ID             Limit to specific radar site					
 #
 #	-s	"YYYY-MM-DD" 	    Specify starting date				
 #	-e	"YYYY-MM-DD" 	    Specify ending date				
@@ -202,11 +203,13 @@ NPOL_SITE=""
 DO_NPOL=0
 DO_START_DATE=0
 DO_END_DATE=0
+SITE_ID=""
+DO_SITE=0
 
 SKIP_CATALOG=0   # if 1, skip call to catalog_to_db, THIS IS FOR TESTING PURPOSES ONLY
 
 # override coded defaults with any optional user-specified values
-while getopts i:v:p:m:n:s:e:f option
+while getopts i:v:p:m:n:r:s:e:f option
   do
     case "${option}"
       in
@@ -216,6 +219,8 @@ while getopts i:v:p:m:n:s:e:f option
         m) GEO_MATCH_VERSION=${OPTARG};;
         n) NPOL_SITE=${OPTARG}
            DO_NPOL=1;;
+        r) SITE_ID=${OPTARG}
+           DO_SITE=1;;
         s) starting_date=${OPTARG}
            DO_START_DATE=1;;
         e) ending_date=${OPTARG}
@@ -430,11 +435,14 @@ echo "Running DPRtoGR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
 # have no routine ground radar acquisition (probably need to add to this list
 # of excluded subsets!).
 
+site_filter=""
 if [ "$DO_NPOL" = "1" ]
   then
 	site_filter="AND C.RADAR_ID IN ('${NPOL_SITE}')"	
-else
-	site_filter=""
+fi
+if [ "$DO_SITE" = "1" ]
+  then
+	site_filter="AND C.RADAR_ID IN ('${SITE_ID}')"	
 fi
 DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
 "SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
@@ -548,6 +556,7 @@ for thisdate in `cat $datelist`
             and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
             and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
             and c.version = '$PPS_VERSION' ${site_filter} \
+            AND C.FILE1CUF NOT LIKE '%rhi%' \
           order by 3,9;
           select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
             from timediftmp group by 1 order by 1;
@@ -561,14 +570,41 @@ for thisdate in `cat $datelist`
 
 #        date | tee -a $LOG_FILE 2>&1
 
-       # Append the satellite-product-specific line followed by the
-       # ground-radar-specific control file line(s) to this date's control file
-       # ($outfileall) as instructions for IDL to do DPR-GR matchup file creation.
-        echo ""  | tee -a $LOG_FILE
-        echo "Control file additions:"  | tee -a $LOG_FILE
-        echo ""  | tee -a $LOG_FILE
-        echo $row | tee -a $outfileall  | tee -a $LOG_FILE
-        cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
+		# when we add in filtering by filename pattern, i.e. eliminate rhi GR scans, need to reset the count
+		# in the current "row" to the number of files returned, if there is not a non-rhi file within the time interval,
+	    # then the "count" in the "DBOUT2" query will not match the count of the entries returned by the "DBOUT3" query
+	    # and the control file will not parse properly.  Therefore, we need to update the count after the new list is 
+	    # returned from DBOUT3 query, and handle if the list is empty, need to skip row if file count is zero after filtering
+		# e.g. row="38725|3|201221|AUS-East|V06A|DPR|All3|GPM/DPR/2ADPR/V06A/AUS-East/2020/12/21/2A-CS-AUS-East.GPM.DPR.V8-20180723.20201221-S232856-E233753.038725.V06A.HDF5"
+		
+		cnt=`cat $outfile | wc -l`
+		#echo "filtered count = " $cnt
+     	orbit=`echo $row | cut -d"|" -f "1"`
+     	orig_cnt=`echo $row | cut -d"|" -f "2"`
+		if [ "$cnt" != "$orig_cnt" ]
+  		then
+  			echo "Filtered rhi files from orbit ${orbit}"
+  			echo "original radar file count = $orig_cnt new count = $cnt"
+  		fi
+     	
+		if [ "$cnt" = "0" ]
+  		then
+     		echo "All radar files filtered for orbit ${orbit}, skipping..."
+		else
+     		f3_8=`echo $row | cut -d"|" -f "3-8"`
+     		new_row=`echo ${orbit}"|"${cnt}"|"${f3_8}`
+
+	       # Append the satellite-product-specific line followed by the
+	       # ground-radar-specific control file line(s) to this date's control file
+	       # ($outfileall) as instructions for IDL to do DPR-GR matchup file creation.
+	        echo ""  | tee -a $LOG_FILE
+	        echo "Control file additions:"  | tee -a $LOG_FILE
+	        echo ""  | tee -a $LOG_FILE
+	        echo $new_row | tee -a $outfileall  | tee -a $LOG_FILE
+	        cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
+
+		fi
+
     done
 
 echo ""
