@@ -602,6 +602,7 @@ fi
 	            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}' \
 	            and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
 	            and c.version = '$PPS_VERSION' ${previous_match_filter} ${site_filter} \
+	            AND C.FILE1CUF NOT LIKE '%rhi%' \
 	          order by 3,9; \
 	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
 	            from timediftmp group by 1 order by 1; \
@@ -609,20 +610,45 @@ fi
 	                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b \
 	                 where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
 	        | tee -a $LOG_FILE 2>&1
-# this was at end of middle where clause, caused error in control file
+	        
+# this clause will cause some files to be filtered out of list returned by query, and count 
+# returned in the first psql query (DBOUT2) will not be correct.  
 #	            AND C.FILE1CUF NOT LIKE '%rhi%' \
 
-
+		# if we add in filtering by filename pattern, i.e. eliminate rhi GR scans, need to reset the count
+		# in the current "row" to the number of files returned, otherwise there will be a parse error in the
+		# control file because file count will not match number of files listed in CF
+		# also need to skip row if file count is zero after filtering
+		# e.g. row="38725|3|201221|AUS-East|V06A|DPR|All3|GPM/DPR/2ADPR/V06A/AUS-East/2020/12/21/2A-CS-AUS-East.GPM.DPR.V8-20180723.20201221-S232856-E233753.038725.V06A.HDF5"
+		
+		cnt=`cat $outfile | wc -l`
+		echo "filtered count = " $cnt
+     	orbit=`echo $row | cut -d"|" -f "1"`
+     	orig_cnt=`echo $row | cut -d"|" -f "2"`
+		if [ "$cnt" != "$orig_cnt" ]
+  		then
+  			echo "Filtered rhi files from orbit ${orbit}"
+  			echo "original count = $orig_cnt new count = $cnt"
+  		fi
+     	
+		if [ "$cnt" = "0" ]
+  		then
+     		echo "All radar files filtered for orbit ${orbit}, skipping..."
+		else
+     		f3_8=`echo $row | cut -d"|" -f "3-8"`
+     		new_row=`echo ${orbit}"|"${cnt}"|"${f3_8}`
+     		echo $new_row
 #        date | tee -a $LOG_FILE 2>&1
 
-       # Append the satellite-product-specific line followed by the
-       # ground-radar-specific control file line(s) to this date's control file
-       # ($outfileall) as instructions for IDL to do GR-to-DPR matchup file creation.
-        echo ""  | tee -a $LOG_FILE
-        echo "Control file additions:"  | tee -a $LOG_FILE
-        echo ""  | tee -a $LOG_FILE
-        echo $row | tee -a $outfileall  | tee -a $LOG_FILE
-        cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
+       		# Append the satellite-product-specific line followed by the
+       		# ground-radar-specific control file line(s) to this date's control file
+       		# ($outfileall) as instructions for IDL to do GR-to-DPR matchup file creation.
+        	echo ""  | tee -a $LOG_FILE
+        	echo "Control file additions:"  | tee -a $LOG_FILE
+        	echo ""  | tee -a $LOG_FILE
+        	echo $new_row | tee -a $outfileall  | tee -a $LOG_FILE
+        	cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
+		fi
     done
 
 echo ""
