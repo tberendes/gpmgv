@@ -284,6 +284,7 @@ if [ "$DO_END_DATE" = "1" ]
   then
      dateEnd=$ending_date
 fi
+site_filter=""
 if [ "$DO_SITE" = "1" ]
   then
 	site_filter="AND C.RADAR_ID IN ('${SITE_ID}')"	
