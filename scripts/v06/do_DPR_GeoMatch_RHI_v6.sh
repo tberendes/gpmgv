@@ -473,6 +473,21 @@ fi
 	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
 	${previous_match_filter} order by 1 ;"`
 	
+	
+	echo "psql -a -A -t -o $datelist -d gpmgv -c \
+	"SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
+	from eventsatsubrad_vw c JOIN orbit_subset_product o \
+	  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
+	   and o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
+	   and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
+	   and c.overpass_time at time zone 'UTC' >= '${dateStart}' \
+	   and c.overpass_time at time zone 'UTC' < '${dateEnd}' ${site_filter} \
+	LEFT OUTER JOIN geo_match_product g on (c.event_num=g.event_num and \
+	   o.version=g.pps_version and g.instrument_id='${INSTRUMENT_ID}' and \
+	   g.parameter_set=${PARAMETER_SET} and g.scan_type='${SWATH}' and g.geo_match_version=${GEO_MATCH_VERSION} ) \
+	JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+	${previous_match_filter} order by 1 ;"
+	
 
 #echo "2014-09-07" > $datelist   # edit/uncomment to just run a specific date
 
