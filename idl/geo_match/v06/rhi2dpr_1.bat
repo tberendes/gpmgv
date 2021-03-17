@@ -39,7 +39,8 @@ restore, './rhi2dpr.sav'
 rhi2dpr, FILES4NC, 100, SCORES=0, GPM_ROOT=gpm_root, DIRDPR='/.', $
    DIRKU='/.', DIRKA='/.', DIRGV='/data/gpmgv/gv_radar/finalQC_in', $
    DIRCOMB='/.', PLOT_RHIS=0 , NC_DIR='/data/gpmgv/netcdf/geo_match', $
-   DBZ_MIN=15.0,  DPR_DBZ_MIN=15.0, DPR_RAIN_MIN=0.01
+   DBZ_MIN=15.0,  DPR_DBZ_MIN=15.0, DPR_RAIN_MIN=0.01, $
+   NC_NAME_ADD='rhi'
 ;   NC_NAME_ADD='15dbzGRDPR_newDm_00_20'
 
 ;resolve_all

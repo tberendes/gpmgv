@@ -92,28 +92,14 @@
 #                           different version of the matchup file.  If the value of
 #                           GEO_MATCH_VERSION is not the same as the version encoded in
 #                           the output netCDF filename an error is noted.  FLOAT type.
+#	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA
+#   -r  SITE_ID             Limit to specific radar site					
+#
+#	-s	"YYYY-MM-DD" 	    Specify starting date				
+#	-e	"YYYY-MM-DD" 	    Specify ending date				
 #
 #    -k                     If specified, skip the step of updating the rain events in
 #                           the rainy100inside100 table.  Takes no argument value.
-#
-#    -f                     If specified, then instruct matchup programs to create
-#                           uncataloged matchups for rain events on a date, even if
-#                           the 'appstatus' table in the database indicates the date's
-#                           matchups for the type have been run already (see NOTE).
-#                           Takes no argument value.
-#
-#    -r                     If specified, then query the database for GR files with
-#                           RHI scans and instruct child script to call a version of
-#                           matchup programs to generate RHI volume matches to the
-#                           DPR data, rather than the default PPI matchups.
-#                           Takes no argument value.
-#
-#    -n                     Like -f option, but instructs the queries that build the
-#                           control file to include all rain events even if the
-#                           database table 'geo_match_product' indicates that a
-#                           matching output netCDF file for the event already exists
-#                           (event-by-event override, versus date-by-date override).
-#                           Takes no argument value.
 #
 #
 # NOTE:  When running dates that might have already had DPR-GR matchup sets
@@ -205,18 +191,23 @@ SAT_ID="GPM"
 export SAT_ID
 SWATH="NS"   # default scan type to match up, can override to HS or MS (if Ka or DPR)
 GEO_MATCH_VERSION=1.21
-GRSITE="%"
 
 SKIP_NEWRAIN=0   # if 1, skip call to psql with SQL_BIN
-FORCE_MATCH=0    # if 1, ignore appstatus for date(s) and (re)run matchups
+# hardcode to ignore previous runs, otherwise, no-rhi matchups will be seen as previously run 
+# and the rhi runs will not work
+FORCE_MATCH=1    # if 1, ignore appstatus for date(s) and (re)run matchups
 DO_RHI=1         # if 1, then matchup to RHI UF files
 NULL_SKIP=0      # if 1, then disable NULL check for geo_match_product
+NPOL_SITE=""
 DO_NPOL=0
 DO_START_DATE=0
 DO_END_DATE=0
+SITE_ID=""
+DO_SITE=0
 
 # override coded defaults with user-specified values
-while getopts i:v:p:d:w:m:kfrn option
+#while getopts i:v:p:d:w:m:kfrn option
+while getopts i:v:p:d:r:n:w:m:kf option
   do
     case "${option}"
       in
@@ -229,7 +220,9 @@ while getopts i:v:p:d:w:m:kfrn option
         f) FORCE_MATCH=1
            NULL_SKIP=1;;
 #        r) DO_RHI=1;;
-        n) GRSITE=${OPTARG}
+        r) SITE_ID=${OPTARG}
+           DO_SITE=1;;
+        n) NPOL_SITE=${OPTARG}
            DO_NPOL=1;;
         s) starting_date=${OPTARG}
            DO_START_DATE=1;;
@@ -347,8 +340,6 @@ echo "SWATH: $SWATH" | tee -a $LOG_FILE
 export SWATH
 echo "GEO_MATCH_VERSION: $GEO_MATCH_VERSION" | tee -a $LOG_FILE
 export GEO_MATCH_VERSION
-echo "GR SITE: $GRSITE" | tee -a $LOG_FILE
-export GRSITE
 echo "SKIP_NEWRAIN: $SKIP_NEWRAIN" | tee -a $LOG_FILE
 echo "FORCE_MATCH: $FORCE_MATCH" | tee -a $LOG_FILE
 echo "DO_RHI: $DO_RHI" | tee -a $LOG_FILE
@@ -403,26 +394,6 @@ if [ "$SKIP_NEWRAIN" = "0" ]
     echo "" | tee -a $LOG_FILE
 fi
 
-if [ "$DO_RHI" = 0 ]
-  then
-    IS_OR_NOT='NOT'
-  else
-    IS_OR_NOT=' '
-fi
-
-if [ "$NULL_SKIP" = 0 ]
-  then
-    NULL_BOGUS="is null"             # for comparison of NULL/NOT NULL filepath
-    NULL_BOGUS2=" = 'No_GeoMatch'"   # for comparison of COALESCE filepath
-  else
-    NULL_BOGUS=" != 'bOgUs' "
-    NULL_BOGUS2=" != 'bOgUs' "
-fi
-
-echo "IS_OR_NOT: $IS_OR_NOT"
-echo "NULL_BOGUS: $NULL_BOGUS"
-echo "NULL_BOGUS2: $NULL_BOGUS2"
-
 # Build a list of dates with precip events as defined in rainy100inside100 table.
 # Modify the query to just run grids for range of dates/orbits.  Limit ourselves
 # to the past 30 days.
@@ -436,7 +407,7 @@ dateEnd=`echo $ymd | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 
 # get YYYYMMDD for 30 days ago
-ymdstart=`offset_date $ymd -160`
+ymdstart=`offset_date $ymd -30`
 dateStart=`echo $ymdstart | awk \
   '{print substr($1,1,4)"-"substr($1,5,2)"-"substr($1,7,2)" 00:00:00+00"}'`
 #echo $dateStart
@@ -455,6 +426,36 @@ fi
 #dateEnd='2017-01-11'
 echo "Running DPRtoGR matchups between $dateStart" and $dateEnd | tee -a $LOG_FILE
 
+# OK, override the automatic date setup above and just specify the start
+# and end dates here in the code for an ad-hoc run.  Or to use the automatic
+# dates (such as running this script on a cron or in a data-driven mode), just
+# comment out the next 2 lines.
+
+#dateStart='2020-02-01'
+#dateEnd='2020-02-02'
+#dateStart='2016-07-13'
+#dateEnd='2016-07-14'
+
+echo "Running GR to DPR matchups from $dateStart to $dateEnd" | tee -a $LOG_FILE
+
+# GET THE LIST OF QUALIFYING 'RAINY' DATES FOR THIS MATCHUP CONFIGURATION.
+# Exclude events for orbit subsets where we have no routine ground radar
+# acquisition (probably need to add to this list of excluded subsets!),
+# and events where the entries in the geo_match_product table indicate that the
+# corresponding output matchup file (pathname attribute) already exists.
+
+site_filter=""
+if [ "$DO_NPOL" = "1" ]
+  then
+	site_filter="AND C.RADAR_ID IN ('${NPOL_SITE}')"	
+fi
+if [ "$DO_SITE" = "1" ]
+  then
+	site_filter="AND C.RADAR_ID IN ('${SITE_ID}')"	
+fi
+
+# TAB MODIFIED 9/13/18, changed the date check to select dates even when the
+# previous matchups are found on a date when using the -f (FORCE_MATCH) option
 
 if [ "$FORCE_MATCH" = "1" ]
   then
@@ -501,8 +502,8 @@ else
  	   collate="collate_npol_md_1cuf"	
    fi
 fi
-
-# Step thru the dates, build an IDL control file for each date and run the grids.
+# Step thru the dates one at a time, build an IDL control file for each date,
+# and run the day's matchups.
 
 for thisdate in `cat $datelist`
   do
@@ -523,171 +524,172 @@ for thisdate in `cat $datelist`
         rm -v $outfileall | tee -a $LOG_FILE 2>&1
     fi
 
-   # Get a listing of DPR files to process, put in file $filelist
-   # -- 2BDPRGMI file is ignored for now
+   # Get a listing of this date's DPR files to process and their control file
+   # metadata, format the partial file paths, and write to intermediate file
+   # $filelist as '|' delimited data.  These lines of data will comprise the
+   # satellite-product-specific lines in the control file.
+   # -- 2B-DPRGMI file is left out for now
 
-    echo "An error from this command is normal, table should not exist:"
-    echo "DROP TABLE temp_n_geo;" | psql gpmgv
+# TAB MODIFIED 9/13/18, changed the date check to select dates even when the
+# previous matchups are found when using the -f (FORCE_MATCH) option
 
-   # here's a faster four-query set with the "left outer join geo_match_product"
-   # connected to a simple temp table
+if [ "$FORCE_MATCH" = "1" ]
+  then
+     previous_match_filter=""
+else
+     previous_match_filter="and b.pathname is null"
+fi
 
-    DBOUT2=`psql -a -A -t -o $filelist  -d gpmgv -c "select c.orbit, c.event_num, c.radar_id, \
-       '${yymmdd}'::text as datestamp, c.subset, d.version, \
-       '${INSTRUMENT_ID}'::text as instrument, '${SWATH}'::text as swath, \
-'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
-||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename as file2a \
-       into temp possible_2adpr \
-       from eventsatsubrad_vw c \
-     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
-        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
-        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST} \
-        AND C.RADAR_ID IN ('${GRSITE}') \
-       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
-      where cast(nominal at time zone 'UTC' as date) = '${thisdate}' and d.version = '$PPS_VERSION'; \
-
-     CREATE TABLE temp_n_geo AS \
-     select c.orbit, c.datestamp, c.subset, c.version, c.instrument, c.swath, c.file2a, \
-            COALESCE(b.pathname, 'No_GeoMatch') as pathname, c.radar_id, c.event_num, b.instrument_id, \
-            b.geo_match_version, b.scan_type, b.parameter_set, b.sat_id \
-       from possible_2adpr c left outer join geo_match_product b on (c.radar_id=b.radar_id \
-        and c.orbit=b.orbit and c.version=b.pps_version and b.instrument_id = '${INSTRUMENT_ID}' \
-        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' \
-        and b.parameter_set=${PARAMETER_SET} and b.sat_id='GPM');
-
-     update temp_n_geo set instrument_id = '${INSTRUMENT_ID}', geo_match_version = ${GEO_MATCH_VERSION},\
-                           scan_type = '${SWATH}', parameter_set = ${PARAMETER_SET}, sat_id = 'GPM';
-
-     select  orbit, count(*), datestamp, subset, version, instrument, swath, file2a\
-       from temp_n_geo where pathname $NULL_BOGUS2 group by 1,3,4,5,6,7,8 order by orbit;"`  | tee -a $LOG_FILE 2>&1
-
-#     select  c.orbit, count(*), c.datestamp, c.subset, c.version, c.instrument, c.swath, c.file2a\
-#       from possible_2adpr c left outer join geo_match_product b on (c.radar_id=b.radar_id \
-#        and c.orbit=b.orbit and c.version=b.pps_version and b.instrument_id = '${INSTRUMENT_ID}' \
-#        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' \
-#        and b.parameter_set=0 and b.sat_id='GPM') where b.pathname $NULL_BOGUS \
-#   group by 1,3,4,5,6,7,8 order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
-
-echo ''
+	    DBOUT2=`psql -a -A -t -o $filelist  -d gpmgv -c "select c.orbit, count(*), \
+	       '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
+	'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
+	||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename\
+	       as file2a \
+	       from eventsatsubrad_vw c \
+	     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
+	        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
+	        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
+	        AND d.version = '$PPS_VERSION' ${site_filter} \
+	     left outer join geo_match_product b on \
+	      ( c.event_num=b.event_num and d.version=b.pps_version \
+	        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
+	        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' ) \
+	       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+	     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' ${previous_match_filter} \
+	     group by 1,3,4,5,6,7,8 \
+	     order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
+	
+#	echo "select c.orbit, count(*), \
+#	       '${yymmdd}', c.subset, d.version, '${INSTRUMENT_ID}', '${SWATH}', \
+#	'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
+#	||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename\
+#	       as file2a \
+#	       from eventsatsubrad_vw c \
+#	     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
+#	        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
+#	        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST}\
+#	        AND d.version = '$PPS_VERSION' ${site_filter} \
+#	     left outer join geo_match_product b on \
+#	      ( c.event_num=b.event_num and d.version=b.pps_version \
+#	        and b.instrument_id = '${INSTRUMENT_ID}' and b.parameter_set=${PARAMETER_SET} \
+#	        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' ) \
+#	       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
+#	     where cast(nominal at time zone 'UTC' as date) = '${thisdate}' ${previous_match_filter} \
+#	     group by 1,3,4,5,6,7,8 \
+#	     order by c.orbit;" 
+     
 echo "filelist:"
 cat $filelist
 echo ''
-echo "select c.orbit, c.event_num, c.radar_id, \
-       '${yymmdd}'::text as datestamp, c.subset, d.version, \
-       '${INSTRUMENT_ID}'::text as instrument, '${SWATH}'::text as swath, \
-'${SAT_ID}/${INSTRUMENT_ID}/${ALGORITHM}/${PPS_VERSION}/'||d.subset||'/'||to_char(d.filedate,'YYYY')||'/'\
-||to_char(d.filedate,'MM')||'/'||to_char(d.filedate,'DD')||'/'||d.filename as file2a \
-       into temp possible_2adpr \
-       from eventsatsubrad_vw c \
-     JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
-        AND c.subset = d.subset AND c.sat_id='$SAT_ID' and c.subset NOT IN ('KOREA','KORA') \
-        AND d.product_type = '${ALGORITHM}' and c.nearest_distance<=${MAX_DIST} \
-        AND C.RADAR_ID IN ('${GRSITE}') \
-       JOIN rainy100inside100 r on (c.event_num=r.event_num) \
-      where cast(nominal at time zone 'UTC' as date) = '${thisdate}' and d.version = '$PPS_VERSION'; \
 
-     CREATE TABLE temp_n_geo AS \
-     select c.orbit, c.datestamp, c.subset, c.version, c.instrument, c.swath, c.file2a, \
-            COALESCE(b.pathname, 'No_GeoMatch') as pathname, c.radar_id, c.event_num, b.instrument_id, \
-            b.geo_match_version, b.scan_type, b.parameter_set, b.sat_id \
-       from possible_2adpr c left outer join geo_match_product b on (c.radar_id=b.radar_id \
-        and c.orbit=b.orbit and c.version=b.pps_version and b.instrument_id = '${INSTRUMENT_ID}' \
-        and b.geo_match_version=${GEO_MATCH_VERSION} and b.scan_type='${SWATH}' \
-        and b.parameter_set=${PARAMETER_SET} and b.sat_id='GPM');
-     update temp_n_geo set instrument_id = '${INSTRUMENT_ID}', geo_match_version = ${GEO_MATCH_VERSION},\
-                           scan_type = '${SWATH}', parameter_set = ${PARAMETER_SET}, sat_id = 'GPM';
-     select  orbit, count(*), datestamp, subset, version, instrument, swath, file2a\
-       from temp_n_geo where pathname $NULL_BOGUS2 group by 1,3,4,5,6,7,8 order by orbit;"
-#exit
-   # - Get a list of ground radars where precip is occurring for each included orbit,
-   #  and prepare this date's control file for IDL to do DPR-GR matchup file creation.
-   #  We now use temp tables and sorting by time difference between overpass_time and
-   #  radar nominal time (nearest minute) to handle where the same radar_id
-   #  comes up more than once for an orbit.
+   # - Step through the satellite-specific control metadata and, for each line,
+   #   get the ground-radar-specific control file metadata for the site overpass
+   #   events where precip is occurring for this satellite/orbit/subset.
+   # - We now use temp tables and sorting by time difference between overpass_time
+   #   and radar nominal time (nearest minute) to handle where the same radar_id
+   #   comes up more than once for an orbit.  We also exclude UF file matches for RHI scans.
 
     for row in `cat $filelist | sed 's/ /_/'`
       do
         orbit=`echo $row | cut -f1 -d '|'`
         subset=`echo $row | cut -f4 -d '|'`
-	DBOUT3=`psql -a -A -t -o $outfile -d gpmgv -c "select a.event_num, a.orbit, \
-            a.radar_id, date_trunc('second', a.overpass_time at time zone 'UTC') as ovrptime, \
-            extract(EPOCH from date_trunc('second', a.overpass_time)) as ovrpticks, \
-            b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
-          into temp timediftmp
-          from overpass_event a, fixed_instrument_location b, \
-	    collate_npol_md_1cuf c \
-            left outer join temp_n_geo e on \
-              (c.radar_id=e.radar_id and c.orbit=e.orbit and c.event_num=e.event_num and \
-               c.version=e.version and e.instrument_id = '${INSTRUMENT_ID}' \
-               and e.parameter_set=${PARAMETER_SET} and e.sat_id='${SAT_ID}' \
-               and e.geo_match_version=${GEO_MATCH_VERSION}) and e.scan_type='${SWATH}' \
-          where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
-            and a.orbit = c.orbit  and c.sat_id='$SAT_ID' \
-            and a.orbit = ${orbit} and c.subset = '${subset}'
-            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
-            and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
-            and e.pathname $NULL_BOGUS2 and c.version = '$PPS_VERSION' \
-            AND ( C.FILE1CUF ${IS_OR_NOT} LIKE '%rhi%' OR C.FILE1CUF ='no_1CUF_file' ) \
-            AND C.RADAR_ID IN ('${GRSITE}') \
-          order by 3,9;
-          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
-            from timediftmp group by 1 order by 1;
-          select a.event_num, a.orbit, a.radar_id, a.ovrptime, a.ovrpticks, \
-                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b
-                 where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
-        | tee -a $LOG_FILE 2>&1
 
+	# TAB MODIFIED 9/13/18, changed the date check to select dates even when the
+	# previous matchups are found when using the -f ($FORCE_MATCH) option
+	
+if [ "$FORCE_MATCH" = "1" ]
+  then
+     previous_match_filter=""
+else
+     previous_match_filter="and e.pathname is null"
+fi
+
+		DBOUT3=`psql -a -A -t -o $outfile -d gpmgv -c "select a.event_num, a.orbit, \
+	            a.radar_id, date_trunc('second', a.overpass_time at time zone 'UTC') as ovrptime, \
+	            extract(EPOCH from date_trunc('second', a.overpass_time)) as ovrpticks, \
+	            b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
+	          into temp timediftmp \
+	          from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
+		    ${collate} c \
+	            left outer join geo_match_product e on \
+	              (c.radar_id=e.radar_id and c.orbit=e.orbit and \
+	               c.version=e.pps_version and e.instrument_id = '${INSTRUMENT_ID}' \
+	               and e.parameter_set=${PARAMETER_SET} and e.sat_id='${SAT_ID}' \
+	               and e.geo_match_version=${GEO_MATCH_VERSION}) and e.scan_type='${SWATH}' \
+	          where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
+	            and a.orbit = c.orbit  and c.sat_id='$SAT_ID' and a.event_num=r.event_num \
+	            and a.orbit = ${orbit} and c.subset = '${subset}' \
+	            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}' \
+	            and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
+	            and c.version = '$PPS_VERSION' ${previous_match_filter} ${site_filter} \
+	            AND C.FILE1CUF LIKE '%rhi%' \
+	          order by 3,9; \
+	          select radar_id, min(tdiff) as mintdiff into temp mintimediftmp \
+	            from timediftmp group by 1 order by 1; \
+	          select a.event_num, a.orbit, a.radar_id, a.ovrptime, a.ovrpticks, \
+	                 a.latitude, a.longitude, a.elev, a.file1cuf from timediftmp a, mintimediftmp b \
+	                 where a.radar_id=b.radar_id and a.tdiff=b.mintdiff order by 3,9;"` \
+	        | tee -a $LOG_FILE 2>&1
+	        
+# this clause will cause some files to be filtered out of list returned by query, and count 
+# returned in the first psql query (DBOUT2) will not be correct.  
+#	            AND C.FILE1CUF NOT LIKE '%rhi%' \
+
+		# when we add in filtering by filename pattern, i.e. eliminate rhi GR scans, need to reset the count
+		# in the current "row" to the number of files returned, if there is not a non-rhi file within the time interval,
+	    # then the "count" in the "DBOUT2" query will not match the count of the entries returned by the "DBOUT3" query
+	    # and the control file will not parse properly.  Therefore, we need to update the count after the new list is 
+	    # returned from DBOUT3 query, and handle if the list is empty, need to skip row if file count is zero after filtering
+		# e.g. row="38725|3|201221|AUS-East|V06A|DPR|All3|GPM/DPR/2ADPR/V06A/AUS-East/2020/12/21/2A-CS-AUS-East.GPM.DPR.V8-20180723.20201221-S232856-E233753.038725.V06A.HDF5"
+		
+		cnt=`cat $outfile | wc -l`
+		#echo "filtered count = " $cnt
+     	orbit=`echo $row | cut -d"|" -f "1"`
+     	orig_cnt=`echo $row | cut -d"|" -f "2"`
+		if [ "$cnt" != "$orig_cnt" ]
+  		then
+  			echo "Filtered rhi files from orbit ${orbit}"
+  			echo "original radar file count = $orig_cnt new count = $cnt"
+  		fi
+     	
+		if [ "$cnt" = "0" ]
+  		then
+     		echo "All radar files filtered for orbit ${orbit}, skipping..."
+		else
+     		f3_8=`echo $row | cut -d"|" -f "3-8"`
+     		new_row=`echo ${orbit}"|"${cnt}"|"${f3_8}`
+     		#echo $new_row
 #        date | tee -a $LOG_FILE 2>&1
 
-echo "select a.event_num, a.orbit, \
-            a.radar_id, date_trunc('second', a.overpass_time at time zone 'UTC') as ovrptime, \
-            extract(EPOCH from date_trunc('second', a.overpass_time)) as ovrpticks, \
-            b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
-          from overpass_event a, fixed_instrument_location b, \
-	    collate_npol_md_1cuf c \
-            left outer join temp_n_geo e on \
-              (c.radar_id=e.radar_id and c.orbit=e.orbit and c.event_num=e.event_num and \
-               c.version=e.version and e.instrument_id = '${INSTRUMENT_ID}' \
-               and e.parameter_set=${PARAMETER_SET} and e.sat_id='${SAT_ID}' \
-               and e.geo_match_version=${GEO_MATCH_VERSION}) and e.scan_type='${SWATH}' \
-          where a.radar_id = b.instrument_id and a.radar_id = c.radar_id  \
-            and a.orbit = c.orbit  and c.sat_id='$SAT_ID' \
-            and a.orbit = ${orbit} and c.subset = '${subset}'
-            and cast(a.overpass_time at time zone 'UTC' as date) = '${thisdate}'
-            and c.product_type = '${ALGORITHM}' and a.nearest_distance <= ${MAX_DIST} \
-            and e.pathname $NULL_BOGUS2 and c.version = '$PPS_VERSION' \
-            AND C.FILE1CUF ${IS_OR_NOT} LIKE '%rhi%' \
-            AND C.RADAR_ID IN ('${GRSITE}') \
-          order by 3,9;"
-
-        echo ""  | tee -a $LOG_FILE
-        echo "Control file additions:"  | tee -a $LOG_FILE
-        echo ""  | tee -a $LOG_FILE
-       # copy the temp file outputs from psql to the daily control file
-        echo $row | tee -a $outfileall  | tee -a $LOG_FILE
-        cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
+       		# Append the satellite-product-specific line followed by the
+       		# ground-radar-specific control file line(s) to this date's control file
+       		# ($outfileall) as instructions for IDL to do GR-to-DPR matchup file creation.
+        	echo ""  | tee -a $LOG_FILE
+        	echo "Control file additions:"  | tee -a $LOG_FILE
+        	echo ""  | tee -a $LOG_FILE
+        	echo $new_row | tee -a $outfileall  | tee -a $LOG_FILE
+        	cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
+		fi
     done
 
 echo ""
 echo "Output control file:"
 ls -al $outfileall
-cat $outfileall
-
-echo "DROP TABLE temp_n_geo;" | psql gpmgv
-
 #exit  # if uncommented, creates the control file for first date, and exits
-gedit $outfileall
+# invoke editor to allow user to supply a radar file manually if none can
+# be found within the time window (allows for larger "slop" in time interval)
+# gedit $outfileall
 
-   echo "Continue to IDL matchup step? (Y or N):"
-    read -r bail
-    if [ "$bail" != 'Y' -a "$bail" != 'y' ]
-      then
-        if [ "$bail" != 'N' -a "$bail" != 'n' ]
-          then
-            echo "Illegal response: ${bail}, skipping." | tee -a $LOG_FILE
-        fi
-        echo "Skipping IDL matchup step on user command." | tee -a $LOG_FILE
-      else
+#   echo "Continue to IDL matchup step? (Y or N):"
+#    read -r bail
+#    if [ "$bail" != 'Y' -a "$bail" != 'y' ]
+#      then
+#        if [ "$bail" != 'N' -a "$bail" != 'n' ]
+#          then
+#            echo "Illegal response: ${bail}, skipping." | tee -a $LOG_FILE
+#        fi
+#        echo "Skipping IDL matchup step on user command." | tee -a $LOG_FILE
+#      else
         if [ -s $outfileall ]
           then
            # Call the IDL wrapper script, do_DPR_geo_matchup4date_v6.sh, to run
@@ -709,15 +711,16 @@ gedit $outfileall
                # extract the pathnames of the matchup files created this run, and 
                # catalog them in the geo_matchup_product table.  The following file
                # must be identically defined here and in do_DPR_geo_matchup4date_v6.sh
-                DBCATALOGFILE=${TMP_DIR}/do_DPR_geo_matchup_catalog.${yymmdd}.txt
-                if [ -s $DBCATALOGFILE ] 
-                  then
-                    catalog_to_db $yymmdd $DBCATALOGFILE
-                  else
-                    echo "but no matchup files listed in $DBCATALOGFILE !"\
-                     | tee -a $LOG_FILE
-                    #exit 1
-                fi
+#  Skip catalog since RHI scans are not unique from PPI scans
+#                DBCATALOGFILE=${TMP_DIR}/do_DPR_geo_matchup_catalog.${yymmdd}.txt
+#                if [ -s $DBCATALOGFILE ] 
+#                  then
+##                    catalog_to_db $yymmdd $DBCATALOGFILE
+#                  else
+#                    echo "but no matchup files listed in $DBCATALOGFILE !"\
+#                     | tee -a $LOG_FILE
+#                    #exit 1
+#                fi
               ;;
               1 )
                 echo ""
@@ -740,20 +743,29 @@ gedit $outfileall
             | tee -a $LOG_FILE
             echo "" | tee -a $LOG_FILE
         fi
-    fi
-
-   echo "Continue to next date? (Y or N):"
-    read -r bail
-    if [ "$bail" != 'Y' -a "$bail" != 'y' ]
+#    fi
+#
+#    echo "Continue to next date? (Y or N):"
+#    read -r go_on
+    go_on=Y
+    if [ "$go_on" != 'Y' -a "$go_on" != 'y' ]
       then
-         if [ "$bail" != 'N' -a "$bail" != 'n' ]
+         if [ "$go_on" != 'N' -a "$go_on" != 'n' ]
            then
-             echo "Illegal response: ${bail}, exiting." | tee -a $LOG_FILE
+             echo "Illegal response: ${go_on}, exiting." | tee -a $LOG_FILE
          fi
          echo "Quitting on user command." | tee -a $LOG_FILE
          exit
     fi
 
 done
+
+echo ''
+echo ''
+echo '***************************************'
+echo ' ***  DONE' $0  '***'
+date
+echo '***************************************'
+echo ''
 
 exit
