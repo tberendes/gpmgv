@@ -450,7 +450,7 @@ from eventsatsubrad_vw c JOIN orbit_subset_product o \
   ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
    and o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
    and c.subset NOT IN ('KOREA','KORA') and c.nearest_distance<=${MAX_DIST} \
-   and c.overpass_time at time zone 'UTC' > '${dateStart}' \
+   and c.overpass_time at time zone 'UTC' >= '${dateStart}' \
    and c.overpass_time at time zone 'UTC' < '${dateEnd}' ${site_filter} \
 JOIN rainy100inside100 r on (c.event_num=r.event_num) order by 1;"`
 
