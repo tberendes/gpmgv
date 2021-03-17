@@ -475,7 +475,7 @@ fi
 	
 	
 	echo "psql -a -A -t -o $datelist -d gpmgv -c \
-	"SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
+	SELECT DISTINCT date(date_trunc('day', c.overpass_time at time zone 'UTC')) \
 	from eventsatsubrad_vw c JOIN orbit_subset_product o \
 	  ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
 	   and o.product_type = '${ALGORITHM}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
