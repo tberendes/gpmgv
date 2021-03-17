@@ -207,7 +207,7 @@ DO_SITE=0
 
 # override coded defaults with user-specified values
 #while getopts i:v:p:d:w:m:kfrn option
-while getopts i:v:p:d:r:n:w:m:kf option
+while getopts i:v:p:s:e:d:r:n:w:m:kf option
   do
     case "${option}"
       in
@@ -648,7 +648,7 @@ fi
      	orig_cnt=`echo $row | cut -d"|" -f "2"`
 		if [ "$cnt" != "$orig_cnt" ]
   		then
-  			echo "Filtered rhi files from orbit ${orbit}"
+  			echo "Filtered non-rhi files from orbit ${orbit}"
   			echo "original radar file count = $orig_cnt new count = $cnt"
   		fi
      	
@@ -672,9 +672,15 @@ fi
 		fi
     done
 
-echo ""
-echo "Output control file:"
-ls -al $outfileall
+	if [ -s $outfileall ]
+	   	then
+			echo ""
+			echo "Output control file:"
+			ls -al $outfileall
+		else
+			echo ""
+			echo "No RHI files for date ${yymmdd}, skipping..."
+	fi
 #exit  # if uncommented, creates the control file for first date, and exits
 # invoke editor to allow user to supply a radar file manually if none can
 # be found within the time window (allows for larger "slop" in time interval)
