@@ -65,6 +65,7 @@
 #                           the database says they have been run already (see NOTE).
 #                           Takes no argument value.
 #
+#	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
 #   -r  SITE_ID             Limit to specific radar site					
 #	-s	"YYYY-MM-DD" 	    Specify starting date				
 #	-e	"YYYY-MM-DD" 	    Specify ending date				
@@ -144,13 +145,15 @@ export ALGORITHM1C
 GEO_MATCH_VERSION=1.2
 export GEO_MATCH_VERSION
 
+NPOL_SITE=""
+DO_NPOL=0
 DO_START_DATE=0
 DO_END_DATE=0
 SITE_ID=""
 DO_SITE=0
 
 # override coded defaults with user-specified values
-while getopts s:i:v:p:r:m:s:e: option
+while getopts s:i:v:p:r:n:m:s:e: option
   do
     case "${option}"
       in
@@ -159,6 +162,8 @@ while getopts s:i:v:p:r:m:s:e: option
         v) PPS_VERSION=${OPTARG};;
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
+        n) NPOL_SITE=${OPTARG}
+           DO_NPOL=1;;
         r) SITE_ID=${OPTARG}
            DO_SITE=1;;
         s) starting_date=${OPTARG}
@@ -285,6 +290,10 @@ if [ "$DO_END_DATE" = "1" ]
      dateEnd=$ending_date
 fi
 site_filter=""
+if [ "$DO_NPOL" = "1" ]
+  then
+	site_filter="AND C.RADAR_ID IN ('${NPOL_SITE}')"	
+fi
 if [ "$DO_SITE" = "1" ]
   then
 	site_filter="AND C.RADAR_ID IN ('${SITE_ID}')"	
@@ -328,7 +337,20 @@ echo " "
 
 #date | tee -a $LOG_FILE 2>&1  # time stamp for query performance evaluation
 
-# Step thru the dates, build an IDL control file for each date and run the grids.
+    
+if [ "$DO_NPOL" = "0" ]
+  then
+   collate="collate_satsubprod_1cuf"	
+else
+   if [ $NPOL_SITE = "NPOL_WA" ]
+     then
+ 	   collate="collate_npol_wa_1cuf"	       
+   else
+ 	   collate="collate_npol_md_1cuf"	
+   fi
+fi
+# Step thru the dates one at a time, build an IDL control file for each date,
+# and run the day's matchups.
 
 while read thisdate
   do
@@ -409,7 +431,7 @@ while read thisdate
             b.latitude, b.longitude, trunc(b.elevation/1000.,3) as elev, c.file1cuf, c.tdiff \
           into temp timediftmp
           from overpass_event a, fixed_instrument_location b, rainy100inside100 r, \
-	    collate_satsubprod_1cuf c \
+	    ${collate} c \
             LEFT OUTER JOIN geo_match_product e on \
               ( c.event_num=e.event_num and c.version=e.pps_version \
                 and e.instrument_id = '${INSTRUMENT_ID}' \
