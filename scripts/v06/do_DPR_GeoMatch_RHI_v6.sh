@@ -1,7 +1,7 @@
 #!/bin/sh
 ###############################################################################
 #
-# do_DPR_GeoMatch_NPOL_MD_rules.sh    Morris/SAIC/GPM GV    March 2015
+# do_DPR_GeoMatch_RHI_v6.sh    Todd Berendes, March 2021
 #
 # Wrapper to do DPR-GR geometric matchups for 2ADPR/2AKa/2AKu and NPOL 1CUF
 # files already received and cataloged, for cases meeting predefined criteria.
@@ -60,7 +60,7 @@
 # SYNOPSIS
 # --------
 #
-#    do_DPR_GeoMatch_NPOL_MD_rules.sh [OPTION]...
+#    do_DPR_GeoMatch_RHI_v6.sh [OPTION]...
 #
 #
 #    OPTIONS/ARGUMENTS:
@@ -117,15 +117,7 @@
 #          collate_npol_md_1cuf is coded in SQL and defined in the 'gpmgv'
 #          database.
 #
-# late 2014    Morris      - Created from do_DPR_GeoMatch.sh.
-# 3/27/2014    Morris      - Modified to bring up each new control file in the
-#                            'gedit' editor and pause to allow the user to
-#                            manually fix missing radar file pathnames before
-#                            proceeding to do_DPR_geo_matchup4date.sh to run
-#                            the matchups in IDL.
-# 2/14/2017   Morris       - Added definition and export of ITE_or_Operational
-#                            environment variable, and expanded prologue.
-# 8/8/2017    Morris       - Changed default PPS_VERSION value to V05A.
+# 2/18/2021    Berendes      - Created from do_DPR_GeoMatch_NPOL_MD_rules.sh.
 #
 ###############################################################################
 
