@@ -60,7 +60,7 @@ FUNCTION gen_gr_hsfs_geo_match_netcdf_v7, geo_match_nc_file, numpts_HS, numpts_F
 @dpr_params_v7.inc  ; for the type-specific fill values
 
 ; for debugging
-!EXCEPT=2
+;!EXCEPT=2
 
 ; TAB 8/27/18 changed version to 1.1 from 1.0 for new snow water equivalent field
 ;GEO_MATCH_FILE_VERSION=1.1   ; hard code inside function now, not from "Include"

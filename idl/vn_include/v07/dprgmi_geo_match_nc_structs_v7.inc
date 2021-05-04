@@ -4,7 +4,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; dprgmi_geo_match_nc_structs_mrms.inc          Morris/SAIC/GPM_GV      August 2014
+; dprgmi_geo_match_nc_structs_v7.inc          Morris/SAIC/GPM_GV      August 2014
 ;
 ; DESCRIPTION
 ; -----------
@@ -32,9 +32,8 @@
 ;    dprgmi_gr_field_flags structure, for version 1.3 files.
 ; 02/04/19 by Todd Berendes
 ;  - added have_GR_SWE and have_MRMS
-; 06/15/20 by Todd Berendes, UAH
-;  - Started Mods for DPRGMI V07 product
-
+; 11/17/20 by Todd Berendes
+;  - Modified for V7 FS swath
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov

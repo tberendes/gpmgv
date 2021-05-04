@@ -302,7 +302,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    orbit = parsed[0]
    nsites = FIX( parsed[1] )
    IF (nsites LE 0 OR nsites GT 99) THEN BEGIN
-      PRINT, "Illegal number of GR sites in control file: ", parsed[1]
+      PRINT, "IDL Error Exit: Illegal number of GR sites in control file: ", parsed[1]
       PRINT, "Line: ", dataPR
       PRINT, "Quitting processing."
       GOTO, bailOut
@@ -779,6 +779,13 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 
    tocdf_elev_angle = elev_angle[idx_uniq_elevs]
    num_elevations_out = N_ELEMENTS(tocdf_elev_angle)
+   ; TAB 2/3/21, fix for some bad files in May/June 2015
+   good_ind = where (elev_angle gt 0, good_cnt)
+   IF good_cnt eq 0 THEN BEGIN
+      PRINT, "Error: Elevation angles are all negative for orbit = ", orbit, ", site = ", $
+              siteID, ", skipping."
+      GOTO, nextGRfile
+   ENDIF
    IF num_elevations NE num_elevations_out THEN BEGIN
       print, ""
       print, "Duplicate sweep elevations ignored!"
@@ -817,8 +824,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
             do_blockage = 0        ; disable blockage computations
             help, blockageElevs
             help, do_blockage
-            print, 'Enter .CONTINUE command to proceed, .RESET to quit:'
-            stop
+;            print, 'Enter .CONTINUE command to proceed, .RESET to quit:'
+;            stop
          endif ELSE BEGIN
             BlockFileBySweep[iswpblk] = dir_block + '/' + siteid + '/' $
                     + siteID + ".BeamBlockage_" + blkgElev_str[nearest] + ".sav"
@@ -830,7 +837,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          print, "Cannot find first sweep blockage file: ", BlockFileBySweep[0]
          do_blockage = 0        ; disable blockage computations
          help, do_blockage
-         stop
+;         stop
       ENDIF
    ENDIF
 
