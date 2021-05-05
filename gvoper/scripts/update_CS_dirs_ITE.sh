@@ -42,7 +42,7 @@ for satInstrAlg in $1
         mkdir -p $version
         cd $version
         case $satonly in
-           GPM )  subsets='AKradars BrazilRadars CONUS DARW KOREA KWAJ Guam Hawaii SanJuanPR Finland' ;;
+           GPM )  subsets='AKradars BrazilRadars CONUS DARW KOREA KWAJ Guam Hawaii SanJuanPR Finland AUS-East AUS-West Tasmania' ;;
           TRMM )  subsets='CONUS DARW KOREA KWAJ' ;;
              * )  subsets='AKradars BrazilRadars CONUS DARW KOREA KWAJ Guam Hawaii SanJuanPR Finland' ;;
         esac
