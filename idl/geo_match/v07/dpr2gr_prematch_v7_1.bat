@@ -54,7 +54,7 @@ cd, PRO_DIR
  flat_ncpath = 0
  dpr_dbz_min = 15.0
  ;nc_name_add = '15dbzGRDPR'
- nc_name_add = ''
+ ;nc_name_add = ''
  dpr_rain_min = 0.01
  non_pps_files = 0
 ; non_pps_files = 1

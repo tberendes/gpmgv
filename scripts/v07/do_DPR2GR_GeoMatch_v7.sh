@@ -62,11 +62,6 @@
 #                           GEO_MATCH_VERSION is not the same as the version encoded in
 #                           the output netCDF filename a fatal error occurs.  FLOAT type.
 #
-#    -f                     If specified, then instruct matchup programs to create
-#                           and overwrite any existing matchups for a date even if
-#                           the database says they have been run already (see NOTE).
-#                           Takes no argument value.
-#
 #	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
 #   -r  SITE_ID             Limit to specific radar site					
 #
@@ -226,12 +221,12 @@ while getopts i:v:p:m:n:r:s:e:f option
            DO_START_DATE=1;;
         e) ending_date=${OPTARG}
            DO_END_DATE=1;;
-#        f) FORCE_MATCH=1;;
+#        f) FORCE_MATCH=1;; # no longer an option since default
         *) echo "Usage: "
            echo "do_DPR2GR_GeoMatch_v7.sh -i INSTRUMENT -v PPS_Version -p ParmSet " \
                 "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA)" \
                 " -s \"YYYY-MM-DD\" -e \"YYYY-MM-DD\""
-#                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA) -f"
+#                "-m GeoMatchVersion -n (NPOL_MD or NPOL_WA)"
            exit 1
     esac
 done
