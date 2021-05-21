@@ -3,7 +3,7 @@
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
-; polar2dpr_hs_ms_ns_snow_2.bat
+; polar2dpr_hs_fs_1.bat
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -26,8 +26,8 @@ help, ITE_OR_OPERATIONAL, gpm_root
 ;exit
 
 FILES4NC = GETENV("CONTROLFILE")
-;restore, '/home/tberendes/git/gpmgv/todd/geo_match/polar2dpr_hs_fs_v7.sav'
-.compile polar2dpr_hs_fs_v7.pro
+restore, './polar2dpr_hs_fs_v7.sav'
+;.compile polar2dpr_hs_fs_v7.pro
 polar2dpr_hs_fs_v7, FILES4NC, 100, SCORES=0, GPM_ROOT=gpm_root, $
            DIRGV='/data/gpmgv/gv_radar/finalQC_in', PLOT_PPIS=0, $
            NC_DIR='/data/gpmgv/netcdf/grmatch', DIR2ADPR='/.', DIR_BLOCK='/data/gpmgv/blockage', $

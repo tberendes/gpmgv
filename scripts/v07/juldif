@@ -1,0 +1,61 @@
+#!/bin/sh
+# juldif
+# calculates the days difference between two dates and reports 
+# the number days as jul1 - jul2 
+# usage juldif jul1 jul2
+# where julian date is in the form yyyyddd
+
+ usage () {
+ echo "Usage:"
+ echo " juldif jul1 jul2"
+ echo ""
+ echo " Calculates the day difference between"
+ echo " two julian dates (jul1 -jul2)"
+ echo " where a julian date is in the form of yyyyddd."
+	 }
+
+if [ $# != 2 ]
+then
+usage
+exit
+fi
+
+# This process subtracts arg2 from arg1. If arg2 is larger
+# then reverse the arguments. The calculations are done, and
+# then the sign is reversed
+if [ `expr $1 \< $2` = 1 ]
+then
+jul1=$2
+jul2=$1
+else
+jul1=$1
+jul2=$2
+fi
+
+# Break the dates in to year and day portions
+yyyy1=`expr $jul1 / 1000`
+yyyy2=`expr $jul2 / 1000`
+ddd1=`expr $jul1 % 1000`
+ddd2=`expr $jul2 % 1000`
+
+# Subtract days
+res=`expr $ddd1 - $ddd2`
+
+# Then add days in year until year2 matches year1
+while [ `expr $yyyy2 \< $yyyy1` = 1 ]
+do
+diy=`yeardays $yyyy2`
+res=`expr $res + $diy`
+yyyy2=`expr $yyyy2 + 1`
+done
+
+# if argument 2 was larger than argument 1 then 
+# the arguments were reversed before calculating
+# adjust by reversing the sign
+if [ `expr $1 \< $2` = 1 ]
+then
+res=`expr $res \* -1`
+fi
+
+# and output the results
+echo $res

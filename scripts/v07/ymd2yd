@@ -1,0 +1,38 @@
+#!/bin/sh
+# ymd2yd converts yyyymmdd to yyyyddd
+# usage ymd2yd 19980429
+
+# if there is no command line argument, then assume that the date
+# is coming in on a pipe and use read to collect it
+
+if [ $# = 0 ]
+then
+read dt
+else
+dt=$1
+fi
+
+# break the yyyymmdd into separate parts for year, month and day
+
+y=`expr $dt / 10000`
+m=`expr \( $dt % 10000 \) / 100`
+d=`expr $dt % 100`
+
+# add the days in each month up to (but not including the month itself)
+# into the days. For example if the date is 19980203 then extract the
+# number of days in January and add it to 03. If the date is June 14, 1998
+# then extract the number of days in January, February, March, April and May
+# and add them to 14.
+
+x=1
+while [ `expr $x \< $m` = 1 ]
+do
+md=`monthdays $y $x`
+d=`expr $d + $md`
+x=`expr $x \+ 1`
+done
+
+# combine the year and day back together again and you have the julian date.
+
+jul=`expr \( $y \* 1000 \) + $d`
+echo $jul

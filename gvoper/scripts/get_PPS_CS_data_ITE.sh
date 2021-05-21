@@ -513,7 +513,7 @@ if [ $GOT_FILES = 'y' ]
     # Call the wrapper script, get_PR_DPR_Meta.sh, to run the scripts that
     # run the IDL .bat files to extract the PR and DPR file metadata.
     # It's slow, so run it in the background so that this script can complete.
-  #CODE BLOCK REMOVED
+  #CODE BLOCK REMOVED, do not update metadata since these files are always previously processed by earlier version
 fi
 
 # set status to $FAILED in the appstatus table for $MISSING rows where ntries

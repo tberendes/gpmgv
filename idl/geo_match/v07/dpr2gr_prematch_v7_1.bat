@@ -44,7 +44,9 @@ cd, PRO_DIR
 ;VERSION2MATCH='V05A'
 ;VERSION2MATCH='V06A'
 ;VERSION2MATCH='V03B'
- VERSION2MATCH='V06X'
+; VERSION2MATCH='V06X'
+;VERSION2MATCH='V07A'
+ VERSION2MATCH='ITE757'
  gr_nc_version = '2_0'
  plot_PPIs = 0
  scores = 0
@@ -59,7 +61,7 @@ cd, PRO_DIR
  declutter = 0
 
 .compile dpr2gr_prematch_v7.pro
-;restore, file='/home/tberendes/git/gpmgv/todd/geo_match/dpr2gr_prematch.sav'
+restore, file='./dpr2gr_prematch_v7.sav'
 
 dpr2gr_prematch_v7, control_file, GPM_ROOT=gpm_root, DIRDPR=dirdpr, $
    DIRKU=dirku, DIRKA=dirka, DIR_GV_NC=dir_gv_nc, $

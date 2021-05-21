@@ -116,6 +116,12 @@ FUNCTION get_dpr_slv_group_v7, group_id, prodgroup, READ_ALL=read_all
                         zFactorCorrectedESurface = h5d_read(dtID)
                'zFactorCorrectedNearSurface' : IF all THEN $
                      zFactorCorrectedNearSurface = h5d_read(dtID)
+; Version 7 changed variable names to 'Final', map to 'Corrected' for consistency in previous version VN files
+                          'zFactorFinal' 	 : zFactorCorrected = h5d_read(dtID)
+                  'zFactorFinalESurface' : IF all THEN $
+                        zFactorCorrectedESurface = h5d_read(dtID)
+               'zFactorFinalNearSurface' : IF all THEN $
+                     zFactorCorrectedNearSurface = h5d_read(dtID)
             ELSE : BEGIN
                       message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1

@@ -174,7 +174,7 @@ until [ "$runagain" = 'n' ]
      #wget --user=${USER} --password="${PW}" -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftp_url*" ${FTPS} | tee -a $LOG_FILE
 
      wget --user=${USER} --password="${PW}" --ftps-fallback-to-ftp -nv --mirror -P ${MIR_DATA_DIR} -o ${MIR_LOG_FILE} -nH --no-parent --cut-dirs=3 -A "ftps_url*" ${FTPS}
-	 status = $?
+	 status=$?
 	 
 # bailout mechanism for testing
 #     echo "Enter q to quit or hit return to continue:"

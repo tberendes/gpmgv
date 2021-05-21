@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# yd2ymd
+#
+# Converts a Julian date in the form 'yyyyddd' to year-month-day
+# format 'yyyymmdd'.  Uses monthdays script to calculate days in a
+# given month for a given year.
+#
+# Usage: yd2ymd yyyyddd
+#
+
+# split the julian date field into year and julian day-of-year
+yyyy=`expr $1 / 1000`
+ddd=`expr $1 % 1000`
+
+mm=1
+dd=`monthdays $yyyy $mm`
+
+while [ `expr $ddd \> $dd` = 1 ]
+  do
+    ddd=`expr $ddd - $dd`
+    mm=`expr $mm + 1`
+    dd=`monthdays $yyyy $mm`
+done
+
+ymd=`expr $yyyy \* 10000 + $mm \* 100 + $ddd`
+
+echo $ymd
