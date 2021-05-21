@@ -215,7 +215,7 @@ echo "" | tee -a $LOG_FILE
 # determine which version of the polar2dpr or rhi2dpr batch file to use
 case "${DO_RHI}"
   in
-    0) BATFILE=polar2dpr_hsfs_v7_${PARAMETER_SET}.bat ;;
+    0) BATFILE=polar2dpr_hs_fs_v7_${PARAMETER_SET}.bat ;;
     1) BATFILE=rhi2dpr_hs_ms_ns_${PARAMETER_SET}.bat ;;
     *) echo "Invalid value ${DO_RHI} for -r option in do_GR_HS_FS_geo_matchup4date_v7.sh."\
        | tee -a $LOG_FILE
