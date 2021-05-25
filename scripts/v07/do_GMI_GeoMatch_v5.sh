@@ -91,11 +91,6 @@
 #    -k                     If specified, skip the step of updating the rain events in
 #                           the rainy100inside100 table.  Takes no argument value.
 #
-#    -f                     If specified, then instruct matchup programs to create
-#                           and overwrite any existing matchups for a date even if
-#                           the database says they have been run already (see NOTE).
-#                           Takes no argument value.
-#
 #	-n	NPOL_MD or NPOL_WA	Specify NPOL MD or WA					
 #   -r  SITE_ID             Limit to specific radar site					
 #	-s	"YYYY-MM-DD" 	    Specify starting date				
