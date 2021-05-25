@@ -5,7 +5,9 @@
 #
 # DESCRIPTION
 # -----------
-# Wrapper to do GPROF-GR NetCDF geometric matchups for 2A-GPROF and 1C-R-XCAL# files in the GV data system, for cases meeting predefined criteria.  This# script drives volume matches between GPROF and ground radar (GR) data to
+# Wrapper to do GPROF-GR NetCDF geometric matchups for 2A-GPROF and 1C-R-XCAL
+# files in the GV data system, for cases meeting predefined criteria.  This
+# script drives volume matches between GPROF and ground radar (GR) data to
 # produce the baseline "GRtoGPROF" matchup netCDF files.  Queries the 'gpmgv'
 # database to find rainy site overpass events between a specified start and end
 # date and assembles a series of date-specific control files to run matchups for
@@ -15,10 +17,39 @@
 # satellite, since the file formats are the same.  In practice this is not
 # feasible, since the matching ground radar data typically are not available
 # except for the GPM and TRMM satellites.
-## For each date, calls the child script do_GMI_geo_matchup4date_v5.sh, which# invokes IDL to generate the GRtoGPROF volume match netCDF files for that day's# rainy overpass events as listed in the daily control file.  Ancillary output# from the script is a series of 'control files', one per day in the range of# dates to be processed, listing 2A-GPROF, 1C-R-XCAL (if available), and ground
-# radar data files to be processed for rainy site overpass events for that# calendar date, as well as metadata parameters related to the GPROF and GR# data and the site overpass events.# # Volume matches are done using the 2A-GPROF data products, and will also# include equivalent blackbody temperature data from the matching (i.e., same# satellite, orbit, orbit subset, and version) 1C-R-XCAL product, if available.# Completed geometry match files are cataloged in the 'gpmgv' database table
+#
+# For each date, calls the child script do_GMI_geo_matchup4date_v5.sh, which
+# invokes IDL to generate the GRtoGPROF volume match netCDF files for that day's
+# rainy overpass events as listed in the daily control file.  Ancillary output
+# from the script is a series of 'control files', one per day in the range of
+# dates to be processed, listing 2A-GPROF, 1C-R-XCAL (if available), and ground
+# radar data files to be processed for rainy site overpass events for that
+# calendar date, as well as metadata parameters related to the GPROF and GR
+# data and the site overpass events.
+# 
+# Volume matches are done using the 2A-GPROF data products, and will also
+# include equivalent blackbody temperature data from the matching (i.e., same
+# satellite, orbit, orbit subset, and version) 1C-R-XCAL product, if available.
+# Completed geometry match files are cataloged in the 'gpmgv' database table
 # 'geo_match_product'.
-# # The script has logic to compute the start and end dates over which to attempt# volume match runs.  The end date is the current calendar day, and the start# date is 30 day prior to the current date.  These computed values exist to# support routine (cron-scheduled) runs of the script.  The computed values# are overridden in practice by specifying override values for the variables# 'startDate' and 'endDate' in the main script itself, and these values must be# updated each time the script is to be (re)run manually.# # Only those site overpasses within the user-specified date range which are# identified as 'rainy' will be configured in the daily control files to be run.# Event criteria are as defined in the table "rainy100inside100" in the "gpmgv"# database, whose contents are updated by an SQL query command file run in this# script as a default option.  Event definition includes cases where the DPR# indicates "rain certain" at 100 or more gridpoints within 100 km of the radar# within the 4km gridded 2A-DPR product.  See the SQL command file# ${BIN_DIR}/'rainCases100kmAddNewEvents.sql'.#
+# 
+# The script has logic to compute the start and end dates over which to attempt
+# volume match runs.  The end date is the current calendar day, and the start
+# date is 30 day prior to the current date.  These computed values exist to
+# support routine (cron-scheduled) runs of the script.  The computed values
+# are overridden in practice by specifying override values for the variables
+# 'startDate' and 'endDate' in the main script itself, and these values must be
+# updated each time the script is to be (re)run manually.
+# 
+# Only those site overpasses within the user-specified date range which are
+# identified as 'rainy' will be configured in the daily control files to be run.
+# Event criteria are as defined in the table "rainy100inside100" in the "gpmgv"
+# database, whose contents are updated by an SQL query command file run in this
+# script as a default option.  Event definition includes cases where the DPR
+# indicates "rain certain" at 100 or more gridpoints within 100 km of the radar
+# within the 4km gridded 2A-DPR product.  See the SQL command file
+# ${BIN_DIR}/'rainCases100kmAddNewEvents.sql'.
+#
 #
 # SYNOPSIS
 # --------
@@ -70,7 +101,16 @@
 #	-s	"YYYY-MM-DD" 	    Specify starting date				
 #	-e	"YYYY-MM-DD" 	    Specify ending date				
 #
-# # NOTE:  When running dates that might have already had GPROF-GR matchup sets#         run, the called script will skip these dates, as the 'appstatus' table#         will say that the date has already been done.  Delete the entries#         from this table where app_id='geo_match_gmi', either for the date(s)#         to be run, or for all dates.  EXCEPTION:  If script is called with the#         -f option (e.g., "do_GMI_GeoMatch.sh -f"), then the status of prior#         runs for the set of dates configured in the script will be ignored and#         the matchups will be re-run, possibly overwriting the existing files.# 
+# 
+# NOTE:  When running dates that might have already had GPROF-GR matchup sets
+#         run, the called script will skip these dates, as the 'appstatus' table
+#         will say that the date has already been done.  Delete the entries
+#         from this table where app_id='geo_match_gmi', either for the date(s)
+#         to be run, or for all dates.  EXCEPTION:  If script is called with the
+#         -f option (e.g., "do_GMI_GeoMatch.sh -f"), then the status of prior
+#         runs for the set of dates configured in the script will be ignored and
+#         the matchups will be re-run, possibly overwriting the existing files.
+# 
 #
 # 10/7/2014   Morris        Created from doGeoMatch4NewRainCases.sh and
 #                           do_DPR_GeoMatch.sh.
