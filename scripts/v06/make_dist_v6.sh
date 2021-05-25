@@ -11,7 +11,7 @@
 #     git pul origin master
 mkdir -p v6_geomatch/idl
 mkdir -p v6_geomatch/scripts
-cp ~/git/gpmgv/scripts/v07/* v6_geomatch/scripts
+cp ~/git/gpmgv/scripts/v06/* v6_geomatch/scripts
 chmod 755 v6_geomatch/scripts/*
 cp ~/git/gpmgv/idl/geo_match/v06/*.bat v6_geomatch/idl
 cd v6_geomatch/idl
