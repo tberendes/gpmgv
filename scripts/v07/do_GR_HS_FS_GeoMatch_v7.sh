@@ -80,7 +80,6 @@
 #	-e	"YYYY-MM-DD" 	    Specify ending date				
 #    
 #
-#
 # NOTE:  When running dates that have already had GR->DPR matchup sets run,
 #        the child script do_GR_HS_FS_geo_matchup4date_v7.sh will skip
 #        processing for these dates, as its query of the 'appstatus' table
