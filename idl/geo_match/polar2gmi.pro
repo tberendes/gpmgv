@@ -864,6 +864,13 @@ FOR igv=0,nsites-1  DO BEGIN
 
    tocdf_elev_angle = elev_angle[idx_uniq_elevs]
    num_elevations_out = N_ELEMENTS(tocdf_elev_angle)
+   ; TAB 6/15/21, fix for some bad files in May/June 2015
+   good_ind = where (elev_angle gt 0, good_cnt)
+   IF good_cnt eq 0 THEN BEGIN
+      PRINT, "Error: Elevation angles are all negative for orbit = ", orbit, ", site = ", $
+              siteID, ", skipping."
+      GOTO, nextGVfile
+   ENDIF
    IF num_elevations NE num_elevations_out THEN BEGIN
       print, ""
       print, "Duplicate sweep elevations ignored!"
