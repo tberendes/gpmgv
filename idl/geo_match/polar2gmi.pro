@@ -543,7 +543,14 @@ NSCANS_GMI = s[1]
      ; find the point locations where lat and lon are non-missing for all 1C swaths
       minlats = MIN(Lat1c_all, DIMENSION=1)
       minlons = MIN(Lon1c_all, DIMENSION=1)
-      idxllgood=WHERE(minlats GT -90.0 and minlons GE -180.0)  ; NOT missing
+      ; TAB 6/15/21 added count check on lat/lon check to handle missing values
+      idxllgood=WHERE(minlats GT -90.0 and minlons GE -180.0, idxcount)  ; NOT missing
+      IF idxcount eq 0 THEN BEGIN
+      	PRINT, "Error: Lat/lons are all missing for orbit = ", orbit, ", site = ", $
+              siteID, ", skipping."
+      	GOTO, nextGVfile
+      ENDIF
+
       llidx = array_indices(minlons, IDXLLGOOD)
      ; grab the first good point and make sure its lat/lon are "the same" between
      ; the 2AGPROF and the 1CRXCAL product.  If not, then bail out, subsets'
