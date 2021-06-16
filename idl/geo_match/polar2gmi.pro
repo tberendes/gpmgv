@@ -546,9 +546,13 @@ NSCANS_GMI = s[1]
       ; TAB 6/15/21 added count check on lat/lon check to handle missing values
       idxllgood=WHERE(minlats GT -90.0 and minlons GE -180.0, idxcount)  ; NOT missing
       IF idxcount eq 0 THEN BEGIN
-      	PRINT, "Error: Lat/lons are all missing for orbit = ", orbit, ", site = ", $
-              siteID, ", skipping."
-      	GOTO, nextGVfile
+            PRINT, "ERROR reading fields from ", file_2AGPROF
+            PRINT, "Skipping events for orbit = ", orbit
+            PRINT, ""
+            GOTO, nextOrbit
+      	PRINT, "Warning: Lat/lons are all missing for orbit = ", orbit, " skipping events..."
+        skip_gr_events, lun0, nsites
+      	GOTO, nextOrbit
       ENDIF
 
       llidx = array_indices(minlons, IDXLLGOOD)
