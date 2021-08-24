@@ -146,7 +146,7 @@ FUNCTION get_cmb_datasets_v7, group_id, label, READ_ALL=read_all
       datasets_struc = { source : label, $
                          Latitude : Latitude, $
                          Longitude : Longitude, $
-                         PSDparamLowNode : PSDparamLowNode, $
+;                         PSDparamLowNode : PSDparamLowNode, $
                          airPressure : airPressure, $
                          airTemperature : airTemperature, $
                          cloudIceWaterCont : cloudIceWaterCont, $
@@ -204,7 +204,7 @@ FUNCTION get_cmb_datasets_v7, group_id, label, READ_ALL=read_all
       datasets_struc = { source : label, $
                          Latitude : Latitude, $
                          Longitude : Longitude, $
-                         PSDparamLowNode : PSDparamLowNode, $
+;                         PSDparamLowNode : PSDparamLowNode, $
                          correctedReflectFactor : correctedReflectFactor, $
                          phaseBinNodes : phaseBinNodes, $
                          pia : pia, $
