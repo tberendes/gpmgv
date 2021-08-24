@@ -191,7 +191,7 @@ FUNCTION read_2bcmb_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
 
       ; get the structure with the swath-level datasets
       ptr_datasets = ptr_new(/allocate_heap)
-      *ptr_datasets = get_cmb_datasets(sw_group_id, prodgroup, READ_ALL=all)
+      *ptr_datasets = get_cmb_datasets_v7(sw_group_id, prodgroup, READ_ALL=all)
       IF (verbose1) THEN help, *ptr_datasets
 
       h5g_close, sw_group_id
