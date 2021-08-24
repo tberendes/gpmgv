@@ -159,14 +159,15 @@ FUNCTION read_2bcmb_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
 	      ENDCASE
       
       	  sw_group_id = h5g_open(group_id, gname)
+      	  swathHeaderID = h5a_open_name(sw_group_id, gname+'_SwathHeader')
       endif else begin
       	  sw_group_id = h5g_open(group_id, sname)
-
+		  swathHeaderID = h5a_open_name(sw_group_id, sname+'_SwathHeader')
       endelse
 
       ; get the SwathHeader for this swath
       swhead_label = prodgroup+'_SwathHeader'
-      swathHeaderID = h5a_open_name(sw_group_id, sname+'_SwathHeader')
+      ;swathHeaderID = h5a_open_name(sw_group_id, sname+'_SwathHeader')
       ppsSwathHeader = h5a_read(swathHeaderID)
       ; extract the individual swath header values from the formatted string
       swathstruc = parse_swath_header_group(ppsSwathHeader, swhead_label)
