@@ -151,7 +151,18 @@ FUNCTION read_2bcmb_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
       print, "" & print, "Swath ",sname,":"
       prodgroup=prodname+'__'+sname      ; label info for data structures
       ; get the group ID for this swath
-      sw_group_id = h5g_open(group_id, sname)
+            
+      if prodname NE '2BCMBX' then begin ; changed swath group names in V07 from V06X
+	      CASE sname OF
+	         'FS' : gname = 'KuKaGMI'
+	         'NS' : gname = 'KuGMI'
+	      ENDCASE
+      
+      	  sw_group_id = h5g_open(group_id, gname)
+      endif else begin
+      	  sw_group_id = h5g_open(group_id, sname)
+
+      endelse
 
       ; get the SwathHeader for this swath
       swhead_label = prodgroup+'_SwathHeader'
