@@ -118,6 +118,7 @@ FUNCTION get_cmb_datasets_v7, group_id, label, READ_ALL=read_all
                     'surfLiqRateFrac' : IF all THEN surfLiqRateFrac = $
                                         h5d_read(dtID)
                   'surfPrecipTotRate' : surfPrecipTotRate = h5d_read(dtID)
+              'nearSurfPrecipTotRate' : surfPrecipTotRate = h5d_read(dtID)
              'surfPrecipTotRateSigma' : IF all THEN surfPrecipTotRateSigma = $
                                         h5d_read(dtID)
                  'surfaceAirPressure' : IF all THEN surfaceAirPressure = $
