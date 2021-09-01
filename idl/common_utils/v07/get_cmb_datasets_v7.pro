@@ -49,6 +49,8 @@
 ;		simulatedBrightTemp 
 ; 08/24/21 by Todd Berendes (UAH)
 ;   mods for V7 variable name changes
+;   removed precipTotPSDparamLow (Nw), PSDparamLowNode, precipTotPSDparamHigh(Dm)
+;   added precipTotDm, precipTotLogNw, precipTotMu
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -97,10 +99,13 @@ FUNCTION get_cmb_datasets_v7, group_id, label, READ_ALL=read_all
                                 'pia' : pia = h5d_read(dtID)
                  'precipTotWaterCont' : precipTotWaterCont = h5d_read(dtID)
             'precipTotWaterContSigma' : precipTotWaterContSigma = h5d_read(dtID)
-              'precipTotPSDparamHigh' : precipTotPSDparamHigh = h5d_read(dtID)
-               'precipTotPSDparamLow' : precipTotPSDparamLow = h5d_read(dtID)
-              			'precipTotDm' : precipTotPSDparamHigh = h5d_read(dtID)
-               			'precipTotMu' : precipTotPSDparamLow = h5d_read(dtID)
+            
+;              'precipTotPSDparamHigh' : precipTotPSDparamHigh = h5d_read(dtID)
+; removed low res params in v7
+;               'precipTotPSDparamLow' : precipTotPSDparamLow = h5d_read(dtID)
+              			'precipTotDm' : precipTotDm = h5d_read(dtID)
+              		 'precipTotLogNw' : precipTotLogNw = h5d_read(dtID)
+              		    'precipTotMu' : precipTotMu = h5d_read(dtID)              		 
                       'precipTotRate' : precipTotRate = h5d_read(dtID)
                  'precipTotRateSigma' : IF all THEN precipTotRateSigma = $
                                         h5d_read(dtID)
@@ -161,8 +166,11 @@ FUNCTION get_cmb_datasets_v7, group_id, label, READ_ALL=read_all
                          pia : pia, $
                          precipTotWaterCont : precipTotWaterCont, $
                          precipTotWaterContSigma : precipTotWaterContSigma, $
-                         precipTotPSDparamHigh : precipTotPSDparamHigh, $
-                         precipTotPSDparamLow : precipTotPSDparamLow, $
+;                         precipTotPSDparamHigh : precipTotPSDparamHigh, $
+;                         precipTotPSDparamLow : precipTotPSDparamLow, $
+                         precipTotDm : precipTotDm, $
+                         precipTotLogNw : precipTotLogNw, $
+                         precipTotMu : precipTotMu, $
                          precipTotRate : precipTotRate, $
                          precipTotRateSigma : precipTotRateSigma, $
                          simulatedBrightTemp : simulatedBrightTemp, $
@@ -211,11 +219,14 @@ FUNCTION get_cmb_datasets_v7, group_id, label, READ_ALL=read_all
                          pia : pia, $
                          precipTotWaterCont : precipTotWaterCont, $
                          precipTotWaterContSigma : precipTotWaterContSigma, $
-                         precipTotPSDparamHigh : precipTotPSDparamHigh, $
+;                         precipTotPSDparamHigh : precipTotPSDparamHigh, $
                          cloudLiqWaterCont : cloudLiqWaterCont, $
                          cloudIceWaterCont : cloudIceWaterCont, $
                          simulatedBrightTemp : simulatedBrightTemp, $
-                         precipTotPSDparamLow : precipTotPSDparamLow, $
+;                         precipTotPSDparamLow : precipTotPSDparamLow, $
+                         precipTotDm : precipTotDm, $
+                         precipTotLogNw : precipTotLogNw, $
+                         precipTotMu : precipTotMu, $
                          precipTotRate : precipTotRate, $
                          surfPrecipTotRate : surfPrecipTotRate }
    ENDELSE

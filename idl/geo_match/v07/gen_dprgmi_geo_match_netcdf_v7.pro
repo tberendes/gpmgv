@@ -59,6 +59,8 @@
 ;			tbSim_183_3v = 12th nemiss index
 ; 11/17/20 by Todd Berendes (UAH)
 ;    Modified for V7
+;   removed precipTotPSDparamLow (Nw), PSDparamLowNode, precipTotPSDparamHigh(Dm)
+;   added precipTotDm, precipTotLogNw, precipTotMu
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -832,18 +834,36 @@ for iswa=0,1 do begin
 
    ; DPRGMI swath-level fields of same no. of dimensions for each swath
 
-   this_varid = ncdf_vardef(cdfid, 'precipTotPSDparamHigh_'+swath[iswa], [fpdimid[iswa],eldimid])
+   this_varid = ncdf_vardef(cdfid, 'precipTotDm_'+swath[iswa], [fpdimid[iswa],eldimid])
    ncdf_attput, cdfid, this_varid, 'long_name', $
-               '2B-DPRGMI precipTotPSDparamHigh for '+swath[iswa]+' swath'
+               '2B-DPRGMI precipTotDm for '+swath[iswa]+' swath'
    ncdf_attput, cdfid, this_varid, 'units', 'mm_Dm'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-   this_varid = ncdf_vardef(cdfid, 'precipTotPSDparamLow_'+swath[iswa], $
-                            [nPSDlo_dimid, fpdimid[iswa],eldimid])
+   this_varid = ncdf_vardef(cdfid, 'precipTotLogNw_'+swath[iswa], [fpdimid[iswa],eldimid])
    ncdf_attput, cdfid, this_varid, 'long_name', $
-               '2B-DPRGMI precipTotPSDparamLow for '+swath[iswa]+' swath'
-   ncdf_attput, cdfid, this_varid, 'units', 'Nw_mu'
+               '2B-DPRGMI precipTotLogNw for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'log10(Nw)'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+   this_varid = ncdf_vardef(cdfid, 'precipTotMu_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, this_varid, 'long_name', $
+               '2B-DPRGMI precipTotMu for '+swath[iswa]+' swath'
+   ncdf_attput, cdfid, this_varid, 'units', 'Mu'
+   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+;   this_varid = ncdf_vardef(cdfid, 'precipTotPSDparamHigh_'+swath[iswa], [fpdimid[iswa],eldimid])
+;   ncdf_attput, cdfid, this_varid, 'long_name', $
+;               '2B-DPRGMI precipTotPSDparamHigh for '+swath[iswa]+' swath'
+;   ncdf_attput, cdfid, this_varid, 'units', 'mm_Dm'
+;   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
+;
+;   this_varid = ncdf_vardef(cdfid, 'precipTotPSDparamLow_'+swath[iswa], $
+;                            [nPSDlo_dimid, fpdimid[iswa],eldimid])
+;   ncdf_attput, cdfid, this_varid, 'long_name', $
+;               '2B-DPRGMI precipTotPSDparamLow for '+swath[iswa]+' swath'
+;   ncdf_attput, cdfid, this_varid, 'units', 'Nw_mu'
+;   ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
    this_varid = ncdf_vardef(cdfid, 'precipTotRate_'+swath[iswa], [fpdimid[iswa],eldimid])
    ncdf_attput, cdfid, this_varid, 'long_name', $
@@ -901,19 +921,42 @@ for iswa=0,1 do begin
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
 
-   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotPSDparamHigh_rejected_'+swath[iswa], $
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotDm_rejected_'+swath[iswa], $
                               [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, rainrejvarid, 'long_name', $
-                'number of bins below rain_min in precipTotPSDparamHigh average for ' $
+                'number of bins below rain_min in precipTotDm average for ' $
+                +swath[iswa]+' swath'
+   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+   
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotLogNw_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+                'number of bins below rain_min in precipTotLogNw average for ' $
                 +swath[iswa]+' swath'
    ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
 
-   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotPSDparamLow_rejected_'+swath[iswa], $
-                             [nPSDlo_dimid, fpdimid[iswa],eldimid], /short)
+   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotMu_rejected_'+swath[iswa], $
+                              [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, rainrejvarid, 'long_name', $
-                'number of bins below rain_min in precipTotPSDparamLow average for ' $
+                'number of bins below rain_min in precipTotMu average for ' $
                 +swath[iswa]+' swath'
    ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
+
+;   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotPSDparamHigh_rejected_'+swath[iswa], $
+;                              [fpdimid[iswa],eldimid], /short)
+;   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+;                'number of bins below rain_min in precipTotPSDparamHigh average for ' $
+;                +swath[iswa]+' swath'
+;   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+;
+;   rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotPSDparamLow_rejected_'+swath[iswa], $
+;                             [nPSDlo_dimid, fpdimid[iswa],eldimid], /short)
+;   ncdf_attput, cdfid, rainrejvarid, 'long_name', $
+;                'number of bins below rain_min in precipTotPSDparamLow average for ' $
+;                +swath[iswa]+' swath'
+;   ncdf_attput, cdfid, rainrejvarid, '_FillValue', INT_RANGE_EDGE
+
 
    rainrejvarid = ncdf_vardef(cdfid, 'n_precipTotRate_rejected_'+swath[iswa], $
                               [fpdimid[iswa],eldimid], /short)

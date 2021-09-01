@@ -51,6 +51,8 @@
 ;  - Added processing of GR Dm and N2 dual-pol fields for version 1.3 file.
 ; 11/17/20 by Todd Berendes, UAH
 ;  - Modified for GPM V7
+;   removed precipTotPSDparamLow (Nw), PSDparamLowNode, precipTotPSDparamHigh(Dm)
+;   added precipTotDm, precipTotLogNw, precipTotMu
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -511,8 +513,11 @@
          n_gr_swemrms_points_rejected = 0UL     ; # of above that are missing swe
          dpr_gates_expected = 0UL      ; # DPR gates within the sweep vert. bounds
          n_correctedReflectFactor_rejected = 0UL  ; # of above that are below DPR dBZ cutoff
-         n_precipTotPSDparamHigh_rejected = 0UL  ; ditto, for corrected DPR Z
-         n_precipTotPSDparamLow_rejected = 0UL  ; # gates below DPR rainrate cutoff
+         n_precipTotDm_rejected = 0UL  ; ditto, for corrected DPR Z
+         n_precipTotLogNw_rejected = 0UL  ; # gates below DPR rainrate cutoff
+         n_precipTotMu_rejected = 0UL  ; # gates below DPR rainrate cutoff
+;         n_precipTotPSDparamHigh_rejected = 0UL  ; ditto, for corrected DPR Z
+;         n_precipTotPSDparamLow_rejected = 0UL  ; # gates below DPR rainrate cutoff
          n_precipTotRate_rejected = 0UL
          n_precipTotWaterCont_rejected = 0UL
          n_precipTotWaterContSigma_rejected = 0UL
@@ -764,27 +769,52 @@
 
                IF clutterStatus NE 2 THEN BEGIN
                  ; OK to proceed with averages, etc.
+                 ; Dm
                   n_correctedReflectFactor_rejected = dpr_gates_expected - numDPRgates
 
                   numDPRgates = 0
-                  precipTotPSDparamHigh_avg = get_dpr_layer_average(           $
+                  precipTotDm_avg = get_dpr_layer_average(           $
                                        topCorrGate, botmCorrGate,              $
-                                       scandpr, raydpr, precipTotPSDparamHigh, $
+                                       scandpr, raydpr, precipTotDm, $
                                        1.0, 0.0,                               $
                                        numDPRgates, lowestClutterFreeBin )
-                  n_precipTotPSDparamHigh_rejected = dpr_gates_expected - numDPRgates
+                  n_precipTotDm_rejected = dpr_gates_expected - numDPRgates
 
-                  precipTotPSDparamLow_avg = FLTARR(nPSDlo)
-                  n_precipTotPSDparamLow_rejected = INTARR(nPSDlo)
-                  psdlo_results = get_precipTotPSDparamLow_avg(            $
-                                    topCorrGate, botmCorrGate,             $
-                                    scandpr, raydpr, precipTotPSDparamLow, $
-                                    PSDparamLowNode, [1.0,1.0], [-9999.0,-3.0] )
-                  FOR psdidx=0,nPSDlo-1 DO BEGIN
-                     precipTotPSDparamLow_avg[psdidx] = psdlo_results.params_avg[psdidx]
-                     n_precipTotPSDparamLow_rejected[psdidx] = dpr_gates_expected - $
-                        psdlo_results.num_in_avg[psdidx]
-                  ENDFOR
+                  precipTotLogNw_avg = get_dpr_layer_average(           $
+                                       topCorrGate, botmCorrGate,              $
+                                       scandpr, raydpr, precipTotLogNw, $
+                                       1.0, 0.0,                               $
+                                       numDPRgates, lowestClutterFreeBin )
+                  n_precipTotLogNw_rejected = dpr_gates_expected - numDPRgates
+                  
+                  precipTotMu_avg = get_dpr_layer_average(           $
+                                       topCorrGate, botmCorrGate,              $
+                                       scandpr, raydpr, precipTotMu, $
+                                       1.0, 0.0,                               $
+                                       numDPRgates, lowestClutterFreeBin )
+                  n_precipTotMu_rejected = dpr_gates_expected - numDPRgates
+
+
+;                  numDPRgates = 0
+;                  precipTotPSDparamHigh_avg = get_dpr_layer_average(           $
+;                                       topCorrGate, botmCorrGate,              $
+;                                       scandpr, raydpr, precipTotPSDparamHigh, $
+;                                       1.0, 0.0,                               $
+;                                       numDPRgates, lowestClutterFreeBin )
+;                  n_precipTotPSDparamHigh_rejected = dpr_gates_expected - numDPRgates
+;
+;				; Nw is 1st index of precipTotPSDparamLow
+;                  precipTotPSDparamLow_avg = FLTARR(nPSDlo)
+ ;                 n_precipTotPSDparamLow_rejected = INTARR(nPSDlo)
+;                  psdlo_results = get_precipTotPSDparamLow_avg(            $
+;                                    topCorrGate, botmCorrGate,             $
+;                                    scandpr, raydpr, precipTotPSDparamLow, $
+;                                    PSDparamLowNode, [1.0,1.0], [-9999.0,-3.0] )
+;                  FOR psdidx=0,nPSDlo-1 DO BEGIN
+;                     precipTotPSDparamLow_avg[psdidx] = psdlo_results.params_avg[psdidx]
+;                     n_precipTotPSDparamLow_rejected[psdidx] = dpr_gates_expected - $
+;                        psdlo_results.num_in_avg[psdidx]
+ ;                 ENDFOR
 
                   numDPRgates = 0
                   precipTotRate_avg = get_dpr_layer_average(           $
@@ -831,12 +861,18 @@
                  ; all bins to average are below lowestClutterFreeBin
                   correctedReflectFactor_avg = Z_BELOW_THRESH
                   n_correctedReflectFactor_rejected = dpr_gates_expected
-                  precipTotPSDparamHigh_avg = SRAIN_BELOW_THRESH
-                  n_precipTotPSDparamHigh_rejected = dpr_gates_expected
-                  precipTotPSDparamLow_avg = FLTARR(nPSDlo)
-                  precipTotPSDparamLow_avg[*] = SRAIN_BELOW_THRESH
-                  n_precipTotPSDparamLow_rejected = INTARR(nPSDlo)
-                  n_precipTotPSDparamLow_rejected[*] = dpr_gates_expected
+                  precipTotDm_avg = SRAIN_BELOW_THRESH
+                  n_precipTotDm_rejected = dpr_gates_expected
+                  precipTotLogNw_avg = SRAIN_BELOW_THRESH
+                  n_precipTotLogNw_rejected = dpr_gates_expected
+                  precipTotMu_avg = SRAIN_BELOW_THRESH
+                  n_precipTotMu_rejected = dpr_gates_expected               
+;                  precipTotPSDparamHigh_avg = SRAIN_BELOW_THRESH
+;                  n_precipTotPSDparamHigh_rejected = dpr_gates_expected
+;                  precipTotPSDparamLow_avg = FLTARR(nPSDlo)
+;                  precipTotPSDparamLow_avg[*] = SRAIN_BELOW_THRESH
+;                  n_precipTotPSDparamLow_rejected = INTARR(nPSDlo)
+;                  n_precipTotPSDparamLow_rejected[*] = dpr_gates_expected
                   precipTotRate_avg = SRAIN_BELOW_THRESH
                   n_precipTotRate_rejected = dpr_gates_expected
                   precipTotWaterCont_avg = SRAIN_BELOW_THRESH
@@ -1318,9 +1354,12 @@
                n2_stddev_gv = SRAIN_BELOW_THRESH
                n2_max_gv = SRAIN_BELOW_THRESH
                correctedReflectFactor_avg = Z_BELOW_THRESH
-               precipTotPSDparamHigh_avg = SRAIN_BELOW_THRESH
-               precipTotPSDparamLow_avg = FLTARR(nPSDlo)
-               precipTotPSDparamLow_avg[*] = SRAIN_BELOW_THRESH
+               precipTotDm_avg = SRAIN_BELOW_THRESH
+               precipTotLogNw_avg = SRAIN_BELOW_THRESH
+               precipTotMu_avg = SRAIN_BELOW_THRESH
+;               precipTotPSDparamHigh_avg = SRAIN_BELOW_THRESH
+;               precipTotPSDparamLow_avg = FLTARR(nPSDlo)
+;               precipTotPSDparamLow_avg[*] = SRAIN_BELOW_THRESH
                precipTotRate_avg = SRAIN_BELOW_THRESH
                precipTotWaterCont_avg = SRAIN_BELOW_THRESH
                precipTotWaterContSigma_avg = SRAIN_BELOW_THRESH
@@ -1423,8 +1462,11 @@
                           correctedReflectFactor_avg
                      tocdf_clutterStatus[jpr,ielev] = UINT(clutterStatus)
                   ENDELSE
-                  tocdf_precipTotPSDparamHigh[jpr,ielev] = precipTotPSDparamHigh_avg
-                  tocdf_precipTotPSDparamLow[*,jpr,ielev] = precipTotPSDparamLow_avg
+                  tocdf_precipTotDm[jpr,ielev] = precipTotDm_avg
+                  tocdf_precipTotLogNw[jpr,ielev] = precipTotLogNw_avg
+                  tocdf_precipTotMu[jpr,ielev] = precipTotMu_avg
+;                  tocdf_precipTotPSDparamHigh[jpr,ielev] = precipTotPSDparamHigh_avg
+;                  tocdf_precipTotPSDparamLow[*,jpr,ielev] = precipTotPSDparamLow_avg
                   tocdf_precipTotRate[jpr,ielev] = precipTotRate_avg
                   tocdf_precipTotWaterCont[jpr,ielev] = precipTotWaterCont_avg
                   tocdf_precipTotWaterContSigma[jpr,ielev] = precipTotWaterContSigma_avg
@@ -1519,8 +1561,11 @@
                              tocdf_correctedReflectFactor[idxKuKa[swathID],jpr,ielev] $
                                  = FLOAT_OFF_EDGE $
                           ELSE tocdf_correctedReflectFactor[jpr,ielev] = FLOAT_OFF_EDGE
-                          tocdf_precipTotPSDparamHigh[jpr,ielev] = FLOAT_OFF_EDGE
-                          tocdf_precipTotPSDparamLow[*,jpr,ielev] = FLOAT_OFF_EDGE
+                          tocdf_precipTotDm[jpr,ielev] = FLOAT_OFF_EDGE
+                          tocdf_precipTotLogNw[jpr,ielev] = FLOAT_OFF_EDGE
+                          tocdf_precipTotMu[jpr,ielev] = FLOAT_OFF_EDGE
+;                          tocdf_precipTotPSDparamHigh[jpr,ielev] = FLOAT_OFF_EDGE
+;                          tocdf_precipTotPSDparamLow[*,jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_precipTotRate[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_precipTotWaterCont[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_precipTotWaterContSigma[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1612,8 +1657,11 @@
                              tocdf_correctedReflectFactor[idxKuKa[swathID],jpr,ielev] $
                                  = Z_MISSING $
                           ELSE tocdf_correctedReflectFactor[jpr,ielev] = Z_MISSING
-                          tocdf_precipTotPSDparamHigh[jpr,ielev] = Z_MISSING
-                          tocdf_precipTotPSDparamLow[*,jpr,ielev] = Z_MISSING
+                          tocdf_precipTotDm[jpr,ielev] = Z_MISSING
+                          tocdf_precipTotLogNw[jpr,ielev] = Z_MISSING
+                          tocdf_precipTotMu[jpr,ielev] = Z_MISSING
+;                          tocdf_precipTotPSDparamHigh[jpr,ielev] = Z_MISSING
+;                          tocdf_precipTotPSDparamLow[*,jpr,ielev] = Z_MISSING
                           tocdf_precipTotRate[jpr,ielev] = Z_MISSING
                           tocdf_precipTotWaterCont[jpr,ielev] = Z_MISSING
                           tocdf_precipTotWaterContSigma[jpr,ielev] = Z_MISSING
@@ -1672,10 +1720,16 @@
                UINT(n_correctedReflectFactor_rejected)
             tocdf_n_dpr_expected[jpr,ielev] = UINT(dpr_gates_expected)
          ENDELSE
-         tocdf_n_precipTotPSDparamHigh_rejected[jpr,ielev] = $
-                               UINT(n_precipTotPSDparamHigh_rejected)
-         tocdf_n_precipTotPSDparamLow_rejected[*,jpr,ielev] = $
-                               UINT(n_precipTotPSDparamLow_rejected)
+         tocdf_n_precipTotDm_rejected[jpr,ielev] = $
+                               UINT(n_precipTotDm_rejected)
+         tocdf_n_precipTotLogNw_rejected[jpr,ielev] = $
+                               UINT(n_precipTotLogNw_rejected)
+         tocdf_n_precipTotMu_rejected[jpr,ielev] = $
+                               UINT(n_precipTotMu_rejected)
+;         tocdf_n_precipTotPSDparamHigh_rejected[jpr,ielev] = $
+;                               UINT(n_precipTotPSDparamHigh_rejected)
+;         tocdf_n_precipTotPSDparamLow_rejected[*,jpr,ielev] = $
+;                               UINT(n_precipTotPSDparamLow_rejected)
          tocdf_n_precipTotRate_rejected[jpr,ielev] = $
                                UINT(n_precipTotRate_rejected)
          tocdf_n_precipTotWaterCont_rejected[jpr,ielev] = $

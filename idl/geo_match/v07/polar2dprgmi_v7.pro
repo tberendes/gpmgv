@@ -138,6 +138,8 @@
 ;  - Added DPRGMI stormTopAltitude field for version 1.3 file.
 ; 11/1720 by Todd Berendes, UAH
 ;  - Modified for GPM V7
+;   removed precipTotPSDparamLow (Nw), PSDparamLowNode, precipTotPSDparamHigh(Dm)
+;   added precipTotDm, precipTotLogNw, precipTotMu
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -1138,8 +1140,11 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          tbSim_37v = reform(tbSim[5,*,*])
          tbSim_89v = reform(tbSim[7,*,*])
          tbSim_183_3v = reform(tbSim[11,*,*])
-         precipTotPSDparamHigh = (*ptr_swath.PTR_DATASETS).precipTotPSDparamHigh
-         precipTotPSDparamLow = (*ptr_swath.PTR_DATASETS).precipTotPSDparamLow
+         precipTotDm = (*ptr_swath.PTR_DATASETS).precipTotDm
+         precipTotLogNw = (*ptr_swath.PTR_DATASETS).precipTotLogNw
+         precipTotMu = (*ptr_swath.PTR_DATASETS).precipTotMu
+;         precipTotPSDparamHigh = (*ptr_swath.PTR_DATASETS).precipTotPSDparamHigh
+;         precipTotPSDparamLow = (*ptr_swath.PTR_DATASETS).precipTotPSDparamLow
          precipTotRate = (*ptr_swath.PTR_DATASETS).precipTotRate
          surfPrecipTotRate = (*ptr_swath.PTR_DATASETS).surfPrecipTotRate
 ;         ptr_free, ptr_swath.PTR_DATASETS
@@ -1614,10 +1619,16 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_swemrms_rejected = UINTARR(numDPRrays, num_elevations_out)
 
      ; DPRGMI 3-D variables:
-      tocdf_precipTotPSDparamHigh = $
+      tocdf_precipTotDm = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
-      tocdf_precipTotPSDparamLow = $
-         MAKE_ARRAY(nPSDlo, numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_precipTotLogNw = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_precipTotMu = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
+;      tocdf_precipTotPSDparamHigh = $
+;         MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
+;      tocdf_precipTotPSDparamLow = $
+;         MAKE_ARRAY(nPSDlo, numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_precipTotRate = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_precipTotWaterCont = $
@@ -1628,10 +1639,16 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_cloudIceWaterCont = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
-      tocdf_n_precipTotPSDparamHigh_rejected = $
+      tocdf_n_precipTotDm_rejected = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
-      tocdf_n_precipTotPSDparamLow_rejected = $
-         MAKE_ARRAY(nPSDlo, numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_n_precipTotLogNw_rejected = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_n_precipTotMu_rejected = $
+         MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
+;      tocdf_n_precipTotPSDparamHigh_rejected = $
+;         MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
+;      tocdf_n_precipTotPSDparamLow_rejected = $
+;         MAKE_ARRAY(nPSDlo, numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
       tocdf_n_precipTotRate_rejected = $
          MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
       tocdf_n_precipTotWaterCont_rejected = $
@@ -1897,18 +1914,27 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'n_gr_expected_'+DPR_scantype, tocdf_gr_expected
 
      ; DPRGMI variables last
-      NCDF_VARPUT, ncid, 'precipTotPSDparamHigh_'+DPR_scantype, tocdf_precipTotPSDparamHigh
-      NCDF_VARPUT, ncid, 'precipTotPSDparamLow_'+DPR_scantype, tocdf_precipTotPSDparamLow
+      NCDF_VARPUT, ncid, 'precipTotDm_'+DPR_scantype, tocdf_precipTotDm
+      NCDF_VARPUT, ncid, 'precipTotLogNw_'+DPR_scantype, tocdf_precipTotLogNw
+      NCDF_VARPUT, ncid, 'precipTotMu_'+DPR_scantype, tocdf_precipTotMu
+;      NCDF_VARPUT, ncid, 'precipTotPSDparamHigh_'+DPR_scantype, tocdf_precipTotPSDparamHigh
+;      NCDF_VARPUT, ncid, 'precipTotPSDparamLow_'+DPR_scantype, tocdf_precipTotPSDparamLow
       NCDF_VARPUT, ncid, 'precipTotRate_'+DPR_scantype, tocdf_precipTotRate
       NCDF_VARPUT, ncid, 'precipTotWaterCont_'+DPR_scantype, tocdf_precipTotWaterCont
       NCDF_VARPUT, ncid, 'precipTotWaterContSigma_'+DPR_scantype, tocdf_precipTotWaterContSigma
       NCDF_VARPUT, ncid, 'cloudLiqWaterCont_'+DPR_scantype, tocdf_cloudLiqWaterCont
       NCDF_VARPUT, ncid, 'cloudIceWaterCont_'+DPR_scantype, tocdf_cloudIceWaterCont
       NCDF_VARPUT, ncid, 'n_dpr_expected_'+DPR_scantype, tocdf_n_dpr_expected
-      NCDF_VARPUT, ncid, 'n_precipTotPSDparamHigh_rejected_'+DPR_scantype, $
-                   tocdf_n_precipTotPSDparamHigh_rejected
-      NCDF_VARPUT, ncid, 'n_precipTotPSDparamLow_rejected_'+DPR_scantype, $
-                   tocdf_n_precipTotPSDparamLow_rejected
+      NCDF_VARPUT, ncid, 'n_precipTotDm_rejected_'+DPR_scantype, $
+                   tocdf_n_precipTotDm_rejected
+      NCDF_VARPUT, ncid, 'n_precipTotLogNw_rejected_'+DPR_scantype, $
+                   tocdf_n_precipTotLogNw_rejected
+      NCDF_VARPUT, ncid, 'n_precipTotMu_rejected_'+DPR_scantype, $
+                   tocdf_n_precipTotMu_rejected
+;      NCDF_VARPUT, ncid, 'n_precipTotPSDparamHigh_rejected_'+DPR_scantype, $
+;                   tocdf_n_precipTotPSDparamHigh_rejected
+;      NCDF_VARPUT, ncid, 'n_precipTotPSDparamLow_rejected_'+DPR_scantype, $
+;                   tocdf_n_precipTotPSDparamLow_rejected
       NCDF_VARPUT, ncid, 'n_precipTotRate_rejected_'+DPR_scantype, $
                    tocdf_n_precipTotRate_rejected
       NCDF_VARPUT, ncid, 'n_precipTotWaterCont_rejected_'+DPR_scantype, $
