@@ -1118,7 +1118,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       IF PTR_VALID(ptr_swath.PTR_DATASETS) THEN BEGIN
          prlons = (*ptr_swath.PTR_DATASETS).LONGITUDE
          prlats = (*ptr_swath.PTR_DATASETS).LATITUDE
-         PSDparamLowNode = (*ptr_swath.PTR_DATASETS).PSDparamLowNode
+         ;PSDparamLowNode = (*ptr_swath.PTR_DATASETS).PSDparamLowNode
          correctedReflectFactor = $
                 (*ptr_swath.PTR_DATASETS).correctedReflectFactor  ;nKuKa
          ; TAB: put new stuff for additional fields here:       
