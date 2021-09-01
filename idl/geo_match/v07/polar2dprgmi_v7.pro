@@ -1260,7 +1260,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       m = 0.0        ; SLOPE AS DX/DY
       dy_sign = 0.0  ; SENSE IN WHICH Y CHANGES WITH INCR. SCAN ANGLE, = -1 OR +1
       get_scan_slope_and_sense, smap, prlats, prlons, scan_num, RAYSPERSCAN, $
-                                m, dy_sign
+                                m, dy_sign, do_print=1
+; remove do_print !!!!!!!!!!!!!!
 
       FOR ray_num = 0,RAYSPERSCAN-1  DO BEGIN
         ; is to-sfc projection of any point along DPR ray is within range of GR volume?
