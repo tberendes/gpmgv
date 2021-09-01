@@ -231,6 +231,9 @@ ENDIF
 ; set to a constant, until database supports DPR product version override values
 DPR_version = '0'
 
+; for debugging
+!EXCEPT=2
+
 
 ; ***************************** Local configuration ****************************
 
