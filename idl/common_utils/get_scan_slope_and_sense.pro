@@ -49,7 +49,7 @@ PRO get_scan_slope_and_sense, smap, prlats, prlons, scan_num, raysperscan, mscan
       if (do_print eq 1 ) then begin
         print, "XX0, XX48, YY0, YY48, m, dysign, = ", $
                XX0, XXEND, YY0, YYEND, mscan, dysign
-        print, "prlats = ",prlats
-        print, "prlons = ",prlons
+        ;print, "prlats = ",prlats
+        ;print, "prlons = ",prlons
       endif
 end
