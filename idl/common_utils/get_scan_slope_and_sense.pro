@@ -3,7 +3,7 @@ PRO get_scan_slope_and_sense, smap, prlats, prlons, scan_num, raysperscan, mscan
 
 ;=============================================================================
 ;+
-; Copyright © 2008, United States Government as represented by the
+; Copyright ï¿½ 2008, United States Government as represented by the
 ; Administrator for The National Aeronautics and Space Administration.
 ; All Rights Reserved.
 ;
@@ -49,5 +49,7 @@ PRO get_scan_slope_and_sense, smap, prlats, prlons, scan_num, raysperscan, mscan
       if (do_print eq 1 ) then begin
         print, "XX0, XX48, YY0, YY48, m, dysign, = ", $
                XX0, XXEND, YY0, YYEND, mscan, dysign
+        print, "prlats = ",prlats
+        print, "prlons = ",prlons
       endif
 end
