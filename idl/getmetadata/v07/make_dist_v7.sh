@@ -5,9 +5,9 @@
 # under your home directory and the idl environment
 # has been configured to include the git/gpmgv/idl
 # directory and all of it's subdirectories in the
-# IDL_PATH variable.  Git shoudl be updated by:
+# IDL_PATH variable.  Git should be updated by:
 #     cd ~/git/gpmgv
-#     git pul origin master
+#     git pull origin master
 mkdir -p v7_metadata/idl
 cp -a ~/git/gpmgv/idl/getmetadata/v07/*.bat v7_metadata/idl
 cd v7_metadata/idl
