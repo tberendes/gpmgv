@@ -10,5 +10,6 @@
 #     git pull origin master
 mkdir -p v7_metadata/idl
 cp -a ~/git/gpmgv/idl/getmetadata/v07/*.bat v7_metadata/idl
+cp -a ~/git/gpmgv/idl/getmetadata/v07/*.pro v7_metadata/idl
 cd v7_metadata/idl
 idl < make_saves_v7.bat
