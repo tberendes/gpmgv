@@ -622,7 +622,8 @@ FOR ncattnum = 0, N_ELEMENTS(parsed)-1 DO BEGIN
                                         /GLOBAL_ATTRIBUTE, /BYTE )
       ELSE : BEGIN
                message, "Unknown GRtoDPR netCDF global attribute '"+thisncatt+"'", /INFO
-               status=1
+               ; TAB 12/6/21 removed error indicator for unknown variable
+               ;status=1
              END
    ENDCASE
    IF status NE 0 THEN GOTO, ErrorExit
@@ -921,7 +922,8 @@ FOR ncvarnum = 0, N_ELEMENTS(ncfilevars)-1 DO BEGIN
       'clutterStatus' : status=PREPARE_NCVAR( ncid1, thisncvar, clutterStatus )
        ELSE : BEGIN
                  message, "Unknown GRtoDPR netCDF variable '"+thisncvar+"'", /INFO
-                 status=1
+                 ; TAB 12/6/21 removed error indicator for unknown variable
+                 ;status=1
               END
    ENDCASE
    IF status NE 0 THEN GOTO, ErrorExit
