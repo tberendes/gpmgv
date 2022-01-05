@@ -239,7 +239,7 @@ GPROF_version = 'V00'
 ; IDL True/False interpretation of values 1 and 0)
 ;DATA_PRESENT = 1
 ;NO_DATA_PRESENT = 0  ; default fill value, defined in grid_def.inc and used in
-                      ; gen_gprof_geo_match_netcdf.pro
+                      ; gen_gprof_geo_match_netcdf_v7.pro.pro
 
 
 ; ***************************** Local configuration ****************************
@@ -369,7 +369,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       ENDIF
    ENDIF
 
-; store the file basenames in a string to be passed to gen_gprof_geo_match_netcdf()
+; store the file basenames in a string to be passed to gen_gprof_geo_match_netcdf_v7.pro()
    infileNameArr = STRARR(3)
    infileNameArr[0] = FILE_BASENAME(origGprofFileName)
    infileNameArr[1] = FILE_BASENAME(origXcalFileName)
@@ -385,7 +385,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   ; generate the netcdf matchup file path
 
    matchup_file_version=0.0  ; give it a null value, for now
-  ; Call gen_gprof_geo_match_netcdf with the option to only get current file version
+  ; Call gen_gprof_geo_match_netcdf_v7.pro with the option to only get current file version
   ; so that it can become part of the matchup file path/name
    throwaway = gen_gprof_geo_match_netcdf( GEO_MATCH_VERS=matchup_file_version )
 
@@ -432,6 +432,15 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 ;  extract pointer data fields into scLats and scLons arrays
    scLons =  (*status.S1.ptr_scStatus).SClongitude
    scLats =  (*status.S1.ptr_scStatus).SClatitude
+
+;  extract scanTime fields 
+   stYear = (*status.S1.ptr_ScanTime).Year
+   stMonth = (*status.S1.ptr_ScanTime).Month
+   stDayOfMonth = (*status.S1.ptr_ScanTime).DayOfMonth
+   stHour = (*status.S1.ptr_ScanTime).Hour
+   stMinute = (*status.S1.ptr_ScanTime).Minute
+   stSecond = (*status.S1.ptr_ScanTime).Second
+   stSunLocalTime = (*status.S1.ptr_ScanTime).sunLocalTime
    
 ; NOTE THAT THE ARRAYS ARE IN (RAY,SCAN) COORDINATES.  NEED TO ACCOUNT FOR THIS
 ; WHEN ASSIGNING "gmi_master_idx" ARRAY INDICES.
@@ -649,7 +658,7 @@ FOR igv=0,nsites-1  DO BEGIN
    ENDIF
    lastsite = siteID
 
-; store the file basename in the string array to be passed to gen_gprof_geo_match_netcdf()
+; store the file basename in the string array to be passed to gen_gprgen_gprof_geo_match_netcdf_v7.pro()
    infileNameArr[2] = base_1CUF
 
    PRINT, igv+1, ": ", gmi_dtime, "  ", siteID, siteLat, siteLon
@@ -675,7 +684,7 @@ FOR igv=0,nsites-1  DO BEGIN
 
   ; set up the structure holding the UF IDs for the fields we find in this file
   ; - the default values in this structure must be coordinated with those
-  ;   defined in gen_gprof_geo_match_netcdf.pro
+  ;   defined in gen_gprof_geo_match_netcdf_v7.pro.pro
    ufstruct={ CZ_ID:    'Unspecified', $
               ZDR_ID  : 'Unspecified', $
               KDP_ID  : 'Unspecified', $
@@ -1491,7 +1500,7 @@ FOR igv=0,nsites-1  DO BEGIN
   ; intersect the elevation sweeps.  This part of the algorithm continues
   ; in code in a separate file, included below:
 
-   @polar2gmi_resampling.pro
+   @polar2gmi_resampling_v7.pro
 
   ; ================================================================================================
 
@@ -1506,7 +1515,7 @@ FOR igv=0,nsites-1  DO BEGIN
 
   ; Create a netCDF file with the proper 'numGMIrays' and 'num_elevations_out'
   ; and Tc channels dimensions, passing the global attribute values along
-   ncfile = gen_gprof_geo_match_netcdf( fname_netCDF, numGMIrays, $
+   ncfile = gen_gprof_geo_match_netcdf_v7.pro( fname_netCDF, numGMIrays, $
                                         tocdf_elev_angle, ufstruct, $
                                         GPROF_version, siteID, $
                                         infileNameArr, Tc_Names )

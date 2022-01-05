@@ -39,6 +39,10 @@
 ; - Added tag/value pairs to return structure for new V05x DATASET members CAPE,
 ;   convectivePrecipitation, frozenPrecipitation, L1CqualityFlag,
 ;   profileTemp2mIndex, and spare2, as determined by read_all setting.
+; 01/05/22 Berendes UAH/ITSC
+; - added new V07 variables airmassLiftIndex, precipitationYesNoFlag
+; - made iceWaterPath and cloudWaterPath included in return struct by default
+;   (without READ_ALL set)
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -63,15 +67,13 @@ FUNCTION get_2agprofgmi_datasets, group_id, label, READ_ALL=read_all
                            'Latitude' : Latitude = h5d_read(dtID)
                           'Longitude' : Longitude = h5d_read(dtID)
                                'CAPE' : IF all THEN CAPE = h5d_read(dtID)
-                     'cloudWaterPath' : IF all THEN cloudWaterPath = $
-                                        h5d_read(dtID)
+                     'cloudWaterPath' : cloudWaterPath = h5d_read(dtID)
               'convectPrecipFraction' : convectPrecipFraction = h5d_read(dtID)
             'convectivePrecipitation' : convectivePrecipitation = h5d_read(dtID)
              'databaseExpansionIndex' : IF all THEN databaseExpansionIndex = $
                                         h5d_read(dtID)
                 'frozenPrecipitation' : frozenPrecipitation = h5d_read(dtID)
-                       'iceWaterPath' : IF all THEN iceWaterPath = $
-                                        h5d_read(dtID)
+                       'iceWaterPath' : iceWaterPath = h5d_read(dtID)
                      'L1CqualityFlag' : IF all THEN L1CqualityFlag = $
                                         h5d_read(dtID)
                'liquidPrecipFraction' : liquidPrecipFraction = h5d_read(dtID)
@@ -111,6 +113,8 @@ FUNCTION get_2agprofgmi_datasets, group_id, label, READ_ALL=read_all
                    'surfaceTypeIndex' : surfaceTypeIndex = h5d_read(dtID)
                         'temp2mIndex' : IF all THEN temp2mIndex = h5d_read(dtID)
               'totalColumnWaterVapor' : totalColumnWaterVapor = h5d_read(dtID)
+                   'airmassLiftIndex' : airmassLiftIndex = h5d_read(dtID)
+             'precipitationYesNoFlag' : precipitationYesNoFlag = h5d_read(dtID)
          'totalColumnWaterVaporIndex' : IF all THEN totalColumnWaterVaporIndex = $
                                         h5d_read(dtID)
             ELSE : BEGIN
@@ -187,6 +191,8 @@ FUNCTION get_2agprofgmi_datasets, group_id, label, READ_ALL=read_all
                       surfaceSkinTempIndex : surfaceSkinTempIndex, $
                       surfaceTypeIndex : surfaceTypeIndex, $
                       temp2mIndex : temp2mIndex, $
+                      airmassLiftIndex : airmassLiftIndex, $
+                      precipitationYesNoFlag : precipitationYesNoFlag, $
                       totalColumnWaterVapor : totalColumnWaterVapor, $
                       totalColumnWaterVaporIndex : totalColumnWaterVaporIndex }
    ENDIF ELSE BEGIN
@@ -204,6 +210,10 @@ FUNCTION get_2agprofgmi_datasets, group_id, label, READ_ALL=read_all
                       sunGlintAngle : sunGlintAngle, $
                       surfacePrecipitation : surfacePrecipitation, $
                       surfaceTypeIndex : surfaceTypeIndex, $
+                      airmassLiftIndex : airmassLiftIndex, $
+                      precipitationYesNoFlag : precipitationYesNoFlag, $
+                      cloudWaterPath : cloudWaterPath, $
+                      iceWaterPath : iceWaterPath, $
                       totalColumnWaterVapor : totalColumnWaterVapor }
    ENDELSE
 

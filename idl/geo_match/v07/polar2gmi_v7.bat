@@ -24,9 +24,9 @@ help, ITE_OR_OPERATIONAL, gpm_root
 FILES4NC = GETENV("CONTROLFILE")
 ;.compile polar2gmi.pro
 ; TAB change this line......
-restore, './polar2gmi.sav'
+restore, './polar2gmi_v7.sav'
 
-polar2gmi, FILES4NC, 125, GPM_ROOT=gpm_root, DIRGV='/data/gpmgv/gv_radar/finalQC_in', NC_DIR='/data/gpmgv/netcdf/geo_match', plot_ppi=0 , DIR_BLOCK='/data/gpmgv/blockage'
+polar2gmi_v7, FILES4NC, 125, GPM_ROOT=gpm_root, DIRGV='/data/gpmgv/gv_radar/finalQC_in', NC_DIR='/data/gpmgv/netcdf/geo_match', plot_ppi=0 , DIR_BLOCK='/data/gpmgv/blockage'
 
 ;resolve_all
-;save, /routines, file='/home/gvoper/idl/geo_match/polar2gmi.sav'
+;save, /routines, file='/home/gvoper/idl/geo_match/polar2gmi_v7.sav'
