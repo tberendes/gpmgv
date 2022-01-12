@@ -926,8 +926,8 @@ FOR igv=0,nsites-1  DO BEGIN
             do_blockage = 0        ; disable blockage computations
             help, blockageElevs
             help, do_blockage
-            print, 'Enter .CONTINUE command to proceed, .RESET to quit:'
-            stop
+;            print, 'Enter .CONTINUE command to proceed, .RESET to quit:'
+;            stop
          endif ELSE BEGIN
             BlockFileBySweep[iswpblk] = dir_block + '/' + siteid + '/' $
                     + siteID + ".BeamBlockage_" + blkgElev_str[nearest] + ".sav"
@@ -939,7 +939,7 @@ FOR igv=0,nsites-1  DO BEGIN
          print, "Cannot find first sweep blockage file: ", BlockFileBySweep[0]
          do_blockage = 0        ; disable blockage computations
          help, do_blockage
-         stop
+;         stop
       ENDIF
    ENDIF
 
