@@ -138,10 +138,10 @@ if [ "$USER_ID" = "morris" ]
         GV_BASE_DIR=/home/gvoper
   elif [ "$USER_ID" = "tberendes" ]
       then
-        GV_BASE_DIR=/home/tberendes/v6_geomatch
+        GV_BASE_DIR=/home/tberendes/v7_geomatch
   elif [ "$USER_ID" = "dberendes" ]
       then
-        GV_BASE_DIR=/home/dberendes/v6_geomatch
+        GV_BASE_DIR=/home/dberendes/v7_geomatch
   else
       echo "User unknown, can't set GV_BASE_DIR!"
       exit 1
