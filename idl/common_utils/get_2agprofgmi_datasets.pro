@@ -48,6 +48,7 @@
 ;       https://pmm.nasa.gov/contact
 ;-
 
+
 FUNCTION get_2agprofgmi_datasets, group_id, label, READ_ALL=read_all
 
    all = KEYWORD_SET(read_all)
@@ -113,8 +114,8 @@ FUNCTION get_2agprofgmi_datasets, group_id, label, READ_ALL=read_all
                    'surfaceTypeIndex' : surfaceTypeIndex = h5d_read(dtID)
                         'temp2mIndex' : IF all THEN temp2mIndex = h5d_read(dtID)
               'totalColumnWaterVapor' : totalColumnWaterVapor = h5d_read(dtID)
-                   'airmassLiftIndex' : airmassLiftIndex = h5d_read(dtID)
-             'precipitationYesNoFlag' : precipitationYesNoFlag = h5d_read(dtID)
+;                   'airmassLiftIndex' : airmassLiftIndex = h5d_read(dtID)
+;             'precipitationYesNoFlag' : precipitationYesNoFlag = h5d_read(dtID)
          'totalColumnWaterVaporIndex' : IF all THEN totalColumnWaterVaporIndex = $
                                         h5d_read(dtID)
             ELSE : BEGIN
@@ -191,8 +192,8 @@ FUNCTION get_2agprofgmi_datasets, group_id, label, READ_ALL=read_all
                       surfaceSkinTempIndex : surfaceSkinTempIndex, $
                       surfaceTypeIndex : surfaceTypeIndex, $
                       temp2mIndex : temp2mIndex, $
-                      airmassLiftIndex : airmassLiftIndex, $
-                      precipitationYesNoFlag : precipitationYesNoFlag, $
+;                      airmassLiftIndex : airmassLiftIndex, $
+;                      precipitationYesNoFlag : precipitationYesNoFlag, $
                       totalColumnWaterVapor : totalColumnWaterVapor, $
                       totalColumnWaterVaporIndex : totalColumnWaterVaporIndex }
    ENDIF ELSE BEGIN
@@ -210,8 +211,8 @@ FUNCTION get_2agprofgmi_datasets, group_id, label, READ_ALL=read_all
                       sunGlintAngle : sunGlintAngle, $
                       surfacePrecipitation : surfacePrecipitation, $
                       surfaceTypeIndex : surfaceTypeIndex, $
-                      airmassLiftIndex : airmassLiftIndex, $
-                      precipitationYesNoFlag : precipitationYesNoFlag, $
+;                      airmassLiftIndex : airmassLiftIndex, $
+;                      precipitationYesNoFlag : precipitationYesNoFlag, $
                       cloudWaterPath : cloudWaterPath, $
                       iceWaterPath : iceWaterPath, $
                       totalColumnWaterVapor : totalColumnWaterVapor }
