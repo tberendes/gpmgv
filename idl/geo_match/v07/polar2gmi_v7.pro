@@ -186,7 +186,7 @@ END
 
 ;*******************************************************************************
 
-PRO polar2gmi, control_file, range_threshold_km, GPM_ROOT=gpmroot,          $
+PRO polar2gmi_v7, control_file, range_threshold_km, GPM_ROOT=gpmroot,          $
                DIRGV=dirgv, NC_DIR=nc_dir, NC_NAME_ADD=ncnameadd,           $
                SCORES=run_scores, PLOT_PPIS=plot_PPIs, PLOT_BINS=plot_bins, $
                MARK_EDGES=mark_edges, DBZ_MIN=dBZ_min, RR_MIN=RR_min,       $
@@ -387,7 +387,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    matchup_file_version=0.0  ; give it a null value, for now
   ; Call gen_gprof_geo_match_netcdf_v7.pro with the option to only get current file version
   ; so that it can become part of the matchup file path/name
-   throwaway = gen_gprof_geo_match_netcdf( GEO_MATCH_VERS=matchup_file_version )
+   throwaway = gen_gprof_geo_match_netcdf_v7( GEO_MATCH_VERS=matchup_file_version )
 
   ; separate version into integer and decimal parts, with 2 decimal places
    verarr=strsplit(string(matchup_file_version,FORMAT='(F0.2)'),'.',/extract)
@@ -406,7 +406,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    ENDELSE
 
 
-   status = read_2agprof_hdf5( file_2AGPROF, /READ_ALL )
+   status = read_2agprof_hdf5_v7( file_2AGPROF, /READ_ALL )
 
    s=SIZE(status, /TYPE)
    CASE s OF

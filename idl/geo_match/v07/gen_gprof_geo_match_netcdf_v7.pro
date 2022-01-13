@@ -54,7 +54,7 @@ FUNCTION gen_gprof_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, 
                                      gprofgrfiles, tbb_channels, $
                                      GEO_MATCH_VERS=geo_match_vers
 
-GEO_MATCH_NC_FILE_VERSION=1.2    ;ignore "Include" file definition now
+GEO_MATCH_NC_FILE_VERSION=2.0    ;ignore "Include" file definition now
 
 IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
    geo_match_vers = GEO_MATCH_NC_FILE_VERSION
