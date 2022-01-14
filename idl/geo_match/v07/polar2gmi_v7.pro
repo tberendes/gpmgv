@@ -461,6 +461,17 @@ NSCANS_GMI = s[1]
    surfaceType = (*status.S1.ptr_datasets).surfaceTypeIndex
    surfacePrecipitation = (*status.S1.ptr_datasets).surfacePrecipitation
    PoP = (*status.S1.ptr_datasets).probabilityOfPrecip
+   
+   ; additional variables for GPROf VN version 2.0 files
+   frozenPrecipitation = (*status.S1.ptr_datasets).frozenPrecipitation
+   convectivePrecipitation = (*status.S1.ptr_datasets).convectivePrecipitation
+   rainWaterPath = (*status.S1.ptr_datasets).rainWaterPath
+   cloudWaterPath = (*status.S1.ptr_datasets).cloudWaterPath
+   iceWaterPath = (*status.S1.ptr_datasets).iceWaterPath
+   
+   ; new V7 variables for GPROf VN version 2.0 files
+   airmassLiftIndex = (*status.S1.ptr_datasets).airmassLiftIndex
+   precipitationYesNoFlag = (*status.S1.ptr_datasets).precipitationYesNoFlag
 
 
   ; get the 1CRXCAL Tc and Quality variables if file is available.  Tc values
