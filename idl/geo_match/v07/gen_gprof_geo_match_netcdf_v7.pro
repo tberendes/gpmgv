@@ -391,6 +391,92 @@ ncdf_attput, cdfid, havefreezingHeightvarid, 'long_name', $
              'data exists flag for freezingHeight'
 ncdf_attput, cdfid, havefreezingHeightvarid, '_FillValue', NO_DATA_PRESENT
 
+; additional variables for GPROf VN version 2.0 files
+
+havefrozenPrecipitationvarid = ncdf_vardef(cdfid, 'have_frozenPrecipitation', /short)
+ncdf_attput, cdfid, havefrozenPrecipitationvarid, 'long_name', $
+             'data exists flag for frozenPrecipitation'
+ncdf_attput, cdfid, havefrozenPrecipitationvarid, '_FillValue', NO_DATA_PRESENT
+
+haveconvectivePrecipitationvarid = ncdf_vardef(cdfid, 'have_convectivePrecipitation', /short)
+ncdf_attput, cdfid, haveconvectivePrecipitationvarid, 'long_name', $
+             'data exists flag for convectivePrecipitation'
+ncdf_attput, cdfid, haveconvectivePrecipitationvarid, '_FillValue', NO_DATA_PRESENT
+
+haverainWaterPathvarid = ncdf_vardef(cdfid, 'have_rainWaterPath', /short)
+ncdf_attput, cdfid, haverainWaterPathvarid, 'long_name', $
+             'data exists flag for rainWaterPath'
+ncdf_attput, cdfid, haverainWaterPathvarid, '_FillValue', NO_DATA_PRESENT
+
+havecloudWaterPathvarid = ncdf_vardef(cdfid, 'have_cloudWaterPath', /short)
+ncdf_attput, cdfid, havecloudWaterPathvarid, 'long_name', $
+             'data exists flag for cloudWaterPath'
+ncdf_attput, cdfid, havecloudWaterPathvarid, '_FillValue', NO_DATA_PRESENT
+
+haveiceWaterPathvarid = ncdf_vardef(cdfid, 'have_iceWaterPath', /short)
+ncdf_attput, cdfid, haveiceWaterPathvarid, 'long_name', $
+             'data exists flag for iceWaterPath'
+ncdf_attput, cdfid, haveiceWaterPathvarid, '_FillValue', NO_DATA_PRESENT
+
+; new V7 variables for GPROf VN version 2.0 files
+
+haveairmassLiftIndexvarid = ncdf_vardef(cdfid, 'have_airmassLiftIndex', /short)
+ncdf_attput, cdfid, haveairmassLiftIndexvarid, 'long_name', $
+             'data exists flag for airmassLiftIndex'
+ncdf_attput, cdfid, haveairmassLiftIndexvarid, '_FillValue', NO_DATA_PRESENT
+
+haveprecipitationYesNoFlagvarid = ncdf_vardef(cdfid, 'have_precipitationYesNoFlag', /short)
+ncdf_attput, cdfid, haveprecipitationYesNoFlagvarid, 'long_name', $
+             'data exists flag for precipitationYesNoFlag'
+ncdf_attput, cdfid, haveprecipitationYesNoFlagvarid, '_FillValue', NO_DATA_PRESENT
+
+; new scanTime and scStatus variables
+
+havescLonsvarid = ncdf_vardef(cdfid, 'have_scLons', /short)
+ncdf_attput, cdfid, havescLonsvarid, 'long_name', $
+             'data exists flag for scLons'
+ncdf_attput, cdfid, havescLonsvarid, '_FillValue', NO_DATA_PRESENT
+
+havescLatsvarid = ncdf_vardef(cdfid, 'have_scLats', /short)
+ncdf_attput, cdfid, havescLatsvarid, 'long_name', $
+             'data exists flag for scLats'
+ncdf_attput, cdfid, havescLatsvarid, '_FillValue', NO_DATA_PRESENT
+
+havestYearvarid = ncdf_vardef(cdfid, 'have_stYear', /short)
+ncdf_attput, cdfid, havestYearvarid, 'long_name', $
+             'data exists flag for stYear'
+ncdf_attput, cdfid, havestYearvarid, '_FillValue', NO_DATA_PRESENT
+
+havestMonthvarid = ncdf_vardef(cdfid, 'have_stMonth', /short)
+ncdf_attput, cdfid, havestMonthvarid, 'long_name', $
+             'data exists flag for stMonth'
+ncdf_attput, cdfid, havestMonthvarid, '_FillValue', NO_DATA_PRESENT
+
+havestDayOfMonthvarid = ncdf_vardef(cdfid, 'have_stDayOfMonth', /short)
+ncdf_attput, cdfid, havestDayOfMonthvarid, 'long_name', $
+             'data exists flag for stDayOfMonth'
+ncdf_attput, cdfid, havestDayOfMonthvarid, '_FillValue', NO_DATA_PRESENT
+
+havestHourvarid = ncdf_vardef(cdfid, 'have_stHour', /short)
+ncdf_attput, cdfid, havestHourvarid, 'long_name', $
+             'data exists flag for stHour'
+ncdf_attput, cdfid, havestHourvarid, '_FillValue', NO_DATA_PRESENT
+
+havestMinutevarid = ncdf_vardef(cdfid, 'have_stMinute', /short)
+ncdf_attput, cdfid, havestMinutevarid, 'long_name', $
+             'data exists flag for stMinute'
+ncdf_attput, cdfid, havestMinutevarid, '_FillValue', NO_DATA_PRESENT
+
+havestSecondvarid = ncdf_vardef(cdfid, 'have_stSecond', /short)
+ncdf_attput, cdfid, havestSecondvarid, 'long_name', $
+             'data exists flag for stSecond'
+ncdf_attput, cdfid, havestSecondvarid, '_FillValue', NO_DATA_PRESENT
+
+havestSunLocalTimevarid = ncdf_vardef(cdfid, 'have_stSunLocalTime', /short)
+ncdf_attput, cdfid, havestSunLocalTimevarid, 'long_name', $
+             'data exists flag for stSunLocalTime'
+ncdf_attput, cdfid, havestSunLocalTimevarid, '_FillValue', NO_DATA_PRESENT
+
 haveTcvarid = ncdf_vardef(cdfid, 'have_Tc', /short)
 ncdf_attput, cdfid, haveTcvarid, 'long_name', $
              'data exists flag for Tc'
@@ -924,9 +1010,111 @@ ncdf_attput, cdfid, PoPvarid, '_FillValue', INT_RANGE_EDGE
 
 freezingHeightvarid = ncdf_vardef(cdfid, 'freezingHeight', [fpdimid], /short)
 ncdf_attput, cdfid, freezingHeightvarid, 'long_name', $
-            'Freezing Height'
+            'Freezing Height, currently unused'
 ncdf_attput, cdfid, freezingHeightvarid, 'units', 'meters'
 ncdf_attput, cdfid, freezingHeightvarid, '_FillValue', INT_RANGE_EDGE
+
+; additional variables for GPROf VN version 2.0 files
+
+frozenPrecipitationvarid = ncdf_vardef(cdfid, 'frozenPrecipitation', [fpdimid])
+ncdf_attput, cdfid, frozenPrecipitationvarid, 'long_name', $
+             'Instantaneous Frozen Precipitation Rate at the Surface'
+ncdf_attput, cdfid, frozenPrecipitationvarid, 'units', 'mm/h'
+ncdf_attput, cdfid, frozenPrecipitationvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+convectivePrecipitationvarid = ncdf_vardef(cdfid, 'convectivePrecipitation', [fpdimid])
+ncdf_attput, cdfid, convectivePrecipitationvarid, 'long_name', $
+             'Instantaneous Convective Precipitation Rate at the Surface'
+ncdf_attput, cdfid, convectivePrecipitationvarid, 'units', 'mm/h'
+ncdf_attput, cdfid, convectivePrecipitationvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+rainWaterPathvarid = ncdf_vardef(cdfid, 'rainWaterPath', [fpdimid])
+ncdf_attput, cdfid, rainWaterPathvarid, 'long_name', $
+             'Total Integrated Rain Water in the Vertical Atmospheric Column'
+ncdf_attput, cdfid, rainWaterPathvarid, 'units', 'km/m^2'
+ncdf_attput, cdfid, rainWaterPathvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+cloudWaterPathvarid = ncdf_vardef(cdfid, 'cloudWaterPath', [fpdimid])
+ncdf_attput, cdfid, cloudWaterPathvarid, 'long_name', $
+             'Total Integrated Cloud Liquid Water in the Vertical Atmospheric Column'
+ncdf_attput, cdfid, cloudWaterPathvarid, 'units', 'km/m^2'
+ncdf_attput, cdfid, cloudWaterPathvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+iceWaterPathvarid = ncdf_vardef(cdfid, 'iceWaterPath', [fpdimid])
+ncdf_attput, cdfid, iceWaterPathvarid, 'long_name', $
+             'Total Integrated Ice Water in the Vertical Atmospheric Column'
+ncdf_attput, cdfid, iceWaterPathvarid, 'units', 'km/m^2'
+ncdf_attput, cdfid, iceWaterPathvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+; new V7 variables for GPROf VN version 2.0 files
+
+airmassLiftIndexvarid = ncdf_vardef(cdfid, 'airmassLiftIndex', [fpdimid], /short)
+ncdf_attput, cdfid, airmassLiftIndexvarid, 'long_name', $
+            'Orographic Moisture Enhancement Indicator, 1 or 0'
+ncdf_attput, cdfid, airmassLiftIndexvarid, 'units', 'none'
+ncdf_attput, cdfid, airmassLiftIndexvarid, '_FillValue', INT_RANGE_EDGE
+
+precipitationYesNoFlagvarid = ncdf_vardef(cdfid, 'precipitationYesNoFlag', [fpdimid], /short)
+ncdf_attput, cdfid, precipitationYesNoFlagvarid, 'long_name', $
+            'Precipitaion Likely Flag, 1 (yes) or 0 (no)'
+ncdf_attput, cdfid, precipitationYesNoFlagvarid, 'units', 'none'
+ncdf_attput, cdfid, precipitationYesNoFlagvarid, '_FillValue', INT_RANGE_EDGE
+
+
+; new scanTime and scStatus variables
+scLonsvarid = ncdf_vardef(cdfid, 'scLons', [fpdimid])
+ncdf_attput, cdfid, scLonsvarid, 'long_name', $
+             'SCstatus Longitude'
+ncdf_attput, cdfid, scLonsvarid, 'units', 'degrees'
+ncdf_attput, cdfid, scLonsvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+scLatsvarid = ncdf_vardef(cdfid, 'scLats', [fpdimid])
+ncdf_attput, cdfid, scLatsvarid, 'long_name', $
+             'SCstatus Latitude'
+ncdf_attput, cdfid, scLatsvarid, 'units', 'degrees'
+ncdf_attput, cdfid, scLatsvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+stYearvarid = ncdf_vardef(cdfid, 'stYear', [fpdimid], /short)
+ncdf_attput, cdfid, stYearvarid, 'long_name', $
+            'ScanTime Year'
+ncdf_attput, cdfid, stYearvarid, 'units', 'none'
+ncdf_attput, cdfid, stYearvarid, '_FillValue', INT_RANGE_EDGE
+
+stMonthvarid = ncdf_vardef(cdfid, 'stMonth', [fpdimid], /short)
+ncdf_attput, cdfid, stMonthvarid, 'long_name', $
+            'ScanTime Month'
+ncdf_attput, cdfid, stMonthvarid, 'units', 'none'
+ncdf_attput, cdfid, stMonthvarid, '_FillValue', INT_RANGE_EDGE
+
+stDayOfMonthvarid = ncdf_vardef(cdfid, 'stDayOfMonth', [fpdimid], /short)
+ncdf_attput, cdfid, stDayOfMonthvarid, 'long_name', $
+            'ScanTime DayOfMonth'
+ncdf_attput, cdfid, stDayOfMonthvarid, 'units', 'none'
+ncdf_attput, cdfid, stDayOfMonthvarid, '_FillValue', INT_RANGE_EDGE
+
+stHourvarid = ncdf_vardef(cdfid, 'stHour', [fpdimid], /short)
+ncdf_attput, cdfid, stHourvarid, 'long_name', $
+            'ScanTime Hour'
+ncdf_attput, cdfid, stHourvarid, 'units', 'none'
+ncdf_attput, cdfid, stHourvarid, '_FillValue', INT_RANGE_EDGE
+
+stMinutevarid = ncdf_vardef(cdfid, 'stMinute', [fpdimid], /short)
+ncdf_attput, cdfid, stMinutevarid, 'long_name', $
+            'ScanTime Minute'
+ncdf_attput, cdfid, stMinutevarid, 'units', 'none'
+ncdf_attput, cdfid, stMinutevarid, '_FillValue', INT_RANGE_EDGE
+
+stSecondvarid = ncdf_vardef(cdfid, 'stSecond', [fpdimid], /short)
+ncdf_attput, cdfid, stSecondvarid, 'long_name', $
+            'ScanTime Second'
+ncdf_attput, cdfid, stSecondvarid, 'units', 'none'
+ncdf_attput, cdfid, stSecondvarid, '_FillValue', INT_RANGE_EDGE
+
+stSunLocalTimevarid = ncdf_vardef(cdfid, 'stSunLocalTime', [fpdimid])
+ncdf_attput, cdfid, stSunLocalTimevarid, 'long_name', $
+             'Apparent Local Solar Time'
+ncdf_attput, cdfid, stSunLocalTimevarid, 'units', 'Hour'
+ncdf_attput, cdfid, stSunLocalTimevarid, '_FillValue', FLOAT_RANGE_EDGE
 
 Qualityvarid = ncdf_vardef(cdfid, 'Quality', [Tbdimid,tcfpdimid], /short)
 ncdf_attput, cdfid, Qualityvarid, 'long_name', $

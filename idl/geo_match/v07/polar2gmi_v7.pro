@@ -1296,6 +1296,31 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_PoP = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
 ;      tocdf_freezingHeight = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
 
+
+   	; additional variables for GPROf VN version 2.0 files
+      tocdf_frozenPrecipitation = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+   	  tocdf_convectivePrecipitation = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_rainWaterPath = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_cloudWaterPath = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_iceWaterPath = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+   
+    ; new V7 variables for GPROf VN version 2.0 files
+      tocdf_airmassLiftIndex = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_precipitationYesNoFlag = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+    
+    ; new scanTime and scStatus variables
+    
+      tocdf_scLons =  MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_scLats =  MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+
+      tocdf_stYear = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_stMonth = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_stDayOfMonth = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_stHour = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_stMinute = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_stSecond = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_stSunLocalTime = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+
       IF have_1c THEN BEGIN
         ; Create new subarrays of dimension nchan1c,numGMIrays for the GPROF Tc
         ; and Quality variables
@@ -1564,6 +1589,45 @@ FOR igv=0,nsites-1  DO BEGIN
     NCDF_VARPUT, ncid, 'have_pixelStatus', DATA_PRESENT  ; data presence flag
    NCDF_VARPUT, ncid, 'PoP', tocdf_PoP      ; data
     NCDF_VARPUT, ncid, 'have_PoP', DATA_PRESENT  ; data presence flag
+   
+; additional variables for GPROf VN version 2.0 files
+   NCDF_VARPUT, ncid, 'frozenPrecipitation', tocdf_frozenPrecipitation      ; data
+    NCDF_VARPUT, ncid, 'have_frozenPrecipitation', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'convectivePrecipitation', tocdf_convectivePrecipitation      ; data
+    NCDF_VARPUT, ncid, 'have_convectivePrecipitation', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'rainWaterPath', tocdf_rainWaterPath      ; data
+    NCDF_VARPUT, ncid, 'have_rainWaterPath', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'cloudWaterPath', tocdf_cloudWaterPath      ; data
+    NCDF_VARPUT, ncid, 'have_cloudWaterPath', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'iceWaterPath', tocdf_iceWaterPath      ; data
+    NCDF_VARPUT, ncid, 'have_iceWaterPath', DATA_PRESENT  ; data presence flag
+
+; scantime and scstatus variables for each footprint    
+   NCDF_VARPUT, ncid, 'scLons', tocdf_scLons      ; data
+    NCDF_VARPUT, ncid, 'have_scLons', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'scLats', tocdf_scLats      ; data
+    NCDF_VARPUT, ncid, 'have_scLats', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'stYear', tocdf_stYear      ; data
+    NCDF_VARPUT, ncid, 'have_stYear', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'stMonth', tocdf_stMonth      ; data
+    NCDF_VARPUT, ncid, 'have_stMonth', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'stDayOfMonth', tocdf_stDayOfMonth      ; data
+    NCDF_VARPUT, ncid, 'have_stDayOfMonth', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'stHour', tocdf_stHour      ; data
+    NCDF_VARPUT, ncid, 'have_stHour', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'stMinute', tocdf_stMinute      ; data
+    NCDF_VARPUT, ncid, 'have_stMinute', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'stSecond', tocdf_stSecond      ; data
+    NCDF_VARPUT, ncid, 'have_stSecond', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'stSunLocalTime', tocdf_stSunLocalTime      ; data
+    NCDF_VARPUT, ncid, 'have_stSunLocalTime', DATA_PRESENT  ; data presence flag
+
+; new V7 variables for GPROf VN version 2.0 files
+   NCDF_VARPUT, ncid, 'airmassLiftIndex', tocdf_airmassLiftIndex      ; data
+    NCDF_VARPUT, ncid, 'have_airmassLiftIndex', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'precipitationYesNoFlag', tocdf_precipitationYesNoFlag      ; data
+    NCDF_VARPUT, ncid, 'have_precipitationYesNoFlag', DATA_PRESENT  ; data presence flag
+    
    NCDF_VARPUT, ncid, 'rayIndex', tocdf_gmi_idx
    IF have_1c THEN BEGIN
       NCDF_VARPUT, ncid, 'Tc', tocdf_1CRXCAL_Tc
