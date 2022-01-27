@@ -1607,7 +1607,7 @@ FOR igv=0,nsites-1  DO BEGIN
 
   ; Create a netCDF file with the proper 'numGMIrays' and 'num_elevations_out'
   ; and Tc channels dimensions, passing the global attribute values along
-   ncfile = gen_gprof_geo_match_netcdf_v7.pro( fname_netCDF, numGMIrays, $
+   ncfile = gen_gprof_geo_match_netcdf_v7( fname_netCDF, numGMIrays, $
                                         tocdf_elev_angle, ufstruct, $
                                         GPROF_version, siteID, $
                                         infileNameArr, Tc_Names )
