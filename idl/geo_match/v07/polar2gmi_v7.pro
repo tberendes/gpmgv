@@ -239,7 +239,7 @@ GPROF_version = 'V00'
 ; IDL True/False interpretation of values 1 and 0)
 ;DATA_PRESENT = 1
 ;NO_DATA_PRESENT = 0  ; default fill value, defined in grid_def.inc and used in
-                      ; gen_gprof_geo_match_netcdf_v7.pro.pro
+                      ; gen_gprof_geo_match_netcdf_v7.pro
 
 
 ; ***************************** Local configuration ****************************
@@ -695,7 +695,7 @@ FOR igv=0,nsites-1  DO BEGIN
 
   ; set up the structure holding the UF IDs for the fields we find in this file
   ; - the default values in this structure must be coordinated with those
-  ;   defined in gen_gprof_geo_match_netcdf_v7.pro.pro
+  ;   defined in gen_gprof_geo_match_netcdf_v7.pro
    ufstruct={ CZ_ID:    'Unspecified', $
               ZDR_ID  : 'Unspecified', $
               KDP_ID  : 'Unspecified', $
