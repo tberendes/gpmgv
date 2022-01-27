@@ -250,7 +250,8 @@ for ncfile in `cat $DBCATALOGFILE`
     PR_VERSION=`echo ${ncfile} | cut -f7 -d '.'`
    # GEO_MATCH_VERSION=`echo ${ncfile} | cut -f6 -d '.' | sed 's/_/./'`
     rowpre="${radar_id}|${orbit}|"
-    rowpost="|${PPS_VERSION}|${PARAMETER_SET}|1.2|1|${INSTRUMENT_ID}|${SAT_ID}|NA"
+    rowpost="|${PPS_VERSION}|${PARAMETER_SET}|${GEO_MATCH_VERSION}|1|${INSTRUMENT_ID}|${SAT_ID}|NA"
+#    rowpost="|${PPS_VERSION}|${PARAMETER_SET}|1.2|1|${INSTRUMENT_ID}|${SAT_ID}|NA"
     gzfile=`ls ${ncfile}\.gz`
     if [ $? = 0 ]
       then
