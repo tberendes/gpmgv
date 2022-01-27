@@ -156,6 +156,10 @@ FUNCTION get_2agprofgmi_datasets_v7, group_id, label, READ_ALL=read_all
    IF N_ELEMENTS(profileTemp2mIndex) EQ 0 THEN profileTemp2mIndex = 'N/A'
    IF N_ELEMENTS(spare2) EQ 0 THEN spare2 = 'N/A'
 
+  ; new for V07x:
+   IF N_ELEMENTS(airmassLiftIndex) EQ 0 THEN airmassLiftIndex = 'N/A'
+   IF N_ELEMENTS(precipitationYesNoFlag) EQ 0 THEN precipitationYesNoFlag = 'N/A'
+  
    IF all THEN BEGIN
    datasets_struc = { source : label, $
                       Latitude : Latitude, $

@@ -22,7 +22,7 @@ help, ITE_OR_OPERATIONAL, gpm_root
 
 ;DATESTAMP = GETENV("RUNDATE")
 FILES4NC = GETENV("CONTROLFILE")
-;.compile polar2gmi.pro
+;.compile polar2gmi_v7.pro
 ; TAB change this line......
 restore, './polar2gmi_v7.sav'
 

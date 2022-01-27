@@ -470,8 +470,8 @@ NSCANS_GMI = s[1]
    iceWaterPath = (*status.S1.ptr_datasets).iceWaterPath
    
    ; new V7 variables for GPROf VN version 2.0 files
-   airmassLiftIndex = (*status.S1.ptr_datasets).airmassLiftIndex
-   precipitationYesNoFlag = (*status.S1.ptr_datasets).precipitationYesNoFlag
+;   airmassLiftIndex = (*status.S1.ptr_datasets).airmassLiftIndex
+;   precipitationYesNoFlag = (*status.S1.ptr_datasets).precipitationYesNoFlag
 
 
   ; get the 1CRXCAL Tc and Quality variables if file is available.  Tc values
@@ -1098,11 +1098,44 @@ FOR igv=0,nsites-1  DO BEGIN
   ; flag for adding 'bogus' point if in-range at edge of scan GMI (2), or just
   ;   beyond max_ranges[elev] (-1), or just a regular, in-range point (1):
    action2do = 0  ; default -- do nothing
+   
+   ; TAB new processing for scStatus and scanTime variables
+   ; allocate memory for temporary arrays
+   ; extract pointer data fields into gmiLats and gmiLons arrays
+   tmp_scLons =  MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
+   tmp_scLats =  MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
+
+   tmp_stYear = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
+   tmp_stMonth = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
+   tmp_stDayOfMonth = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
+   tmp_stHour = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
+   tmp_stMinute = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
+   tmp_stSecond = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
+   tmp_stSunLocalTime = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
+
+   ; populate pixel/scan arrays with scan values
+   FOR scan_num = 0,NSCANS_GMI-1  DO BEGIN
+      FOR ray_num = 0,NPIXEL_GMI-1  DO BEGIN
+      	  tmp_scLons[ray_num,scan_num] = scLons[scan_num]
+      	  tmp_scLats[ray_num,scan_num] = scLats[scan_num]
+   		  tmp_stYear[ray_num,scan_num] = stYear[scan_num] 
+   		  tmp_stMonth[ray_num,scan_num] = stMonth[scan_num]
+   		  tmp_stDayOfMonth[ray_num,scan_num] = stDayOfMonth[scan_num]
+   		  tmp_stHour[ray_num,scan_num] = stHour[scan_num]
+   		  tmp_stMinute[ray_num,scan_num] = stMinute[scan_num]
+   		  tmp_stSecond[ray_num,scan_num] = stSecond[scan_num]
+   		  tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
+	  ENDFOR
+   ENDFOR   
 
    FOR scan_num = start_scan,end_scan  DO BEGIN
       subset_scan_num = scan_num - start_scan
 
       FOR ray_num = 0,NPIXEL_GMI-1  DO BEGIN
+      
+      	; new variables from scStatus and scanTime
+      	
+      	
         ; Set flag value according to where the GMI footprint lies w.r.t. the GV radar.
          action2do = 0  ; default -- do nothing
 
@@ -1305,8 +1338,8 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_iceWaterPath = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
    
     ; new V7 variables for GPROf VN version 2.0 files
-      tocdf_airmassLiftIndex = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
-      tocdf_precipitationYesNoFlag = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+;      tocdf_airmassLiftIndex = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+;      tocdf_precipitationYesNoFlag = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
     
     ; new scanTime and scStatus variables
     
@@ -1492,6 +1525,29 @@ FOR igv=0,nsites-1  DO BEGIN
          tocdf_pixelStatus[prgoodidx] = pixelStatus[gmi_idx_2get]
          tocdf_surfaceType[prgoodidx] = surfaceType[gmi_idx_2get]
          tocdf_PoP[prgoodidx] = PoP[gmi_idx_2get]
+         
+         ; additional variables for GPROf VN version 2.0 files
+   		 tocdf_frozenPrecipitation[prgoodidx] = frozenPrecipitation[gmi_idx_2get]
+   		 tocdf_convectivePrecipitation[prgoodidx] = convectivePrecipitation[gmi_idx_2get]
+   		 tocdf_rainWaterPath[prgoodidx] = rainWaterPath[gmi_idx_2get]
+   		 tocdf_cloudWaterPath[prgoodidx] = cloudWaterPath[gmi_idx_2get]
+   		 tocdf_iceWaterPath[prgoodidx] = iceWaterPath[gmi_idx_2get]
+   
+   		 ; new V7 variables for GPROf VN version 2.0 files
+;   		 tocdf_airmassLiftIndex[prgoodidx] = airmassLiftIndex[gmi_idx_2get]
+;   		 tocdf_precipitationYesNoFlag[prgoodidx] = precipitationYesNoFlag[gmi_idx_2get]
+
+	     ; new scStatus and scanTime variables
+      	 tocdf_scLons[prgoodidx] = tmp_scLons[gmi_idx_2get]
+      	 tocdf_scLats[prgoodidx] = tmp_scLats[gmi_idx_2get]
+   		 tocdf_stYear[prgoodidx] = tmp_stYear[gmi_idx_2get] 
+   		 tocdf_stMonth[prgoodidx] = tmp_stMonth[gmi_idx_2get]
+   		 tocdf_stDayOfMonth[prgoodidx] = tmp_stDayOfMonth[gmi_idx_2get]
+   		 tocdf_stHour[prgoodidx] = tmp_stHour[gmi_idx_2get]
+   		 tocdf_stMinute[prgoodidx] = tmp_stMinute[gmi_idx_2get]
+   		 tocdf_stSecond[prgoodidx] = tmp_stSecond[gmi_idx_2get]
+   		 tocdf_stSunLocalTime[prgoodidx] = tmp_stSunLocalTime[gmi_idx_2get]
+         
         ; handle the arrays with the extra dimension of channel number
          IF have_1c THEN BEGIN
             for k = 0, nchan1c-1 do begin
@@ -1623,10 +1679,10 @@ FOR igv=0,nsites-1  DO BEGIN
     NCDF_VARPUT, ncid, 'have_stSunLocalTime', DATA_PRESENT  ; data presence flag
 
 ; new V7 variables for GPROf VN version 2.0 files
-   NCDF_VARPUT, ncid, 'airmassLiftIndex', tocdf_airmassLiftIndex      ; data
-    NCDF_VARPUT, ncid, 'have_airmassLiftIndex', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'precipitationYesNoFlag', tocdf_precipitationYesNoFlag      ; data
-    NCDF_VARPUT, ncid, 'have_precipitationYesNoFlag', DATA_PRESENT  ; data presence flag
+;   NCDF_VARPUT, ncid, 'airmassLiftIndex', tocdf_airmassLiftIndex      ; data
+;    NCDF_VARPUT, ncid, 'have_airmassLiftIndex', DATA_PRESENT  ; data presence flag
+;   NCDF_VARPUT, ncid, 'precipitationYesNoFlag', tocdf_precipitationYesNoFlag      ; data
+;    NCDF_VARPUT, ncid, 'have_precipitationYesNoFlag', DATA_PRESENT  ; data presence flag
     
    NCDF_VARPUT, ncid, 'rayIndex', tocdf_gmi_idx
    IF have_1c THEN BEGIN
