@@ -440,7 +440,9 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    stHour = (*status.S1.ptr_ScanTime).Hour
    stMinute = (*status.S1.ptr_ScanTime).Minute
    stSecond = (*status.S1.ptr_ScanTime).Second
-   stSunLocalTime = (*status.S1.ptr_ScanTime).sunLocalTime
+
+; TAB new in V7, uncomment this when V7 is available
+;   stSunLocalTime = (*status.S1.ptr_ScanTime).sunLocalTime
    
 ; NOTE THAT THE ARRAYS ARE IN (RAY,SCAN) COORDINATES.  NEED TO ACCOUNT FOR THIS
 ; WHEN ASSIGNING "gmi_master_idx" ARRAY INDICES.
@@ -1124,7 +1126,8 @@ FOR igv=0,nsites-1  DO BEGIN
    		  tmp_stHour[ray_num,scan_num] = stHour[scan_num]
    		  tmp_stMinute[ray_num,scan_num] = stMinute[scan_num]
    		  tmp_stSecond[ray_num,scan_num] = stSecond[scan_num]
-   		  tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
+; TAB new in V7, uncomment this when V7 is available
+;   		  tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
 	  ENDFOR
    ENDFOR   
 
