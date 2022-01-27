@@ -60,7 +60,7 @@
 #                              file and passes its pathname to IDL via setting
 #                              the environment variable CONTROLFILE.
 #
-#   polar2gmi.bat (EXTERNAL) - Batch file of IDL commands to be run.
+#   polar2gmi_v7.bat (EXTERNAL) - Batch file of IDL commands to be run.
 #
 #
 #  DATABASE
@@ -105,7 +105,7 @@
 BIN_DIR=${GV_BASE_DIR}/scripts
 #IDL_PRO_DIR=${GV_BASE_DIR}/idl/dev/geo_match  # change for operational
 IDL_PRO_DIR=${GV_BASE_DIR}/idl  # change for operational
-export IDL_PRO_DIR                 # IDL polar2gmi.bat needs this
+export IDL_PRO_DIR                 # IDL polar2gmi_v7.bat needs this
 IDL=/usr/local/bin/idl
 #DATA_DIR=/data/gpmgv
 #TMP_DIR=${DATA_DIR}/tmp   # must be set & exported by calling process
@@ -198,10 +198,10 @@ esac
 # fi
 
 # check that the to-be-called scripts are found
-if [ ! -s ${IDL_PRO_DIR}/polar2gmi.bat ]
+if [ ! -s ${IDL_PRO_DIR}/polar2gmi_v7.bat ]
   then
      echo "" | tee -a $LOG_FILE
-     echo "FATAL: Script ${IDL_PRO_DIR}/polar2gmi.bat not found, " \
+     echo "FATAL: Script ${IDL_PRO_DIR}/polar2gmi_v7.bat not found, " \
        | tee -a $LOG_FILE
      echo "exiting with appstatus value = 'UNTRIED' for datestamp ${THISRUN}." \
        | tee -a $LOG_FILE
@@ -246,8 +246,8 @@ done
 CONTROLFILE=${TMP_DIR}/GMI_files_sites4geoMatch_v7.${THISRUN}.txt
 if [ -s $CONTROLFILE ]
   then
-    #export THISRUN              # IDL polar2gmi.bat needs this
-    export CONTROLFILE          # IDL polar2gmi.bat needs this
+    #export THISRUN              # IDL polar2gmi_v7.bat needs this
+    export CONTROLFILE          # IDL polar2gmi_v7.bat needs this
     echo "" | tee -a $LOG_FILE
     echo "UPDATE appstatus SET ntries = ntries + 1 \
           WHERE app_id = 'geo_match_gmi' AND datestamp = '$THISRUN';" \
@@ -258,7 +258,7 @@ if [ -s $CONTROLFILE ]
      | tee -a $LOG_FILE
     echo "" | tee -a $LOG_FILE
        
-    $IDL < ${IDL_PRO_DIR}/polar2gmi.bat | tee -a $LOG_FILE 2>&1
+    $IDL < ${IDL_PRO_DIR}/polar2gmi_v7.bat | tee -a $LOG_FILE 2>&1
 
     echo "=============================================" | tee -a $LOG_FILE
 
