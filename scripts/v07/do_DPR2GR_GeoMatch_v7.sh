@@ -171,8 +171,8 @@ rundate=`date -u +%y%m%d`
 LOG_FILE=${LOG_DIR}/do_DPR2GR_GeoMatch_v7.${rundate}.log
 export rundate
 
-PPS_VERSION="ITE757"         # specifies default PPS version of products to process
-#PPS_VERSION="V07A"         # specifies default PPS version of products to process
+#PPS_VERSION="ITE757"         # specifies default PPS version of products to process
+PPS_VERSION="V07A"         # specifies default PPS version of products to process
 export PPS_VERSION
 
 PARAMETER_SET=1  # default set of dpr2gr_prematch parameters (dpr2gr_prematch.bat file) in use
