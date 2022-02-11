@@ -509,6 +509,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
   ; Determine how many DPR footprints fall inside the analysis area
    numDPRrays = data_GR2DPR.NUMRAYS
 
+  PRINT, "numDPRrays for ", siteID, " ", numDPRrays
+
   ; Create temp array of DPR (ray, scan) 1-D index locators for in-range points.
   ;   Use flag values of -1 for 'bogus' DPR points (out-of-range DPR footprints
   ;   just adjacent to the first/last in-range point of the scan), or -2 for
@@ -1558,7 +1560,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                              "valid 2A-KU file name: " + dataPR, /INFO
                     goto, bailOut
                  ENDIF
-                 ; 2AKU has only NS scan/swath type
+                 ; 2AKU has only FS scan/swath type
                  DPR_scans = ['FS']
                  print, '' & print, "Reading file: ", file_2aku & print, ''
                  dpr_data = read_2akaku_hdf5_v7(file_2aku)
