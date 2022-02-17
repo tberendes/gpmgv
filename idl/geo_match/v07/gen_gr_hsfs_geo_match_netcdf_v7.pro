@@ -383,6 +383,12 @@ ncdf_attput, cdfid, haveSWEvarid, 'long_name', $
              'data exists flag for ground radar snowfall water equivalent rate'
 ncdf_attput, cdfid, haveSWEvarid, '_FillValue', NO_DATA_PRESENT
 
+numDPRScansid = ncdf_vardef(cdfid, 'numDPRScans')
+ncdf_attput, cdfid, numDPRScansid, 'long_name', $
+             'Number of DPR scans in gr_match file'
+ncdf_attput, cdfid, numDPRScansid, '_FillValue', INT_RANGE_EDGE
+
+
 
 for iswa=0,N_ELEMENTS(swath)-1 do begin
 
