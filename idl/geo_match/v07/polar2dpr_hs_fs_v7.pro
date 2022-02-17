@@ -177,6 +177,7 @@ IF N_ELEMENTS(dir_block) EQ 1 THEN BEGIN
    ENDIF ELSE message, "DIR_BLOCK directory does not exist: "+dir_block
 ENDIF
 
+;TAB is this necessary?????????
  COMMON sample, start_sample, sample_range, num_range, RAYSPERSCAN
 
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
@@ -272,7 +273,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    subset = parsed[3]
    DPR_version = parsed[4]
    Instrument_ID = parsed[5]        ; 2A algorithm/product: Ka, Ku, or DPR
-;   DPR_scantype = parsed[6]        ; HS, MS, or NS
+;   DPR_scantype = parsed[6]        ; HS, FS
 
 
   ; generate the netcdf matchup file path
@@ -1019,6 +1020,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 ;   NCDF_VARPUT, ncid, 'rain_min', DPR_RAIN_MIN
 ;   NCDF_VARPUT, ncid, 'numScans', SAMPLE_RANGE
 ;   NCDF_VARPUT, ncid, 'numRays', RAYSPERSCAN
+   NCDF_VARPUT, ncid, 'numDPRScans', SAMPLE_RANGE
 
 
 ;-------------------------------------------------------------------------------
@@ -1182,7 +1184,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    IF ( nscans2do EQ 0 ) THEN BEGIN
       print, "No ", DPR_scantype, " swath footprints in range of GR", $
              " by lat/lon difference check, bailing."
-      IF DPR_scantype NE 'NS' THEN GOTO, skippedSwath ELSE GOTO, emptyFile
+      IF DPR_scantype NE 'FS' THEN GOTO, skippedSwath ELSE GOTO, emptyFile
    ENDIF
 
 ;-------------------------------------------------------------------------------
@@ -1535,8 +1537,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       GOTO, skippedSwath
    ENDELSE
 
-   IF swathIDs[swathID] EQ 'NS' THEN BEGIN
-     ; write this global variable just one time in NS scan processing, as we
+   IF swathIDs[swathID] EQ 'FS' THEN BEGIN
+     ; write this global variable just one time in FS scan processing, as we
      ; really only care about it if using a fixed ROI value
       NCDF_VARPUT, ncid, 'GR_ROI_km', max_DPR_footprint_diag_halfwidth
 ;      SAVE, dpr_echoes, numDPRrays, file='/tmp/dpr_echoesBy3.sav'

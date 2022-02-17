@@ -198,6 +198,8 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.nc_file_version = ncversion
      ncdf_attget, ncid1, 'DPR_Version', DPR_vers_byte, /global
      matchupmeta.DPR_Version = STRING(DPR_vers_byte)
+     NCDF_VARGET, ncid1, 'numDPRScans', numDPRScans
+     matchupmeta.numDPRScans = numDPRScans
 ENDIF
 
 

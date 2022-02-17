@@ -116,6 +116,7 @@
 # 11/6/2018   Berendes	    Added BrazilRadars and Hawaii to subsets
 # 3/2/2021	Berendes		 Added NPOL logic
 #							 Added starting and ending date parameters
+# 2/9/22   Berendes			Removed subset restriction for processing
 #
 #
 ###############################################################################
@@ -348,7 +349,7 @@ DBOUT=`psql -a -A -t -o $datelist -d gpmgv -c \
 from eventsatsubrad_vw c JOIN orbit_subset_product o \
   ON c.orbit = o.orbit AND c.subset = o.subset AND c.sat_id = o.sat_id \
  AND o.product_type = '${ALGORITHM2A}' and o.version='${PPS_VERSION}' and o.sat_id='${SAT_ID}' \
-   and c.subset IN ('AKradars','CONUS','KWAJ','BrazilRadars','Hawaii') and c.nearest_distance<=${MAX_DIST} \
+   and c.nearest_distance<=${MAX_DIST} \
    and c.overpass_time at time zone 'UTC' >= '${dateStart}' \
    and c.overpass_time at time zone 'UTC' < '${dateEnd}' ${site_filter} \
 JOIN rainy100inside100 r on (c.event_num=r.event_num) \
@@ -361,8 +362,9 @@ order by 1;"`
 #WHERE g.pathname is null order by 1;"`
 
 #echo 'DBOUT: ' $DBOUT
-
+# removed these lines to enable other subsets
 #   and c.subset IN ('AKradars','CONUS','KWAJ') and c.nearest_distance<=${MAX_DIST} \
+#   and c.subset IN ('AKradars','CONUS','KWAJ','BrazilRadars','Hawaii') and c.nearest_distance<=${MAX_DIST} \
 #echo "2014-09-07" > $datelist
 echo " "
 echo "Dates to attempt runs:" | tee -a $LOG_FILE
@@ -422,8 +424,7 @@ while read thisdate
        from eventsatsubrad_vw c \
      JOIN orbit_subset_product d ON c.sat_id=d.sat_id and c.orbit = d.orbit\
         AND c.subset = d.subset AND c.sat_id='$SAT_ID' \
-        AND c.subset IN ('AKradars','CONUS','KWAJ','BrazilRadars','Hawaii') \
-        AND d.product_type = '${ALGORITHM2A}' and c.nearest_distance<=${MAX_DIST} ${site_filter} \
+         AND d.product_type = '${ALGORITHM2A}' and c.nearest_distance<=${MAX_DIST} ${site_filter} \
        JOIN orbit_subset_product x ON x.sat_id=d.sat_id and x.orbit = d.orbit\
             AND x.subset = d.subset AND x.product_type = '1CRXCAL' and x.version='${PPS_XCAL_VERSION}' \
        LEFT OUTER JOIN geo_match_product b on ( c.event_num=b.event_num \
@@ -442,6 +443,9 @@ while read thisdate
 #        and b.geo_match_version=${GEO_MATCH_VERSION} and b.parameter_set=0 ) \
 
 #       AND x.subset = d.subset AND x.product_type = '1CRXCAL' and x.version=d.version \
+# this line appeared below $SAT_ID line
+# removed to enable other subsets
+#        AND c.subset IN ('AKradars','CONUS','KWAJ','BrazilRadars','Hawaii') \
  #  group by 1,3,4,5,6,7,8 order by c.orbit;"`  | tee -a $LOG_FILE 2>&1
 #   echo $DBOUT2   | tee -a $LOG_FILE 2>&1
 #        AND c.subset IN ('AKradars','CONUS','KWAJ') \
