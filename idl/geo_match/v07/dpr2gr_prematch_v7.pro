@@ -347,7 +347,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ; the same number of scans do the the smaller width of the Ka HS scan.  We will compute an offset to make them line up.
    ; ##################################################################################
    if SAMPLE_RANGE ne numDPRScans then begin
-   	   message, 'dpr2gr_prematch: numDPRScans '+numDPRScan+' does not match product scans '+SAMPLE_RANGE
+   	   message, 'dpr2gr_prematch: numDPRScans '+numDPRScans+' does not match product scans '+SAMPLE_RANGE
 	   for ifp = 0, numDPRrays-1 do begin
 	      ray_num = data_GR2DPR.RAYNUM[ifp]
 	      scan_num = data_GR2DPR.SCANNUM[ifp]
