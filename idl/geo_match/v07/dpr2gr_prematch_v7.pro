@@ -375,11 +375,16 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      print, 'distance ',min_dist
 	      
 	      ; REMOVE, testing.....
-	      goto, bailOut
+	      ;goto, bailOut
 
 ;#####################################
 	      
    	   endfor
+   	   
+   	   ; REMOVE, testing.....
+	   goto, bailOut
+;#####################################
+
    endif
 
    ; extract DPR variables/arrays from struct pointers
