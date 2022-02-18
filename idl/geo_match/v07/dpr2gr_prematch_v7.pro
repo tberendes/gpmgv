@@ -360,7 +360,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      min_ray=-1
 	      for scan=0,SAMPLE_RANGE-1 do begin
 	          for ray=0,RAYSPERSCAN-1 do begin
-	              dx = lat - (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
+	              dy = lat - (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
 	              dx = lon - (*ptr_swath.PTR_DATASETS).LONGITUDE[ray,scan]
 	          	  dist = dx*dx + dy*dy
 	          	  if dist lt min_dist then begin
