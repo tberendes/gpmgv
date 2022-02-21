@@ -350,7 +350,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    if SAMPLE_RANGE ne numDPRScans then begin
    	   print, 'dpr2gr_prematch: numDPRScans ',numDPRScans,' does not match product scans ',SAMPLE_RANGE, ' for scan ',DPR_scantype
 	   scan_offset = 10000
-	   ray_offset = 10000
 	   for ifp = 0, numDPRrays_gr-1 do begin
 	      ray_num = data_GR2DPR.RAYNUM[ifp]
 	      scan_num = data_GR2DPR.SCANNUM[ifp]
@@ -359,7 +358,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      ; find offset in subset product file, search for closest lat/lon match for footprints
 	      min_dist=1000.0
 	      min_scan=-1
-	      min_ray=-1
 	      ; set inital scan range to 25 scans either way
 	      s_scan = scan_num - 25
 	      if s_scan lt 0 then s_scan = 0
@@ -367,36 +365,35 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      if e_scan gt (SAMPLE_RANGE-1) then e_scan = SAMPLE_RANGE - 1
 	      ;for scan=0,SAMPLE_RANGE-1 do begin
 	      for scan=s_scan,e_scan do begin
-	          ;for ray=0,RAYSPERSCAN-1 do begin
-			      ray = ray_num ; assume no ray offset 
-	          	  swath_lat = (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
-	          	  swath_lon = (*ptr_swath.PTR_DATASETS).LONGITUDE[ray,scan]
-	          	  if swath_lat ge -90.0 and swath_lon ge -180.0 then begin
-		              dy = lat - (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
-		              dx = lon - (*ptr_swath.PTR_DATASETS).LONGITUDE[ray,scan]
-		          	  dist = dx*dx + dy*dy
-		          	  if dist lt min_dist then begin
-		          	  	  min_dist=dist
-		          	  	  min_scan=scan
-		          	  	  min_ray=ray
-		          	  endif
-	          	  endif ;else begin
-;	      			  print, 'missing lat/lon in swath, fp ',ifp
-;	          	  endelse
-	          ;endfor
+          	  swath_lat = (*ptr_swath.PTR_DATASETS).LATITUDE[ray_num,scan]
+          	  swath_lon = (*ptr_swath.PTR_DATASETS).LONGITUDE[ray_num,scan]
+          	  if swath_lat ge -90.0 and swath_lon ge -180.0 then begin
+	              dy = lat - (*ptr_swath.PTR_DATASETS).LATITUDE[ray_num,scan]
+	              dx = lon - (*ptr_swath.PTR_DATASETS).LONGITUDE[ray_num,scan]
+	          	  dist = dx*dx + dy*dy
+	          	  if dist lt min_dist then begin
+	          	  	  min_dist=dist
+	          	  	  min_scan=scan
+	          	  endif
+          	  endif ;else begin
+;	      	      print, 'missing lat/lon in swath, fp ',ifp
+;	          endelse
 	      endfor
+	      if min_scan lt 0 then begin
+	          print,'out of bounds footprint ', ifp
+		      print, 'DPR scan ',scan_num,' ray ',ray_num
+	          continue
+	      endif
+	      
 	      s_off = scan_num - min_scan
-	      r_off = ray_num - min_ray
-	      if s_off lt 0 or r_off lt 0 then continue
-	      if s_off lt scan_offset or r_off lt ray_offset then begin
+	      if s_off lt 0 then continue
+	      if s_off lt scan_offset then begin
 	          scan_offset = s_off
-	          ray_offset = r_off
 	          print, 'new scan/ray offset found:'
 		      print, 'DPR scan ',scan_num,' -> ',min_scan
-		      print, 'DPR ray ',ray_num,' -> ',min_ray
+		      print, 'DPR ray ',ray_num
 		      print, 'distance ',min_dist
 		      print, 'scan offset ',scan_offset
-		      print, 'ray offset ',ray_offset
 		      print,''
 	      endif
 	      
