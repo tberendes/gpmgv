@@ -373,9 +373,9 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 		          	  	  min_scan=scan
 		          	  	  min_ray=ray
 		          	  endif
-	          	  endif else begin
-	      			  print, 'missing lat/lon in swath, fp ',ifp
-	          	  endelse
+	          	  endif ;else begin
+;	      			  print, 'missing lat/lon in swath, fp ',ifp
+;	          	  endelse
 	          endfor
 	      endfor
 	      s_off = scan_num - min_scan
@@ -389,6 +389,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 		      print, 'distance ',min_dist
 		      print, 'scan offset ',scan_offset
 		      print, 'ray offset ',ray_offset
+		      print,''
 	      endif
 	      
 	      ; REMOVE, testing.....
