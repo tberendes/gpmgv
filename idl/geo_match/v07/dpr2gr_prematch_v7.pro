@@ -348,7 +348,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ; the same number of scans do the the smaller width of the Ka HS scan.  We will compute an offset to make them line up.
    ; ##################################################################################
    if SAMPLE_RANGE ne numDPRScans then begin
-   	   print, 'dpr2gr_prematch: numDPRScans ',numDPRScans,' does not match product scans ',SAMPLE_RANGE
+   	   print, 'dpr2gr_prematch: numDPRScans ',numDPRScans,' does not match product scans ',SAMPLE_RANGE, ' for scan ',DPR_scantype
 	   for ifp = 0, numDPRrays_gr-1 do begin
 	      ray_num = data_GR2DPR.RAYNUM[ifp]
 	      scan_num = data_GR2DPR.SCANNUM[ifp]
@@ -360,14 +360,20 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      min_ray=-1
 	      for scan=0,SAMPLE_RANGE-1 do begin
 	          for ray=0,RAYSPERSCAN-1 do begin
-	              dy = lat - (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
-	              dx = lon - (*ptr_swath.PTR_DATASETS).LONGITUDE[ray,scan]
-	          	  dist = dx*dx + dy*dy
-	          	  if dist lt min_dist then begin
-	          	  	  min_dist=dist
-	          	  	  min_scan=scan
-	          	  	  min_ray=ray
-	          	  endif
+	          	  swath_lat = (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
+	          	  swath_lon = (*ptr_swath.PTR_DATASETS).LONGITUDE[ray,scan]
+	          	  if swath_lat ge -90.0 and swath_lon ge -180.0 then begin
+		              dy = lat - (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
+		              dx = lon - (*ptr_swath.PTR_DATASETS).LONGITUDE[ray,scan]
+		          	  dist = dx*dx + dy*dy
+		          	  if dist lt min_dist then begin
+		          	  	  min_dist=dist
+		          	  	  min_scan=scan
+		          	  	  min_ray=ray
+		          	  endif
+	          	  endif else begin
+	      			  print, 'missing lat/lon in swath... '
+	          	  endelse
 	          endfor
 	      endfor
 	      print, 'DPR scan ',scan_num,' -> ',min_scan
