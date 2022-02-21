@@ -358,6 +358,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      min_dist=1000.0
 	      min_scan=-1
 	      min_ray=-1
+	      scan_offset = 0
+	      ray_offset = 0
 	      for scan=0,SAMPLE_RANGE-1 do begin
 	          for ray=0,RAYSPERSCAN-1 do begin
 	          	  swath_lat = (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
@@ -372,13 +374,22 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 		          	  	  min_ray=ray
 		          	  endif
 	          	  endif else begin
-	      			  print, 'missing lat/lon in swath... '
+	      			  print, 'missing lat/lon in swath, fp ',ifp
 	          	  endelse
 	          endfor
 	      endfor
-	      print, 'DPR scan ',scan_num,' -> ',min_scan
-	      print, 'DPR ray ',ray_num,' -> ',min_ray
-	      print, 'distance ',min_dist
+	      s_off = scan_num - min_scan
+	      r_off = ray_num - min_ray
+	      if s_off ne scan_offset or r_off ne ray_offset then begin
+	          scan_offset = s_off
+	          ray_offset = r_off
+	          print, 'scan/ray offset changed:'
+		      print, 'DPR scan ',scan_num,' -> ',min_scan
+		      print, 'DPR ray ',ray_num,' -> ',min_ray
+		      print, 'distance ',min_dist
+		      print, 'scan offset ',scan_offset
+		      print, 'ray offset ',ray_offset
+	      endif
 	      
 	      ; REMOVE, testing.....
 	      ;goto, bailOut
