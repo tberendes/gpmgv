@@ -349,8 +349,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ; ##################################################################################
    if SAMPLE_RANGE ne numDPRScans then begin
    	   print, 'dpr2gr_prematch: numDPRScans ',numDPRScans,' does not match product scans ',SAMPLE_RANGE, ' for scan ',DPR_scantype
-	   scan_offset = 0
-	   ray_offset = 0
+	   scan_offset = 10000
+	   ray_offset = 10000
 	   for ifp = 0, numDPRrays_gr-1 do begin
 	      ray_num = data_GR2DPR.RAYNUM[ifp]
 	      scan_num = data_GR2DPR.SCANNUM[ifp]
@@ -380,10 +380,11 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      endfor
 	      s_off = scan_num - min_scan
 	      r_off = ray_num - min_ray
-	      if s_off ne scan_offset or r_off ne ray_offset then begin
+	      if s_off lt 0 or r_off lt 0 continue
+	      if s_off lt scan_offset or r_off lt ray_offset then begin
 	          scan_offset = s_off
 	          ray_offset = r_off
-	          print, 'scan/ray offset changed:'
+	          print, 'new scan/ray offset found:'
 		      print, 'DPR scan ',scan_num,' -> ',min_scan
 		      print, 'DPR ray ',ray_num,' -> ',min_ray
 		      print, 'distance ',min_dist
