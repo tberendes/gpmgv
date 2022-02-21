@@ -349,6 +349,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ; ##################################################################################
    if SAMPLE_RANGE ne numDPRScans then begin
    	   print, 'dpr2gr_prematch: numDPRScans ',numDPRScans,' does not match product scans ',SAMPLE_RANGE, ' for scan ',DPR_scantype
+	   scan_offset = 0
+	   ray_offset = 0
 	   for ifp = 0, numDPRrays_gr-1 do begin
 	      ray_num = data_GR2DPR.RAYNUM[ifp]
 	      scan_num = data_GR2DPR.SCANNUM[ifp]
@@ -358,8 +360,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      min_dist=1000.0
 	      min_scan=-1
 	      min_ray=-1
-	      scan_offset = 0
-	      ray_offset = 0
 	      for scan=0,SAMPLE_RANGE-1 do begin
 	          for ray=0,RAYSPERSCAN-1 do begin
 	          	  swath_lat = (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
