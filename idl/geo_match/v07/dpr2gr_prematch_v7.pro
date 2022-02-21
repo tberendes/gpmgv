@@ -367,9 +367,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      if e_scan gt (SAMPLE_RANGE-1) then e_scan = SAMPLE_RANGE - 1
 	      ;for scan=0,SAMPLE_RANGE-1 do begin
 	      for scan=s_scan,e_scan do begin
-	          ; take four rays along the scan
 	          ;for ray=0,RAYSPERSCAN-1 do begin
-	          for ray=0,RAYSPERSCAN-1,(RAYSPERSCAN/4) do begin
+			      ray = ray_num ; assume no ray offset 
 	          	  swath_lat = (*ptr_swath.PTR_DATASETS).LATITUDE[ray,scan]
 	          	  swath_lon = (*ptr_swath.PTR_DATASETS).LONGITUDE[ray,scan]
 	          	  if swath_lat ge -90.0 and swath_lon ge -180.0 then begin
@@ -384,7 +383,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	          	  endif ;else begin
 ;	      			  print, 'missing lat/lon in swath, fp ',ifp
 ;	          	  endelse
-	          endfor
+	          ;endfor
 	      endfor
 	      s_off = scan_num - min_scan
 	      r_off = ray_num - min_ray
