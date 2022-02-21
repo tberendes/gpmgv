@@ -380,7 +380,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      endfor
 	      s_off = scan_num - min_scan
 	      r_off = ray_num - min_ray
-	      if s_off lt 0 or r_off lt 0 continue
+	      if s_off lt 0 or r_off lt 0 then continue
 	      if s_off lt scan_offset or r_off lt ray_offset then begin
 	          scan_offset = s_off
 	          ray_offset = r_off
