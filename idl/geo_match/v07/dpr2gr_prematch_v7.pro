@@ -409,9 +409,9 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	   ;goto, bailOut
 ;#####################################
 
-		if scan_offset = 10000 then begin
+		if scan_offset eq 10000 then begin
   	   		print, 'dpr2gr_prematch: scan offset not found in file ',fname_netCDF,' for scan ',DPR_scantype, ' skipping file...'
-		 	goto nextGRfile
+		 	goto, nextGRfile
 		endif
 
    endif
