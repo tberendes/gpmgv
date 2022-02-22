@@ -348,6 +348,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ; the same number of scans do the the smaller width of the Ka HS scan.  We will compute an offset to make them line up.
    ; ##################################################################################
    scan_offset = 0
+   offset_range = 50
    if SAMPLE_RANGE ne numDPRScans then begin
    	   print, 'dpr2gr_prematch: numDPRScans ',numDPRScans,' does not match product scans ',SAMPLE_RANGE, ' for scan ',DPR_scantype
 	   scan_offset = 10000
@@ -359,10 +360,10 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      ; find offset in subset product file, search for closest lat/lon match for footprints
 	      min_dist=1000.0
 	      min_scan=-1
-	      ; set inital scan range to 25 scans either way
-	      s_scan = scan_num - 25
+	      ; set inital scan range to offset_range scans either way
+	      s_scan = scan_num - offset_range
 	      if s_scan lt 0 then s_scan = 0
-	      e_scan = scan_num + 25
+	      e_scan = scan_num + offset_range
 	      if e_scan gt (SAMPLE_RANGE-1) then e_scan = SAMPLE_RANGE - 1
 	      ;for scan=0,SAMPLE_RANGE-1 do begin
 	      for scan=s_scan,e_scan do begin
