@@ -140,6 +140,8 @@
 ;    control file for this version.
 ; 01/05/21 by Todd Berendes UAH/ITSC
 ;  - Added new variables for V7 GMI data
+; 4/6/22 by Todd Berendes UAH/ITSC
+;  - Added new GR liquid and frozen water content fields
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -226,7 +228,7 @@ ENDIF
 ; "Include" file for GMI-product-specific parameters (i.e., NPIXEL_GMI):
 @gmi_params.inc
 ; "Include" file for names, paths, etc.:
-@environs.inc
+@environs_v7.inc
 ; "Include" file for special values in netCDF files: Z_BELOW_THRESH, etc.
 @pr_params.inc
 
@@ -707,7 +709,9 @@ FOR igv=0,nsites-1  DO BEGIN
               RR_ID:    'Unspecified', $
               HID_ID:   'Unspecified', $
               D0_ID:    'Unspecified', $
-              NW_ID:    'Unspecified' }
+              NW_ID:    'Unspecified', $
+              MW_ID:    'Unspecified', $
+              MI_ID:    'Unspecified' }
 
   ; need to define this parameter, we don't know whether we can compute it yet
    have_gv_blockage = 0
@@ -882,6 +886,37 @@ FOR igv=0,nsites-1  DO BEGIN
    ENDIF ELSE BEGIN
       have_gv_nw = 1
       ufstruct.NW_ID = gv_nw_field
+   ENDELSE
+
+  ; TAB 4/6/22 added new GR liquid and frozen water content fields
+  ; find the volume with the Mw field for the GV site/source
+   gv_mw_field = ''
+   mw_field2get = 'MW'
+   mw_vol_num = get_site_specific_z_volume( siteID, radar, gv_mw_field, $
+                                            UF_FIELD=mw_field2get )
+   IF ( mw_vol_num LT 0 )  THEN BEGIN
+      PRINT, ""
+      PRINT, "No 'MW' volume in radar structure from file: ", file_1CUF
+      PRINT, ""
+      have_gv_mw = 0
+   ENDIF ELSE BEGIN
+      have_gv_mw = 1
+      ufstruct.MW_ID = gv_mw_field
+   ENDELSE
+
+  ; find the volume with the Mi field for the GV site/source
+   gv_mi_field = ''
+   mi_field2get = 'MI'
+   mi_vol_num = get_site_specific_z_volume( siteID, radar, gv_mi_field, $
+                                            UF_FIELD=mi_field2get )
+   IF ( mi_vol_num LT 0 )  THEN BEGIN
+      PRINT, ""
+      PRINT, "No 'MI' volume in radar structure from file: ", file_1CUF
+      PRINT, ""
+      have_gv_mi = 0
+   ENDIF ELSE BEGIN
+      have_gv_mi = 1
+      ufstruct.MI_ID = gv_mi_field
    ENDELSE
 
   ; get the number of elevation sweeps in the vol, and the array of elev angles
@@ -1423,6 +1458,18 @@ FOR igv=0,nsites-1  DO BEGIN
                                       VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Nw_max = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mw = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mw_stddev = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mw_max = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mi = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mi_stddev = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mi_max = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_blockage = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
                                      VALUE=FLOAT_RANGE_EDGE)
       tocdf_top_hgt = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
@@ -1439,6 +1486,8 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_gr_hid_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_dzero_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_nw_rejected = UINTARR(numGMIrays, num_elevations_out)
+      tocdf_gr_mw_rejected = UINTARR(numGMIrays, num_elevations_out)
+      tocdf_gr_mi_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_expected = UINTARR(numGMIrays, num_elevations_out)
 
      ; Create new subarrays of dimensions (numGMIrays, num_elevations_out) for each
@@ -1500,6 +1549,18 @@ FOR igv=0,nsites-1  DO BEGIN
                                           /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Nw_max_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
                                        VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mw_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mw_stddev_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, $
+                                          /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mw_max_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                       VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mi_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mi_stddev_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, $
+                                          /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_Mi_max_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                       VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_blockage_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
                                          VALUE=FLOAT_RANGE_EDGE)
       tocdf_top_hgt_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
@@ -1516,6 +1577,8 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_gr_hid_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_dzero_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_nw_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
+      tocdf_gr_mw_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
+      tocdf_gr_mi_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_VPR_expected = UINTARR(numGMIrays, num_elevations_out)
 
      ; get the indices of actual GMI footprints and load the 2D element subarrays
@@ -1756,6 +1819,18 @@ FOR igv=0,nsites-1  DO BEGIN
       NCDF_VARPUT, ncid, 'GR_Nw_StdDev_slantPath', tocdf_gr_nw_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_Nw_Max_slantPath', tocdf_gr_nw_max            ; data
    ENDIF
+   IF ( have_gv_mw ) THEN BEGIN
+      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_slantPath', tocdf_gr_mw            ; data
+       NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent_slantPath', DATA_PRESENT      ; data presence flag
+      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_StdDev_slantPath', tocdf_gr_mw_stddev     ; data
+      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_Max_slantPath', tocdf_gr_mw_max            ; data
+   ENDIF
+   IF ( have_gv_mi ) THEN BEGIN
+      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_slantPath', tocdf_gr_mi            ; data
+       NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent_slantPath', DATA_PRESENT      ; data presence flag
+      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_StdDev_slantPath', tocdf_gr_mi_stddev     ; data
+      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_Max_slantPath', tocdf_gr_mi_max            ; data
+   ENDIF
    IF ( have_gv_blockage ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_blockage_slantPath', tocdf_gr_blockage      ; data
        NCDF_VARPUT, ncid, 'have_GR_blockage_slantPath', DATA_PRESENT      ; data presence flag
@@ -1772,6 +1847,8 @@ FOR igv=0,nsites-1  DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_hid_rejected', tocdf_gr_hid_rejected
    NCDF_VARPUT, ncid, 'n_gr_dzero_rejected', tocdf_gr_dzero_rejected
    NCDF_VARPUT, ncid, 'n_gr_nw_rejected', tocdf_gr_nw_rejected
+   NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_rejected', tocdf_gr_mw_rejected
+   NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_rejected', tocdf_gr_mi_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected', tocdf_gr_expected
 
    NCDF_VARPUT, ncid, 'GR_Z_VPR', tocdf_gr_dbz_VPR            ; data
@@ -1830,6 +1907,18 @@ FOR igv=0,nsites-1  DO BEGIN
       NCDF_VARPUT, ncid, 'GR_Nw_StdDev_VPR', tocdf_gr_nw_stddev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_Nw_Max_VPR', tocdf_gr_nw_max_VPR            ; data
    ENDIF
+   IF ( have_gv_mw ) THEN BEGIN
+      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_VPR', tocdf_gr_mw_VPR            ; data
+       NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent_VPR', DATA_PRESENT      ; data presence flag
+      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_StdDev_VPR', tocdf_gr_mw_stddev_VPR     ; data
+      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_Max_VPR', tocdf_gr_mw_max_VPR            ; data
+   ENDIF
+   IF ( have_gv_mi ) THEN BEGIN
+      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_VPR', tocdf_gr_mi_VPR            ; data
+       NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent_VPR', DATA_PRESENT      ; data presence flag
+      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_StdDev_VPR', tocdf_gr_mi_stddev_VPR     ; data
+      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_Max_VPR', tocdf_gr_mi_max_VPR            ; data
+   ENDIF
    IF ( have_gv_blockage ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_blockage_VPR', tocdf_gr_blockage_VPR      ; data
        NCDF_VARPUT, ncid, 'have_GR_blockage_VPR', DATA_PRESENT      ; data presence flag
@@ -1846,6 +1935,8 @@ FOR igv=0,nsites-1  DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_hid_vpr_rejected', tocdf_gr_hid_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_dzero_vpr_rejected', tocdf_gr_dzero_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_nw_vpr_rejected', tocdf_gr_nw_vpr_rejected
+   NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_vpr_rejected', tocdf_gr_mw_vpr_rejected
+   NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_vpr_rejected', tocdf_gr_mi_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_vpr_expected', tocdf_gr_VPR_expected
 
    NCDF_CLOSE, ncid

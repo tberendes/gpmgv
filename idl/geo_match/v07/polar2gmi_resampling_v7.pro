@@ -36,6 +36,8 @@
 ;  - Added ability to increase current LUT array sizes if they fill up.
 ; 11/13/15 by Bob Morris, GPM GV (SAIC)
 ;  - Added processing of GR_blockage for version 1.11 file.
+; 4/6/22 by Todd Berendes UAH/ITSC
+;  - Added new GR liquid and frozen water content fields
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -62,6 +64,8 @@
    IF have_gv_hid THEN hidvolume = rsl_get_volume( radar, hid_vol_num )
    IF have_gv_dzero THEN dzerovolume = rsl_get_volume( radar, dzero_vol_num )
    IF have_gv_nw THEN nwvolume = rsl_get_volume( radar, nw_vol_num )
+   IF have_gv_mw THEN mwvolume = rsl_get_volume( radar, mw_vol_num )
+   IF have_gv_mi THEN mivolume = rsl_get_volume( radar, mi_vol_num )
 
   ; Map this GV radar's data to the these GMI footprints, sweep by sweep, at the
   ;   locations where GMI rays intersect the elevation sweeps:
@@ -124,6 +128,10 @@
          dzero_sweep = rsl_get_sweep( dzerovolume, SWEEP_INDEX=idx_uniq_elevs[ielev] )
       IF have_gv_nw THEN $
          nw_sweep = rsl_get_sweep( nwvolume, SWEEP_INDEX=idx_uniq_elevs[ielev] )
+      IF have_gv_mw THEN $
+         mw_sweep = rsl_get_sweep( mwvolume, SWEEP_INDEX=idx_uniq_elevs[ielev] )
+      IF have_gv_mi THEN $
+         mi_sweep = rsl_get_sweep( mivolume, SWEEP_INDEX=idx_uniq_elevs[ielev] )
      ; read/get the number of rays in the sweep: nrays
       nrays = sweep.h.nrays
 
@@ -235,6 +243,8 @@
       IF have_gv_hid THEN hid_bscan = FLTARR(nbins,nrays)
       IF have_gv_dzero THEN dzero_bscan = FLTARR(nbins,nrays)
       IF have_gv_nw THEN nw_bscan = FLTARR(nbins,nrays)
+      IF have_gv_mw THEN mw_bscan = FLTARR(nbins,nrays)
+      IF have_gv_mi THEN mi_bscan = FLTARR(nbins,nrays)
      ; read each GV ray into the b-scan column
       FOR iray = 0, nrays-1 DO BEGIN
          ray = sweep.ray[iray]
@@ -274,6 +284,14 @@
          IF have_gv_nw THEN BEGIN
             nw_ray = nw_sweep.ray[iray]
             nw_bscan[*,iray] = nw_ray.range[0:nbins-1]
+         ENDIF
+         IF have_gv_mw THEN BEGIN
+            mw_ray = mw_sweep.ray[iray]
+            mw_bscan[*,iray] = mw_ray.range[0:nbins-1]
+         ENDIF
+         IF have_gv_mi THEN BEGIN
+            mi_ray = mi_sweep.ray[iray]
+            mi_bscan[*,iray] = mi_ray.range[0:nbins-1]
          ENDIF
       ENDFOR
 
@@ -478,6 +496,8 @@
          n_gr_hid_points_rejected = 0UL    ; # of above with undetermined HID
          n_gr_dzero_points_rejected = 0UL  ; # of above that are MISSING D0
          n_gr_nw_points_rejected = 0UL     ; # of above that are MISSING Nw
+         n_gr_mw_points_rejected = 0UL     ; # of above that are MISSING Mw
+         n_gr_mi_points_rejected = 0UL     ; # of above that are MISSING Mi
          GMI_gates_expected = 0UL       ; # GMI gates within the sweep vert. bounds
 
          GMI_index = GMI_master_idx[jpr]
@@ -650,6 +670,25 @@
                   nw_max_gv = altstats.max
                ENDIF
 
+               IF have_gv_mw THEN BEGIN
+                  gvmwvals = mw_bscan[thisGMIsGVindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
+                  altstats=mean_stddev_max_by_rules(gvmwvals,'MW', 0.0, $
+                              0.0, SRAIN_BELOW_THRESH)
+                  n_gr_mw_points_rejected = altstats.rejects
+                  mw_avg_gv = altstats.mean
+                  mw_stddev_gv = altstats.stddev
+                  mw_max_gv = altstats.max
+               ENDIF
+               IF have_gv_mi THEN BEGIN
+                  gvmivals = mi_bscan[thisGMIsGVindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
+                  altstats=mean_stddev_max_by_rules(gvmivals,'MI', 0.0, $
+                              0.0, SRAIN_BELOW_THRESH)
+                  n_gr_mi_points_rejected = altstats.rejects
+                  mi_avg_gv = altstats.mean
+                  mi_stddev_gv = altstats.stddev
+                  mi_max_gv = altstats.max
+               ENDIF
+
                IF do_this_elev_blockage EQ 1 THEN BEGIN
                   compute_mean_blockage, ielev, jpr, tocdf_gr_blockage, $
                      blockage4swp, max_sep, gmi_x_center, gmi_y_center, $
@@ -701,6 +740,12 @@
                nw_avg_gv = SRAIN_BELOW_THRESH
                nw_stddev_gv = SRAIN_BELOW_THRESH
                nw_max_gv = SRAIN_BELOW_THRESH
+               mw_avg_gv = SRAIN_BELOW_THRESH
+               mw_stddev_gv = SRAIN_BELOW_THRESH
+               mw_max_gv = SRAIN_BELOW_THRESH
+               mi_avg_gv = SRAIN_BELOW_THRESH
+               mi_stddev_gv = SRAIN_BELOW_THRESH
+               mi_max_gv = SRAIN_BELOW_THRESH
 	       meantop = 0.0    ; should calculate something for this
 	       meanbotm = 0.0   ; ditto
 	    ENDIF
@@ -757,6 +802,16 @@
                      tocdf_gr_nw_stddev[jpr,ielev] = nw_stddev_gv
                      tocdf_gr_nw_max[jpr,ielev] = nw_max_gv
                   ENDIF
+                  IF have_gv_mw THEN BEGIN
+                     tocdf_gr_mw[jpr,ielev] = mw_avg_gv
+                     tocdf_gr_mw_stddev[jpr,ielev] = mw_stddev_gv
+                     tocdf_gr_mw_max[jpr,ielev] = mw_max_gv
+                  ENDIF
+                  IF have_gv_mi THEN BEGIN
+                     tocdf_gr_mi[jpr,ielev] = mi_avg_gv
+                     tocdf_gr_mi_stddev[jpr,ielev] = mi_stddev_gv
+                     tocdf_gr_mi_max[jpr,ielev] = mi_max_gv
+                  ENDIF
                  ; NOTE: No need to write tocdf_gr_blockage, its valid values
                  ; get assigned in COMPUTE_MEAN_BLOCKAGE()
                   tocdf_top_hgt[jpr,ielev] = meantop
@@ -811,6 +866,16 @@
                              tocdf_gr_Nw_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_max[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
+                          IF have_gv_mw THEN BEGIN
+                             tocdf_gr_Mw[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mw_stddev[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mw_max[jpr,ielev] = FLOAT_OFF_EDGE
+                          ENDIF
+                          IF have_gv_mi THEN BEGIN
+                             tocdf_gr_Mi[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mi_stddev[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mi_max[jpr,ielev] = FLOAT_OFF_EDGE
+                          ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
@@ -863,6 +928,16 @@
                              tocdf_gr_Nw_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_max[jpr,ielev] = Z_MISSING
                           ENDIF
+                          IF have_gv_mw THEN BEGIN
+                             tocdf_gr_Mw[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mw_stddev[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mw_max[jpr,ielev] = Z_MISSING
+                          ENDIF
+                          IF have_gv_mi THEN BEGIN
+                             tocdf_gr_Mi[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mi_stddev[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mi_max[jpr,ielev] = Z_MISSING
+                          ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage[jpr,ielev] = Z_MISSING
                           ENDIF
@@ -884,6 +959,8 @@
          IF have_gv_hid THEN tocdf_gr_hid_rejected[jpr,ielev] = UINT(n_gr_hid_points_rejected)
          IF have_gv_dzero THEN tocdf_gr_dzero_rejected[jpr,ielev] = UINT(n_gr_dzero_points_rejected)
          IF have_gv_nw THEN tocdf_gr_nw_rejected[jpr,ielev] = UINT(n_gr_nw_points_rejected)
+         IF have_gv_mw THEN tocdf_gr_mw_rejected[jpr,ielev] = UINT(n_gr_mw_points_rejected)
+         IF have_gv_mi THEN tocdf_gr_mi_rejected[jpr,ielev] = UINT(n_gr_mi_points_rejected)
          tocdf_gr_expected[jpr,ielev] = UINT(countGVpts)
 
       ENDFOR  ; each GMI subarray point: jpr=0, numGMIrays-1
@@ -1033,6 +1110,8 @@
          n_gr_hid_vpr_points_rejected = 0UL    ; # of above with undetermined HID
          n_gr_dzero_vpr_points_rejected = 0UL  ; # of above that are MISSING D0
          n_gr_nw_vpr_points_rejected = 0UL     ; # of above that are MISSING Nw
+         n_gr_mw_vpr_points_rejected = 0UL     ; # of above that are MISSING MW
+         n_gr_mi_vpr_points_rejected = 0UL     ; # of above that are MISSING MI
          GMI_gates_expected = 0UL       ; # GMI gates within the sweep vert. bounds
 
          GMI_index = GMI_master_idx[jpr]
@@ -1172,6 +1251,26 @@
                   nw_max_gv_vpr = altstats.max
                ENDIF
 
+               IF have_gv_mw THEN BEGIN
+                  gvmwvals = mw_bscan[thisGMIsGVindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
+                  altstats=mean_stddev_max_by_rules(gvmwvals,'MW', 0.0, $
+                              0.0, SRAIN_BELOW_THRESH)
+                  n_gr_mw_vpr_points_rejected = altstats.rejects
+                  mw_avg_gv_vpr = altstats.mean
+                  mw_stddev_gv_vpr = altstats.stddev
+                  mw_max_gv_vpr = altstats.max
+               ENDIF
+
+               IF have_gv_mi THEN BEGIN
+                  gvmivals = mi_bscan[thisGMIsGVindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
+                  altstats=mean_stddev_max_by_rules(gvmivals,'MI', 0.0, $
+                              0.0, SRAIN_BELOW_THRESH)
+                  n_gr_mi_vpr_points_rejected = altstats.rejects
+                  mi_avg_gv_vpr = altstats.mean
+                  mi_stddev_gv_vpr = altstats.stddev
+                  mi_max_gv_vpr = altstats.max
+               ENDIF
+
                IF do_this_elev_blockage EQ 1 THEN BEGIN
                   compute_mean_blockage, ielev, jpr, tocdf_gr_blockage_VPR, $
                      blockage4swp, max_sep, sfc_x_center, sfc_y_center, $
@@ -1223,6 +1322,12 @@
                nw_avg_gv_vpr = SRAIN_BELOW_THRESH
                nw_stddev_gv_vpr = SRAIN_BELOW_THRESH
                nw_max_gv_vpr = SRAIN_BELOW_THRESH
+               mw_avg_gv_vpr = SRAIN_BELOW_THRESH
+               mw_stddev_gv_vpr = SRAIN_BELOW_THRESH
+               mw_max_gv_vpr = SRAIN_BELOW_THRESH
+               mi_avg_gv_vpr = SRAIN_BELOW_THRESH
+               mi_stddev_gv_vpr = SRAIN_BELOW_THRESH
+               mi_max_gv_vpr = SRAIN_BELOW_THRESH
 	       meantop_vpr = 0.0    ; should calculate something for this
 	       meanbotm_vpr = 0.0   ; ditto
 	    ENDIF
@@ -1279,6 +1384,16 @@
                      tocdf_gr_nw_stddev_VPR[jpr,ielev] = nw_stddev_gv_vpr
                      tocdf_gr_nw_max_VPR[jpr,ielev] = nw_max_gv_vpr
                   ENDIF
+                  IF have_gv_mw THEN BEGIN
+                     tocdf_gr_mw_VPR[jpr,ielev] = mw_avg_gv_vpr
+                     tocdf_gr_mw_stddev_VPR[jpr,ielev] = mw_stddev_gv_vpr
+                     tocdf_gr_mw_max_VPR[jpr,ielev] = mw_max_gv_vpr
+                  ENDIF
+                  IF have_gv_mi THEN BEGIN
+                     tocdf_gr_mi_VPR[jpr,ielev] = mi_avg_gv_vpr
+                     tocdf_gr_mi_stddev_VPR[jpr,ielev] = mi_stddev_gv_vpr
+                     tocdf_gr_mi_max_VPR[jpr,ielev] = mi_max_gv_vpr
+                  ENDIF
                  ; NOTE: No need to write tocdf_gr_blockage_vpr, its valid values
                  ; get assigned in COMPUTE_MEAN_BLOCKAGE()
                   tocdf_top_hgt_vpr[jpr,ielev] = meantop_vpr
@@ -1333,6 +1448,16 @@
                              tocdf_gr_Nw_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
+                          IF have_gv_mw THEN BEGIN
+                             tocdf_gr_Mw_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mw_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mw_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                          ENDIF
+                          IF have_gv_mi THEN BEGIN
+                             tocdf_gr_Mi_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mi_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mi_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                          ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
@@ -1385,6 +1510,16 @@
                              tocdf_gr_Nw_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_max_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
+                          IF have_gv_mw THEN BEGIN
+                             tocdf_gr_Mw_VPR[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mw_stddev_VPR[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mw_max_VPR[jpr,ielev] = Z_MISSING
+                          ENDIF
+                          IF have_gv_mi THEN BEGIN
+                             tocdf_gr_Mi_VPR[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mi_stddev_VPR[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mi_max_VPR[jpr,ielev] = Z_MISSING
+                          ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
@@ -1415,6 +1550,10 @@
                              UINT(n_gr_dzero_vpr_points_rejected)
          IF have_gv_nw THEN tocdf_gr_nw_VPR_rejected[jpr,ielev] = $
                              UINT(n_gr_nw_vpr_points_rejected)
+         IF have_gv_mw THEN tocdf_gr_mw_VPR_rejected[jpr,ielev] = $
+                             UINT(n_gr_mw_vpr_points_rejected)
+         IF have_gv_mi THEN tocdf_gr_mi_VPR_rejected[jpr,ielev] = $
+                             UINT(n_gr_mi_vpr_points_rejected)
          tocdf_gr_vpr_expected[jpr,ielev] = UINT(countGVpts_vpr)
 
       ENDFOR    ; GMI footprints
