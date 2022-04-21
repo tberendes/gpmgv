@@ -50,6 +50,8 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
            "Mismatched data and weights array sizes."
 
    SWITCH field OF
+        'MW' :
+        'MI' :
          'Z' :
        'ZDR' :
        'KDP' :
