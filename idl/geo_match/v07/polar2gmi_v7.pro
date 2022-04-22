@@ -1769,72 +1769,73 @@ FOR igv=0,nsites-1  DO BEGIN
    NCDF_VARPUT, ncid, 'GR_Z_Max_slantPath', tocdf_gr_dbz_max            ; data
    IF ( have_gv_rc ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_RC_rainrate_slantPath', tocdf_gr_rc            ; data
-       NCDF_VARPUT, ncid, 'have_GR_RC_rainrate_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_RC_rainrate_StdDev_slantPath', tocdf_gr_rc_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_RC_rainrate_Max_slantPath', tocdf_gr_rc_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_RC_rainrate_slantPath', have_gv_rc      ; data presence flag
    IF ( have_gv_rp ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_RP_rainrate_slantPath', tocdf_gr_rp            ; data
-       NCDF_VARPUT, ncid, 'have_GR_RP_rainrate_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_RP_rainrate_StdDev_slantPath', tocdf_gr_rp_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_RP_rainrate_Max_slantPath', tocdf_gr_rp_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_RP_rainrate_slantPath', have_gv_rp      ; data presence flag
    IF ( have_gv_rr ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_RR_rainrate_slantPath', tocdf_gr_rr            ; data
-       NCDF_VARPUT, ncid, 'have_GR_RR_rainrate_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_RR_rainrate_StdDev_slantPath', tocdf_gr_rr_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_RR_rainrate_Max_slantPath', tocdf_gr_rr_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_RR_rainrate_slantPath', have_gv_rr      ; data presence flag
    IF ( have_gv_zdr ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Zdr_slantPath', tocdf_gr_zdr            ; data
-       NCDF_VARPUT, ncid, 'have_GR_Zdr_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_Zdr_StdDev_slantPath', tocdf_gr_zdr_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_Zdr_Max_slantPath', tocdf_gr_zdr_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_Zdr_slantPath', have_gv_zdr      ; data presence flag
    IF ( have_gv_kdp ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Kdp_slantPath', tocdf_gr_kdp            ; data
-       NCDF_VARPUT, ncid, 'have_GR_Kdp_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_Kdp_StdDev_slantPath', tocdf_gr_kdp_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_Kdp_Max_slantPath', tocdf_gr_kdp_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_Kdp_slantPath', have_gv_kdp      ; data presence flag
    IF ( have_gv_rhohv ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_RHOhv_slantPath', tocdf_gr_rhohv            ; data
-       NCDF_VARPUT, ncid, 'have_GR_RHOhv_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_RHOhv_StdDev_slantPath', tocdf_gr_rhohv_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_RHOhv_Max_slantPath', tocdf_gr_rhohv_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_RHOhv_slantPath', have_gv_rhohv      ; data presence flag
    IF ( have_gv_hid ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_HID_slantPath', tocdf_gr_hid            ; data
-       NCDF_VARPUT, ncid, 'have_GR_HID_slantPath', DATA_PRESENT      ; data presence flag
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_HID_slantPath', have_gv_hid      ; data presence flag
    IF ( have_gv_dzero ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Dzero_slantPath', tocdf_gr_dzero            ; data
-       NCDF_VARPUT, ncid, 'have_GR_Dzero_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_Dzero_StdDev_slantPath', tocdf_gr_dzero_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_Dzero_Max_slantPath', tocdf_gr_dzero_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_Dzero_slantPath', have_gv_dzero      ; data presence flag
    IF ( have_gv_nw ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Nw_slantPath', tocdf_gr_nw            ; data
-       NCDF_VARPUT, ncid, 'have_GR_Nw_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_Nw_StdDev_slantPath', tocdf_gr_nw_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_Nw_Max_slantPath', tocdf_gr_nw_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_Nw_slantPath', have_gv_nw      ; data presence flag
    IF ( have_gv_mw ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_liquidWaterContent_slantPath', tocdf_gr_mw            ; data
-       NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_liquidWaterContent_StdDev_slantPath', tocdf_gr_mw_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_liquidWaterContent_Max_slantPath', tocdf_gr_mw_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent_slantPath', have_gv_mw      ; data presence flag
    IF ( have_gv_mi ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_frozenWaterContent_slantPath', tocdf_gr_mi            ; data
-       NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent_slantPath', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_frozenWaterContent_StdDev_slantPath', tocdf_gr_mi_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_frozenWaterContent_Max_slantPath', tocdf_gr_mi_max            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent_slantPath', have_gv_mi      ; data presence flag
    IF ( have_gv_blockage ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_blockage_slantPath', tocdf_gr_blockage      ; data
-       NCDF_VARPUT, ncid, 'have_GR_blockage_slantPath', DATA_PRESENT      ; data presence flag
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_blockage_slantPath', have_gv_blockage      ; data presence flag
+   
    NCDF_VARPUT, ncid, 'topHeight', tocdf_top_hgt
    NCDF_VARPUT, ncid, 'bottomHeight', tocdf_botm_hgt
    NCDF_VARPUT, ncid, 'n_gr_z_rejected', tocdf_gr_z_rejected
@@ -1857,72 +1858,73 @@ FOR igv=0,nsites-1  DO BEGIN
    NCDF_VARPUT, ncid, 'GR_Z_Max_VPR', tocdf_gr_dbz_Max_VPR            ; data
    IF ( have_gv_rc ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_RC_rainrate_VPR', tocdf_gr_rc_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_RC_rainrate_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_RC_rainrate_StdDev_VPR', tocdf_gr_rc_StdDev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_RC_rainrate_Max_VPR', tocdf_gr_rc_Max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_RC_rainrate_VPR', have_gv_rc      ; data presence flag
    IF ( have_gv_rp ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_RP_rainrate_VPR', tocdf_gr_rp_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_RP_rainrate_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_RP_rainrate_StdDev_VPR', tocdf_gr_rp_StdDev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_RP_rainrate_Max_VPR', tocdf_gr_rp_Max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_RP_rainrate_VPR', have_gv_rp      ; data presence flag
    IF ( have_gv_rr ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_RR_rainrate_VPR', tocdf_gr_rr_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_RR_rainrate_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_RR_rainrate_StdDev_VPR', tocdf_gr_rr_StdDev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_RR_rainrate_Max_VPR', tocdf_gr_rr_Max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_RR_rainrate_VPR', have_gv_rr      ; data presence flag
    IF ( have_gv_zdr ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Zdr_VPR', tocdf_gr_zdr_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_Zdr_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_Zdr_StdDev_VPR', tocdf_gr_zdr_stddev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_Zdr_Max_VPR', tocdf_gr_zdr_max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_Zdr_VPR', have_gv_zdr      ; data presence flag
    IF ( have_gv_kdp ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Kdp_VPR', tocdf_gr_kdp_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_Kdp_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_Kdp_StdDev_VPR', tocdf_gr_kdp_stddev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_Kdp_Max_VPR', tocdf_gr_kdp_max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_Kdp_VPR', have_gv_kdp      ; data presence flag
    IF ( have_gv_rhohv ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_RHOhv_VPR', tocdf_gr_rhohv_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_RHOhv_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_RHOhv_StdDev_VPR', tocdf_gr_rhohv_stddev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_RHOhv_Max_VPR', tocdf_gr_rhohv_max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_RHOhv_VPR', have_gv_rhohv      ; data presence flag
    IF ( have_gv_hid ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_HID_VPR', tocdf_gr_hid_VPR            ; data
        NCDF_VARPUT, ncid, 'have_GR_HID_VPR', DATA_PRESENT      ; data presence flag
    ENDIF
    IF ( have_gv_dzero ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Dzero_VPR', tocdf_gr_dzero_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_Dzero_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_Dzero_StdDev_VPR', tocdf_gr_dzero_stddev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_Dzero_Max_VPR', tocdf_gr_dzero_max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_Dzero_VPR', have_gv_dzero      ; data presence flag
    IF ( have_gv_nw ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Nw_VPR', tocdf_gr_nw_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_Nw_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_Nw_StdDev_VPR', tocdf_gr_nw_stddev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_Nw_Max_VPR', tocdf_gr_nw_max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_Nw_VPR', have_gv_nw      ; data presence flag
    IF ( have_gv_mw ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_liquidWaterContent_VPR', tocdf_gr_mw_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_liquidWaterContent_StdDev_VPR', tocdf_gr_mw_stddev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_liquidWaterContent_Max_VPR', tocdf_gr_mw_max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent_VPR', have_gv_mw      ; data presence flag
    IF ( have_gv_mi ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_frozenWaterContent_VPR', tocdf_gr_mi_VPR            ; data
-       NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent_VPR', DATA_PRESENT      ; data presence flag
       NCDF_VARPUT, ncid, 'GR_frozenWaterContent_StdDev_VPR', tocdf_gr_mi_stddev_VPR     ; data
       NCDF_VARPUT, ncid, 'GR_frozenWaterContent_Max_VPR', tocdf_gr_mi_max_VPR            ; data
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent_VPR', have_gv_mi      ; data presence flag
    IF ( have_gv_blockage ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_blockage_VPR', tocdf_gr_blockage_VPR      ; data
-       NCDF_VARPUT, ncid, 'have_GR_blockage_VPR', DATA_PRESENT      ; data presence flag
    ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_blockage_VPR', have_gv_blockage      ; data presence flag
+   
    NCDF_VARPUT, ncid, 'topHeight_vpr', tocdf_top_hgt_VPR
    NCDF_VARPUT, ncid, 'bottomHeight_vpr', tocdf_botm_hgt_VPR
    NCDF_VARPUT, ncid, 'n_gr_z_vpr_rejected', tocdf_gr_z_VPR_rejected
