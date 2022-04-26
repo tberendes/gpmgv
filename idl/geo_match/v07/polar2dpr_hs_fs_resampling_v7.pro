@@ -1231,6 +1231,12 @@
                nw_avg_gv = SRAIN_BELOW_THRESH
                nw_stddev_gv = SRAIN_BELOW_THRESH
                nw_max_gv = SRAIN_BELOW_THRESH
+               mw_avg_gv = SRAIN_BELOW_THRESH
+               mw_stddev_gv = SRAIN_BELOW_THRESH
+               mw_max_gv = SRAIN_BELOW_THRESH
+               mi_avg_gv = SRAIN_BELOW_THRESH
+               mi_stddev_gv = SRAIN_BELOW_THRESH
+               mi_max_gv = SRAIN_BELOW_THRESH
                dm_avg_gv = SRAIN_BELOW_THRESH
                dm_stddev_gv = SRAIN_BELOW_THRESH
                dm_max_gv = SRAIN_BELOW_THRESH
