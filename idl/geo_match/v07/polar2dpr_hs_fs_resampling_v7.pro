@@ -671,7 +671,7 @@
                ENDIF
 
                IF have_gv_mw THEN BEGIN
-                  gvmwvals = mw_bscan[thisGMIsGVindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
+                  gvmwvals = mw_bscan[thisPRsGRindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
                   altstats=mean_stddev_max_by_rules(gvmwvals,'MW', 0.0, $
                               0.0, SRAIN_BELOW_THRESH)
                   n_gr_mw_points_rejected = altstats.rejects
@@ -680,7 +680,7 @@
                   mw_max_gv = altstats.max
                ENDIF
                IF have_gv_mi THEN BEGIN
-                  gvmivals = mi_bscan[thisGMIsGVindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
+                  gvmivals = mi_bscan[thisPRsGRindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
                   altstats=mean_stddev_max_by_rules(gvmivals,'MI', 0.0, $
                               0.0, SRAIN_BELOW_THRESH)
                   n_gr_mi_points_rejected = altstats.rejects
