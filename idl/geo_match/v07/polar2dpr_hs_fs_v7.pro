@@ -511,7 +511,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
               D0_ID:    'Unspecified', $
               NW_ID:    'Unspecified', $
               MW_ID:    'Unspecified', $
-              MI_ID:    'Unspecified' }
+              MI_ID:    'Unspecified', $
               DM_ID:    'Unspecified', $
               N2_ID:    'Unspecified' }
 
