@@ -254,6 +254,8 @@
 ;  - Added mods for SWE variables
 ; 09/30/20 Berendes, UAH
 ;  - Added pwat_integ_liquid and pwat_integ_solid variables
+; 4/20/22 by Todd Berendes UAH/ITSC
+;  - Added new GR liquid and frozen water content fields
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -692,6 +694,12 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_Nw = data_GR2DPR.GR_NW
       tocdf_gr_Nw_stddev = data_GR2DPR.GR_NW_STDDEV
       tocdf_gr_Nw_max = data_GR2DPR.GR_NW_MAX
+      tocdf_gr_Mw = data_GR2DPR.GR_liquidWaterContent
+      tocdf_gr_Mw_stddev = data_GR2DPR.GR_liquidWaterContent_STDDEV
+      tocdf_gr_Mw_max = data_GR2DPR.GR_liquidWaterContent_MAX
+      tocdf_gr_Mi = data_GR2DPR.GR_frozenWaterContent
+      tocdf_gr_Mi_stddev = data_GR2DPR.GR_frozenWaterContent_STDDEV
+      tocdf_gr_Mi_max = data_GR2DPR.GR_frozenWaterContent_MAX
       tocdf_gr_Dm = data_GR2DPR.GR_DM
       tocdf_gr_Dm_stddev = data_GR2DPR.GR_DM_STDDEV
       tocdf_gr_Dm_max = data_GR2DPR.GR_DM_MAX
@@ -741,6 +749,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_hid_rejected = data_GR2DPR.N_GR_HID_REJECTED
       tocdf_gr_dzero_rejected = data_GR2DPR.N_GR_DZERO_REJECTED
       tocdf_gr_nw_rejected = data_GR2DPR.N_GR_NW_REJECTED
+      tocdf_gr_mw_rejected = data_GR2DPR.N_GR_liquidWaterContent_REJECTED
+      tocdf_gr_mi_rejected = data_GR2DPR.N_GR_frozenWaterContent_REJECTED
       tocdf_gr_dm_rejected = data_GR2DPR.N_GR_DM_REJECTED
       tocdf_gr_n2_rejected = data_GR2DPR.N_GR_N2_REJECTED
       tocdf_gr_expected = data_GR2DPR.N_GR_EXPECTED
@@ -1273,6 +1283,16 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'GR_Nw_StdDev', tocdf_gr_nw_stddev
    NCDF_VARPUT, ncid, 'GR_Nw_Max', tocdf_gr_nw_max
 
+   NCDF_VARPUT, ncid, 'GR_liquidWaterContent', tocdf_gr_mw            ; data
+    NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent', myflags.have_GR_liquidWaterContent      ; data presence flag
+   NCDF_VARPUT, ncid, 'GR_liquidWaterContent_StdDev', tocdf_gr_mw_stddev     ; data
+   NCDF_VARPUT, ncid, 'GR_liquidWaterContent_Max', tocdf_gr_mw_max            ; data
+
+   NCDF_VARPUT, ncid, 'GR_frozenWaterContent', tocdf_gr_mi            ; data
+    NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent', myflags.have_GR_frozenWaterContent      ; data presence flag
+   NCDF_VARPUT, ncid, 'GR_frozenWaterContent_StdDev', tocdf_gr_mi_stddev     ; data
+   NCDF_VARPUT, ncid, 'GR_frozenWaterContent_Max', tocdf_gr_mi_max            ; data
+  
    NCDF_VARPUT, ncid, 'GR_Dm', tocdf_gr_dm
     NCDF_VARPUT, ncid, 'have_GR_Dm', myflags.HAVE_GR_DM
    NCDF_VARPUT, ncid, 'GR_Dm_StdDev', tocdf_gr_dm_stddev
@@ -1313,6 +1333,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_gr_hid_rejected', tocdf_gr_hid_rejected
    NCDF_VARPUT, ncid, 'n_gr_dzero_rejected', tocdf_gr_dzero_rejected
    NCDF_VARPUT, ncid, 'n_gr_nw_rejected', tocdf_gr_nw_rejected
+   NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_rejected', tocdf_gr_mw_rejected
+   NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_rejected', tocdf_gr_mi_rejected
    NCDF_VARPUT, ncid, 'n_gr_dm_rejected', tocdf_gr_dm_rejected
    NCDF_VARPUT, ncid, 'n_gr_n2_rejected', tocdf_gr_n2_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected', tocdf_gr_expected

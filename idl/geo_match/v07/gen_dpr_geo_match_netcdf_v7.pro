@@ -88,6 +88,8 @@
 ; 9/28/20 by Todd Berendes (UAH)
 ;    Added new GPM integrated PW fields for liquid and solid
 ;    Modified for GPM V7
+; 4/20/22 by Todd Berendes UAH/ITSC
+;  - Added new GR liquid and frozen water content fields
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -113,7 +115,7 @@ FUNCTION gen_dpr_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, $
 ; 8/30/18 TAB updated version to 1.22 from 1.21
 ;GEO_MATCH_FILE_VERSION=1.22
 ; TAB 11/10/20 changed version to 2.0 from 1.22 for additional GPM fields pwatIntegrated_liquid, pwatIntegrated_ice
-GEO_MATCH_FILE_VERSION=2.0
+GEO_MATCH_FILE_VERSION=2.1
 
 IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
    geo_match_vers = GEO_MATCH_FILE_VERSION
@@ -146,6 +148,8 @@ rruf = 'Unspecified'
 hiduf = 'Unspecified'
 dzerouf = 'Unspecified'
 nwuf = 'Unspecified'
+mwuf = 'Unspecified'
+miuf = 'Unspecified'
 dmuf = 'Unspecified'
 n2uf = 'Unspecified'
 
@@ -175,6 +179,8 @@ CASE s OF
                  'HID_ID' : hiduf = gv_UF_field.HID_ID
                  'D0_ID'  : dzerouf = gv_UF_field.D0_ID
                  'NW_ID'  : nwuf = gv_UF_field.NW_ID
+                 'MW_ID'  : mwuf = gv_UF_field.MW_ID
+                 'MI_ID'  : miuf = gv_UF_field.MI_ID
                  'DM_ID'  : dmuf = gv_UF_field.DM_ID
                  'N2_ID'  : n2uf = gv_UF_field.N2_ID
                   ELSE    : message, "Unknown UF field tagname '"+ufid $
@@ -194,6 +200,8 @@ ncdf_attput, cdfid, 'GV_UF_RR_field', rruf, /global
 ncdf_attput, cdfid, 'GV_UF_HID_field', hiduf, /global
 ncdf_attput, cdfid, 'GV_UF_D0_field', dzerouf, /global
 ncdf_attput, cdfid, 'GV_UF_NW_field', nwuf, /global
+ncdf_attput, cdfid, 'GV_UF_MW_field', mwuf, /global
+ncdf_attput, cdfid, 'GV_UF_MI_field', miuf, /global
 ncdf_attput, cdfid, 'GV_UF_DM_field', dmuf, /global
 ncdf_attput, cdfid, 'GV_UF_N2_field', n2uf, /global
 
@@ -427,6 +435,16 @@ havegvNWvarid = ncdf_vardef(cdfid, 'have_GR_Nw', /short)
 ncdf_attput, cdfid, havegvNWvarid, 'long_name', $
              'data exists flag for GR_Nw'
 ncdf_attput, cdfid, havegvNWvarid, '_FillValue', NO_DATA_PRESENT
+
+havegvMWvarid = ncdf_vardef(cdfid, 'have_GR_liquidWaterContent', /short)
+ncdf_attput, cdfid, havegvMWvarid, 'long_name', $
+             'data exists flag for GR_liquidWaterContent'
+ncdf_attput, cdfid, havegvMWvarid, '_FillValue', NO_DATA_PRESENT
+
+havegvMIvarid = ncdf_vardef(cdfid, 'have_GR_frozenWaterContent', /short)
+ncdf_attput, cdfid, havegvMIvarid, 'long_name', $
+             'data exists flag for GR_frozenWaterContent'
+ncdf_attput, cdfid, havegvMIvarid, '_FillValue', NO_DATA_PRESENT
 
 havegvDMvarid = ncdf_vardef(cdfid, 'have_GR_Dm', /short)
 ncdf_attput, cdfid, havegvDMvarid, 'long_name', $
@@ -728,6 +746,36 @@ ncdf_attput, cdfid, gvNWmaxvarid, 'long_name', $
 ncdf_attput, cdfid, gvNWmaxvarid, 'units', '1/(mm*m^3)'
 ncdf_attput, cdfid, gvNWmaxvarid, '_FillValue', FLOAT_RANGE_EDGE
 
+gvMWvarid = ncdf_vardef(cdfid, 'GR_liquidWaterContent', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvMWvarid, 'long_name', 'liquid water mass'
+ncdf_attput, cdfid, gvMWvarid, 'units', 'kg/m^3'
+ncdf_attput, cdfid, gvMWvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+gvMWstddevvarid = ncdf_vardef(cdfid, 'GR_liquidWaterContent_StdDev', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvMWstddevvarid, 'long_name', 'Standard Deviation of liquid water mass'
+ncdf_attput, cdfid, gvMWstddevvarid, 'units', 'kg/m^3'
+ncdf_attput, cdfid, gvMWstddevvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+gvMWmaxvarid = ncdf_vardef(cdfid, 'GR_liquidWaterContent_Max', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvMWmaxvarid, 'long_name', 'Sample Maximum of liquid water mass'
+ncdf_attput, cdfid, gvMWmaxvarid, 'units', 'kg/m^3'
+ncdf_attput, cdfid, gvMWmaxvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+gvMIvarid = ncdf_vardef(cdfid, 'GR_frozenWaterContent', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvMIvarid, 'long_name', 'frozen water mass'
+ncdf_attput, cdfid, gvMIvarid, 'units', 'kg/m^3'
+ncdf_attput, cdfid, gvMIvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+gvMIstddevvarid = ncdf_vardef(cdfid, 'GR_frozenWaterContent_StdDev', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvMIstddevvarid, 'long_name', 'Standard Deviation of frozen water mass'
+ncdf_attput, cdfid, gvMIstddevvarid, 'units', 'kg/m^3'
+ncdf_attput, cdfid, gvMIstddevvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+gvMImaxvarid = ncdf_vardef(cdfid, 'GR_frozenWaterContent_Max', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvMImaxvarid, 'long_name', 'Sample Maximum of frozen water mass'
+ncdf_attput, cdfid, gvMImaxvarid, 'units', 'kg/m^3'
+ncdf_attput, cdfid, gvMImaxvarid, '_FillValue', FLOAT_RANGE_EDGE
+
 gvDMvarid = ncdf_vardef(cdfid, 'GR_Dm', [fpdimid,eldimid])
 ncdf_attput, cdfid, gvDMvarid, 'long_name', 'DP Retrieved Median Diameter'
 ncdf_attput, cdfid, gvDMvarid, 'units', 'mm'
@@ -992,6 +1040,16 @@ gv_nw_rejvarid = ncdf_vardef(cdfid, 'n_gr_nw_rejected', [fpdimid,eldimid], /shor
 ncdf_attput, cdfid, gv_nw_rejvarid, 'long_name', $
              'number of bins with missing Nw in GR_Nw average'
 ncdf_attput, cdfid, gv_nw_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+gv_mw_rejvarid = ncdf_vardef(cdfid, 'n_gr_liquidWaterContent_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, gv_mw_rejvarid, 'long_name', $
+             'number of bins with missing liquidWaterContent in GR_liquidWaterContent average'
+ncdf_attput, cdfid, gv_mw_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+gv_mi_rejvarid = ncdf_vardef(cdfid, 'n_gr_frozenWaterContent_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, gv_mi_rejvarid, 'long_name', $
+             'number of bins with missing frozenWaterContent in GR_frozenWaterContent average'
+ncdf_attput, cdfid, gv_mi_rejvarid, '_FillValue', INT_RANGE_EDGE
 
 gv_dm_rejvarid = ncdf_vardef(cdfid, 'n_gr_dm_rejected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, gv_dm_rejvarid, 'long_name', $
