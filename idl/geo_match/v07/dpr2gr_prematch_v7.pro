@@ -584,6 +584,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
               HID_ID:   mygeometa.GV_UF_HID_field, $
               D0_ID:    mygeometa.GV_UF_D0_field, $
               NW_ID:    mygeometa.GV_UF_NW_field, $
+              MW_ID:    mygeometa.GV_UF_MW_field, $
+              MI_ID:    mygeometa.GV_UF_MI_field, $
               DM_ID:    mygeometa.GV_UF_DM_field, $
               N2_ID:    mygeometa.GV_UF_N2_field }
 
