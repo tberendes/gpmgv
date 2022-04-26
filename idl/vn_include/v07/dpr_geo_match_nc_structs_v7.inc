@@ -175,8 +175,8 @@ field_flags =  { dpr_gr_field_flags,                        $
                  have_GR_HID:              NO_DATA_PRESENT, $
                  have_GR_Dzero:            NO_DATA_PRESENT, $
                  have_GR_Nw:               NO_DATA_PRESENT, $
-                 have_GR_Mw:               NO_DATA_PRESENT, $
-                 have_GR_Mi:               NO_DATA_PRESENT, $
+                 have_GR_liquidWaterContent: NO_DATA_PRESENT, $
+                 have_GR_frozenWaterContent: NO_DATA_PRESENT, $
                  have_GR_Dm:               NO_DATA_PRESENT, $
                  have_GR_N2:               NO_DATA_PRESENT, $
                  have_GR_blockage:         NO_DATA_PRESENT, $
