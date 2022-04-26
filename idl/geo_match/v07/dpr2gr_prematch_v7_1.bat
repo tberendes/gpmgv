@@ -47,6 +47,7 @@ cd, PRO_DIR
 ; VERSION2MATCH='V06X'
 VERSION2MATCH='V07A'
 ; VERSION2MATCH='ITE757'
+; use default version defined in dpr2gr_prematch_v7.pro
 ; gr_nc_version = '2_0'
  plot_PPIs = 0
  scores = 0
