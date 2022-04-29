@@ -545,7 +545,7 @@ while read thisdate
 # ###############################################
 # REMOVE THIS, for testing only, skip database load
 # ################################################
-		continue
+#		continue
 		
         case $? in
           0 )
