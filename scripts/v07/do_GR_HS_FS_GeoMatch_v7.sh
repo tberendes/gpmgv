@@ -108,6 +108,10 @@
 # 3/2/2021	Berendes		 Added NPOL logic
 #							 Added starting and ending date parameters
 # 5/18/2021 Berendes		 Changed names and logic for V7 GPM scans and new format
+# 4/29/2022 Berendes	  - set Force_flag to true, ignoring command line arg
+#                           and the appstatus check.  The check just added confusion
+#	                        for our processing workflow and since dates are now 
+#                           always specified this check is really unnecessary.
 #
 ###############################################################################
 
@@ -223,6 +227,8 @@ while getopts v:p:m:n:r:s:e:kf option
            exit 1
     esac
 done
+
+FORCE_MATCH=1    # ignore appstatus for date(s) and (re)run matchups, this is done now to avoid confusion
 
 ALGORITHM=2A$INSTRUMENT_ID
 export ALGORITHM
