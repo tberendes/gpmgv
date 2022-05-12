@@ -474,8 +474,8 @@ NSCANS_GMI = s[1]
    iceWaterPath = (*status.S1.ptr_datasets).iceWaterPath
    
    ; new V7 variables for GPROf VN version 2.0 files
-;   airmassLiftIndex = (*status.S1.ptr_datasets).airmassLiftIndex
-;   precipitationYesNoFlag = (*status.S1.ptr_datasets).precipitationYesNoFlag
+   airmassLiftIndex = (*status.S1.ptr_datasets).airmassLiftIndex
+   precipitationYesNoFlag = (*status.S1.ptr_datasets).precipitationYesNoFlag
 
 
   ; get the 1CRXCAL Tc and Quality variables if file is available.  Tc values
@@ -1376,8 +1376,8 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_iceWaterPath = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
    
     ; new V7 variables for GPROf VN version 2.0 files
-;      tocdf_airmassLiftIndex = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
-;      tocdf_precipitationYesNoFlag = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_airmassLiftIndex = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_precipitationYesNoFlag = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
     
     ; new scanTime and scStatus variables
     
@@ -1600,8 +1600,8 @@ FOR igv=0,nsites-1  DO BEGIN
    		 tocdf_iceWaterPath[prgoodidx] = iceWaterPath[gmi_idx_2get]
    
    		 ; new V7 variables for GPROf VN version 2.0 files
-;   		 tocdf_airmassLiftIndex[prgoodidx] = airmassLiftIndex[gmi_idx_2get]
-;   		 tocdf_precipitationYesNoFlag[prgoodidx] = precipitationYesNoFlag[gmi_idx_2get]
+   		 tocdf_airmassLiftIndex[prgoodidx] = airmassLiftIndex[gmi_idx_2get]
+   		 tocdf_precipitationYesNoFlag[prgoodidx] = precipitationYesNoFlag[gmi_idx_2get]
 
 	     ; new scStatus and scanTime variables
       	 tocdf_scLons[prgoodidx] = tmp_scLons[gmi_idx_2get]
@@ -1745,10 +1745,10 @@ FOR igv=0,nsites-1  DO BEGIN
     NCDF_VARPUT, ncid, 'have_stSunLocalTime', DATA_PRESENT  ; data presence flag
 
 ; new V7 variables for GPROf VN version 2.0 files
-;   NCDF_VARPUT, ncid, 'airmassLiftIndex', tocdf_airmassLiftIndex      ; data
-;    NCDF_VARPUT, ncid, 'have_airmassLiftIndex', DATA_PRESENT  ; data presence flag
-;   NCDF_VARPUT, ncid, 'precipitationYesNoFlag', tocdf_precipitationYesNoFlag      ; data
-;    NCDF_VARPUT, ncid, 'have_precipitationYesNoFlag', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'airmassLiftIndex', tocdf_airmassLiftIndex      ; data
+    NCDF_VARPUT, ncid, 'have_airmassLiftIndex', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'precipitationYesNoFlag', tocdf_precipitationYesNoFlag      ; data
+    NCDF_VARPUT, ncid, 'have_precipitationYesNoFlag', DATA_PRESENT  ; data presence flag
     
    NCDF_VARPUT, ncid, 'rayIndex', tocdf_gmi_idx
    IF have_1c THEN BEGIN

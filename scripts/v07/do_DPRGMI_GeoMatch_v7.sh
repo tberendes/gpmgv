@@ -75,6 +75,10 @@
 #                           for user gvoper's usage.
 # 3/2/2021	Berendes		 Added NPOL logic
 #							 Added starting and ending date parameters
+# 4/29/2022 Berendes	  - set Force_flag to true, ignoring command line arg
+#                           and the appstatus check.  The check just added confusion
+#	                        for our processing workflow and since dates are now 
+#                           always specified this check is really unnecessary.
 #
 ###############################################################################
 echo ''
@@ -152,7 +156,7 @@ SAT_ID="GPM"
 export SAT_ID
 ALGORITHM="2BDPRGMI"
 export ALGORITHM
-GEO_MATCH_VERSION=2.0     # should match latest version of GRtoDPRGMI netCDF file
+GEO_MATCH_VERSION=2.1     # should match latest version of GRtoDPRGMI netCDF file
 # must match version in gen_dprgmi_geo_match_netcdf_v7.pro
 export GEO_MATCH_VERSION
 
@@ -161,7 +165,6 @@ FORCE_MATCH=0    # if 1, ignore appstatus for date(s) and (re)run matchups
 DO_RHI=0         # if 1, then matchup to RHI UF files
 SKIP_MATCHUPS=0  # if 1, then skip matchups and just do control files
 
-FORCE_MATCH=0
 NPOL_SITE=""
 DO_NPOL=0
 DO_START_DATE=0
@@ -198,6 +201,8 @@ while getopts v:p:d:m:r:n:s:e:kfc option
            exit 1
     esac
 done
+
+FORCE_MATCH=1    # ignore appstatus for date(s) and (re)run matchups, this is done now to avoid confusion
 
 # extract the first character of the PPS_VERSION and set and export it as a
 # flag for the IDL batch script to determine whether we are processing ITE or

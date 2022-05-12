@@ -160,8 +160,10 @@ export BIN_DIR
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
 #PPS_VERSION=V05A        # controls which GMI products we process
-PPS_VERSION=V05B        # controls which GMI products we process
-PPS_XCAL_VERSION=V05A        # controls which GMI XCAL products we process
+#PPS_VERSION=V05B        # controls which GMI products we process
+#PPS_XCAL_VERSION=V05A        # controls which GMI XCAL products we process
+PPS_VERSION=V07A        # controls which GMI products we process
+PPS_XCAL_VERSION=V07A        # controls which GMI XCAL products we process
 export PPS_VERSION
 PARAMETER_SET=0  # set of polar2tmi parameters (polar2tmi.bat file) in use
 export PARAMETER_SET
