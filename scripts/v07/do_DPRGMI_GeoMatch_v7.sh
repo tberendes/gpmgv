@@ -141,7 +141,7 @@ SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 # special rainy100inside100 script to get smaller scale events
 #SQL_BIN=${BIN_DIR}/rainCases20in100kmAddNewEvents.sql
 
-PPS_VERSION=ITE761        # default DPRGMI product version to be processed
+PPS_VERSION=V07A        # default DPRGMI product version to be processed
 export PPS_VERSION
 PARAMETER_SET=1  # default set of polar2dprgmi_v7 parameters (polar2dprgmi_v7 .bat file) in use
 export PARAMETER_SET
