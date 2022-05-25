@@ -646,7 +646,10 @@
                   gvhidvals = hid_bscan[thisPRsGRindices]
                   gvhidgoodidx = WHERE( gvhidvals GE 0, countGVhidgood )
                   gvhidbadidx = WHERE( gvhidvals LT 0, countGVhidbad )
-                  n_gv_hid_points_rejected = N_ELEMENTS(gvhidvals) - countGVhidgood
+
+                  ; TAB 5/25/22 pre-existing bug:
+                  ;n_gv_hid_points_rejected = N_ELEMENTS(gvhidvals) - countGVhidgood
+                  n_gr_hid_points_rejected = N_ELEMENTS(gvhidvals) - countGVhidgood
 
                   IF ( countGVhidgood GT 0 ) THEN BEGIN
                     ; compute HID histogram
