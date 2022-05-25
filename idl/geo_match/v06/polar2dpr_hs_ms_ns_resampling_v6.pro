@@ -584,7 +584,20 @@
                     ; compute HID histogram
                      hid4hist = gvhidvals[gvhidgoodidx]
                      hid_hist = HISTOGRAM(hid4hist, MIN=0, MAX=n_hid_cats-1)
-                     hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
+     
+                     ; original line
+                     ;hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
+                     
+                     ; TAB 2/25/22 Patrick Gatlin found this issue:
+                     ; I may have found something in the assignment of HID counts in the DPR ray at a 
+                     ; given GR elevation scan.  I am not sure why the first index of the hid_hist is 
+                     ; being reassigned to the number of gvhidvals<0 (i.e., countGVhidbad) 
+                     ; after the histogram. I’m pretty sure the GR qc1 files have HID=0 for 
+                     ; unclassified radar echoes and missing values where there is no radar echoes. 
+                     ; Hence, I would think that the first index of hid_hist should be incremented by countGVhidbad. 
+                     
+                     hid_hist[0] += countGVhidbad  ;tally number of MISSING gates
+                     
 
                      IF gv_hid_field EQ 'HC' THEN BEGIN
                        ;print, "Regrouping DARW HC categories into the FH categories..."
