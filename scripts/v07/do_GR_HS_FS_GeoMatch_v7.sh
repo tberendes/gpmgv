@@ -712,6 +712,7 @@ fi
         	# TAB 5/27/22
         	# add in processing to append freezing level info to control file:
         	while read outline
+        	  do
         		orbit=`echo $outline | cut -f2 -d '|'`
         		site=`echo $outline | cut -f3 -d '|'`
         		datetime=`echo $outline | cut -f4 -d '|'`
@@ -735,11 +736,11 @@ fi
 			          else
 			            echo "Notice: freezing level height could not be computed from sounding file for ${site} ${orbit} ${datetime}"| tee -a $LOG_FILE
 			            echo "${outline}|-9999." | tee -a $outfileall | tee -a $LOG_FILE
-			        fi
+			          fi
 			      else
 			            echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
 			            echo "${outline}|-9999." | tee -a $outfileall | tee -a $LOG_FILE			      
-			    fi
+			      fi
         	done < $outfile
         	
         	#cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
