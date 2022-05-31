@@ -112,6 +112,8 @@
 #                           and the appstatus check.  The check just added confusion
 #	                        for our processing workflow and since dates are now 
 #                           always specified this check is really unnecessary.
+# 5/31/2022 Berendes		Added freezing level function and code to append freezing level
+#                           to the control file
 #
 ###############################################################################
 
@@ -165,6 +167,7 @@ export TMP_DIR
 #GEO_NC_DIR=${DATA_DIR}/netcdf/geo_match
 BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
+SOUNDINGS_TOP_DIR=/data/gpmgv/soundings
 
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 
@@ -321,6 +324,48 @@ if [ -s $loadfile ]
 fi
 
 return
+}
+################################################################################
+function findfreezinglevel() {
+
+  havebotm=0
+  while read sndlevel
+    do
+      echo $sndlevel | grep '\.' > /dev/null
+      if [ $? = 1 ]
+        then
+          continue
+      fi
+      hgttemp=`echo $sndlevel | grep '\.' | sed 's/  */ /g' | cut -f2-3 -d ' '`
+      hgt=`echo $hgttemp | cut -f1 -d ' '`
+      temp=`echo $hgttemp | cut -f2 -d ' '`
+      echo $temp | grep '-' > /dev/null
+      if [ $? = 1 ]
+        then
+          botmhgt=$hgt
+          botmtemp=$temp
+          havebotm=1
+        else
+          tophgt=$hgt
+          toptemp=$temp
+          break
+      fi
+  done < $1
+  if [ $havebotm = 1 ]
+    then
+#      echo botmhgt, botmtemp, tophgt, toptemp: $botmhgt, $botmtemp, $tophgt, $toptemp
+      dh=$(echo "scale = 4; $tophgt-$botmhgt" | bc)
+      dt=$(echo "scale = 4; $toptemp-$botmtemp" | bc)
+      bbHeight_km=$(echo "scale = 2; $tophgt - $toptemp * $dh / $dt" | bc)
+      bbHeight=$(echo "scale = 2; $bbHeight_km / 1000.0" | bc)
+    else
+#      echo tophgt, toptemp: $tophgt, $toptemp
+      bbHeight=$(echo "scale = 2; $tophgt / 1000.0" | bc)
+  fi
+#  echo bbHeight: $bbHeight
+  local theHeight=$bbHeight
+  echo "$theHeight"
+  return
 }
 ################################################################################
 
@@ -664,15 +709,49 @@ fi
         	echo "Control file additions:"  | tee -a $LOG_FILE
         	echo ""  | tee -a $LOG_FILE
         	echo $new_row | tee -a $outfileall  | tee -a $LOG_FILE
-        	cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
+        	# TAB 5/27/22
+        	# add in processing to append freezing level info to control file:
+        	while read outline
+        		orbit=`echo $outline | cut -f2 -d '|'`
+        		site=`echo $outline | cut -f3 -d '|'`
+        		datetime=`echo $outline | cut -f4 -d '|'`
+        		year=`echo $datetime | cut -f1 -d '-'`
+    			mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			hh=`echo $datetime | cut -f2 -d ' ' | cut -f1 -d ':'`
+    			# format the matching sounding's file pathname
+    			sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    			ls -al $sndfile > /dev/null
+    			if [ $? = 0 ]
+			      then
+			        # call function to compute the freezing level height (m)
+			        freezing_level=`findfreezinglevel $sndfile`
+			        echo "site, orbit, freezing level: ${site}|${orbit}|${freezing_level}"
+			        echo $freezing_level | grep '\.' > /dev/null
+			        if [ $? = 0 ]
+			          then
+			            # write site, orbit, and freezing level Height to $bbfile as delimited text
+			            echo "freezing level height: $freezingLevel km for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			            echo "${outline}|${freezing_level}" | tee -a $outfileall | tee -a $LOG_FILE
+			          else
+			            echo "Notice: freezing level height could not be computed from sounding file for ${site} ${orbit} ${datetime}"| tee -a $LOG_FILE
+			            echo "${outline}|-9999." | tee -a $outfileall | tee -a $LOG_FILE
+			        fi
+			      else
+			            echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			            echo "${outline}|-9999." | tee -a $outfileall | tee -a $LOG_FILE			      
+			    fi
+        	done < $outfile
+        	
+        	#cat $outfile | tee -a $outfileall  | tee -a $LOG_FILE
 		fi
     done
 
 echo ""
 echo "Output control file:"
 ls -al $outfileall
-#echo "Exiting for test..."
-#exit  # if uncommented, creates the control file for first date, and exits
+echo "Exiting for test..."
+cat $outfileall
+exit  # if uncommented, creates the control file for first date, and exits
 
     if [ -s $outfileall ]
       then
