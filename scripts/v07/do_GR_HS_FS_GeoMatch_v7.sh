@@ -716,9 +716,19 @@ fi
         		orbit=`echo $outline | cut -f2 -d '|'`
         		site=`echo $outline | cut -f3 -d '|'`
         		datetime=`echo $outline | cut -f4 -d '|'`
-        		year=`echo $datetime | cut -f1 -d '-'`
-    			mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
-    			hh=`echo $datetime | cut -f2 -d ' ' | cut -f1 -d ':'`
+    			if [ $site -eq "KWAJ" ] # round to nearest day at zero Z
+    			   then
+    			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud ${datetime}" UTC + 12 hours")
+    			   	  year=`echo $NEXT_DATE | cut -f1 -d '-'`
+    			   	  mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			   	  hh="00"
+    			   else # round to nearest hour
+    			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud ${datetime}" UTC + 30 minutes")
+    			   	  year=`echo $NEXT_DATE | cut -f1 -d '-'`
+    			   	  mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			   	  hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
+    			   
+    			   fi    			   
     			# format the matching sounding's file pathname
     			sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
     			ls -al $sndfile > /dev/null
