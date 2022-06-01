@@ -716,14 +716,14 @@ fi
         		orbit=`echo $outline | cut -f2 -d '|'`
         		site=`echo $outline | cut -f3 -d '|'`
         		datetime=`echo $outline | cut -f4 -d '|'`
-    			if [ $site -eq "KWAJ" ] # round to nearest day at zero Z
+    			if [ "$site" -eq "KWAJ" ] # round to nearest day at zero Z
     			   then
-    			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud ${datetime}" UTC + 12 hour")
+    			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 12 hour")
     			   	  year=`echo $NEXT_DATE | cut -f1 -d '-'`
     			   	  mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
     			   	  hh="00"
     			   else # round to nearest hour
-    			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud ${datetime}" UTC + 30 minute")
+    			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 30 minute")
     			   	  year=`echo $NEXT_DATE | cut -f1 -d '-'`
     			   	  mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
     			   	  hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
