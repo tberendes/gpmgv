@@ -520,6 +520,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    binEllipsoid[*,*] = ELLIPSOID_BIN_DPR
 
    ; debug, remove *****************
+   
    help, localZenithAngle
    
    ; precompute the reuseable ray angle trig variables for parallax -- in GPM,
