@@ -722,11 +722,32 @@ fi
     			   	  year=`echo $NEXT_DATE | cut -f1 -d '-'`
     			   	  mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
     			   	  hh="00"
+    			      # format the matching sounding's file pathname
+    				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    				  ls -al $sndfile > /dev/null
+    				  if [ $? != 0 ] # check to see if file exists, if not set date to truncated previous date
+    				     then
+			               echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			               echo "Trying previous date..."
+    			   	       year=`echo $datetime | cut -f1 -d '-'`
+    			   	       mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
+    				  fi
     			   else # round to nearest hour
     			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 30 minute")
     			   	  year=`echo $NEXT_DATE | cut -f1 -d '-'`
     			   	  mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
     			   	  hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
+    			      # format the matching sounding's file pathname
+    				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    				  ls -al $sndfile > /dev/null
+    				  if [ $? != 0 ] # check to see if file exists, if not set date to truncated previous date
+    				     then
+			               echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			               echo "Trying previous date..."
+    			   	       year=`echo $datetime | cut -f1 -d '-'`
+    			   	       mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
+    			   	  	   hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
+    				  fi
     			   
     			   fi    			   
     			# format the matching sounding's file pathname
@@ -741,7 +762,7 @@ fi
 			        if [ $? = 0 ]
 			          then
 			            # write site, orbit, and freezing level Height to $bbfile as delimited text
-			            echo "freezing level height: $freezingLevel km for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			            echo "freezing level height: $freezing_level km for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
 			            echo "${outline}|${freezing_level}" | tee -a $outfileall | tee -a $LOG_FILE
 			          else
 			            echo "Notice: freezing level height could not be computed from sounding file for ${site} ${orbit} ${datetime}"| tee -a $LOG_FILE
