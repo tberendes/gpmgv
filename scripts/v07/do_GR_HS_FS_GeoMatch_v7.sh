@@ -727,8 +727,8 @@ fi
     				  ls -al $sndfile > /dev/null
     				  if [ $? != 0 ] # check to see if file exists, if not set date to truncated previous date
     				     then
-			               echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
-			               echo "Trying previous date..."
+			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			               #echo "Trying previous date..."
     			   	       year=`echo $datetime | cut -f1 -d '-'`
     			   	       mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
     				  fi
@@ -742,8 +742,8 @@ fi
     				  ls -al $sndfile > /dev/null
     				  if [ $? != 0 ] # check to see if file exists, if not set date to truncated previous date
     				     then
-			               echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
-			               echo "Trying previous date..."
+			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			               #echo "Trying previous date..."
     			   	       year=`echo $datetime | cut -f1 -d '-'`
     			   	       mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
     			   	  	   hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
@@ -757,19 +757,19 @@ fi
 			      then
 			        # call function to compute the freezing level height (m)
 			        freezing_level=`findfreezinglevel $sndfile`
-			        echo "site, orbit, freezing level: ${site}|${orbit}|${freezing_level}"
+			        #echo "site, orbit, freezing level: ${site}|${orbit}|${freezing_level}"
 			        echo $freezing_level | grep '\.' > /dev/null
 			        if [ $? = 0 ]
 			          then
 			            # write site, orbit, and freezing level Height to $bbfile as delimited text
-			            echo "freezing level height: $freezing_level km for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			            #echo "freezing level height: $freezing_level km for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
 			            echo "${outline}|${freezing_level}" | tee -a $outfileall | tee -a $LOG_FILE
 			          else
-			            echo "Notice: freezing level height could not be computed from sounding file for ${site} ${orbit} ${datetime}"| tee -a $LOG_FILE
+			            #echo "Notice: freezing level height could not be computed from sounding file for ${site} ${orbit} ${datetime}"| tee -a $LOG_FILE
 			            echo "${outline}|-9999." | tee -a $outfileall | tee -a $LOG_FILE
 			          fi
 			      else
-			            echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			            #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
 			            echo "${outline}|-9999." | tee -a $outfileall | tee -a $LOG_FILE			      
 			      fi
         	done < $outfile
