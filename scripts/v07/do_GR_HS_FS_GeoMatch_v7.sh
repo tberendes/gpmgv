@@ -725,7 +725,7 @@ fi
     			      # format the matching sounding's file pathname
     				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
     				  ls -al $sndfile > /dev/null
-    				  if [ $? != 0 ] # check to see if file exists, if not set date to truncated previous date
+    				  if [ $? -ne 0 ] # check to see if file exists, if not set date to truncated previous date
     				     then
 			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
 			               #echo "Trying previous date..."
@@ -740,26 +740,26 @@ fi
     			      # format the matching sounding's file pathname
     				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
     				  ls -al $sndfile > /dev/null
-    				  if [ $? != 0 ] # check to see if file exists, if not set date to truncated previous date
+    				  if [ $? -ne 0 ] # check to see if file exists, if not set date to truncated previous date
     				     then
 			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
 			               #echo "Trying previous date..."
     			   	       year=`echo $datetime | cut -f1 -d '-'`
     			   	       mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
-    			   	  	   hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
+    			   	  	   hh=`echo $datetime | cut -f2 -d ' ' | cut -f1 -d ':'`
     				  fi
     			   
     			   fi    			   
     			# format the matching sounding's file pathname
     			sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
     			ls -al $sndfile > /dev/null
-    			if [ $? = 0 ]
+    			if [ $? -eq 0 ]
 			      then
 			        # call function to compute the freezing level height (m)
 			        freezing_level=`findfreezinglevel $sndfile`
 			        #echo "site, orbit, freezing level: ${site}|${orbit}|${freezing_level}"
 			        echo $freezing_level | grep '\.' > /dev/null
-			        if [ $? = 0 ]
+			        if [ $? -eq 0 ]
 			          then
 			            # write site, orbit, and freezing level Height to $bbfile as delimited text
 			            #echo "freezing level height: $freezing_level km for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
