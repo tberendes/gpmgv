@@ -716,37 +716,37 @@ fi
         		orbit=`echo $outline | cut -f2 -d '|'`
         		site=`echo $outline | cut -f3 -d '|'`
         		datetime=`echo $outline | cut -f4 -d '|'`
-    			if [ "$site" = "KWAJ" ] # round to nearest day at zero Z
+    			if [ "$site" = "KWAJ" ] # round to current day at zero Z
     			   then
-    			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 12 hour")
-    			   	  year=`echo $NEXT_DATE | cut -f1 -d '-'`
-    			   	  mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			   	  year=`echo $datetime | cut -f1 -d '-'`
+    			   	  mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
     			   	  hh="00"
     			      # format the matching sounding's file pathname
     				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
     				  ls -al $sndfile > /dev/null
-    				  if [ $? -ne 0 ] # check to see if file exists, if not set date to truncated previous date
+    				  if [ $? -ne 0 ] # check to see if file exists, if not set date to next day
     				     then
 			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
-			               #echo "Trying previous date..."
-    			   	       year=`echo $datetime | cut -f1 -d '-'`
-    			   	       mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
+			               #echo "Trying next date..."
+			               NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 24 hour")
+    			   	       year=`echo $NEXT_DATE | cut -f1 -d '-'`
+    			   	       mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
     				  fi
-    			   else # round to nearest hour
-    			   	  NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 30 minute")
-    			   	  year=`echo $NEXT_DATE | cut -f1 -d '-'`
-    			   	  mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
-    			   	  hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
+    			   else # truncate to nearest hour
+    			   	  year=`echo $datetime | cut -f1 -d '-'`
+    			   	  mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			   	  hh=`echo $datetime | cut -f2 -d ' ' | cut -f1 -d ':'`
     			      # format the matching sounding's file pathname
     				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
     				  ls -al $sndfile > /dev/null
-    				  if [ $? -ne 0 ] # check to see if file exists, if not set date to truncated previous date
+    				  if [ $? -ne 0 ] # check to see if file exists, if not set time to next hour
     				     then
 			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
-			               #echo "Trying previous date..."
-    			   	       year=`echo $datetime | cut -f1 -d '-'`
-    			   	       mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
-    			   	  	   hh=`echo $datetime | cut -f2 -d ' ' | cut -f1 -d ':'`
+			               #echo "Trying next hour..."
+			               NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 60 minute")
+    			   	       year=`echo $NEXT_DATE | cut -f1 -d '-'`
+    			   	       mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
+    			   	  	   hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
     				  fi
     			   
     			   fi    			   
