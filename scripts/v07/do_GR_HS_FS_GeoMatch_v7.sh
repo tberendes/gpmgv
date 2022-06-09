@@ -186,7 +186,8 @@ export SWATH
 # - Note that appstatus table entries for the child script do_GR_HS_FS_geo_matchup4date_v7.sh
 #   use the fixed app_id value 'geo_match_GRx3', not something based on $SWATH.
 
-GEO_MATCH_VERSION=2.1     # current GRtoDPR_HS_FS netCDF matchup file definition version, 
+#GEO_MATCH_VERSION=2.1     # current GRtoDPR_HS_FS netCDF matchup file definition version, 
+GEO_MATCH_VERSION=2.2     # current GRtoDPR_HS_FS netCDF matchup file definition version, 
 # must match version in gen_gr_hsfs_geo_match_netcdf_v7.pro
 export GEO_MATCH_VERSION
 
