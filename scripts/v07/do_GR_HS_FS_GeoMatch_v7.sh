@@ -798,9 +798,9 @@ fi
 echo ""
 echo "Output control file:"
 ls -al $outfileall
-echo "Exiting for test..."
-cat $outfileall
-exit  # if uncommented, creates the control file for first date, and exits
+#echo "Exiting for test..."
+#cat $outfileall
+#exit  # if uncommented, creates the control file for first date, and exits
 
     if [ -s $outfileall ]
       then
