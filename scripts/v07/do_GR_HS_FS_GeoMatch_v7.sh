@@ -724,7 +724,7 @@ fi
     			   	  hh="00"
     			      # format the matching sounding's file pathname
     				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
-    				  ls -al $sndfile > /dev/null
+    				  ls -al $sndfile 2>&1 /dev/null
     				  if [ $? -ne 0 ] # check to see if file exists, if not set date to next day
     				     then
 			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
@@ -740,7 +740,7 @@ fi
     			   	  hh="12"
     			      # format the matching sounding's file pathname
     				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_FMEE_${year}_${mmdd}_${hh}UTC.txt
-    				  ls -al $sndfile > /dev/null
+    				  ls -al $sndfile 2>&1 /dev/null
     				  if [ $? -ne 0 ] # check to see if file exists, if not set date to next day
     				     then
 			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
@@ -755,7 +755,7 @@ fi
     			   	  hh=`echo $datetime | cut -f2 -d ' ' | cut -f1 -d ':'`
     			      # format the matching sounding's file pathname
     				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
-    				  ls -al $sndfile > /dev/null
+    				  ls -al $sndfile 2>&1 /dev/null
     				  if [ $? -ne 0 ] # check to see if file exists, if not set time to next hour
     				     then
 			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
@@ -769,7 +769,7 @@ fi
     			   fi    			   
     			# format the matching sounding's file pathname
     			sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
-    			ls -al $sndfile > /dev/null
+    			ls -al $sndfile 2>&1 /dev/null
     			if [ $? -eq 0 ]
 			      then
 			        # call function to compute the freezing level height (m)
