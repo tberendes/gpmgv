@@ -577,7 +577,7 @@
                IF have_gv_hid THEN BEGIN
                   gvhidvals = hid_bscan[thisPRsGRindices]
                   gvhidgoodidx = WHERE( gvhidvals GE 0, countGVhidgood )
-                  gvhidbadidx = WHERE( gvhidvals LT 0, countGVhidbad )
+                  ;gvhidbadidx = WHERE( gvhidvals LT 0, countGVhidbad )
                   ; TAB 5/25/22 pre-existing bug:
                   ;n_gv_hid_points_rejected = N_ELEMENTS(gvhidvals) - countGVhidgood
                   n_gr_hid_points_rejected = N_ELEMENTS(gvhidvals) - countGVhidgood
@@ -590,16 +590,9 @@
                      ; original line
                      ;hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
                      
-                     ; TAB 2/25/22 Patrick Gatlin found this issue:
-                     ; I may have found something in the assignment of HID counts in the DPR ray at a 
-                     ; given GR elevation scan.  I am not sure why the first index of the hid_hist is 
-                     ; being reassigned to the number of gvhidvals<0 (i.e., countGVhidbad) 
-                     ; after the histogram. I’m pretty sure the GR qc1 files have HID=0 for 
-                     ; unclassified radar echoes and missing values where there is no radar echoes. 
-                     ; Hence, I would think that the first index of hid_hist should be incremented by countGVhidbad. 
-                     
-                     hid_hist[0] += countGVhidbad  ;tally number of MISSING gates
-                     
+                     ; TAB 2/26/22 hid_hist[0] now contains only zero value HIDs.
+                     ; previously it had been set to only "bad" i.e. < 0 values
+                     ; now all "bad" values will be included only in n_gr_hid_points_rejected                   
 
                      IF gv_hid_field EQ 'HC' THEN BEGIN
                        ;print, "Regrouping DARW HC categories into the FH categories..."
@@ -639,7 +632,7 @@
                   ENDIF ELSE BEGIN
                     ; handle where no GV hid values meet criteria
                      hid_hist = INTARR(n_hid_cats)
-                     hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
+                     ;hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
                   ENDELSE
                ENDIF
 

@@ -115,6 +115,11 @@ IF ( vers_def ne 'Geo Match File Version' ) THEN BEGIN
 ENDIF
 NCDF_VARGET, ncid1, versid, ncversion
 
+freezing_level_height = -9999.
+if ( ncversion gt 2.1 ) then begin
+	NCDF_VARGET, ncid1, 'freezing_level_height', freezing_level_height
+endif
+
 ; Get the DPR and GR filenames in the matchup file.  Read them and
 ; override the 'UNKNOWN' initial values in the structure
 IF N_Elements(filesmeta) NE 0 THEN BEGIN
@@ -202,6 +207,7 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.GR_ROI_km = grROI
 ;     NCDF_VARGET, ncid1, versid, ncversion  ; already "got" this variable
      matchupmeta.nc_file_version = ncversion
+     matchupmeta.freezing_level_height=freezing_level_height
      ncdf_attget, ncid1, 'DPR_Version', DPR_vers_byte, /global
      matchupmeta.DPR_Version = STRING(DPR_vers_byte)
      NCDF_VARGET, ncid1, 'numDPRScans', numDPRScans

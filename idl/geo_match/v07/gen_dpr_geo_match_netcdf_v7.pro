@@ -101,6 +101,7 @@ FUNCTION gen_dpr_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, $
                                    gv_UF_field, scanType, DPR_vers, siteID, $
                                    dprgrfiles, DECLUTTERED=decluttered, $
                                    GEO_MATCH_VERS=geo_match_vers, $
+                                   FREEZING_LEVEL=freezing_level, $
                                    NON_PPS_FILES=non_pps_files
 
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
@@ -115,7 +116,15 @@ FUNCTION gen_dpr_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, $
 ; 8/30/18 TAB updated version to 1.22 from 1.21
 ;GEO_MATCH_FILE_VERSION=1.22
 ; TAB 11/10/20 changed version to 2.0 from 1.22 for additional GPM fields pwatIntegrated_liquid, pwatIntegrated_ice
-GEO_MATCH_FILE_VERSION=2.1
+;GEO_MATCH_FILE_VERSION=2.1
+; TAB 6/8/22 changed version to 2.2 from 2.1 for additional freezing level variable
+GEO_MATCH_FILE_VERSION=2.2
+
+; TAB 6/7/22 
+freezing_level_height=-9999. ; defaults to missing height
+IF ( N_ELEMENTS(freezing_level) NE 0 ) THEN BEGIN
+	freezing_level_height=freezing_level
+endif
 
 IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
    geo_match_vers = GEO_MATCH_FILE_VERSION
@@ -1247,6 +1256,11 @@ ncdf_attput, cdfid, siteelevvarid, 'units', 'km'
 
 vnversvarid = ncdf_vardef(cdfid, 'version')
 ncdf_attput, cdfid, vnversvarid, 'long_name', 'Geo Match File Version'
+
+frzlvlvarid = ncdf_vardef(cdfid, 'freezing_level_height')
+ncdf_attput, cdfid, frzlvlvarid, 'long_name', 'Model-based freezing level height AGL'
+ncdf_attput, cdfid, frzlvlvarid, 'units', 'km'
+ncdf_attput, cdfid, frzlvlvarid, '_FillValue', -9999.
 ;
 ncdf_control, cdfid, /endef
 ;
@@ -1260,6 +1274,7 @@ FOR iel = 0,N_ELEMENTS(elev_angles)-1 DO BEGIN
    ncdf_varput, cdfid, agvtimevarid, '01-01-1970 00:00:00', OFFSET=[0,iel]
 ENDFOR
 ncdf_varput, cdfid, vnversvarid, GEO_MATCH_FILE_VERSION
+ncdf_varput, cdfid, frzlvlvarid, freezing_level_height
 
 ncdf_close, cdfid
 

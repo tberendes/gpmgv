@@ -256,6 +256,8 @@
 ;  - Added pwat_integ_liquid and pwat_integ_solid variables
 ; 4/20/22 by Todd Berendes UAH/ITSC
 ;  - Added new GR liquid and frozen water content fields
+; 6/822 Todd Berendes UAH/ITSC
+;  - Added freezing level variable from model soundings
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -343,6 +345,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ; get the number of scans present in the original DPR file
    numDPRScans = mygeometa.numDPRScans
    numDPRrays_gr = data_GR2DPR.NUMRAYS
+   
+   freezing_level = mygeometa.freezing_level_height
 
    ; TAB 2-17-22
    ; compare original dpr scans with the dataset scans.  If the same continue processing, else find mapping for DPR to dataset scans
@@ -1149,6 +1153,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 ;                                      DPR_scantype, DPR_version, $
                                       siteID, infileNameArr, $
                                       DECLUTTERED=decluttered, $
+                                      FREEZING_LEVEL=freezing_level, $
                                       NON_PPS_FILES=non_pps_files )
 
    IF ( fname_netCDF EQ "NoGeoMatchFile" ) THEN BEGIN
@@ -1416,7 +1421,8 @@ DPR_version = '0'
 
 ;IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '1_0' ELSE BEGIN
 ; 8/30/18 TAB changed default version of grverstr to 1_1
-IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '2_1' ELSE BEGIN
+#IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '2_1' ELSE BEGIN
+IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '2_2' ELSE BEGIN
   ; check whether we have '.' or '_' between the units and decimal places
    IF STRPOS(gr_nc_version, '.') NE -1 THEN BEGIN
      ; substitute an underscore for the decimal point

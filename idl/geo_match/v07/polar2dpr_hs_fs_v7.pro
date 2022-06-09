@@ -345,6 +345,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 
       parsed=STRSPLIT( dataGR, '|', count=nGRfields, /extract )
       CASE nGRfields OF
+        10 : BEGIN   ; new control file format with additional freezing level height
+              origUFName = parsed[8]  ; filename as listed in/on the database/disk
+              IF file_basename(origUFName) NE 'no_1CUF_file' THEN numUFgood++
+            END
         9 : BEGIN   ; legacy control file format
               origUFName = parsed[8]  ; filename as listed in/on the database/disk
               IF file_basename(origUFName) NE 'no_1CUF_file' THEN numUFgood++
@@ -415,7 +419,21 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   ; overpass datetime, time in ticks, site lat, site lon, site elev,
   ; 1CUF file unique pathname
    parsed=STRSPLIT( dataGR, '|', count=nGRfields, /extract )
+   freezing_level = -9999.
    CASE nGRfields OF
+     10 : BEGIN   ; legacy control file format
+           event_num = LONG( parsed[0] )
+           orbit = parsed[1]
+           siteID = parsed[2]    ; GPMGV siteID
+           dpr_dtime = parsed[3]
+           dpr_dtime_ticks = parsed[4]
+           siteLat = FLOAT( parsed[5] )
+           siteLon = FLOAT( parsed[6] )
+           siteElev = FLOAT( parsed[7] )
+           origUFName = parsed[8]  ; filename as listed in/on the database/disk
+   		   freezing_level = parsed[9]
+   		   ; need to add freezing height into gen_gr_hsfs... as attribute and carry through
+         END
      9 : BEGIN   ; legacy control file format
            event_num = LONG( parsed[0] )
            orbit = parsed[1]
@@ -1033,6 +1051,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                             DPR_version, $
                                             siteID, $
                                             infileNameArr, $
+                                            FREEZING_LEVEL=freezing_level, $
                                             NON_PPS_FILES=non_pps_files )
 
    IF ( fname_netCDF EQ "NoGeoMatchFile" ) THEN $

@@ -709,6 +709,7 @@ fi
         	echo "Control file additions:"  | tee -a $LOG_FILE
         	echo ""  | tee -a $LOG_FILE
         	echo $new_row | tee -a $outfileall  | tee -a $LOG_FILE
+        	
         	# TAB 5/27/22
         	# add in processing to append freezing level info to control file:
         	while read outline
@@ -723,6 +724,22 @@ fi
     			   	  hh="00"
     			      # format the matching sounding's file pathname
     				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    				  ls -al $sndfile > /dev/null
+    				  if [ $? -ne 0 ] # check to see if file exists, if not set date to next day
+    				     then
+			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			               #echo "Trying next date..."
+			               NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 24 hour")
+    			   	       year=`echo $NEXT_DATE | cut -f1 -d '-'`
+    			   	       mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
+    				  fi
+    			 elif [ "$site" = "Reunion" ] # round to current day at 12 Z
+    			   then
+    			   	  year=`echo $datetime | cut -f1 -d '-'`
+    			   	  mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			   	  hh="12"
+    			      # format the matching sounding's file pathname
+    				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_FMEE_${year}_${mmdd}_${hh}UTC.txt
     				  ls -al $sndfile > /dev/null
     				  if [ $? -ne 0 ] # check to see if file exists, if not set date to next day
     				     then
