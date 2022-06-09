@@ -183,7 +183,8 @@ SAT_ID="GPM"
 export SAT_ID
 SWATH="All"
 
-GEO_MATCH_VERSION=2.1     # current GRtoDPR netCDF matchup file version output by IDL
+#GEO_MATCH_VERSION=2.1     # current GRtoDPR netCDF matchup file version output by IDL
+GEO_MATCH_VERSION=2.2     # current GRtoDPR netCDF matchup file version output by IDL
 # must match version in gen_dpr_geo_match_netcdf_v7.pro
 export GEO_MATCH_VERSION
 
