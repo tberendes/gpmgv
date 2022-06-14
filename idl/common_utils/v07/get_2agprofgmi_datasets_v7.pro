@@ -40,7 +40,7 @@
 ;   convectivePrecipitation, frozenPrecipitation, L1CqualityFlag,
 ;   profileTemp2mIndex, and spare2, as determined by read_all setting.
 ; 01/05/22 Berendes UAH/ITSC
-; - added new V07 variables airmassLiftIndex, precipitationYesNoFlag
+; - added new V07 variables airmassLiftIndex, precipitationYesNoFlag, sunLocalTime
 ; - made iceWaterPath and cloudWaterPath included in return struct by default
 ;   (without READ_ALL set)
 ;
@@ -114,6 +114,7 @@ FUNCTION get_2agprofgmi_datasets_v7, group_id, label, READ_ALL=read_all
                    'surfaceTypeIndex' : surfaceTypeIndex = h5d_read(dtID)
                         'temp2mIndex' : IF all THEN temp2mIndex = h5d_read(dtID)
               'totalColumnWaterVapor' : totalColumnWaterVapor = h5d_read(dtID)
+                       'sunLocalTime' : sunLocalTime = h5d_read(dtID)
                    'airmassLiftIndex' : airmassLiftIndex = h5d_read(dtID)
              'precipitationYesNoFlag' : precipitationYesNoFlag = h5d_read(dtID)
          'totalColumnWaterVaporIndex' : IF all THEN totalColumnWaterVaporIndex = $
@@ -157,6 +158,7 @@ FUNCTION get_2agprofgmi_datasets_v7, group_id, label, READ_ALL=read_all
    IF N_ELEMENTS(spare2) EQ 0 THEN spare2 = 'N/A'
 
   ; new for V07x:
+   IF N_ELEMENTS(sunLocalTime) EQ 0 THEN sunLocalTime = 'N/A'
    IF N_ELEMENTS(airmassLiftIndex) EQ 0 THEN airmassLiftIndex = 'N/A'
    IF N_ELEMENTS(precipitationYesNoFlag) EQ 0 THEN precipitationYesNoFlag = 'N/A'
   
@@ -196,6 +198,7 @@ FUNCTION get_2agprofgmi_datasets_v7, group_id, label, READ_ALL=read_all
                       surfaceSkinTempIndex : surfaceSkinTempIndex, $
                       surfaceTypeIndex : surfaceTypeIndex, $
                       temp2mIndex : temp2mIndex, $
+                      sunLocalTime : sunLocalTime, $
                       airmassLiftIndex : airmassLiftIndex, $
                       precipitationYesNoFlag : precipitationYesNoFlag, $
                       totalColumnWaterVapor : totalColumnWaterVapor, $
@@ -215,6 +218,7 @@ FUNCTION get_2agprofgmi_datasets_v7, group_id, label, READ_ALL=read_all
                       sunGlintAngle : sunGlintAngle, $
                       surfacePrecipitation : surfacePrecipitation, $
                       surfaceTypeIndex : surfaceTypeIndex, $
+                      sunLocalTime : sunLocalTime, $
                       airmassLiftIndex : airmassLiftIndex, $
                       precipitationYesNoFlag : precipitationYesNoFlag, $
                       cloudWaterPath : cloudWaterPath, $
