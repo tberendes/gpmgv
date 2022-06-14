@@ -75,7 +75,7 @@ FUNCTION gen_dprgmi_geo_match_netcdf_v7, geo_match_nc_file, numpts_FS, numpts_NS
                                       elev_angles, numscans_FS, numscans_NS, $
                                       gv_UF_field, DPR_vers, siteID, $
                                       dprgrfiles, GEO_MATCH_VERS=geo_match_vers, $
-                                      FREEZING_LEVEL=freezing_level, $
+                                      FREEZING_LEVEL=freezing_level
 
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc
