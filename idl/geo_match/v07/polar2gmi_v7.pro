@@ -344,13 +344,6 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       print, ''
       GPROF_version = parsed[5-ctloff]   ;control file includes GPROF_version
    ENDIF
-   freezing_level = -9999.
-   IF N_ELEMENTS(parsed) GE 7 THEN BEGIN ; control file includes freezing_level_height
-      print, ''
-      print, "Including freezing level height from control file: ", parsed[6-ctloff]
-      print, ''
-      freezing_level = parsed[6-ctloff]   ;control file includes GPROF_version
-   ENDIF
 
 ;HELP, GPROF_version, origGprofFileName, nsites, ORBIT, DATESTAMP, SUBSET, $
 ;      origXcalFileName, have_1c
@@ -615,8 +608,22 @@ FOR igv=0,nsites-1  DO BEGIN
   ; overpass datetime, time in ticks, site lat, site lon, site elev,
   ; 1CUF file unique pathname
 
+   freezing_level = -9999.
+
    parsed=STRSPLIT( dataGR, '|', count=nGVfields, /extract )
    CASE nGVfields OF
+     10 : BEGIN   ; legacy control file format
+           event_num = LONG( parsed[0] )
+           orbit = parsed[1]
+           siteID = parsed[2]    ; GPMGV siteID
+           gmi_dtime = parsed[3]
+           gmi_dtime_ticks = parsed[4]
+           siteLat = FLOAT( parsed[5] )
+           siteLon = FLOAT( parsed[6] )
+           siteElev = FLOAT( parsed[7] )
+           origUFName = parsed[8]  ; filename as listed in/on the database/disk
+           freezing_level = parsed[9]
+         END
      9 : BEGIN   ; legacy control file format
            event_num = LONG( parsed[0] )
            orbit = parsed[1]
