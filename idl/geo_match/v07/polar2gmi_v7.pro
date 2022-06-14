@@ -450,9 +450,6 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    stMinute = (*status.S1.ptr_ScanTime).Minute
    stSecond = (*status.S1.ptr_ScanTime).Second
 
-; TAB new in V7, uncomment this when V7 is available
-   stSunLocalTime = (*status.S1.ptr_ScanTime).sunLocalTime
-   
 ; NOTE THAT THE ARRAYS ARE IN (RAY,SCAN) COORDINATES.  NEED TO ACCOUNT FOR THIS
 ; WHEN ASSIGNING "gmi_master_idx" ARRAY INDICES.
 
@@ -481,6 +478,7 @@ NSCANS_GMI = s[1]
    iceWaterPath = (*status.S1.ptr_datasets).iceWaterPath
    
    ; new V7 variables for GPROf VN version 2.0 files
+   stSunLocalTime = (*status.S1.ptr_datasets).sunLocalTime
    airmassLiftIndex = (*status.S1.ptr_datasets).airmassLiftIndex
    precipitationYesNoFlag = (*status.S1.ptr_datasets).precipitationYesNoFlag
 

@@ -54,14 +54,14 @@ FUNCTION get_2agprofgmi_datasets_v7, group_id, label, READ_ALL=read_all
    all = KEYWORD_SET(read_all)
 
    nmbrs = h5g_get_num_objs(group_id)
-   print, "No. Objects = ", nmbrs
+   ;print, "No. Objects = ", nmbrs
    ; identify and extract the datasets one by one
    dtnames=STRARR(nmbrs)
    for immbr = 0, nmbrs-1 do begin
       ; get the object's information
       dtnames[immbr]=H5G_GET_OBJ_NAME_BY_IDX(group_id,immbr)
       info=H5G_GET_OBJINFO(group_id, dtnames[immbr])
-      print, dtnames[immbr], ": ", info.type
+      ;print, dtnames[immbr], ": ", info.type
       IF info.type EQ 'DATASET' THEN BEGIN
          dtID = h5d_open(group_id, dtnames[immbr])
          CASE dtnames[immbr] OF
