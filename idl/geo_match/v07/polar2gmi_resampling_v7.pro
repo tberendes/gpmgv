@@ -599,7 +599,7 @@
                IF have_gv_hid THEN BEGIN
                   gvhidvals = hid_bscan[thisGMIsGVindices]
                   gvhidgoodidx = WHERE( gvhidvals GE 0, countGVhidgood )
-                  gvhidbadidx = WHERE( gvhidvals LT 0, countGVhidbad )
+                  ;gvhidbadidx = WHERE( gvhidvals LT 0, countGVhidbad )
                   
                   ; TAB 5/25/22 pre-existing bug:
                   ;n_gv_hid_points_rejected = countGVpts - countGVhidgood
@@ -609,7 +609,11 @@
                     ; compute HID histogram
                      hid4hist = gvhidvals[gvhidgoodidx]
                      hid_hist = HISTOGRAM(hid4hist, MIN=0, MAX=n_hid_cats-1)
-                     hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
+                     
+                     ; TAB 2/26/22 hid_hist[0] now contains only zero value HIDs.
+                     ; previously it had been set to only "bad" i.e. < 0 values
+                     ; now all "bad" values will be included only in n_gr_hid_points_rejected
+                     ;hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
 
                      IF gv_hid_field EQ 'HC' THEN BEGIN
                        ;print, "Regrouping DARW HC categories into the FH categories..."
@@ -649,7 +653,7 @@
                   ENDIF ELSE BEGIN
                     ; handle where no GV hid values meet criteria
                      hid_hist = INTARR(n_hid_cats)
-                     hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
+                     ;hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
                   ENDELSE
                ENDIF
 

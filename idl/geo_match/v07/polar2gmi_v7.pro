@@ -344,6 +344,13 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       print, ''
       GPROF_version = parsed[5-ctloff]   ;control file includes GPROF_version
    ENDIF
+   freezing_level = -9999.
+   IF N_ELEMENTS(parsed) GE 7 THEN BEGIN ; control file includes freezing_level_height
+      print, ''
+      print, "Including freezing level height from control file: ", parsed[6-ctloff]
+      print, ''
+      freezing_level = parsed[6-ctloff]   ;control file includes GPROF_version
+   ENDIF
 
 ;HELP, GPROF_version, origGprofFileName, nsites, ORBIT, DATESTAMP, SUBSET, $
 ;      origXcalFileName, have_1c
@@ -444,7 +451,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    stSecond = (*status.S1.ptr_ScanTime).Second
 
 ; TAB new in V7, uncomment this when V7 is available
-;   stSunLocalTime = (*status.S1.ptr_ScanTime).sunLocalTime
+   stSunLocalTime = (*status.S1.ptr_ScanTime).sunLocalTime
    
 ; NOTE THAT THE ARRAYS ARE IN (RAY,SCAN) COORDINATES.  NEED TO ACCOUNT FOR THIS
 ; WHEN ASSIGNING "gmi_master_idx" ARRAY INDICES.
@@ -1162,7 +1169,7 @@ FOR igv=0,nsites-1  DO BEGIN
    		  tmp_stMinute[ray_num,scan_num] = stMinute[scan_num]
    		  tmp_stSecond[ray_num,scan_num] = stSecond[scan_num]
 ; TAB new in V7, uncomment this when V7 is available
-;   		  tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
+   		  tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
 	  ENDFOR
    ENDFOR   
 
@@ -1676,7 +1683,7 @@ FOR igv=0,nsites-1  DO BEGIN
    ncfile = gen_gprof_geo_match_netcdf_v7( fname_netCDF, numGMIrays, $
                                         tocdf_elev_angle, ufstruct, $
                                         GPROF_version, siteID, $
-                                        infileNameArr, Tc_Names )
+                                        infileNameArr, Tc_Names, FREEZING_LEVEL=freezing_level )
 
    IF ( fname_netCDF EQ "NoGeoMatchFile" ) THEN $
       message, "Error in creating output netCDF file "+fname_netCDF

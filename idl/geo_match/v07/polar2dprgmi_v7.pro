@@ -136,7 +136,7 @@
 ;    file version, rather than gen_dprgmi_geo_match_netcdf_v6.
 ; 11/19/16 by Bob Morris, GPM GV (SAIC)
 ;  - Added DPRGMI stormTopAltitude field for version 1.3 file.
-; 11/1720 by Todd Berendes, UAH
+; 11/17/20 by Todd Berendes, UAH
 ;  - Modified for GPM V7
 ;   removed precipTotPSDparamLow (Nw), PSDparamLowNode, precipTotPSDparamHigh(Dm)
 ;   added precipTotDm, precipTotLogNw, precipTotMu
@@ -376,6 +376,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 
       parsed=STRSPLIT( dataGR, '|', count=nGRfields, /extract )
       CASE nGRfields OF
+        10 : BEGIN   ; new control file format with additional freezing level height
+              origUFName = parsed[8]  ; filename as listed in/on the database/disk
+              IF file_basename(origUFName) NE 'no_1CUF_file' THEN numUFgood++
+            END
         9 : BEGIN   ; legacy control file format
               origUFName = parsed[8]  ; filename as listed in/on the database/disk
               IF file_basename(origUFName) NE 'no_1CUF_file' THEN numUFgood++
@@ -449,7 +453,20 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   ; overpass datetime, time in ticks, site lat, site lon, site elev,
   ; 1CUF file unique pathname
    parsed=STRSPLIT( dataGR, '|', count=nGRfields, /extract )
+   freezing_level = -9999.
    CASE nGRfields OF
+     10 : BEGIN   ; legacy control file format
+           event_num = LONG( parsed[0] )
+           orbit = parsed[1]
+           siteID = parsed[2]    ; GPMGV siteID
+           dpr_dtime = parsed[3]
+           dpr_dtime_ticks = parsed[4]
+           siteLat = FLOAT( parsed[5] )
+           siteLon = FLOAT( parsed[6] )
+           siteElev = FLOAT( parsed[7] )
+           origUFName = parsed[8]  ; filename as listed in/on the database/disk
+   		   freezing_level = parsed[9]
+         END
      9 : BEGIN   ; legacy control file format
            event_num = LONG( parsed[0] )
            orbit = parsed[1]
@@ -1082,7 +1099,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                          num_fp_by_source[2], tocdf_elev_angle, $
                                          nscansBySwath[0], nscansBySwath[2],    $
                                          ufstruct, DPR_version, siteID,         $
-                                         infileNameArr )
+                                         infileNameArr, FREEZING_LEVEL=freezing_level )
 
    IF ( fname_netCDF EQ "NoGeoMatchFile" ) THEN $
       message, "Error in creating output netCDF file "+fname_netCDF

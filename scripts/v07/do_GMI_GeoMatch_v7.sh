@@ -283,6 +283,49 @@ fi
 return
 }
 ################################################################################
+################################################################################
+function findfreezinglevel() {
+
+  havebotm=0
+  while read sndlevel
+    do
+      echo $sndlevel | grep '\.' > /dev/null
+      if [ $? = 1 ]
+        then
+          continue
+      fi
+      hgttemp=`echo $sndlevel | grep '\.' | sed 's/  */ /g' | cut -f2-3 -d ' '`
+      hgt=`echo $hgttemp | cut -f1 -d ' '`
+      temp=`echo $hgttemp | cut -f2 -d ' '`
+      echo $temp | grep '-' > /dev/null
+      if [ $? = 1 ]
+        then
+          botmhgt=$hgt
+          botmtemp=$temp
+          havebotm=1
+        else
+          tophgt=$hgt
+          toptemp=$temp
+          break
+      fi
+  done < $1
+  if [ $havebotm = 1 ]
+    then
+#      echo botmhgt, botmtemp, tophgt, toptemp: $botmhgt, $botmtemp, $tophgt, $toptemp
+      dh=$(echo "scale = 4; $tophgt-$botmhgt" | bc)
+      dt=$(echo "scale = 4; $toptemp-$botmtemp" | bc)
+      bbHeight_km=$(echo "scale = 2; $tophgt - $toptemp * $dh / $dt" | bc)
+      bbHeight=$(echo "scale = 2; $bbHeight_km / 1000.0" | bc)
+    else
+#      echo tophgt, toptemp: $tophgt, $toptemp
+      bbHeight=$(echo "scale = 2; $tophgt / 1000.0" | bc)
+  fi
+#  echo bbHeight: $bbHeight
+  local theHeight=$bbHeight
+  echo "$theHeight"
+  return
+}
+################################################################################
 
 # Begin main script
 echo "Starting ${SAT_ID}/${INSTRUMENT_ID}-GR matchups on $rundate." | tee $LOG_FILE
@@ -521,9 +564,91 @@ while read thisdate
 		else
      		f3_8=`echo $row | cut -d"|" -f "3-8"`
      		new_row=`echo ${orbit}"|"${cnt}"|"${f3_8}`
-
         	echo $new_row >> $outfileall
-        	cat $outfile >> $outfileall
+
+        	# TAB 5/27/22
+        	# add in processing to append freezing level info to control file:
+        	while read outline
+        	  do
+        		orbit=`echo $outline | cut -f2 -d '|'`
+        		site=`echo $outline | cut -f3 -d '|'`
+        		datetime=`echo $outline | cut -f4 -d '|'`
+    			if [ "$site" = "KWAJ" ] # round to current day at zero Z
+    			   then
+    			   	  year=`echo $datetime | cut -f1 -d '-'`
+    			   	  mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			   	  hh="00"
+    			      # format the matching sounding's file pathname
+    				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    				  ls -al $sndfile > /dev/null 2>&1
+    				  if [ $? -ne 0 ] # check to see if file exists, if not set date to next day
+    				     then
+			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			               #echo "Trying next date..."
+			               NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 24 hour")
+    			   	       year=`echo $NEXT_DATE | cut -f1 -d '-'`
+    			   	       mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
+    				  fi
+    			 elif [ "$site" = "Reunion" ] # round to current day at 12 Z
+    			   then
+    			   	  year=`echo $datetime | cut -f1 -d '-'`
+    			   	  mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			   	  hh="12"
+    			      # format the matching sounding's file pathname
+    				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_FMEE_${year}_${mmdd}_${hh}UTC.txt
+    				  ls -al $sndfile > /dev/null 2>&1
+    				  if [ $? -ne 0 ] # check to see if file exists, if not set date to next day
+    				     then
+			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			               #echo "Trying next date..."
+			               NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 24 hour")
+    			   	       year=`echo $NEXT_DATE | cut -f1 -d '-'`
+    			   	       mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
+    				  fi
+    			   else # truncate to nearest hour
+    			   	  year=`echo $datetime | cut -f1 -d '-'`
+    			   	  mmdd=`echo $datetime | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`
+    			   	  hh=`echo $datetime | cut -f2 -d ' ' | cut -f1 -d ':'`
+    			      # format the matching sounding's file pathname
+    				  sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    				  ls -al $sndfile > /dev/null 2>&1
+    				  if [ $? -ne 0 ] # check to see if file exists, if not set time to next hour
+    				     then
+			               #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			               #echo "Trying next hour..."
+			               NEXT_DATE=$(date +"%Y-%m-%d %H:%M:%S" -ud "${datetime} UTC + 60 minute")
+    			   	       year=`echo $NEXT_DATE | cut -f1 -d '-'`
+    			   	       mmdd=`echo $NEXT_DATE | cut -f2-3 -d '-' | sed 's/-//' | cut -f1 -d' '`				        
+    			   	  	   hh=`echo $NEXT_DATE | cut -f2 -d ' ' | cut -f1 -d ':'`
+    				  fi
+    			   
+    			   fi    			   
+    			# format the matching sounding's file pathname
+    			sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    			ls -al $sndfile > /dev/null 2>&1
+    			if [ $? -eq 0 ]
+			      then
+			        # call function to compute the freezing level height (m)
+			        freezing_level=`findfreezinglevel $sndfile`
+			        #echo "site, orbit, freezing level: ${site}|${orbit}|${freezing_level}"
+			        echo $freezing_level | grep '\.' > /dev/null
+			        if [ $? -eq 0 ]
+			          then
+			            # write site, orbit, and freezing level Height to $bbfile as delimited text
+			            #echo "freezing level height: $freezing_level km for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			            echo "${outline}|${freezing_level}" | tee -a $outfileall | tee -a $LOG_FILE
+			          else
+			            #echo "Notice: freezing level height could not be computed from sounding file for ${site} ${orbit} ${datetime}"| tee -a $LOG_FILE
+			            echo "${outline}|-9999." | tee -a $outfileall | tee -a $LOG_FILE
+			          fi
+			      else
+			            #echo "Notice: Missing sounding file for ${site} ${orbit} ${datetime}" | tee -a $LOG_FILE
+			            echo "${outline}|-9999." | tee -a $outfileall | tee -a $LOG_FILE			      
+			      fi
+        	done < $outfile       
+
+
+        	#cat $outfile >> $outfileall
         fi
     done
 

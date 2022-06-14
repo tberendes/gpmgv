@@ -74,7 +74,8 @@
 FUNCTION gen_dprgmi_geo_match_netcdf_v7, geo_match_nc_file, numpts_FS, numpts_NS, $
                                       elev_angles, numscans_FS, numscans_NS, $
                                       gv_UF_field, DPR_vers, siteID, $
-                                      dprgrfiles, GEO_MATCH_VERS=geo_match_vers
+                                      dprgrfiles, GEO_MATCH_VERS=geo_match_vers, $
+                                      FREEZING_LEVEL=freezing_level, $
 
 ; "Include" file for DATA_PRESENT, NO_DATA_PRESENT
 @grid_def.inc
@@ -85,7 +86,17 @@ FUNCTION gen_dprgmi_geo_match_netcdf_v7, geo_match_nc_file, numpts_FS, numpts_NS
 ; TAB 2/4/19 incremented version for new snow fields
 ;GEO_MATCH_FILE_VERSION=1.31   ; hard code inside function now, not from "Include"
 ; TAB 11/10/20 changed version to 2.0 from 1.31 for additional GPM fields
-GEO_MATCH_FILE_VERSION=2.1   ; hard code inside function now, not from "Include"
+;GEO_MATCH_FILE_VERSION=2.1   ; hard code inside function now, not from "Include"
+
+; TAB 6/7/22 version 2.2 added freezing_level_height variable
+GEO_MATCH_FILE_VERSION=2.2
+
+; TAB 6/7/22 
+freezing_level_height=-9999. ; defaults to missing height
+IF ( N_ELEMENTS(freezing_level) NE 0 ) THEN BEGIN
+	freezing_level_height=freezing_level
+endif
+
 
 IF ( N_ELEMENTS(geo_match_vers) NE 0 ) THEN BEGIN
   ; assign optional keyword parameter value for "versionOnly" calling mode
@@ -1306,6 +1317,12 @@ ncdf_attput, cdfid, siteelevvarid, 'units', 'km'
 
 vnversvarid = ncdf_vardef(cdfid, 'version')
 ncdf_attput, cdfid, vnversvarid, 'long_name', 'Geo Match File Version'
+
+frzlvlvarid = ncdf_vardef(cdfid, 'freezing_level_height')
+ncdf_attput, cdfid, frzlvlvarid, 'long_name', 'Model-based freezing level height AGL'
+ncdf_attput, cdfid, frzlvlvarid, 'units', 'km'
+ncdf_attput, cdfid, frzlvlvarid, '_FillValue', -9999.
+
 ;
 ncdf_control, cdfid, /endef
 ;
@@ -1316,6 +1333,7 @@ FOR iel = 0,N_ELEMENTS(elev_angles)-1 DO BEGIN
    ncdf_varput, cdfid, agvtimevarid, '01-01-1970 00:00:00', OFFSET=[0,iel]
 ENDFOR
 ncdf_varput, cdfid, vnversvarid, GEO_MATCH_FILE_VERSION ;GEO_MATCH_NC_FILE_VERS
+ncdf_varput, cdfid, frzlvlvarid, freezing_level_height
 IF numpts_FS GT 0 THEN NCDF_VARPUT, cdfid, 'have_swath_FS', DATA_PRESENT
 
 ncdf_close, cdfid
