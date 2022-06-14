@@ -136,6 +136,7 @@ export LOG_DIR
 #BIN_DIR=${GV_BASE_DIR}/scripts/matchup
 BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
+SOUNDINGS_TOP_DIR=/data/gpmgv/soundings
 
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
 # special rainy100inside100 script to get smaller scale events

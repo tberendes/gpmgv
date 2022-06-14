@@ -158,6 +158,7 @@ export LOG_DIR
 BIN_DIR=${GV_BASE_DIR}/scripts
 export BIN_DIR
 SQL_BIN=${BIN_DIR}/rainCases100kmAddNewEvents.sql
+SOUNDINGS_TOP_DIR=/data/gpmgv/soundings
 
 #PPS_VERSION=V05A        # controls which GMI products we process
 #PPS_VERSION=V05B        # controls which GMI products we process
