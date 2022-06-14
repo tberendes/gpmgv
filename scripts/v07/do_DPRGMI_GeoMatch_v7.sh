@@ -157,7 +157,7 @@ SAT_ID="GPM"
 export SAT_ID
 ALGORITHM="2BDPRGMI"
 export ALGORITHM
-GEO_MATCH_VERSION=2.1     # should match latest version of GRtoDPRGMI netCDF file
+GEO_MATCH_VERSION=2.2     # should match latest version of GRtoDPRGMI netCDF file
 # must match version in gen_dprgmi_geo_match_netcdf_v7.pro
 export GEO_MATCH_VERSION
 
