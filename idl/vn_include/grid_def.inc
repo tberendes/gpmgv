@@ -23,7 +23,8 @@
 ;-
 ;===============================================================================
 
-COMMON grid_def, NX, NY, NZ, DX_DY, DZ, Z_BASE, ZLEVELS, GRID_ID
+; TAB 6/14/22, this common statement causes syntax error now
+;COMMON grid_def, NX, NY, NZ, DX_DY, DZ, Z_BASE, ZLEVELS, GRID_ID
 
 ; 2A-55 grid parameters:
 
