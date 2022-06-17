@@ -288,6 +288,7 @@ return
 function findfreezinglevel() {
 
   havebotm=0
+  havetop=0
   while read sndlevel
     do
       echo $sndlevel | grep '\.' > /dev/null
@@ -307,9 +308,15 @@ function findfreezinglevel() {
         else
           tophgt=$hgt
           toptemp=$temp
+          havetop=1
           break
       fi
   done < $1
+  if [ $havetop = 0 ]
+    then
+       echo "missing"
+       return
+    fi
   if [ $havebotm = 1 ]
     then
 #      echo botmhgt, botmtemp, tophgt, toptemp: $botmhgt, $botmtemp, $tophgt, $toptemp
