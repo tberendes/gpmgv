@@ -470,11 +470,17 @@ NSCANS_GMI = s[1]
    cloudWaterPath = (*status.S1.ptr_datasets).cloudWaterPath
    iceWaterPath = (*status.S1.ptr_datasets).iceWaterPath
    
+   is_version_7 = 1
+   
    ; new V7 variables for GPROf VN version 2.0 files
    stSunLocalTime = (*status.S1.ptr_datasets).sunLocalTime
    airmassLiftIndex = (*status.S1.ptr_datasets).airmassLiftIndex
    precipitationYesNoFlag = (*status.S1.ptr_datasets).precipitationYesNoFlag
-
+   if (typename(stSunLocalTime) eq 'STRING') then begin
+   		IF ( stSunLocalTime EQ 'N/A' ) THEN BEGIN
+   			is_version_7 = 0
+   		endif
+   endif
 
   ; get the 1CRXCAL Tc and Quality variables if file is available.  Tc values
   ; for all channels for a given instrument may be distributed among more than
@@ -1174,7 +1180,9 @@ FOR igv=0,nsites-1  DO BEGIN
    		  tmp_stMinute[ray_num,scan_num] = stMinute[scan_num]
    		  tmp_stSecond[ray_num,scan_num] = stSecond[scan_num]
 ; TAB new in V7, uncomment this when V7 is available
-   		  tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
+		  if ( is_version_7 eq 1 ) then begin
+   		  		tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
+   		  endif   		  
 	  ENDFOR
    ENDFOR   
 
@@ -1612,8 +1620,10 @@ FOR igv=0,nsites-1  DO BEGIN
    		 tocdf_iceWaterPath[prgoodidx] = iceWaterPath[gmi_idx_2get]
    
    		 ; new V7 variables for GPROf VN version 2.0 files
-   		 tocdf_airmassLiftIndex[prgoodidx] = airmassLiftIndex[gmi_idx_2get]
-   		 tocdf_precipitationYesNoFlag[prgoodidx] = precipitationYesNoFlag[gmi_idx_2get]
+   		 if ( is_version_7 eq 1 ) then begin
+   		     tocdf_airmassLiftIndex[prgoodidx] = airmassLiftIndex[gmi_idx_2get]
+   		     tocdf_precipitationYesNoFlag[prgoodidx] = precipitationYesNoFlag[gmi_idx_2get]
+   		 endif 
 
 	     ; new scStatus and scanTime variables
       	 tocdf_scLons[prgoodidx] = tmp_scLons[gmi_idx_2get]
