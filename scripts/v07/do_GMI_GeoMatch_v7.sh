@@ -72,6 +72,7 @@
 #    -v PPS_VERSION         Override default PPS_VERSION to the specified PPS_VERSION.
 #                           This determines which version of the 2A/1C products will be
 #                           processed in the matchups.  STRING type.
+#    -x PPS_XCAL_VERSION    Override default PPS_XCAL_VERSION, defaults to PPS_VERSION.
 #
 #    -p PARAMETER_SET       Override default PARAMETER_SET to the specified PARAMETER_SET
 #                           This tracks which version of IDL batch file was used in
@@ -192,13 +193,14 @@ SITE_ID=""
 DO_SITE=0
 
 # override coded defaults with user-specified values
-while getopts s:i:v:p:r:n:m:s:e: option
+while getopts i:v:x:p:r:n:m:s:e: option
   do
     case "${option}"
       in
 #        s) SAT_ID=${OPTARG};;
         i) INSTRUMENT_ID=${OPTARG};;
         v) PPS_VERSION=${OPTARG};;
+        x) PPS_XCAL_VERSION=${OPTARG};;
         p) PARAMETER_SET=${OPTARG};;
         m) GEO_MATCH_VERSION=${OPTARG};;
         n) NPOL_SITE=${OPTARG}
