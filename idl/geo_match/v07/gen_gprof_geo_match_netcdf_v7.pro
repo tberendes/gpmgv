@@ -480,35 +480,10 @@ ncdf_attput, cdfid, havescLatsvarid, 'long_name', $
              'data exists flag for scLats'
 ncdf_attput, cdfid, havescLatsvarid, '_FillValue', NO_DATA_PRESENT
 
-havestYearvarid = ncdf_vardef(cdfid, 'have_stYear', /short)
-ncdf_attput, cdfid, havestYearvarid, 'long_name', $
-             'data exists flag for stYear'
-ncdf_attput, cdfid, havestYearvarid, '_FillValue', NO_DATA_PRESENT
-
-havestMonthvarid = ncdf_vardef(cdfid, 'have_stMonth', /short)
-ncdf_attput, cdfid, havestMonthvarid, 'long_name', $
-             'data exists flag for stMonth'
-ncdf_attput, cdfid, havestMonthvarid, '_FillValue', NO_DATA_PRESENT
-
-havestDayOfMonthvarid = ncdf_vardef(cdfid, 'have_stDayOfMonth', /short)
-ncdf_attput, cdfid, havestDayOfMonthvarid, 'long_name', $
-             'data exists flag for stDayOfMonth'
-ncdf_attput, cdfid, havestDayOfMonthvarid, '_FillValue', NO_DATA_PRESENT
-
-havestHourvarid = ncdf_vardef(cdfid, 'have_stHour', /short)
-ncdf_attput, cdfid, havestHourvarid, 'long_name', $
-             'data exists flag for stHour'
-ncdf_attput, cdfid, havestHourvarid, '_FillValue', NO_DATA_PRESENT
-
-havestMinutevarid = ncdf_vardef(cdfid, 'have_stMinute', /short)
-ncdf_attput, cdfid, havestMinutevarid, 'long_name', $
-             'data exists flag for stMinute'
-ncdf_attput, cdfid, havestMinutevarid, '_FillValue', NO_DATA_PRESENT
-
-havestSecondvarid = ncdf_vardef(cdfid, 'have_stSecond', /short)
-ncdf_attput, cdfid, havestSecondvarid, 'long_name', $
-             'data exists flag for stSecond'
-ncdf_attput, cdfid, havestSecondvarid, '_FillValue', NO_DATA_PRESENT
+havetimeGMIscanvarid = ncdf_vardef(cdfid, 'have_timeGMIscan', /short)
+ncdf_attput, cdfid, havetimeGMIscanvarid, 'long_name', $
+             'data exists flag for timeGMIscan'
+ncdf_attput, cdfid, havetimeGMIscanvarid, '_FillValue', NO_DATA_PRESENT
 
 havestSunLocalTimevarid = ncdf_vardef(cdfid, 'have_stSunLocalTime', /short)
 ncdf_attput, cdfid, havestSunLocalTimevarid, 'long_name', $
@@ -1208,41 +1183,10 @@ ncdf_attput, cdfid, scLatsvarid, 'long_name', $
 ncdf_attput, cdfid, scLatsvarid, 'units', 'degrees'
 ncdf_attput, cdfid, scLatsvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-stYearvarid = ncdf_vardef(cdfid, 'stYear', [fpdimid], /short)
-ncdf_attput, cdfid, stYearvarid, 'long_name', $
-            'ScanTime Year'
-ncdf_attput, cdfid, stYearvarid, 'units', 'none'
-ncdf_attput, cdfid, stYearvarid, '_FillValue', INT_RANGE_EDGE
-
-stMonthvarid = ncdf_vardef(cdfid, 'stMonth', [fpdimid], /short)
-ncdf_attput, cdfid, stMonthvarid, 'long_name', $
-            'ScanTime Month'
-ncdf_attput, cdfid, stMonthvarid, 'units', 'none'
-ncdf_attput, cdfid, stMonthvarid, '_FillValue', INT_RANGE_EDGE
-
-stDayOfMonthvarid = ncdf_vardef(cdfid, 'stDayOfMonth', [fpdimid], /short)
-ncdf_attput, cdfid, stDayOfMonthvarid, 'long_name', $
-            'ScanTime DayOfMonth'
-ncdf_attput, cdfid, stDayOfMonthvarid, 'units', 'none'
-ncdf_attput, cdfid, stDayOfMonthvarid, '_FillValue', INT_RANGE_EDGE
-
-stHourvarid = ncdf_vardef(cdfid, 'stHour', [fpdimid], /short)
-ncdf_attput, cdfid, stHourvarid, 'long_name', $
-            'ScanTime Hour'
-ncdf_attput, cdfid, stHourvarid, 'units', 'none'
-ncdf_attput, cdfid, stHourvarid, '_FillValue', INT_RANGE_EDGE
-
-stMinutevarid = ncdf_vardef(cdfid, 'stMinute', [fpdimid], /short)
-ncdf_attput, cdfid, stMinutevarid, 'long_name', $
-            'ScanTime Minute'
-ncdf_attput, cdfid, stMinutevarid, 'units', 'none'
-ncdf_attput, cdfid, stMinutevarid, '_FillValue', INT_RANGE_EDGE
-
-stSecondvarid = ncdf_vardef(cdfid, 'stSecond', [fpdimid], /short)
-ncdf_attput, cdfid, stSecondvarid, 'long_name', $
-            'ScanTime Second'
-ncdf_attput, cdfid, stSecondvarid, 'units', 'none'
-ncdf_attput, cdfid, stSecondvarid, '_FillValue', INT_RANGE_EDGE
+timeGMIscanvarid = ncdf_vardef(cdfid, 'timeGMIscan', [fpdimid])
+ncdf_attput, cdfid, timeGMIscanvarid, 'units', 'seconds'
+ncdf_attput, cdfid, timeGMIscanvarid, 'long_name', 'Scan Time Seconds since 01-01-1970 00:00:00'
+ncdf_attput, cdfid, timeGMIscanvarid, '_FillValue', 0.0D+0
 
 stSunLocalTimevarid = ncdf_vardef(cdfid, 'stSunLocalTime', [fpdimid])
 ncdf_attput, cdfid, stSunLocalTimevarid, 'long_name', $

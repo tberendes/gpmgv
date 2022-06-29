@@ -1160,25 +1160,27 @@ FOR igv=0,nsites-1  DO BEGIN
    tmp_scLons =  MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
    tmp_scLats =  MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
 
-   tmp_stYear = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
-   tmp_stMonth = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
-   tmp_stDayOfMonth = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
-   tmp_stHour = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
-   tmp_stMinute = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
-   tmp_stSecond = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /int, VALUE=INT_RANGE_EDGE)
+   tmp_timeGMIscan = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
    tmp_stSunLocalTime = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
 
    ; populate pixel/scan arrays with scan values
    FOR scan_num = 0,NSCANS_GMI-1  DO BEGIN
+   	  ; create scan time date/time string "YYYY-MM-DD hh:mm:ss"
+   	  str=string(stYear[scan_num],stMonth[scan_num],stDayOfMonth[scan_num], $
+         stHour[scan_num], stMinute[scan_num], stSecond[scan_num], $
+         format='%4d-%02d-%02d %02d:%02d:%02d')
+      print, 'scan time: ',str
+      ; need to convert scan time date to seconds since 1970
+   	  scantime = ticks_from_datetime(str)
+      print, 'scan time secs since 1970: ', scantime
+   	  
       FOR ray_num = 0,NPIXEL_GMI-1  DO BEGIN
       	  tmp_scLons[ray_num,scan_num] = scLons[scan_num]
       	  tmp_scLats[ray_num,scan_num] = scLats[scan_num]
-   		  tmp_stYear[ray_num,scan_num] = stYear[scan_num] 
-   		  tmp_stMonth[ray_num,scan_num] = stMonth[scan_num]
-   		  tmp_stDayOfMonth[ray_num,scan_num] = stDayOfMonth[scan_num]
-   		  tmp_stHour[ray_num,scan_num] = stHour[scan_num]
-   		  tmp_stMinute[ray_num,scan_num] = stMinute[scan_num]
-   		  tmp_stSecond[ray_num,scan_num] = stSecond[scan_num]
+   		  
+   		  ; need to convert scan time date to seconds since 1970
+   		  tmp_timeGMIscan[ray_num,scan_num] = scantime
+   		  
 ; TAB new in V7, uncomment this when V7 is available
 		  if ( is_version_7 eq 1 ) then begin
    		  		tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
@@ -1404,12 +1406,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_scLons =  MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_scLats =  MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
 
-      tocdf_stYear = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
-      tocdf_stMonth = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
-      tocdf_stDayOfMonth = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
-      tocdf_stHour = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
-      tocdf_stMinute = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
-      tocdf_stSecond = MAKE_ARRAY(numGMIrays, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_timeGMIscan = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_stSunLocalTime = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
 
       IF have_1c THEN BEGIN
@@ -1628,12 +1625,7 @@ FOR igv=0,nsites-1  DO BEGIN
 	     ; new scStatus and scanTime variables
       	 tocdf_scLons[prgoodidx] = tmp_scLons[gmi_idx_2get]
       	 tocdf_scLats[prgoodidx] = tmp_scLats[gmi_idx_2get]
-   		 tocdf_stYear[prgoodidx] = tmp_stYear[gmi_idx_2get] 
-   		 tocdf_stMonth[prgoodidx] = tmp_stMonth[gmi_idx_2get]
-   		 tocdf_stDayOfMonth[prgoodidx] = tmp_stDayOfMonth[gmi_idx_2get]
-   		 tocdf_stHour[prgoodidx] = tmp_stHour[gmi_idx_2get]
-   		 tocdf_stMinute[prgoodidx] = tmp_stMinute[gmi_idx_2get]
-   		 tocdf_stSecond[prgoodidx] = tmp_stSecond[gmi_idx_2get]
+   		 tocdf_timeGMIscan[prgoodidx] = tmp_timeGMIscan[gmi_idx_2get]
    		 tocdf_stSunLocalTime[prgoodidx] = tmp_stSunLocalTime[gmi_idx_2get]
          
         ; handle the arrays with the extra dimension of channel number
@@ -1751,18 +1743,8 @@ FOR igv=0,nsites-1  DO BEGIN
     NCDF_VARPUT, ncid, 'have_scLons', DATA_PRESENT  ; data presence flag
    NCDF_VARPUT, ncid, 'scLats', tocdf_scLats      ; data
     NCDF_VARPUT, ncid, 'have_scLats', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'stYear', tocdf_stYear      ; data
-    NCDF_VARPUT, ncid, 'have_stYear', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'stMonth', tocdf_stMonth      ; data
-    NCDF_VARPUT, ncid, 'have_stMonth', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'stDayOfMonth', tocdf_stDayOfMonth      ; data
-    NCDF_VARPUT, ncid, 'have_stDayOfMonth', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'stHour', tocdf_stHour      ; data
-    NCDF_VARPUT, ncid, 'have_stHour', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'stMinute', tocdf_stMinute      ; data
-    NCDF_VARPUT, ncid, 'have_stMinute', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'stSecond', tocdf_stSecond      ; data
-    NCDF_VARPUT, ncid, 'have_stSecond', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'timeGMIscan', tocdf_timeGMIscan      ; data
+    NCDF_VARPUT, ncid, 'have_timeGMIscan', DATA_PRESENT  ; data presence flag
    NCDF_VARPUT, ncid, 'stSunLocalTime', tocdf_stSunLocalTime      ; data
     NCDF_VARPUT, ncid, 'have_stSunLocalTime', DATA_PRESENT  ; data presence flag
 
