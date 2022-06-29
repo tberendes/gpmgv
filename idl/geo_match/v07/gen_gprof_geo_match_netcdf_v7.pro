@@ -1183,12 +1183,12 @@ ncdf_attput, cdfid, scLatsvarid, 'long_name', $
 ncdf_attput, cdfid, scLatsvarid, 'units', 'degrees'
 ncdf_attput, cdfid, scLatsvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-timeGMIscanvarid = ncdf_vardef(cdfid, 'timeGMIscan', [fpdimid])
+timeGMIscanvarid = ncdf_vardef(cdfid, 'timeGMIscan', [fpdimid], /float)
 ncdf_attput, cdfid, timeGMIscanvarid, 'units', 'seconds'
 ncdf_attput, cdfid, timeGMIscanvarid, 'long_name', 'Scan Time Seconds since 01-01-1970 00:00:00'
 ncdf_attput, cdfid, timeGMIscanvarid, '_FillValue', 0.0D+0
 
-stSunLocalTimevarid = ncdf_vardef(cdfid, 'stSunLocalTime', [fpdimid])
+stSunLocalTimevarid = ncdf_vardef(cdfid, 'stSunLocalTime', [fpdimid], /float)
 ncdf_attput, cdfid, stSunLocalTimevarid, 'long_name', $
              'Apparent Local Solar Time'
 ncdf_attput, cdfid, stSunLocalTimevarid, 'units', 'Hour'
