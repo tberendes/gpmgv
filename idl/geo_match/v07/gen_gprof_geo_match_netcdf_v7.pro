@@ -1183,6 +1183,9 @@ ncdf_attput, cdfid, scLatsvarid, 'long_name', $
 ncdf_attput, cdfid, scLatsvarid, 'units', 'degrees'
 ncdf_attput, cdfid, scLatsvarid, '_FillValue', FLOAT_RANGE_EDGE
 
+; note: fill values must match data types or you will get following error
+; "NCDF_CONTROL: Attempt to take the file out of define mode (ENDEF) failed."
+
 timeGMIscanvarid = ncdf_vardef(cdfid, 'timeGMIscan', [fpdimid], /double)
 ncdf_attput, cdfid, timeGMIscanvarid, 'units', 'seconds'
 ncdf_attput, cdfid, timeGMIscanvarid, 'long_name', 'Scan Time Seconds since 01-01-1970 00:00:00'
