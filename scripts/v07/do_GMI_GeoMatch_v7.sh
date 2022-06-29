@@ -322,8 +322,8 @@ function findfreezinglevel() {
   if [ $havebotm = 1 ]
     then
 #      echo botmhgt, botmtemp, tophgt, toptemp: $botmhgt, $botmtemp, $tophgt, $toptemp
-      dh=$(echo "scale = 4; $tophgt-$botmhgt" | bc)
-      dt=$(echo "scale = 4; $toptemp-$botmtemp" | bc)
+      dh=$(echo "scale = 4; $tophgt - $botmhgt" | bc)
+      dt=$(echo "scale = 4; $toptemp - $botmtemp" | bc)
       bbHeight_km=$(echo "scale = 2; $tophgt - $toptemp * $dh / $dt" | bc)
       bbHeight=$(echo "scale = 2; $bbHeight_km / 1000.0" | bc)
     else
