@@ -1182,6 +1182,7 @@ FOR igv=0,nsites-1  DO BEGIN
    		  
    		  ; need to convert scan time date to seconds since 1970
    		  tmp_timeGMIscan[ray_num,scan_num] = scantime
+      	  print, 'st: ', tmp_timeGMIscan[ray_num,scan_num]
    		  
 ; TAB new in V7, uncomment this when V7 is available
 		  if ( is_version_7 eq 1 ) then begin
