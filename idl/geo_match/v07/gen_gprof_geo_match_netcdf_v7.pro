@@ -424,10 +424,10 @@ ncdf_attput, cdfid, havePoPvarid, 'long_name', $
              'data exists flag for PoP'
 ncdf_attput, cdfid, havePoPvarid, '_FillValue', NO_DATA_PRESENT
 
-havefreezingHeightvarid = ncdf_vardef(cdfid, 'have_freezingHeight', /short)
-ncdf_attput, cdfid, havefreezingHeightvarid, 'long_name', $
-             'data exists flag for freezingHeight'
-ncdf_attput, cdfid, havefreezingHeightvarid, '_FillValue', NO_DATA_PRESENT
+;havefreezingHeightvarid = ncdf_vardef(cdfid, 'have_freezingHeight', /short)
+;ncdf_attput, cdfid, havefreezingHeightvarid, 'long_name', $
+;             'data exists flag for freezingHeight'
+;ncdf_attput, cdfid, havefreezingHeightvarid, '_FillValue', NO_DATA_PRESENT
 
 ; additional variables for GPROf VN version 2.0 files
 
@@ -1117,11 +1117,11 @@ ncdf_attput, cdfid, PoPvarid, 'long_name', $
 ncdf_attput, cdfid, PoPvarid, 'units', 'percent'
 ncdf_attput, cdfid, PoPvarid, '_FillValue', INT_RANGE_EDGE
 
-freezingHeightvarid = ncdf_vardef(cdfid, 'freezingHeight', [fpdimid], /short)
-ncdf_attput, cdfid, freezingHeightvarid, 'long_name', $
-            'Freezing Height, currently unused'
-ncdf_attput, cdfid, freezingHeightvarid, 'units', 'meters'
-ncdf_attput, cdfid, freezingHeightvarid, '_FillValue', INT_RANGE_EDGE
+;freezingHeightvarid = ncdf_vardef(cdfid, 'freezingHeight', [fpdimid], /short)
+;ncdf_attput, cdfid, freezingHeightvarid, 'long_name', $
+;            'Freezing Height, currently unused'
+;ncdf_attput, cdfid, freezingHeightvarid, 'units', 'meters'
+;ncdf_attput, cdfid, freezingHeightvarid, '_FillValue', INT_RANGE_EDGE
 
 ; additional variables for GPROf VN version 2.0 files
 
@@ -1171,13 +1171,13 @@ ncdf_attput, cdfid, precipitationYesNoFlagvarid, '_FillValue', INT_RANGE_EDGE
 
 
 ; new scanTime and scStatus variables
-scLonsvarid = ncdf_vardef(cdfid, 'scLons', [fpdimid])
+scLonsvarid = ncdf_vardef(cdfid, 'SClongitude', [fpdimid])
 ncdf_attput, cdfid, scLonsvarid, 'long_name', $
              'SCstatus Longitude'
 ncdf_attput, cdfid, scLonsvarid, 'units', 'degrees'
 ncdf_attput, cdfid, scLonsvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-scLatsvarid = ncdf_vardef(cdfid, 'scLats', [fpdimid])
+scLatsvarid = ncdf_vardef(cdfid, 'SClatitude', [fpdimid])
 ncdf_attput, cdfid, scLatsvarid, 'long_name', $
              'SCstatus Latitude'
 ncdf_attput, cdfid, scLatsvarid, 'units', 'degrees'
