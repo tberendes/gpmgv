@@ -1631,7 +1631,7 @@ FOR igv=0,nsites-1  DO BEGIN
    		 tocdf_timeGMIscan[prgoodidx] = tmp_timeGMIscan[gmi_idx_2get]
    		 tocdf_sunLocalTime[prgoodidx] = tmp_sunLocalTime[gmi_idx_2get]
          
-         print, tocdf_scLats[prgoodidx]
+         print, tocdf_timeGMIscan[prgoodidx]
          
         ; handle the arrays with the extra dimension of channel number
          IF have_1c THEN BEGIN
