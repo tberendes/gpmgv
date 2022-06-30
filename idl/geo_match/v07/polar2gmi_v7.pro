@@ -1173,7 +1173,7 @@ FOR igv=0,nsites-1  DO BEGIN
       ; need to convert scan time date to seconds since 1970
    	  scantime = ticks_from_datetime(str)
       print, 'scan time secs since 1970: ', scantime
-      dig = string(scantime, format='(D12.2)')
+      dig = string(scantime, format='(D20.2)')
       print, 'all digits: ', dig
    	  
       FOR ray_num = 0,NPIXEL_GMI-1  DO BEGIN
