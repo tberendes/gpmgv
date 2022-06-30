@@ -1408,7 +1408,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_scLons =  MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_scLats =  MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
 
-      tocdf_timeGMIscan = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_timeGMIscan = MAKE_ARRAY(numGMIrays, /double, VALUE=FLOAT_RANGE_EDGE)
       tocdf_sunLocalTime = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
 
       IF have_1c THEN BEGIN
