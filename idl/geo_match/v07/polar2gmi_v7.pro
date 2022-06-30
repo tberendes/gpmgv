@@ -1182,7 +1182,7 @@ FOR igv=0,nsites-1  DO BEGIN
    		  
    		  ; need to convert scan time date to seconds since 1970
    		  tmp_timeGMIscan[ray_num,scan_num] = scantime
-      	  print, 'st: ', string(tmp_timeGMIscan[ray_num,scan_num],format='(D20.2)')
+      	  ;print, 'st: ', string(tmp_timeGMIscan[ray_num,scan_num],format='(D20.2)')
    		  
 ; TAB new in V7, uncomment this when V7 is available
 		  if ( is_version_7 eq 1 ) then begin
@@ -1630,6 +1630,8 @@ FOR igv=0,nsites-1  DO BEGIN
       	 tocdf_scLats[prgoodidx] = tmp_scLats[gmi_idx_2get]
    		 tocdf_timeGMIscan[prgoodidx] = tmp_timeGMIscan[gmi_idx_2get]
    		 tocdf_sunLocalTime[prgoodidx] = tmp_sunLocalTime[gmi_idx_2get]
+         
+         help, tocdf_scLats[prgoodidx]
          
         ; handle the arrays with the extra dimension of channel number
          IF have_1c THEN BEGIN
