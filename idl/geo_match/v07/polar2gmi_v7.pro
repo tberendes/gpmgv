@@ -1173,7 +1173,7 @@ FOR igv=0,nsites-1  DO BEGIN
       ; need to convert scan time date to seconds since 1970
    	  scantime = ticks_from_datetime(str)
       print, 'scan time secs since 1970: ', scantime
-      print, 'scan time secs since 1970: ', scantime, format='%30f'
+      print, 'scan time secs since 1970: ', scantime, format='%f30.1'
    	  
       FOR ray_num = 0,NPIXEL_GMI-1  DO BEGIN
       	  tmp_scLons[ray_num,scan_num] = scLons[scan_num]
