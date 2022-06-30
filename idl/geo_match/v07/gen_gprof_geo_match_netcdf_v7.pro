@@ -470,14 +470,14 @@ ncdf_attput, cdfid, haveprecipitationYesNoFlagvarid, '_FillValue', NO_DATA_PRESE
 
 ; new scanTime and scStatus variables
 
-havescLonsvarid = ncdf_vardef(cdfid, 'have_scLons', /short)
+havescLonsvarid = ncdf_vardef(cdfid, 'have_SClongitude', /short)
 ncdf_attput, cdfid, havescLonsvarid, 'long_name', $
-             'data exists flag for scLons'
+             'data exists flag for SClongitude'
 ncdf_attput, cdfid, havescLonsvarid, '_FillValue', NO_DATA_PRESENT
 
-havescLatsvarid = ncdf_vardef(cdfid, 'have_scLats', /short)
+havescLatsvarid = ncdf_vardef(cdfid, 'have_SClatitude', /short)
 ncdf_attput, cdfid, havescLatsvarid, 'long_name', $
-             'data exists flag for scLats'
+             'data exists flag for SClatitude'
 ncdf_attput, cdfid, havescLatsvarid, '_FillValue', NO_DATA_PRESENT
 
 havetimeGMIscanvarid = ncdf_vardef(cdfid, 'have_timeGMIscan', /short)
@@ -485,10 +485,10 @@ ncdf_attput, cdfid, havetimeGMIscanvarid, 'long_name', $
              'data exists flag for timeGMIscan'
 ncdf_attput, cdfid, havetimeGMIscanvarid, '_FillValue', NO_DATA_PRESENT
 
-havestSunLocalTimevarid = ncdf_vardef(cdfid, 'have_stSunLocalTime', /short)
-ncdf_attput, cdfid, havestSunLocalTimevarid, 'long_name', $
-             'data exists flag for stSunLocalTime'
-ncdf_attput, cdfid, havestSunLocalTimevarid, '_FillValue', NO_DATA_PRESENT
+havesunLocalTimevarid = ncdf_vardef(cdfid, 'have_sunLocalTime', /short)
+ncdf_attput, cdfid, havesunLocalTimevarid, 'long_name', $
+             'data exists flag for sunLocalTime'
+ncdf_attput, cdfid, havesunLocalTimevarid, '_FillValue', NO_DATA_PRESENT
 
 haveTcvarid = ncdf_vardef(cdfid, 'have_Tc', /short)
 ncdf_attput, cdfid, haveTcvarid, 'long_name', $
@@ -1191,11 +1191,11 @@ ncdf_attput, cdfid, timeGMIscanvarid, 'units', 'seconds'
 ncdf_attput, cdfid, timeGMIscanvarid, 'long_name', 'Scan Time Seconds since 01-01-1970 00:00:00'
 ncdf_attput, cdfid, timeGMIscanvarid, '_FillValue', 0.0D+0
 
-stSunLocalTimevarid = ncdf_vardef(cdfid, 'stSunLocalTime', [fpdimid], /float)
-ncdf_attput, cdfid, stSunLocalTimevarid, 'long_name', $
+sunLocalTimevarid = ncdf_vardef(cdfid, 'sunLocalTime', [fpdimid], /float)
+ncdf_attput, cdfid, sunLocalTimevarid, 'long_name', $
              'Apparent Local Solar Time'
-ncdf_attput, cdfid, stSunLocalTimevarid, 'units', 'Hour'
-ncdf_attput, cdfid, stSunLocalTimevarid, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, sunLocalTimevarid, 'units', 'Hour'
+ncdf_attput, cdfid, sunLocalTimevarid, '_FillValue', FLOAT_RANGE_EDGE
 
 Qualityvarid = ncdf_vardef(cdfid, 'Quality', [Tbdimid,tcfpdimid], /short)
 ncdf_attput, cdfid, Qualityvarid, 'long_name', $

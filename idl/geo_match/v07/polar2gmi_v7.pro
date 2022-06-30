@@ -473,11 +473,11 @@ NSCANS_GMI = s[1]
    is_version_7 = 1
    
    ; new V7 variables for GPROf VN version 2.0 files
-   stSunLocalTime = (*status.S1.ptr_datasets).sunLocalTime
+   sunLocalTime = (*status.S1.ptr_datasets).sunLocalTime
    airmassLiftIndex = (*status.S1.ptr_datasets).airmassLiftIndex
    precipitationYesNoFlag = (*status.S1.ptr_datasets).precipitationYesNoFlag
-   if (typename(stSunLocalTime) eq 'STRING') then begin
-   		IF ( stSunLocalTime EQ 'N/A' ) THEN BEGIN
+   if (typename(sunLocalTime) eq 'STRING') then begin
+   		IF ( sunLocalTime EQ 'N/A' ) THEN BEGIN
    			is_version_7 = 0
    		endif
    endif
@@ -1161,7 +1161,7 @@ FOR igv=0,nsites-1  DO BEGIN
    tmp_scLats =  MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
 
    tmp_timeGMIscan = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
-   tmp_stSunLocalTime = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
+   tmp_sunLocalTime = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
 
    ; populate pixel/scan arrays with scan values
    FOR scan_num = 0,NSCANS_GMI-1  DO BEGIN
@@ -1183,7 +1183,7 @@ FOR igv=0,nsites-1  DO BEGIN
    		  
 ; TAB new in V7, uncomment this when V7 is available
 		  if ( is_version_7 eq 1 ) then begin
-   		  		tmp_stSunLocalTime[ray_num,scan_num] = stSunLocalTime[scan_num]
+   		  		tmp_sunLocalTime[ray_num,scan_num] = sunLocalTime[scan_num]
    		  endif   		  
 	  ENDFOR
    ENDFOR   
@@ -1407,7 +1407,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_scLats =  MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
 
       tocdf_timeGMIscan = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
-      tocdf_stSunLocalTime = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_sunLocalTime = MAKE_ARRAY(numGMIrays, /float, VALUE=FLOAT_RANGE_EDGE)
 
       IF have_1c THEN BEGIN
         ; Create new subarrays of dimension nchan1c,numGMIrays for the GPROF Tc
@@ -1626,7 +1626,7 @@ FOR igv=0,nsites-1  DO BEGIN
       	 tocdf_scLons[prgoodidx] = tmp_scLons[gmi_idx_2get]
       	 tocdf_scLats[prgoodidx] = tmp_scLats[gmi_idx_2get]
    		 tocdf_timeGMIscan[prgoodidx] = tmp_timeGMIscan[gmi_idx_2get]
-   		 tocdf_stSunLocalTime[prgoodidx] = tmp_stSunLocalTime[gmi_idx_2get]
+   		 tocdf_sunLocalTime[prgoodidx] = tmp_sunLocalTime[gmi_idx_2get]
          
         ; handle the arrays with the extra dimension of channel number
          IF have_1c THEN BEGIN
@@ -1739,14 +1739,14 @@ FOR igv=0,nsites-1  DO BEGIN
     NCDF_VARPUT, ncid, 'have_iceWaterPath', DATA_PRESENT  ; data presence flag
 
 ; scantime and scstatus variables for each footprint    
-   NCDF_VARPUT, ncid, 'scLons', tocdf_scLons      ; data
-    NCDF_VARPUT, ncid, 'have_scLons', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'scLats', tocdf_scLats      ; data
-    NCDF_VARPUT, ncid, 'have_scLats', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'SClongitude', tocdf_scLons      ; data
+    NCDF_VARPUT, ncid, 'have_SClongitude', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'SClatitude', tocdf_scLats      ; data
+    NCDF_VARPUT, ncid, 'have_SClatitude', DATA_PRESENT  ; data presence flag
    NCDF_VARPUT, ncid, 'timeGMIscan', tocdf_timeGMIscan      ; data
     NCDF_VARPUT, ncid, 'have_timeGMIscan', DATA_PRESENT  ; data presence flag
-   NCDF_VARPUT, ncid, 'stSunLocalTime', tocdf_stSunLocalTime      ; data
-    NCDF_VARPUT, ncid, 'have_stSunLocalTime', DATA_PRESENT  ; data presence flag
+   NCDF_VARPUT, ncid, 'sunLocalTime', tocdf_sunLocalTime      ; data
+    NCDF_VARPUT, ncid, 'have_sunLocalTime', DATA_PRESENT  ; data presence flag
 
 ; new V7 variables for GPROf VN version 2.0 files
    NCDF_VARPUT, ncid, 'airmassLiftIndex', tocdf_airmassLiftIndex      ; data
