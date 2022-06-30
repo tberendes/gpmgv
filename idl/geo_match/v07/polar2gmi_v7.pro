@@ -1169,10 +1169,10 @@ FOR igv=0,nsites-1  DO BEGIN
    	  str=string(stYear[scan_num],stMonth[scan_num],stDayOfMonth[scan_num], $
          stHour[scan_num], stMinute[scan_num], stSecond[scan_num], $
          format='%4d-%02d-%02d %02d:%02d:%02d')
-      ;print, 'scan time: ',str
+      print, 'scan time: ',str
       ; need to convert scan time date to seconds since 1970
    	  scantime = ticks_from_datetime(str)
-      ;print, 'scan time secs since 1970: ', scantime
+      print, 'scan time secs since 1970: ', scantime
    	  
       FOR ray_num = 0,NPIXEL_GMI-1  DO BEGIN
       	  tmp_scLons[ray_num,scan_num] = scLons[scan_num]
