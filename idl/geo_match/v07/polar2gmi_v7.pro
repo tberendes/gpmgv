@@ -1160,7 +1160,7 @@ FOR igv=0,nsites-1  DO BEGIN
    tmp_scLons =  MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
    tmp_scLats =  MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
 
-   tmp_timeGMIscan = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
+   tmp_timeGMIscan = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /double, VALUE=FLOAT_RANGE_EDGE)
    tmp_sunLocalTime = MAKE_ARRAY(NPIXEL_GMI, NSCANS_GMI, /float, VALUE=FLOAT_RANGE_EDGE)
 
    ; populate pixel/scan arrays with scan values
