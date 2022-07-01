@@ -1169,12 +1169,12 @@ FOR igv=0,nsites-1  DO BEGIN
    	  str=string(stYear[scan_num],stMonth[scan_num],stDayOfMonth[scan_num], $
          stHour[scan_num], stMinute[scan_num], stSecond[scan_num], $
          format='%4d-%02d-%02d %02d:%02d:%02d')
-      print, 'scan time: ',str
+      ;print, 'scan time: ',str
       ; need to convert scan time date to seconds since 1970
    	  scantime = ticks_from_datetime(str)
-      print, 'scan time secs since 1970: ', scantime
+      ;print, 'scan time secs since 1970: ', scantime
       dig = string(scantime, format='(D20.2)')
-      print, 'all digits: ', dig
+      ;print, 'all digits: ', dig
    	  
       FOR ray_num = 0,NPIXEL_GMI-1  DO BEGIN
       	  tmp_scLons[ray_num,scan_num] = scLons[scan_num]
@@ -1630,9 +1630,7 @@ FOR igv=0,nsites-1  DO BEGIN
       	 tocdf_scLats[prgoodidx] = tmp_scLats[gmi_idx_2get]
    		 tocdf_timeGMIscan[prgoodidx] = tmp_timeGMIscan[gmi_idx_2get]
    		 tocdf_sunLocalTime[prgoodidx] = tmp_sunLocalTime[gmi_idx_2get]
-         
-         printf, tmp_timeGMIscan, format='(D20.2)'
-         
+                  
         ; handle the arrays with the extra dimension of channel number
          IF have_1c THEN BEGIN
             for k = 0, nchan1c-1 do begin
