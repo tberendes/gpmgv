@@ -343,14 +343,19 @@ function findfreezinglevel() {
       temp=`echo $hgttemp | cut -f2 -d ' '`
       echo $temp | grep '-' > /dev/null
       if [ $? = 1 ]
-        then
+        then # negative sign not found
           botmhgt=$hgt
           botmtemp=$temp
           havebotm=1
-        else
+        else # negative sign found
+          # special case where temp is -0.0
+          if [ $temp = '-0.0' ]
+             then
+                continue
+          fi
+          havetop=1
           tophgt=$hgt
           toptemp=$temp
-          havetop=1
           break
       fi
   done < $1
@@ -365,13 +370,14 @@ function findfreezinglevel() {
       dh=$(echo "scale = 4; $tophgt - $botmhgt" | bc)
       dt=$(echo "scale = 4; $toptemp - $botmtemp" | bc)
       bbHeight_km=$(echo "scale = 2; $tophgt - $toptemp * $dh / $dt" | bc)
+      #echo dt, dh: $dt, $dh
       bbHeight=$(echo "scale = 2; $bbHeight_km / 1000.0" | bc)
     else
 #      echo tophgt, toptemp: $tophgt, $toptemp
       bbHeight=$(echo "scale = 2; $tophgt / 1000.0" | bc)
   fi
 #  echo bbHeight: $bbHeight
-  local theHeight=$bbHeight
+  theHeight=$bbHeight
   echo "$theHeight"
   return
 }

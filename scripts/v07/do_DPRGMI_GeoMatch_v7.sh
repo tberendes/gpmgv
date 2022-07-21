@@ -5,7 +5,43 @@
 #
 # DESCRIPTION
 # -----------
-# Wrapper to do DPRGMI-GR NetCDF geometric matchups for GPM 2B-DPRGMI files# already received and cataloged, for cases meeting predefined criteria.  This# script drives volume matches between DPRGMI and ground radar (GR) data for# both the MS and NS scan type and Ka and Ku instruments to produce the baseline # "GRtoDPRGMI" matchup netCDF files.  Queries the 'gpmgv' database to find rainy# site overpass events between a specified start and end date and assembles a# series of date-specific control files to run matchups for those dates.  For# each date, calls the child script do_DPRGMI_geo_matchup4date_v7.sh, which in turn# invokes IDL to generate the GRtoDPRGMI volume match netCDF files for that day's# rainy overpass events as listed in the daily control file.  Ancillary output# from the script is a series of 'control files', one per day in the range of# dates to be processed, listing DPR and ground radar data files to be processed# for rainy site overpass events for that calendar date, as well as metadata# parameters related to the DPR and GR data and the site overpass events.# # Volume matches are done for MS and NS scan types for Ku data, and MS only for# the Ka data.  Data for all scan types and frequencies are contained in the# GRtoDPRGMI netCDF matchup data files.  These files are not split out by scan# type and frequency as the 2A-DPR/Ka/Ku matchups are.# # The script has logic to compute the start and end dates over which to attempt# volume match runs.  The end date is the current calendar day, and the start# date is 30 day prior to the current date.  These computed values exist to# support routine (cron-scheduled) runs of the script.  The computed values# are overridden in practice by specifying override values for the variables# 'startDate' and 'endDate' in the main script itself, and these values must be# updated each time the script is to be (re)run manually.# # Only those site overpasses within the user-specified date range which are# identified as 'rainy' will be configured in the daily control files to be run.# Event criteria are as defined in the table "rainy100inside100" in the "gpmgv"# database, whose contents are updated by an SQL query command file run in this# script as a default option.  Event definition includes cases where the DPR# indicates "rain certain" at 100 or more gridpoints within 100 km of the radar# within the 4km gridded 2A-DPR product.  See the SQL command file# ${BIN_DIR}/'rainCases100kmAddNewEvents.sql'.#
+# Wrapper to do DPRGMI-GR NetCDF geometric matchups for GPM 2B-DPRGMI files
+# already received and cataloged, for cases meeting predefined criteria.  This
+# script drives volume matches between DPRGMI and ground radar (GR) data for
+# both the MS and NS scan type and Ka and Ku instruments to produce the baseline 
+# "GRtoDPRGMI" matchup netCDF files.  Queries the 'gpmgv' database to find rainy
+# site overpass events between a specified start and end date and assembles a
+# series of date-specific control files to run matchups for those dates.  For
+# each date, calls the child script do_DPRGMI_geo_matchup4date_v7.sh, which in turn
+# invokes IDL to generate the GRtoDPRGMI volume match netCDF files for that day's
+# rainy overpass events as listed in the daily control file.  Ancillary output
+# from the script is a series of 'control files', one per day in the range of
+# dates to be processed, listing DPR and ground radar data files to be processed
+# for rainy site overpass events for that calendar date, as well as metadata
+# parameters related to the DPR and GR data and the site overpass events.
+# 
+# Volume matches are done for MS and NS scan types for Ku data, and MS only for
+# the Ka data.  Data for all scan types and frequencies are contained in the
+# GRtoDPRGMI netCDF matchup data files.  These files are not split out by scan
+# type and frequency as the 2A-DPR/Ka/Ku matchups are.
+# 
+# The script has logic to compute the start and end dates over which to attempt
+# volume match runs.  The end date is the current calendar day, and the start
+# date is 30 day prior to the current date.  These computed values exist to
+# support routine (cron-scheduled) runs of the script.  The computed values
+# are overridden in practice by specifying override values for the variables
+# 'startDate' and 'endDate' in the main script itself, and these values must be
+# updated each time the script is to be (re)run manually.
+# 
+# Only those site overpasses within the user-specified date range which are
+# identified as 'rainy' will be configured in the daily control files to be run.
+# Event criteria are as defined in the table "rainy100inside100" in the "gpmgv"
+# database, whose contents are updated by an SQL query command file run in this
+# script as a default option.  Event definition includes cases where the DPR
+# indicates "rain certain" at 100 or more gridpoints within 100 km of the radar
+# within the 4km gridded 2A-DPR product.  See the SQL command file
+# ${BIN_DIR}/'rainCases100kmAddNewEvents.sql'.
+#
 #
 # SYNOPSIS
 # --------
@@ -300,14 +336,19 @@ function findfreezinglevel() {
       temp=`echo $hgttemp | cut -f2 -d ' '`
       echo $temp | grep '-' > /dev/null
       if [ $? = 1 ]
-        then
+        then # negative sign not found
           botmhgt=$hgt
           botmtemp=$temp
           havebotm=1
-        else
+        else # negative sign found
+          # special case where temp is -0.0
+          if [ $temp = '-0.0' ]
+             then
+                continue
+          fi
+          havetop=1
           tophgt=$hgt
           toptemp=$temp
-          havetop=1
           break
       fi
   done < $1
@@ -322,13 +363,14 @@ function findfreezinglevel() {
       dh=$(echo "scale = 4; $tophgt - $botmhgt" | bc)
       dt=$(echo "scale = 4; $toptemp - $botmtemp" | bc)
       bbHeight_km=$(echo "scale = 2; $tophgt - $toptemp * $dh / $dt" | bc)
+      #echo dt, dh: $dt, $dh
       bbHeight=$(echo "scale = 2; $bbHeight_km / 1000.0" | bc)
     else
 #      echo tophgt, toptemp: $tophgt, $toptemp
       bbHeight=$(echo "scale = 2; $tophgt / 1000.0" | bc)
   fi
 #  echo bbHeight: $bbHeight
-  local theHeight=$bbHeight
+  theHeight=$bbHeight
   echo "$theHeight"
   return
 }
