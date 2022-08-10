@@ -95,7 +95,7 @@ FUNCTION get_dpr_pre_group_v7, group_id, prodgroup, READ_ALL=read_all
             'snRatioAtRealSurface' : IF all THEN snRatioAtRealSurface = $
                                      h5d_read(dtID)
                  'zFactorMeasured' : zFactorMeasured = h5d_read(dtID)
-                          'Height' : height = h5d_read(dtID)
+                          'height' : height = h5d_read(dtID)
             ELSE : BEGIN
                       message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
@@ -153,7 +153,7 @@ FUNCTION get_dpr_pre_group_v7, group_id, prodgroup, READ_ALL=read_all
    
   ; append extra V07 variables, as available
    IF N_ELEMENTS(height) NE 0 THEN experimental_struc = $
-      CREATE_STRUCT(experimental_struc, 'Height', height)
+      CREATE_STRUCT(experimental_struc, 'height', height)
 
 return, PRE_struc
 end
