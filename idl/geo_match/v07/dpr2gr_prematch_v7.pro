@@ -773,14 +773,14 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_precipWater = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                   VALUE=FLOAT_RANGE_EDGE)
       tocdf_flagInversion = MAKE_ARRAY(numDPRrays, /short, $
-                                  VALUE=SHORT(INT_RANGE_EDGE))
+                                  VALUE=INT_RANGE_EDGE)
       tocdf_flagHail = MAKE_ARRAY(numDPRrays, /short, $
-                                  VALUE=SHORT(INT_RANGE_EDGE))
+                                  VALUE=INT_RANGE_EDGE)
       tocdf_flagGraupelHail = MAKE_ARRAY(numDPRrays, /short, $
-                                  VALUE=SHORT(INT_RANGE_EDGE))
+                                  VALUE=INT_RANGE_EDGE)
                                   
       tocdf_mixedPhaseTop = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
-      tocdf_flagHeavyIcePrecip = MAKE_ARRAY(numDPRrays, num_elevations_out, /short, VALUE=SHORT(INT_RANGE_EDGE))
+      tocdf_flagHeavyIcePrecip = MAKE_ARRAY(numDPRrays, num_elevations_out, /short, VALUE=INT_RANGE_EDGE)
 
       tocdf_epsilon = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                  VALUE=FLOAT_RANGE_EDGE)
@@ -1108,7 +1108,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                   		  tocdf_precipWater[jpr,ielev] = FLOAT_OFF_EDGE
                   		  if IS_DPR_FS then begin 
                   		      tocdf_mixedPhaseTop[jpr,ielev] = FLOAT_OFF_EDGE
-                  		      tocdf_flagHeavyIcePrecip[jpr,ielev] = SHORT(FLOAT_OFF_EDGE)
+                  		      tocdf_flagHeavyIcePrecip[jpr,ielev] = INT_OFF_EDGE
                   		  endif
                           tocdf_epsilon[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_dm[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1122,7 +1122,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                           tocdf_precipWater[jpr,ielev] = Z_MISSING
                   		  if IS_DPR_FS then begin
                   		      tocdf_mixedPhaseTop[jpr,ielev] = Z_MISSING
-                  		      tocdf_flagHeavyIcePrecip[jpr,ielev] = SHORT(Z_MISSING)
+                  		      tocdf_flagHeavyIcePrecip[jpr,ielev] = LONG(Z_MISSING)
                   		  endif
                           tocdf_epsilon[jpr,ielev] = Z_MISSING
                           tocdf_dm[jpr,ielev] = Z_MISSING
