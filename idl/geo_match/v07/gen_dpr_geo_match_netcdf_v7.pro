@@ -1018,25 +1018,25 @@ ncdf_attput, cdfid, precipWater_varid, 'long_name', $
 ncdf_attput, cdfid, precipWater_varid, 'units', 'g/m3'
 ncdf_attput, cdfid, precipWater_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-flagInversion_varid = ncdf_vardef(cdfid, 'flagInversion', [fpdimid], /int)
+flagInversion_varid = ncdf_vardef(cdfid, 'flagInversion', [fpdimid], /short)
 ncdf_attput, cdfid, flagInversion_varid, 'long_name', $
              'TBD info for flagInversion'
 ncdf_attput, cdfid, flagInversion_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-flagGraupelHail_varid = ncdf_vardef(cdfid, 'flagGraupelHail', [fpdimid], /int)
+flagGraupelHail_varid = ncdf_vardef(cdfid, 'flagGraupelHail', [fpdimid], /short)
 ncdf_attput, cdfid, flagGraupelHail_varid, 'long_name', $
              'Graupel or Hail flag, only available for DPR FS scan'
 ncdf_attput, cdfid, flagGraupelHail_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-flagHail_varid = ncdf_vardef(cdfid, 'flagHail', [fpdimid], /int)
+flagHail_varid = ncdf_vardef(cdfid, 'flagHail', [fpdimid], /short)
 ncdf_attput, cdfid, flagHail_varid, 'long_name', $
              '0 Hail not detected 1 Hail detected, only available for DPR FS scan'
 ncdf_attput, cdfid, flagHail_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-flagHeavyIcePrecip_varid = ncdf_vardef(cdfid, 'flagHeavyIcePrecip', [fpdimid,eldimid], /int)
+flagHeavyIcePrecip_varid = ncdf_vardef(cdfid, 'flagHeavyIcePrecip', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, flagHeavyIcePrecip_varid, 'long_name', $
              'Flag for heavyIcePrecip, only available for DPR FS scan'
 ncdf_attput, cdfid, flagHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
