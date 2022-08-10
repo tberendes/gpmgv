@@ -1018,25 +1018,25 @@ ncdf_attput, cdfid, varid, 'long_name', $
 ncdf_attput, cdfid, varid, 'units', 'g/m3'
 ncdf_attput, cdfid, varid, '_FillValue', FLOAT_RANGE_EDGE
 
-varid = ncdf_vardef(cdfid, 'flagInversion', [fpdimid], /short)
+varid = ncdf_vardef(cdfid, 'flagInversion', [fpdimid], /int)
 ncdf_attput, cdfid, varid, 'long_name', $
              'TBD info for flagInversion'
 ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-varid = ncdf_vardef(cdfid, 'flagGraupelHail', [fpdimid], /short)
+varid = ncdf_vardef(cdfid, 'flagGraupelHail', [fpdimid], /int)
 ncdf_attput, cdfid, varid, 'long_name', $
              'Graupel or Hail flag, only available for DPR FS scan'
 ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-varid = ncdf_vardef(cdfid, 'flagHail', [fpdimid], /short)
+varid = ncdf_vardef(cdfid, 'flagHail', [fpdimid], /int)
 ncdf_attput, cdfid, varid, 'long_name', $
              '0 Hail not detected 1 Hail detected, only available for DPR FS scan'
 ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-varid = ncdf_vardef(cdfid, 'flagHeavyIcePrecip', [fpdimid,eldimid], /short)
+varid = ncdf_vardef(cdfid, 'flagHeavyIcePrecip', [fpdimid,eldimid], /int)
 ncdf_attput, cdfid, varid, 'long_name', $
              'Flag for heavyIcePrecip, only available for DPR FS scan'
 ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT

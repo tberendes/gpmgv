@@ -772,15 +772,15 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                                    VALUE=FLOAT_RANGE_EDGE)
       tocdf_precipWater = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                   VALUE=FLOAT_RANGE_EDGE)
-      tocdf_flagInversion = MAKE_ARRAY(numDPRrays, /short, $
+      tocdf_flagInversion = MAKE_ARRAY(numDPRrays, /int, $
                                   VALUE=INT_RANGE_EDGE)
-      tocdf_flagHail = MAKE_ARRAY(numDPRrays, /short, $
+      tocdf_flagHail = MAKE_ARRAY(numDPRrays, /int, $
                                   VALUE=INT_RANGE_EDGE)
-      tocdf_flagGraupelHail = MAKE_ARRAY(numDPRrays, /short, $
+      tocdf_flagGraupelHail = MAKE_ARRAY(numDPRrays, /int, $
                                   VALUE=INT_RANGE_EDGE)
                                   
       tocdf_mixedPhaseTop = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
-      tocdf_flagHeavyIcePrecip = MAKE_ARRAY(numDPRrays, num_elevations_out, /short, VALUE=INT_RANGE_EDGE)
+      tocdf_flagHeavyIcePrecip = MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
 
       tocdf_epsilon = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                  VALUE=FLOAT_RANGE_EDGE)
