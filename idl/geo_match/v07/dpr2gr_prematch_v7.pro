@@ -1055,11 +1055,13 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                   n_dpr_nw_gates_rejected = dpr_gates_expected - numDPRgates
                   
                   ; new logic for flagHeavyIcePrecip
-                  xin=where(tempHID_btm GT 0 AND tempHIP_top GT 0,xcount) ;make sure only valid values
-				  if(xcount GT 0) then begin
-					 if(topHeight[jpr,ielev] GE min(tempHIP_btm[xin]) AND bottomHeight[jpr,ielev] LE max(tempHIP_top[xin])) then begin
-						tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ;at least one bin in volume has heavyIcePrecip detected by DPR
-					 endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
+                  if IS_DPR_FS then begin
+	                  xin=where(tempHID_btm GT 0 AND tempHIP_top GT 0,xcount) ;make sure only valid values
+					  if(xcount GT 0) then begin
+						 if(topHeight[jpr,ielev] GE min(tempHIP_btm[xin]) AND bottomHeight[jpr,ielev] LE max(tempHIP_top[xin])) then begin
+							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ;at least one bin in volume has heavyIcePrecip detected by DPR
+						 endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
+					  endif
 				  endif
                         
                ENDIF
