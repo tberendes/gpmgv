@@ -1180,6 +1180,17 @@ ncdf_attput, cdfid, epsilonrejvarid, 'long_name', $
              'number of bins below 0.0 in Epsilon average'
 ncdf_attput, cdfid, epsilonrejvarid, '_FillValue', INT_RANGE_EDGE
 
+; new V7 
+precipWater_rejvarid = ncdf_vardef(cdfid, 'n_dpr_precipWater_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, precipWater_rejvarid, 'long_name', $
+             'number of bins with missing precipWater in DPR precipWater average'
+ncdf_attput, cdfid, precipWater_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+mixedPhaseTop_rejvarid = ncdf_vardef(cdfid, 'n_dpr_mixedPhaseTop_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, mixedPhaseTop_rejvarid, 'long_name', $
+             'number of bins with missing mixedPhaseTop in DPR mixedPhaseTop average'
+ncdf_attput, cdfid, mixedPhaseTop_rejvarid, '_FillValue', INT_RANGE_EDGE
+
 prexpvarid = ncdf_vardef(cdfid, 'n_dpr_expected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, prexpvarid, 'long_name', 'number of bins in DPR averages'
 ncdf_attput, cdfid, prexpvarid, '_FillValue', INT_RANGE_EDGE
