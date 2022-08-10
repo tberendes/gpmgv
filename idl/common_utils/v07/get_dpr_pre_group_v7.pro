@@ -152,7 +152,7 @@ FUNCTION get_dpr_pre_group_v7, group_id, prodgroup, READ_ALL=read_all
    ENDELSE
    
   ; append extra V07 variables, as available
-   IF N_ELEMENTS(height) NE 0 THEN experimental_struc = $
+   IF N_ELEMENTS(height) NE 0 THEN PRE_struc = $
       CREATE_STRUCT(PRE_struc, 'height', height)
 
 return, PRE_struc
