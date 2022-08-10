@@ -495,39 +495,39 @@ ncdf_attput, cdfid, havedbzvarid, 'long_name', $
 ncdf_attput, cdfid, havedbzvarid, '_FillValue', NO_DATA_PRESENT
 
 ; V07 new variables
-havevarid = ncdf_vardef(cdfid, 'have_precipWater', /short)
-ncdf_attput, cdfid, havevarid, 'long_name', $
+have_precipWater_varid = ncdf_vardef(cdfid, 'have_precipWater', /short)
+ncdf_attput, cdfid, have_precipWater_varid, 'long_name', $
              'data exists flag for precipWater'
-ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, have_precipWater_varid, '_FillValue', NO_DATA_PRESENT
 
-havevarid = ncdf_vardef(cdfid, 'have_flagInversion', /short)
-ncdf_attput, cdfid, havevarid, 'long_name', $
+have_flagInversion_varid = ncdf_vardef(cdfid, 'have_flagInversion', /short)
+ncdf_attput, cdfid, have_flagInversion_varid, 'long_name', $
              'data exists flag for flagInversion'
-ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, have_flagInversion_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-havevarid = ncdf_vardef(cdfid, 'have_flagGraupelHail', /short)
-ncdf_attput, cdfid, havevarid, 'long_name', $
+have_flagGraupelHail_varid = ncdf_vardef(cdfid, 'have_flagGraupelHail', /short)
+ncdf_attput, cdfid, have_flagGraupelHail_varid, 'long_name', $
              'data exists flag for flagGraupelHail'
-ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, have_flagGraupelHail_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-havevarid = ncdf_vardef(cdfid, 'have_flagHail', /short)
-ncdf_attput, cdfid, havevarid, 'long_name', $
+have_flagHail_varid = ncdf_vardef(cdfid, 'have_flagHail', /short)
+ncdf_attput, cdfid, have_flagHail_varid, 'long_name', $
              'data exists flag for flagHail'
-ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, have_flagHail_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-havevarid = ncdf_vardef(cdfid, 'have_flagHeavyIcePrecip', /short)
-ncdf_attput, cdfid, havevarid, 'long_name', $
+have_flagHeavyIcePrecip_varid = ncdf_vardef(cdfid, 'have_flagHeavyIcePrecip', /short)
+ncdf_attput, cdfid, have_flagHeavyIcePrecip_varid, 'long_name', $
              'data exists flag for flagHeavyIcePrecip'
-ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, have_flagHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-havevarid = ncdf_vardef(cdfid, 'have_mixedPhaseTop', /short)
-ncdf_attput, cdfid, havevarid, 'long_name', $
+have_mixedPhaseTop_varid = ncdf_vardef(cdfid, 'have_mixedPhaseTop', /short)
+ncdf_attput, cdfid, have_mixedPhaseTop_varid, 'long_name', $
              'data exists flag for mixedPhaseTop'
-ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, have_mixedPhaseTop_varid, '_FillValue', NO_DATA_PRESENT
 
 havepiavarid = ncdf_vardef(cdfid, 'have_piaFinal', /short)
 ncdf_attput, cdfid, havepiavarid, 'long_name', $
@@ -1012,41 +1012,41 @@ ncdf_attput, cdfid, dbzvarid, 'units', 'dBZ'
 ncdf_attput, cdfid, dbzvarid, '_FillValue', FLOAT_RANGE_EDGE
 
 ; new V07 variables
-varid = ncdf_vardef(cdfid, 'precipWater', [fpdimid,eldimid], /float)
-ncdf_attput, cdfid, varid, 'long_name', $
+precipWater_varid = ncdf_vardef(cdfid, 'precipWater', [fpdimid,eldimid], /float)
+ncdf_attput, cdfid, precipWater_varid, 'long_name', $
              'The amount of precipitable water'
-ncdf_attput, cdfid, varid, 'units', 'g/m3'
-ncdf_attput, cdfid, varid, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, precipWater_varid, 'units', 'g/m3'
+ncdf_attput, cdfid, precipWater_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-varid = ncdf_vardef(cdfid, 'flagInversion', [fpdimid], /int)
-ncdf_attput, cdfid, varid, 'long_name', $
+flagInversion_varid = ncdf_vardef(cdfid, 'flagInversion', [fpdimid], /int)
+ncdf_attput, cdfid, flagInversion_varid, 'long_name', $
              'TBD info for flagInversion'
-ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, flagInversion_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-varid = ncdf_vardef(cdfid, 'flagGraupelHail', [fpdimid], /int)
-ncdf_attput, cdfid, varid, 'long_name', $
+flagGraupelHail_varid = ncdf_vardef(cdfid, 'flagGraupelHail', [fpdimid], /int)
+ncdf_attput, cdfid, flagGraupelHail_varid, 'long_name', $
              'Graupel or Hail flag, only available for DPR FS scan'
-ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, flagGraupelHail_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-varid = ncdf_vardef(cdfid, 'flagHail', [fpdimid], /int)
-ncdf_attput, cdfid, varid, 'long_name', $
+flagHail_varid = ncdf_vardef(cdfid, 'flagHail', [fpdimid], /int)
+ncdf_attput, cdfid, flagHail_varid, 'long_name', $
              '0 Hail not detected 1 Hail detected, only available for DPR FS scan'
-ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, flagHail_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-varid = ncdf_vardef(cdfid, 'flagHeavyIcePrecip', [fpdimid,eldimid], /int)
-ncdf_attput, cdfid, varid, 'long_name', $
+flagHeavyIcePrecip_varid = ncdf_vardef(cdfid, 'flagHeavyIcePrecip', [fpdimid,eldimid], /int)
+ncdf_attput, cdfid, flagHeavyIcePrecip_varid, 'long_name', $
              'Flag for heavyIcePrecip, only available for DPR FS scan'
-ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
+ncdf_attput, cdfid, flagHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-varid = ncdf_vardef(cdfid, 'mixedPhaseTop', [fpdimid], /float)
-ncdf_attput, cdfid, varid, 'long_name', $
+mixedPhaseTop_varid = ncdf_vardef(cdfid, 'mixedPhaseTop', [fpdimid], /float)
+ncdf_attput, cdfid, mixedPhaseTop_varid, 'long_name', $
              'DPR detected top of mixed phase, only available for DPR FS scan'
-ncdf_attput, cdfid, varid, 'units', 'm'
-ncdf_attput, cdfid, varid, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, mixedPhaseTop_varid, 'units', 'm'
+ncdf_attput, cdfid, mixedPhaseTop_varid, '_FillValue', FLOAT_RANGE_EDGE
 
 rainvarid = ncdf_vardef(cdfid, 'PrecipRate', [fpdimid,eldimid])
 ncdf_attput, cdfid, rainvarid, 'long_name', 'DPR Estimated Rain Rate Profile'
