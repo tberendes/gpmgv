@@ -962,7 +962,7 @@ vnversvarid = ncdf_vardef(cdfid, 'version')
 ncdf_attput, cdfid, vnversvarid, 'long_name', 'Geo Match File Version'
 
 frzlvlvarid = ncdf_vardef(cdfid, 'freezing_level_height')
-ncdf_attput, cdfid, frzlvlvarid, 'long_name', 'Model-based freezing level height AGL'
+ncdf_attput, cdfid, frzlvlvarid, 'long_name', 'Model-based freezing level height MSL'
 ncdf_attput, cdfid, frzlvlvarid, 'units', 'km'
 ncdf_attput, cdfid, frzlvlvarid, '_FillValue', -9999.
 

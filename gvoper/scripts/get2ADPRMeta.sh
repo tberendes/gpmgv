@@ -412,4 +412,34 @@ echo "UPDATE appstatus SET status='$FAILED' WHERE app_id = 'get2ADPRMeta'\
  AND status='$MISSING' AND ntries > 4;" | psql -a -d gpmgv \
   | tee -a $LOG_FILE 2>&1
 
+echo "Updating rainy overpass table..." | tee -a $LOG_FILE
+cat ${BIN_DIR}/rainCases100kmAddNewEvents.sql | psql -a -d gpmgv  | tee -a $LOG_FILE 2>&1
+
+#yymmdd=`date -d ''${THISRUN}'- 6 day' +%y%m%d`
+# Generate lists of rainy overpasses starting 6 days prior to today's date going back 14 days.
+# There is an approximate three day lag in the PPS GPM subsets, and up to 5 days for the CT files
+# so starting 6 days back should usually cover the lag.  The 10 day buffer will help fill in any late 
+# arriving files or gaps from PPS downtime
+
+for ((i=6; i<=20; i++))
+do
+   yymmdd=`date -d ''${THISRUN}'- '${i}' day' +%y%m%d`
+   #yymmdd=`date -d ''${THISRUN}'- 6 day' +%y%m%d`
+   yy=`echo $yymmdd |cut -c1-2`
+   mm=`echo $yymmdd | cut -c3-4`
+   dd=`echo $yymmdd | cut -c5-6`
+   raindate="20${yy}-${mm}-${dd}"
+   echo "Generating list of rainy overpasses for $raindate..." | tee -a $LOG_FILE
+   dbout=`psql -a -A -t -o ${DATA_DIR}/rainy_overpass/rainy_sites_${yymmdd}.txt -d gpmgv \
+     -c "select radar_id as site,orbit,overpass_time AT TIME ZONE 'UTC' \
+     as overpass_time_gmt,num_overlap_rain_certain as rainy_grid_points \
+     from rainy100inside100 where sat_id='GPM' and DATE(overpass_time AT TIME ZONE 'UTC') ='${raindate}' order by 3"`
+   if [ ! -s ${DATA_DIR}/rainy_overpass/rainy_sites_${yymmdd}.txt ]
+   then
+      #echo 'empty' rainy_sites_${yymmdd}.txt
+      rm ${DATA_DIR}/rainy_overpass/rainy_sites_${yymmdd}.txt
+   fi
+  
+done
+
 exit

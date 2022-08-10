@@ -216,7 +216,9 @@ for datepath in `echo $ctdate1 $ctdate2 | sort -u`
     wget -r -nc -np -nH --cut-dirs=4 -o ${TEMPFILE} -P ${GEO_DATA}/${yyyymmpath} -AORBDEF.txt\
          --user=$USERPASS --password=$USERPASS --ftps-fallback-to-ftp $FIXEDPATH/${yyyymmpath}/
 
-    cat ${TEMPFILE} | grep saved | grep ORBDEF.txt | cut -f2 -d '“' | cut -f1 -d '”' > $FILES2DO
+	# wget changed output format and broke this line, changed to not use quotes in parsing of filename
+    #cat ${TEMPFILE} | grep saved | grep ORBDEF.txt | cut -f2 -d '"' | cut -f1 -d '"' > $FILES2DO
+    cat ${TEMPFILE} | grep saved | grep ORBDEF.txt | cut -f6 -d' ' | cut -c2- | rev | cut -c2- | rev > $FILES2DO
     if [ -s $FILES2DO ]
       then
         ngotten=`cat $FILES2DO | wc -l`

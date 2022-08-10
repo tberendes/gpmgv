@@ -235,7 +235,7 @@ FUNCTION read_2akaku_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2re
 
       ; get the VER structure for this swath
       ptr_ver = ptr_new(/allocate_heap)
-      *ptr_ver = get_dpr_ver_group(sw_group_id, prodgroup, READ_ALL=all)
+      *ptr_ver = get_dpr_ver_group_v7(sw_group_id, prodgroup, READ_ALL=all)
       IF (verbose1) THEN help, *ptr_ver
 
       h5g_close, sw_group_id

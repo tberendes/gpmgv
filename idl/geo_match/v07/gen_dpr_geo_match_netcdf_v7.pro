@@ -90,6 +90,8 @@
 ;    Modified for GPM V7
 ; 4/20/22 by Todd Berendes UAH/ITSC
 ;  - Added new GR liquid and frozen water content fields
+; 7/6/22 Todd Berendes UAH/ITSC
+;  - Changed zFactorCorrected to zFactorFinal in output netCDF file to match V7 variable name
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -487,10 +489,45 @@ ncdf_attput, cdfid, havedbzrawvarid, 'long_name', $
              'data exists flag for ZFactorMeasured'
 ncdf_attput, cdfid, havedbzrawvarid, '_FillValue', NO_DATA_PRESENT
 
-havedbzvarid = ncdf_vardef(cdfid, 'have_ZFactorCorrected', /short)
+havedbzvarid = ncdf_vardef(cdfid, 'have_ZFactorFinal', /short)
 ncdf_attput, cdfid, havedbzvarid, 'long_name', $
-             'data exists flag for ZFactorCorrected'
+             'data exists flag for ZFactorFinal'
 ncdf_attput, cdfid, havedbzvarid, '_FillValue', NO_DATA_PRESENT
+
+; V07 new variables
+havevarid = ncdf_vardef(cdfid, 'have_precipWater', /short)
+ncdf_attput, cdfid, havevarid, 'long_name', $
+             'data exists flag for precipWater'
+ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+
+havevarid = ncdf_vardef(cdfid, 'have_flagInversion', /short)
+ncdf_attput, cdfid, havevarid, 'long_name', $
+             'data exists flag for flagInversion'
+ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+havevarid = ncdf_vardef(cdfid, 'have_flagGraupelHail', /short)
+ncdf_attput, cdfid, havevarid, 'long_name', $
+             'data exists flag for flagGraupelHail'
+ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+havevarid = ncdf_vardef(cdfid, 'have_flagHail', /short)
+ncdf_attput, cdfid, havevarid, 'long_name', $
+             'data exists flag for flagHail'
+ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+havevarid = ncdf_vardef(cdfid, 'have_flagHeavyIcePrecip', /short)
+ncdf_attput, cdfid, havevarid, 'long_name', $
+             'data exists flag for flagHeavyIcePrecip'
+ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+havevarid = ncdf_vardef(cdfid, 'have_mixedPhaseTop', /short)
+ncdf_attput, cdfid, havevarid, 'long_name', $
+             'data exists flag for mixedPhaseTop'
+ncdf_attput, cdfid, havevarid, '_FillValue', NO_DATA_PRESENT
 
 havepiavarid = ncdf_vardef(cdfid, 'have_piaFinal', /short)
 ncdf_attput, cdfid, havepiavarid, 'long_name', $
@@ -968,11 +1005,48 @@ ncdf_attput, cdfid, dbzrawvarid, 'long_name', 'DPR Uncorrected Reflectivity'
 ncdf_attput, cdfid, dbzrawvarid, 'units', 'dBZ'
 ncdf_attput, cdfid, dbzrawvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-dbzvarid = ncdf_vardef(cdfid, 'ZFactorCorrected', [fpdimid,eldimid])
+dbzvarid = ncdf_vardef(cdfid, 'ZFactorFinal', [fpdimid,eldimid])
 ncdf_attput, cdfid, dbzvarid, 'long_name', $
              'DPR Attenuation-corrected Reflectivity'
 ncdf_attput, cdfid, dbzvarid, 'units', 'dBZ'
 ncdf_attput, cdfid, dbzvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+; new V07 variables
+varid = ncdf_vardef(cdfid, 'precipWater', [fpdimid,eldimid], /float)
+ncdf_attput, cdfid, varid, 'long_name', $
+             'The amount of precipitable water'
+ncdf_attput, cdfid, varid, 'units', 'g/m3'
+ncdf_attput, cdfid, varid, '_FillValue', FLOAT_RANGE_EDGE
+
+varid = ncdf_vardef(cdfid, 'flagInversion', [fpdimid], /short)
+ncdf_attput, cdfid, varid, 'long_name', $
+             'TBD info for flagInversion'
+ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+varid = ncdf_vardef(cdfid, 'flagGraupelHail', [fpdimid], /short)
+ncdf_attput, cdfid, varid, 'long_name', $
+             'Graupel or Hail flag, only available for DPR FS scan'
+ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+varid = ncdf_vardef(cdfid, 'flagHail', [fpdimid], /short)
+ncdf_attput, cdfid, varid, 'long_name', $
+             '0 Hail not detected 1 Hail detected, only available for DPR FS scan'
+ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+varid = ncdf_vardef(cdfid, 'flagHeavyIcePrecip', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, varid, 'long_name', $
+             'Flag for heavyIcePrecip, only available for DPR FS scan'
+ncdf_attput, cdfid, varid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+varid = ncdf_vardef(cdfid, 'mixedPhaseTop', [fpdimid], /float)
+ncdf_attput, cdfid, varid, 'long_name', $
+             'DPR detected top of mixed phase, only available for DPR FS scan'
+ncdf_attput, cdfid, varid, 'units', 'm'
+ncdf_attput, cdfid, varid, '_FillValue', FLOAT_RANGE_EDGE
 
 rainvarid = ncdf_vardef(cdfid, 'PrecipRate', [fpdimid,eldimid])
 ncdf_attput, cdfid, rainvarid, 'long_name', 'DPR Estimated Rain Rate Profile'
@@ -1082,7 +1156,7 @@ ncdf_attput, cdfid, rawZrejvarid, '_FillValue', INT_RANGE_EDGE
 
 corZrejvarid = ncdf_vardef(cdfid, 'n_dpr_corr_z_rejected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, corZrejvarid, 'long_name', $
-             'number of bins below DPR_dBZ_min in ZFactorCorrected average'
+             'number of bins below DPR_dBZ_min in ZFactorFinal average'
 ncdf_attput, cdfid, corZrejvarid, '_FillValue', INT_RANGE_EDGE
 
 rainrejvarid = ncdf_vardef(cdfid, 'n_dpr_corr_r_rejected', [fpdimid,eldimid], /short)
@@ -1190,7 +1264,7 @@ ncdf_attput, cdfid, rayidxvarid, 'long_name', $
 ncdf_attput, cdfid, rayidxvarid, '_FillValue', INT_RANGE_EDGE
 
 ; TAB 9/28/20 Added new PW fields
-;For the precipWaterIntegrated…make it two variables in the VN (e.g., pwatIntegrated_liquid, pwatIntegrated_solid):
+;For the precipWaterIntegrated make it two variables in the VN (e.g., pwatIntegrated_liquid, pwatIntegrated_solid):
 
 ;    pwatIntegrated_liquid = 1st LS index
 ;    pwatIntegrated_solid = 2nd LS index
@@ -1258,7 +1332,7 @@ vnversvarid = ncdf_vardef(cdfid, 'version')
 ncdf_attput, cdfid, vnversvarid, 'long_name', 'Geo Match File Version'
 
 frzlvlvarid = ncdf_vardef(cdfid, 'freezing_level_height')
-ncdf_attput, cdfid, frzlvlvarid, 'long_name', 'Model-based freezing level height AGL'
+ncdf_attput, cdfid, frzlvlvarid, 'long_name', 'Model-based freezing level height MSL'
 ncdf_attput, cdfid, frzlvlvarid, 'units', 'km'
 ncdf_attput, cdfid, frzlvlvarid, '_FillValue', -9999.
 ;

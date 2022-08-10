@@ -174,7 +174,7 @@ FUNCTION read_2adpr_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
 
       ; get the CSF structure for this swath
       ptr_csf = ptr_new(/allocate_heap)
-      *ptr_csf = get_dpr_csf_group(sw_group_id, prodgroup, READ_ALL=all)
+      *ptr_csf = get_dpr_csf_group_v7(sw_group_id, prodgroup, READ_ALL=all)
       IF (verbose1) THEN help, *ptr_csf
 
       ; get the DSD structure for this swath
@@ -189,7 +189,7 @@ FUNCTION read_2adpr_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
 
       ; get the PRE structure for this swath
       ptr_pre = ptr_new(/allocate_heap)
-      *ptr_pre = get_dpr_pre_group(sw_group_id, prodgroup, READ_ALL=all)
+      *ptr_pre = get_dpr_pre_group_v7(sw_group_id, prodgroup, READ_ALL=all)
       IF (verbose1) THEN help, *ptr_pre
 
       ; get the SLV structure for this swath
@@ -204,7 +204,7 @@ FUNCTION read_2adpr_hdf5_v7, file, DEBUG=debug, READ_ALL=read_all, SCAN=scan2rea
 
       ; get the VER structure for this swath
       ptr_ver = ptr_new(/allocate_heap)
-      *ptr_ver = get_dpr_ver_group(sw_group_id, prodgroup, READ_ALL=all)
+      *ptr_ver = get_dpr_ver_group_v7(sw_group_id, prodgroup, READ_ALL=all)
       IF (verbose1) THEN help, *ptr_ver
 
       h5g_close, sw_group_id

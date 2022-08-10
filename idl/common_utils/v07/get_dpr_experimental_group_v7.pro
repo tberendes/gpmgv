@@ -34,6 +34,8 @@
 ;   variables for V05x file.
 ; 06/25/20  Berendes/UAH
 ; - removed binDEML2 from structure, not present in V07 files
+; 7/6/22 Berendes, UAH ITSC
+; - Added new GPM V7 Variables flagGraupelHail, binMixedPhaseTop
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
@@ -78,6 +80,8 @@ FUNCTION get_dpr_experimental_group_v7, group_id, prodgroup, READ_ALL=read_all
                     'seaIceConcentration' : seaIceConcentration = h5d_read(dtID)
                        'sigmaZeroProfile' : sigmaZeroProfile = h5d_read(dtID)
                    'surfaceSnowfallIndex' : surfaceSnowfallIndex=h5d_read(dtID)
+         		       'binMixedPhaseTop' : binMixedPhaseTop=h5d_read(dtID)
+                        'flagGraupelHail' : flagGraupelHail = h5d_read(dtID)
             ELSE : BEGIN
                       message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
@@ -108,6 +112,12 @@ FUNCTION get_dpr_experimental_group_v7, group_id, prodgroup, READ_ALL=read_all
       CREATE_STRUCT(experimental_struc, 'flagSurfaceSnowfall', flagSurfaceSnowfall)
    IF N_ELEMENTS(surfaceSnowfallIndex) NE 0 THEN experimental_struc = $
       CREATE_STRUCT(experimental_struc, 'surfaceSnowfallIndex', surfaceSnowfallIndex)
+
+  ; append extra V07 variables
+   IF N_ELEMENTS(binMixedPhaseTop) NE 0 THEN experimental_struc = $
+      CREATE_STRUCT(experimental_struc, 'binMixedPhaseTop', binMixedPhaseTop)
+   IF N_ELEMENTS(flagGraupelHail) NE 0 THEN experimental_struc = $
+      CREATE_STRUCT(experimental_struc, 'flagGraupelHail', flagGraupelHail)
 
 return, experimental_struc
 end

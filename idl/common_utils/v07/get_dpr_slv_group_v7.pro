@@ -40,6 +40,8 @@
 ; - changes for V07 files
 ; 10/26/20  Berendes/UAH
 ; - Added precipWaterIntegrated to the list of variables to be read by default.
+; 7/6/22  Berendes/UAH
+; - Added new GPM V7 Variable precipWater to the list of variables to be read by default.
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -122,6 +124,7 @@ FUNCTION get_dpr_slv_group_v7, group_id, prodgroup, READ_ALL=read_all
                         zFactorCorrectedESurface = h5d_read(dtID)
                'zFactorFinalNearSurface' : IF all THEN $
                      zFactorCorrectedNearSurface = h5d_read(dtID)
+                               'precipWater' : precipWater = h5d_read(dtID)
             ELSE : BEGIN
                       message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
@@ -188,6 +191,9 @@ FUNCTION get_dpr_slv_group_v7, group_id, prodgroup, READ_ALL=read_all
                     precipWaterIntegrated : precipWaterIntegrated, $
                     zFactorCorrected : zFactorCorrected }
    ENDELSE
+  ; append extra V07 variable
+   IF N_ELEMENTS(precipWater) NE 0 THEN SLV_struc = $
+      CREATE_STRUCT(SLV_struc, 'precipWater', precipWater)
 
 return, SLV_struc
 end
