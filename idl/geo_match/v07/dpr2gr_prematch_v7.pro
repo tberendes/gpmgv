@@ -512,11 +512,11 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          
          ; components for mixedPhaseTop and flagHeavyIcePrecip      
          ; from Patrick  
+         ; from Patrick
+         height_dpr = reform((*ptr_swath.PTR_PRE).Height[*,*,*])
          tempHIP_btm = height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKa,*,*])] ; in FS indexed by frequency
          tempHIP_top = height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKa,*,*])] ; in FS indexed by frequency
          
-         ; from Patrick
-         height_dpr = reform((*ptr_swath.PTR_PRE).Height[*,*,*])
          binMixedPhaseTop = reform((*ptr_swath.PTR_EXP).binMixedPhaseTop[*,*])
          mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
          
