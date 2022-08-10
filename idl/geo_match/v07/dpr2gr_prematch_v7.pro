@@ -1058,7 +1058,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                   if IS_DPR_FS then begin
 	                  xin=where(tempHIP_btm GT 0 AND tempHIP_top GT 0,xcount) ;make sure only valid values
 					  if(xcount GT 0) then begin
-						 if(topHeight[jpr,ielev] GE min(tempHIP_btm[xin]) AND bottomHeight[jpr,ielev] LE max(tempHIP_top[xin])) then begin
+						 if(data_GR2DPR.TOPHEIGHT[jpr,ielev] GE min(tempHIP_btm[xin]) AND $
+						 data_GR2DPR.BOTTOMHEIGHT[jpr,ielev] LE max(tempHIP_top[xin])) then begin
 							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ;at least one bin in volume has heavyIcePrecip detected by DPR
 						 endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
 					  endif
