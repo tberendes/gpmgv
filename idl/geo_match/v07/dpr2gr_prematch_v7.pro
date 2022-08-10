@@ -1071,6 +1071,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                dbz_corr_avg = Z_BELOW_THRESH
                rain_corr_avg = SRAIN_BELOW_THRESH
                epsilon_avg = Z_BELOW_THRESH
+               precipWater_avg = Z_BELOW_THRESH
+               if IS_DPR_FS then mixedPhaseTop_avg = Z_BELOW_THRESH
                IF ( have_paramdsd ) THEN BEGIN
                   dpr_dm_avg = Z_BELOW_THRESH
                   dpr_nw_avg = Z_BELOW_THRESH
