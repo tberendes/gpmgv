@@ -508,7 +508,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       flagInversion = (*ptr_swath.PTR_VER).flagInversion
       if IS_DPR_FS then begin
          flagHail = (*ptr_swath.PTR_CSF).flagHail
-         flagGraupelHail = (*ptr_swath.PTR_EXP).flagGraupelHail
+         flagGraupelHail = (*ptr_swath.PTR_Experimental).flagGraupelHail
          
          ; components for mixedPhaseTop and flagHeavyIcePrecip      
          ; from Patrick  
