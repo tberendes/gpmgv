@@ -341,7 +341,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       'FS_Ku' : begin
                    DO_KUKA = 1 ; KuKa will already be default to Ku
                    IS_DPR_FS = 1 ; flag as DPR FS scan
-                   indexKuKaDPR=2 #third element of nfreqHI in GPM.V7 filespec document
+                   indexKuKaDPR=2 ;third element of nfreqHI in GPM.V7 filespec document
                 end
       'FS' : BEGIN
                 RAYSPERSCAN = RAYSPERSCAN_FS
