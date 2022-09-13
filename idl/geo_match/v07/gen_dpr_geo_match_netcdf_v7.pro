@@ -92,7 +92,16 @@
 ;  - Added new GR liquid and frozen water content fields
 ; 7/6/22 Todd Berendes UAH/ITSC
 ;  - Changed zFactorCorrected to zFactorFinal in output netCDF file to match V7 variable name
-;
+; 8/15/22 Todd Berendes UAH/ITSC
+;  - New V07 variables in DPR, Ku, Ka
+;       precipWater, The amount of precipitable water, g/m3
+;       flagInversion, Inversion flag
+;  - New V07 variables only available for DPR FS scan
+;       flagGraupelHail, Graupel or Hail flag
+;       flagHail, 0 Hail not detected 1 Hail detected
+;       flagHeavyIcePrecip, Flag for heavyIcePrecip
+;       mixedPhaseTop, DPR detected top of mixed phase, meters
+
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
 ;
@@ -1042,7 +1051,7 @@ ncdf_attput, cdfid, flagHeavyIcePrecip_varid, 'long_name', $
 ncdf_attput, cdfid, flagHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
-mixedPhaseTop_varid = ncdf_vardef(cdfid, 'mixedPhaseTop', [fpdimid,eldimid], /float)
+mixedPhaseTop_varid = ncdf_vardef(cdfid, 'mixedPhaseTop', [fpdimid], /float)
 ncdf_attput, cdfid, mixedPhaseTop_varid, 'long_name', $
              'DPR detected top of mixed phase, only available for DPR FS scan'
 ncdf_attput, cdfid, mixedPhaseTop_varid, 'units', 'm'
@@ -1185,11 +1194,6 @@ precipWater_rejvarid = ncdf_vardef(cdfid, 'n_dpr_precipWater_rejected', [fpdimid
 ncdf_attput, cdfid, precipWater_rejvarid, 'long_name', $
              'number of bins with missing precipWater in DPR precipWater average'
 ncdf_attput, cdfid, precipWater_rejvarid, '_FillValue', INT_RANGE_EDGE
-
-mixedPhaseTop_rejvarid = ncdf_vardef(cdfid, 'n_dpr_mixedPhaseTop_rejected', [fpdimid,eldimid], /short)
-ncdf_attput, cdfid, mixedPhaseTop_rejvarid, 'long_name', $
-             'number of bins with missing mixedPhaseTop in DPR mixedPhaseTop average'
-ncdf_attput, cdfid, mixedPhaseTop_rejvarid, '_FillValue', INT_RANGE_EDGE
 
 prexpvarid = ncdf_vardef(cdfid, 'n_dpr_expected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, prexpvarid, 'long_name', 'number of bins in DPR averages'

@@ -260,8 +260,15 @@
 ;  - Added freezing level variable from model soundings
 ; 7/6/22 Todd Berendes UAH/ITSC
 ;  - Changed zFactorCorrected to zFactorFinal in output netCDF file to match V7 variable name
-; 7/18/22 Todd Berendes UAH/ITSC
-;  - Added precipWater, flagInversion
+; 8/15/22 Todd Berendes UAH/ITSC
+;  - New V07 variables in DPR, Ku, Ka
+;       precipWater, The amount of precipitable water, g/m3
+;       flagInversion, Inversion flag
+;  - New V07 variables only available for DPR FS scan
+;       flagGraupelHail, Graupel or Hail flag
+;       flagHail, 0 Hail not detected 1 Hail detected
+;       flagHeavyIcePrecip, Flag for heavyIcePrecip
+;       mixedPhaseTop, DPR detected top of mixed phase, meters
 ; 
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -334,6 +341,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       'FS_Ku' : begin
                    DO_KUKA = 1 ; KuKa will already be default to Ku
                    IS_DPR_FS = 1 ; flag as DPR FS scan
+                   indexKuKaDPR=2 #third element of nfreqHI in GPM.V7 filespec document
                 end
       'FS' : BEGIN
                 RAYSPERSCAN = RAYSPERSCAN_FS
@@ -512,12 +520,11 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          
          ; components for mixedPhaseTop and flagHeavyIcePrecip      
          ; from Patrick  
-         ; from Patrick
-         height_dpr = reform((*ptr_swath.PTR_PRE).Height[*,*,*])
-         tempHIP_btm = height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKa,*,*])] ; in FS indexed by frequency
-         tempHIP_top = height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKa,*,*])] ; in FS indexed by frequency
+         height_dpr = (*ptr_swath.PTR_PRE).Height[*,*,*] ; values in meters
+		 tempHIP_btm = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
+		 tempHIP_top = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
          
-         binMixedPhaseTop = reform((*ptr_swath.PTR_Experimental).binMixedPhaseTop[*,*])
+         binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop[*,*]
          mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
          
       endif
@@ -779,7 +786,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_flagGraupelHail = MAKE_ARRAY(numDPRrays, /int, $
                                   VALUE=INT_RANGE_EDGE)
                                   
-      tocdf_mixedPhaseTop = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_mixedPhaseTop = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_flagHeavyIcePrecip = MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
 
       tocdf_epsilon = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -814,7 +821,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_meas_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_precipWater_rejected = UINTARR(numDPRrays, num_elevations_out)
-      tocdf_mixedPhaseTop_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_r_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_epsilon_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_dpr_dm_rejected = UINTARR(numDPRrays, num_elevations_out)
@@ -843,6 +849,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          tocdf_heightStormTop[prgoodidx] = heightStormTop[pr_idx_2get]
          tocdf_rayNum = data_GR2DPR.RAYNUM
          tocdf_scanNum = data_GR2DPR.SCANNUM - scan_offset ; TAB 2/22/22 put in coordinates of offsetted data product (i.e. Ka)
+         tocdf_mixedPhaseTop[prgoodidx] = mixedPhaseTop[pr_idx_2get]
          
          ; TAB 9/30/20 
       	 tocdf_pwat_integ_liquid[prgoodidx] = pwat_integ_liquid[pr_idx_2get]
@@ -943,7 +950,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          n_dpr_dm_gates_rejected = 0UL  ; # gates with missing Dm
          n_dpr_nw_gates_rejected = 0UL  ; # gates with missing Nw
          n_precipWater_gates_rejected = 0UL
-         n_mixedPhaseTop_gates_rejected = 0UL
          clutterStatus = 0UL           ; result of clutter proximity for volume
 
          dpr_index = dpr_master_idx[jpr]
@@ -1021,15 +1027,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                                                     binClutterFreeBottom )
                n_precipWater_gates_rejected = dpr_gates_expected - numDPRgates
 
-			   n_mixedPhaseTop_gates_rejected = INT_RANGE_EDGE
-			   if IS_DPR_FS then begin
-                  numDPRgates = 0
-                  mixedPhaseTop_avg = get_dpr_layer_average( topCorrGate, botmCorrGate, $
-                                                    scandpr, raydpr, mixedPhaseTop, $
-                                                    1.0, 0.0,  numDPRgates, $
-                                                    binClutterFreeBottom )
-                  n_mixedPhaseTop_gates_rejected = dpr_gates_expected - numDPRgates
-			   endif
                numDPRgates = 0
                epsilon_avg = get_dpr_layer_average( topCorrGate, botmCorrGate, $
                                                     scandpr, raydpr, epsilon, $
@@ -1077,7 +1074,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                rain_corr_avg = SRAIN_BELOW_THRESH
                epsilon_avg = Z_BELOW_THRESH
                precipWater_avg = Z_BELOW_THRESH
-               if IS_DPR_FS then mixedPhaseTop_avg = Z_BELOW_THRESH
                IF ( have_paramdsd ) THEN BEGIN
                   dpr_dm_avg = Z_BELOW_THRESH
                   dpr_nw_avg = Z_BELOW_THRESH
@@ -1096,7 +1092,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                   tocdf_corr_dbz[jpr,ielev] = dbz_corr_avg
                   tocdf_corr_rain[jpr,ielev] = rain_corr_avg
                   tocdf_precipWater[jpr,ielev] = precipWater_avg
-                  if IS_DPR_FS then tocdf_mixedPhaseTop[jpr,ielev] = mixedPhaseTop_avg
                   tocdf_epsilon[jpr,ielev] = epsilon_avg
                   IF ( have_paramdsd ) THEN BEGIN
                      tocdf_dm[jpr,ielev] = dpr_dm_avg
@@ -1114,7 +1109,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                           tocdf_corr_rain[jpr,ielev] = FLOAT_OFF_EDGE
                   		  tocdf_precipWater[jpr,ielev] = FLOAT_OFF_EDGE
                   		  if IS_DPR_FS then begin 
-                  		      tocdf_mixedPhaseTop[jpr,ielev] = FLOAT_OFF_EDGE
                   		      tocdf_flagHeavyIcePrecip[jpr,ielev] = INT_OFF_EDGE
                   		  endif
                           tocdf_epsilon[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1128,7 +1122,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                           tocdf_corr_rain[jpr,ielev] = Z_MISSING
                           tocdf_precipWater[jpr,ielev] = Z_MISSING
                   		  if IS_DPR_FS then begin
-                  		      tocdf_mixedPhaseTop[jpr,ielev] = Z_MISSING
                   		      tocdf_flagHeavyIcePrecip[jpr,ielev] = LONG(Z_MISSING)
                   		  endif
                           tocdf_epsilon[jpr,ielev] = Z_MISSING
@@ -1142,7 +1135,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          tocdf_meas_z_rejected[jpr,ielev] = UINT(n_meas_zgates_rejected)
          tocdf_corr_z_rejected[jpr,ielev] = UINT(n_corr_zgates_rejected)
          tocdf_precipWater_rejected[jpr,ielev] = UINT(n_precipWater_gates_rejected)
-         tocdf_mixedPhaseTop_rejected[jpr,ielev] = UINT(n_mixedPhaseTop_gates_rejected)
          tocdf_corr_r_rejected[jpr,ielev] = UINT(n_corr_rgates_rejected)
          tocdf_epsilon_rejected[jpr,ielev] = UINT(n_epsilon_gates_rejected)
          IF ( have_paramdsd ) THEN BEGIN
@@ -1470,7 +1462,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_dpr_meas_z_rejected', tocdf_meas_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_z_rejected', tocdf_corr_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_precipWater_rejected', tocdf_precipWater_rejected
-   if IS_DPR_FS then NCDF_VARPUT, ncid, 'n_dpr_mixedPhaseTop_rejected', tocdf_mixedPhaseTop_rejected
    NCDF_VARPUT, ncid, 'n_dpr_epsilon_rejected', tocdf_epsilon_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_r_rejected', tocdf_corr_r_rejected
    IF ( have_paramdsd ) THEN BEGIN
