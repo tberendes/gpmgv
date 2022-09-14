@@ -520,6 +520,36 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          
          ; components for mixedPhaseTop and flagHeavyIcePrecip      
          ; from Patrick  
+         
+;         height (4-byte float, array size: nbin x nray x nscan):
+;Height. Values are in m. Special values are defined as:
+;-9999.9 Missing value
+;
+; is the Height MSL or AGL?
+;         
+;         binHeavyIcePrecipTop (2-byte integer, array size: nray x nscan):
+;Range bin number for the top of heavy ice precip. For FS and MS swaths, bin numbers
+;are 1-based ranging from 1 at the top of the data window with 176 at the Ellipsoid. For
+;HS swaths, bin numbers are 1-based ranging from 1 at the top of the data window with
+;88 at the Ellipsoid.A value of -1111 denotes no precipitation is present. Special values are
+;defined as:
+;-9999 Missing value
+;
+;binHeavyIcePrecipBottom (2-byte integer, array size: nray x nscan):
+;Range bin number for the bottom of heavy ice precip. For FS and MS swaths, bin numbers
+;are 1-based ranging from 1 at the top of the data window with 176 at the Ellipsoid. For
+;HS swaths, bin numbers are 1-based ranging from 1 at the top of the data window with
+;88 at the Ellipsoid.A value of -1111 denotes no precipitation is present. Special values are
+;defined as:
+;-9999 Missing value
+
+; need to filter out the negative values in the "bin" variables since we are indexing on them.  
+; do we need to subtract 1 from the "bin" values?
+;
+; idl 8.0 allows negative array indices which wrap around
+; https://www.l3harrisgeospatial.com/Support/Self-Help-Tools/Help-Articles/Help-Articles-Detail/ArtMID/10220/ArticleID/18490/IDL-version-80-or-greater-Negative-Array-Indices-and-the-WHERE-function
+         
+         
          height_dpr = (*ptr_swath.PTR_PRE).Height[*,*,*] ; values in meters
 		 tempHIP_btm = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
 		 tempHIP_top = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
