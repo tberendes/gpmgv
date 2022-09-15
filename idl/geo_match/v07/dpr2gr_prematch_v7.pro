@@ -527,7 +527,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 ;
 ; is the Height MSL or AGL?
 ;         
-;         binHeavyIcePrecipTop (2-byte integer, array size: nray x nscan):
+;binHeavyIcePrecipTop (2-byte integer, array size: nfreqHI x nray x nscan):
 ;Range bin number for the top of heavy ice precip. For FS and MS swaths, bin numbers
 ;are 1-based ranging from 1 at the top of the data window with 176 at the Ellipsoid. For
 ;HS swaths, bin numbers are 1-based ranging from 1 at the top of the data window with
@@ -535,13 +535,18 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 ;defined as:
 ;-9999 Missing value
 ;
-;binHeavyIcePrecipBottom (2-byte integer, array size: nray x nscan):
+;binHeavyIcePrecipBottom (2-byte integer, array size: nfreqHI x nray x nscan):
 ;Range bin number for the bottom of heavy ice precip. For FS and MS swaths, bin numbers
 ;are 1-based ranging from 1 at the top of the data window with 176 at the Ellipsoid. For
 ;HS swaths, bin numbers are 1-based ranging from 1 at the top of the data window with
 ;88 at the Ellipsoid.A value of -1111 denotes no precipitation is present. Special values are
 ;defined as:
 ;-9999 Missing value
+;
+;binMixedPhaseTop (2-byte integer, array size: nray x nscan):
+;The range bin of the mixed phase top. Special values are defined as:
+;-9999 Missing value
+
 
 ; need to filter out the negative values in the "bin" variables since we are indexing on them.  
 ; do we need to subtract 1 from the "bin" values?
@@ -551,11 +556,29 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          
          
          height_dpr = (*ptr_swath.PTR_PRE).Height[*,*,*] ; values in meters
-		 tempHIP_btm = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
-		 tempHIP_top = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
          
+         ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
+         binHIPB = reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*]) - 1
+         binHIPT = reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*]) - 1
+         
+		 tempHIP_btm = height_dpr[binHIPB]
+		 tempHIP_top = height_dpr[binHIPT]
+		 HIPB_missing = where(binHIPB lt 0)
+		 HIPT_missing = where(binHIPT lt 0)
+		 ; fix missing height bin values (i.e. < 0)
+		 tempHIP_btm[HIPB_missing] = tempHIP_btm[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
+		 tempHIP_top[HIPT_missing] = tempHIP_top[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
+
          binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop[*,*]
-         mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
+         mixedPhaseTop = height_dpr[binMixedPhaseTop] ;cross-reference height with bin number
+         ; fix missing values (negative bin indices)
+         mixedPhaseTop[where(binMixedPhaseTop lt 0) = -9999 ; missing 
+         
+;		 tempHIP_btm = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
+;		 tempHIP_top = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
+;         
+;         binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop[*,*]
+;         mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
          
       endif
       
