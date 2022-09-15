@@ -555,7 +555,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 ; https://www.l3harrisgeospatial.com/Support/Self-Help-Tools/Help-Articles/Help-Articles-Detail/ArtMID/10220/ArticleID/18490/IDL-version-80-or-greater-Negative-Array-Indices-and-the-WHERE-function
          
          
-         height_dpr = (*ptr_swath.PTR_PRE).Height[*,*,*] ; values in meters
+         height_dpr = (*ptr_swath.PTR_PRE).Height ; values in meters
          
          ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
          binHIPB = reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*]) - 1
@@ -569,11 +569,13 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 		 tempHIP_btm[HIPB_missing] = tempHIP_btm[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
 		 tempHIP_top[HIPT_missing] = tempHIP_top[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
 
-         binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop[*,*]
-         mixedPhaseTop = height_dpr[binMixedPhaseTop] ;cross-reference height with bin number
+         binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop
+         mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
          ; fix missing values (negative bin indices)
          mixedPhaseTop[where(binMixedPhaseTop lt 0)] = -9999 ; missing 
          
+;         height_dpr = (*ptr_swath.PTR_PRE).Height[*,*,*] ; values in meters
+;         
 ;		 tempHIP_btm = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
 ;		 tempHIP_top = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
 ;         
