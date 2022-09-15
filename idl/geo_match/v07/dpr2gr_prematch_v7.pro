@@ -570,6 +570,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 		 tempHIP_top[HIPT_missing] = tempHIP_top[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
 
          binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop
+         print, binMixedPhaseTop
          mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
          ; fix missing values (negative bin indices)
          mixedPhaseTop[where(binMixedPhaseTop lt 0)] = -9999 ; missing 
