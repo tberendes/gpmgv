@@ -546,6 +546,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 ;binMixedPhaseTop (2-byte integer, array size: nray x nscan):
 ;The range bin of the mixed phase top. Special values are defined as:
 ;-9999 Missing value
+; this is wrong, it appears that missing data is set to zero, which implies that indexing starts at 1 
+; like the other "bin" variables
 
 
 ; need to filter out the negative values in the "bin" variables since we are indexing on them.  
@@ -569,8 +571,10 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 		 tempHIP_btm[HIPB_missing] = tempHIP_btm[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
 		 tempHIP_top[HIPT_missing] = tempHIP_top[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
 
-         binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop
-         print, binMixedPhaseTop
+         binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop - 1 
+         ; it appears that missing data is set to zero, which implies that indexing starts at 1 
+		 ; like the other "bin" variables, subtracting one will cause missing values to be -1
+         ;print, binMixedPhaseTop
          mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
          ; fix missing values (negative bin indices)
          mixedPhaseTop[where(binMixedPhaseTop lt 0)] = -9999 ; missing 
