@@ -572,7 +572,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop[*,*]
          mixedPhaseTop = height_dpr[binMixedPhaseTop] ;cross-reference height with bin number
          ; fix missing values (negative bin indices)
-         mixedPhaseTop[where(binMixedPhaseTop lt 0) = -9999 ; missing 
+         mixedPhaseTop[where(binMixedPhaseTop lt 0)] = -9999 ; missing 
          
 ;		 tempHIP_btm = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
 ;		 tempHIP_top = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
