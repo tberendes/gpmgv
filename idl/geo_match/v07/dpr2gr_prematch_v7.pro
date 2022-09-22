@@ -565,11 +565,17 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          
 		 tempHIP_btm = height_dpr[binHIPB]
 		 tempHIP_top = height_dpr[binHIPT]
-		 HIPB_missing = where(binHIPB lt 0)
-		 HIPT_missing = where(binHIPT lt 0)
+		 
 		 ; fix missing height bin values (i.e. < 0)
-		 tempHIP_btm[HIPB_missing] = tempHIP_btm[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
-		 tempHIP_top[HIPT_missing] = tempHIP_top[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
+		 HIPB_missing = where(binHIPB lt 0, hipb_missing_cnt)
+		 if (hipb_missing_cnt gt 0) then begin
+		     tempHIP_btm[HIPB_missing] = tempHIP_btm[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
+		 endif
+		 
+		 HIPT_missing = where(binHIPT lt 0, hipt_missing_cnt)
+		 if (hipt_missing_cnt gt 0) then begin
+		     tempHIP_top[HIPT_missing] = tempHIP_top[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
+		 endif
 
          binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop - 1 
          ; it appears that missing data is set to zero, which implies that indexing starts at 1 
@@ -577,7 +583,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          ;print, binMixedPhaseTop
          mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
          ; fix missing values (negative bin indices)
-         mixedPhaseTop[where(binMixedPhaseTop lt 0)] = -9999 ; missing 
+         mixedPhaseTop[where(binMixedPhaseTop lt 0, /NULL)] = -9999 ; missing 
          
 ;         height_dpr = (*ptr_swath.PTR_PRE).Height[*,*,*] ; values in meters
 ;         
