@@ -915,7 +915,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          tocdf_heightStormTop[prgoodidx] = heightStormTop[pr_idx_2get]
          tocdf_rayNum = data_GR2DPR.RAYNUM
          tocdf_scanNum = data_GR2DPR.SCANNUM - scan_offset ; TAB 2/22/22 put in coordinates of offsetted data product (i.e. Ka)
-         tocdf_mixedPhaseTop[prgoodidx] = mixedPhaseTop[pr_idx_2get]
          
          ; TAB 9/30/20 
       	 tocdf_pwat_integ_liquid[prgoodidx] = pwat_integ_liquid[pr_idx_2get]
@@ -927,6 +926,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          if IS_DPR_FS then begin
             tocdf_flagHail[prgoodidx] = flagHail[pr_idx_2get]
             tocdf_flagGraupelHail[prgoodidx] = flagGraupelHail[pr_idx_2get]
+            tocdf_mixedPhaseTop[prgoodidx] = mixedPhaseTop[pr_idx_2get]
          endif 
 
      ENDIF ELSE BEGIN
