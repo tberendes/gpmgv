@@ -1119,8 +1119,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                   
                   ; new logic for flagHeavyIcePrecip
                   if IS_DPR_FS then begin
-					    if((tempHIP_btm[jpr,ielev] GT 0) AND (meantopMSL GE tempHIP_btm[jpr,ielev]) AND $
-						(tempHIP_top[jpr,ielev] GT 0) AND (meanbotmMSL LE tempHIP_top[jpr,ielev])) then begin
+					    if((tempHIP_btm[jpr,ielev] GT 0) AND (meantopMSL GE tempHIP_btm[jpr]) AND $
+						(tempHIP_top[jpr,ielev] GT 0) AND (meanbotmMSL LE tempHIP_top[jpr])) then begin
 							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ; heavy ice precip is a footprint based height
 						endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
 				  endif
