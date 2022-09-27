@@ -569,12 +569,12 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 		 ; fix missing height bin values (i.e. < 0)
 		 HIPB_missing = where(binHIPB lt 0, hipb_missing_cnt)
 		 if (hipb_missing_cnt gt 0) then begin
-		     tempHIP_btm[HIPB_missing] = tempHIP_btm[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
+		     tempHIP_btm[HIPB_missing] = binHIPB[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
 		 endif
 		 
 		 HIPT_missing = where(binHIPT lt 0, hipt_missing_cnt)
 		 if (hipt_missing_cnt gt 0) then begin
-		     tempHIP_top[HIPT_missing] = tempHIP_top[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
+		     tempHIP_top[HIPT_missing] = binHIPT[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
 		 endif
 
          binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop - 1 
@@ -1119,14 +1119,21 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                   
                   ; new logic for flagHeavyIcePrecip
                   if IS_DPR_FS then begin
-	                  xin=where(tempHIP_btm GT 0 AND tempHIP_top GT 0,xcount) ;make sure only valid values
-					  if(xcount GT 0) then begin
-						 if(data_GR2DPR.TOPHEIGHT[jpr,ielev] GE min(tempHIP_btm[xin]) AND $
-						 data_GR2DPR.BOTTOMHEIGHT[jpr,ielev] LE max(tempHIP_top[xin])) then begin
-							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ;at least one bin in volume has heavyIcePrecip detected by DPR
-						 endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
-					  endif
+					    if((tempHIP_btm[jpr,ielev] GT 0) AND (meantopMSL GE tempHIP_btm[jpr,ielev]) AND $
+						(tempHIP_top[jpr,ielev] GT 0) AND (meanbotmMSL LE tempHIP_top[jpr,ielev])) then begin
+							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ; heavy ice precip is a footprint based height
+						endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
 				  endif
+				  ; original logic, I think this was erroneously based on assumption heavyIcePrecip top and bottom was indexed by dpr bin, not footprint based
+;                  if IS_DPR_FS then begin
+;	                  xin=where(tempHIP_btm GT 0 AND tempHIP_top GT 0,xcount) ;make sure only valid values
+;					  if(xcount GT 0) then begin
+;						 if(data_GR2DPR.TOPHEIGHT[jpr,ielev] GE min(tempHIP_btm[xin]) AND $
+;						 data_GR2DPR.BOTTOMHEIGHT[jpr,ielev] LE max(tempHIP_top[xin])) then begin
+;							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ;at least one bin in volume has heavyIcePrecip detected by DPR
+;						 endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
+;					  endif
+;				  endif
                         
                ENDIF
          ENDIF ELSE BEGIN          ; dpr_index GE 0 AND dpr_echoes[jpr] NE 0B

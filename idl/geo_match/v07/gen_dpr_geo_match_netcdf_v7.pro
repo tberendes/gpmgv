@@ -1053,7 +1053,7 @@ ncdf_attput, cdfid, flagHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
 ; only available for DPR FS scan
 mixedPhaseTop_varid = ncdf_vardef(cdfid, 'mixedPhaseTop', [fpdimid], /float)
 ncdf_attput, cdfid, mixedPhaseTop_varid, 'long_name', $
-             'DPR detected top of mixed phase, only available for DPR FS scan'
+             'DPR detected top of mixed phase, only available for DPR FS scan (MSL)'
 ncdf_attput, cdfid, mixedPhaseTop_varid, 'units', 'm'
 ncdf_attput, cdfid, mixedPhaseTop_varid, '_FillValue', FLOAT_RANGE_EDGE
 
