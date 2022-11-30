@@ -563,19 +563,19 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          binHIPB = reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*]) - 1
          binHIPT = reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*]) - 1
          
-		 tempHIP_btm = height_dpr[binHIPB]
-		 tempHIP_top = height_dpr[binHIPT]
+;		 tempHIP_btm = height_dpr[binHIPB]
+;		 tempHIP_top = height_dpr[binHIPT]
 		 
-		 ; fix missing height bin values (i.e. < 0)
-		 HIPB_missing = where(binHIPB lt 0, hipb_missing_cnt)
-		 if (hipb_missing_cnt gt 0) then begin
-		     tempHIP_btm[HIPB_missing] = binHIPB[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
-		 endif
+;		 ; fix missing height bin values (i.e. < 0)
+;		 HIPB_missing = where(binHIPB lt 0, hipb_missing_cnt)
+;		 if (hipb_missing_cnt gt 0) then begin
+;		     tempHIP_btm[HIPB_missing] = binHIPB[HIPB_missing] + 1 ; add 1 to get back missing and no precip values
+;		 endif
 		 
-		 HIPT_missing = where(binHIPT lt 0, hipt_missing_cnt)
-		 if (hipt_missing_cnt gt 0) then begin
-		     tempHIP_top[HIPT_missing] = binHIPT[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
-		 endif
+;		 HIPT_missing = where(binHIPT lt 0, hipt_missing_cnt)
+;		 if (hipt_missing_cnt gt 0) then begin
+;		     tempHIP_top[HIPT_missing] = binHIPT[HIPT_missing] + 1 ; add 1 to get back missing and no precip values
+;		 endif
 
          binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop - 1 
          ; it appears that missing data is set to zero, which implies that indexing starts at 1 
@@ -1118,12 +1118,25 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                   n_dpr_nw_gates_rejected = dpr_gates_expected - numDPRgates
                   
                   ; new logic for flagHeavyIcePrecip
-                  if IS_DPR_FS then begin
-					    if((tempHIP_btm[jpr] GT 0) AND (meantopMSL*1000.0 GE tempHIP_btm[jpr]) AND $
-						(tempHIP_top[jpr] GT 0) AND (meanbotmMSL*1000.0 LE tempHIP_top[jpr])) then begin
-							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ; heavy ice precip is a footprint based height
-						endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
-				  endif
+                  ; need to index binHIPB and binHIPT by raydpr, scandpr not jpr
+              		;raydpr = data_GR2DPR.RAYNUM[jpr]
+              		;scandpr = data_GR2DPR.SCANNUM[jpr]-scan_offset ; TAB 2/22/22
+              		; make upper section match with indexing logic, need single values indexed by ray,scan
+
+                    if(binHIPB[raydpr,scandpr] GE 0) and (binHIPT[raydpr,scandpr] GE 0) AND $
+                         (meantopMSL*1e3 GE height_dpr[binHIPB[raydpr,scandpr]],raydpr,scandpr) AND $
+                         (meanbotmMSL*1e3 LE height_dpr[binHIPT[raydpr,scandpr]],raydpr,scandpr) THEN BEGIN
+                            tocdf_flagHeavyIcePrecip[jpr,ielev] = 1
+                    ENDIF ELSE tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
+                  
+                  ; next attempt
+;                  if IS_DPR_FS then begin
+;					    if((tempHIP_btm[jpr] GT 0) AND (meantopMSL*1000.0 GE tempHIP_btm[jpr]) AND $
+;						(tempHIP_top[jpr] GT 0) AND (meanbotmMSL*1000.0 LE tempHIP_top[jpr])) then begin
+;							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ; heavy ice precip is a footprint based height
+;						endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
+;				  endif
+				  
 				  ; original logic, I think this was erroneously based on assumption heavyIcePrecip top and bottom was indexed by dpr bin, not footprint based
 ;                  if IS_DPR_FS then begin
 ;	                  xin=where(tempHIP_btm GT 0 AND tempHIP_top GT 0,xcount) ;make sure only valid values
