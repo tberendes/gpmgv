@@ -1123,11 +1123,13 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
               		;scandpr = data_GR2DPR.SCANNUM[jpr]-scan_offset ; TAB 2/22/22
               		; make upper section match with indexing logic, need single values indexed by ray,scan
 
+                  if IS_DPR_FS then begin
                     if (binHIPB[raydpr,scandpr] GE 0) and (binHIPT[raydpr,scandpr] GE 0) AND $
                          (meantopMSL*1e3 GE height_dpr[binHIPB[raydpr,scandpr],raydpr,scandpr]) AND $
                          (meanbotmMSL*1e3 LE height_dpr[binHIPT[raydpr,scandpr],raydpr,scandpr]) THEN BEGIN
                             tocdf_flagHeavyIcePrecip[jpr,ielev] = 1
                     ENDIF ELSE tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
+                  endif
                   
                   ; next attempt
 ;                  if IS_DPR_FS then begin
