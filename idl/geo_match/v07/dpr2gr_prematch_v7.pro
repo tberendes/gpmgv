@@ -1057,6 +1057,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          n_dpr_dm_gates_rejected = 0UL  ; # gates with missing Dm
          n_dpr_nw_gates_rejected = 0UL  ; # gates with missing Nw
          n_precipWater_gates_rejected = 0UL
+         n_airTemperature_gates_rejected = 0UL
+         
          clutterStatus = 0UL           ; result of clutter proximity for volume
 
          dpr_index = dpr_master_idx[jpr]
