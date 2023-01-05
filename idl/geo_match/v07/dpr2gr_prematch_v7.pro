@@ -512,8 +512,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 	      ; following needed for DFR variables
 	      dbz_corr_Ku = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[0,*,*,*])
  		  dbz_corr_Ka = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[1,*,*,*])
- 		  dbz_meas_Ku = reform((*ptr_swath.PTR_SLV).ZFACTORMEASURED[0,*,*,*])
- 		  dbz_meas_Ka = reform((*ptr_swath.PTR_SLV).ZFACTORMEASURED[1,*,*,*]) 
+ 		  dbz_meas_Ku = reform((*ptr_swath.PTR_PRE).ZFACTORMEASURED[0,*,*,*])
+ 		  dbz_meas_Ka = reform((*ptr_swath.PTR_PRE).ZFACTORMEASURED[1,*,*,*]) 
  		  
 		  ; Compute the DFR for each DPR bin for both measured and final reflectivity:
 		  
