@@ -1250,6 +1250,11 @@ ncdf_attput, cdfid, precipWater_rejvarid, 'long_name', $
              'number of bins with missing precipWater in DPR precipWater average'
 ncdf_attput, cdfid, precipWater_rejvarid, '_FillValue', INT_RANGE_EDGE
 
+airTemp_rejvarid = ncdf_vardef(cdfid, 'n_dpr_airTemperature_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, airTemp_rejvarid, 'long_name', $
+             'number of bins with missing airTemperature in DPR airTemperature average'
+ncdf_attput, cdfid, airTemp_rejvarid, '_FillValue', INT_RANGE_EDGE
+
 prexpvarid = ncdf_vardef(cdfid, 'n_dpr_expected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, prexpvarid, 'long_name', 'number of bins in DPR averages'
 ncdf_attput, cdfid, prexpvarid, '_FillValue', INT_RANGE_EDGE
