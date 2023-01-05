@@ -1099,14 +1099,14 @@ ncdf_attput, cdfid, mixedPhaseTop_varid, 'units', 'm'
 ncdf_attput, cdfid, mixedPhaseTop_varid, '_FillValue', FLOAT_RANGE_EDGE
 
 ; only available for DPR FS scan
-measuredDFR_varid = ncdf_vardef(cdfid, 'measuredDFR', [fpdimid], /float)
+measuredDFR_varid = ncdf_vardef(cdfid, 'measuredDFR', [fpdimid,eldimid], /float)
 ncdf_attput, cdfid, measuredDFR_varid, 'long_name', $
              'DPR Measured Dual Frequency Ratio (DFR), only available for DPR FS scan'
 ncdf_attput, cdfid, measuredDFR_varid, 'units', 'db'
 ncdf_attput, cdfid, measuredDFR_varid, '_FillValue', FLOAT_RANGE_EDGE
 
 ; only available for DPR FS scan
-finalDFR_varid = ncdf_vardef(cdfid, 'finalDFR', [fpdimid], /float)
+finalDFR_varid = ncdf_vardef(cdfid, 'finalDFR', [fpdimid,eldimid], /float)
 ncdf_attput, cdfid, finalDFR_varid, 'long_name', $
              'DPR Final Dual Frequency Ratio (DFR), only available for DPR FS scan'
 ncdf_attput, cdfid, finalDFR_varid, 'units', 'db'
