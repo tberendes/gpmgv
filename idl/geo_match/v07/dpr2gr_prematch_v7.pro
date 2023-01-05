@@ -518,8 +518,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 		  ; Compute the DFR for each DPR bin for both measured and final reflectivity:
 		  
 		  ; get index for missing values in either Ku or Ka components of reflectivity :
-          ind_bad_corr=where(dbz_corr_Ku lt 0 or dbz_corr_Ka lt 0) #do this check for both
-          ind_bad_meas=where(dbz_meas_Ku lt 0 or dbz_meas_Ka lt 0) #do this check for both
+          ind_bad_corr=where(dbz_corr_Ku lt 0 or dbz_corr_Ka lt 0) 
+          ind_bad_meas=where(dbz_meas_Ku lt 0 or dbz_meas_Ka lt 0) 
           
           ; replicate dbz_corr_Ku, set all to missing, fill in DFR using ind
           DFRfinal=dbz_corr_Ku-dbz_corr_Ka
