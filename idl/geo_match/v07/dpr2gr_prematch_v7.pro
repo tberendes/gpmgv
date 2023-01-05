@@ -269,6 +269,10 @@
 ;       flagHail, 0 Hail not detected 1 Hail detected
 ;       flagHeavyIcePrecip, Flag for heavyIcePrecip
 ;       mixedPhaseTop, DPR detected top of mixed phase, meters
+; 1/4/23 Todd Berendes UAH/ITSC
+;  -  Added measuredDFR, finalDFR, nHeavyIcePrecip
+;  -  Added airTemperature to all types
+;  -  Changed to version 2.3
 ; 
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -493,7 +497,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    ; TAB 2/16/21 added heightZeroDeg from VER
    IF PTR_VALID(ptr_swath.PTR_VER) THEN BEGIN
       ; help, *ptr_swath.PTR_VER
-      heightZeroDeg = (*ptr_swath.PTR_VER).HEIGHTZERODEG   
+      heightZeroDeg = (*ptr_swath.PTR_VER).HEIGHTZERODEG
+      airTemperature = (*ptr_swath.PTR_VER).airTemperature
    ENDIF ELSE BEGIN
       message, "IDL Error Exit: Invalid pointer to PTR_VER.", /INFO
       goto, bailOut
@@ -503,6 +508,34 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    	  if DO_KUKA then begin
 	      dbz_corr = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[indexKuKa,*,*,*]) ; in FS indexed by frequency
 	      piaFinal = reform((*ptr_swath.PTR_SLV).piaFinal[indexKuKa,*,*]) ; in FS indexed by frequency
+	      
+	      ; following needed for DFR variables
+	      dbz_corr_Ku = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[0,*,*,*])
+ 		  dbz_corr_Ka = reform((*ptr_swath.PTR_SLV).ZFACTORCORRECTED[1,*,*,*])
+ 		  dbz_meas_Ku = reform((*ptr_swath.PTR_SLV).ZFACTORMEASURED[0,*,*,*])
+ 		  dbz_meas_Ka = reform((*ptr_swath.PTR_SLV).ZFACTORMEASURED[1,*,*,*]) 
+ 		  
+		  ; Compute the DFR for each DPR bin for both measured and final reflectivity:
+		  
+		  ; get index for missing values in either Ku or Ka components of reflectivity :
+          ind_bad_corr=where(dbz_corr_Ku lt 0 or dbz_corr_Ka lt 0) #do this check for both
+          ind_bad_meas=where(dbz_meas_Ku lt 0 or dbz_meas_Ka lt 0) #do this check for both
+          
+          ; replicate dbz_corr_Ku, set all to missing, fill in DFR using ind
+          DFRfinal=dbz_corr_Ku-dbz_corr_Ka
+          ; set missing values according to Ku and Ka components to  Z_MISSING
+          DFRfinal[ind_bad_corr] = Z_MISSING
+          DFRmeasured=dbz_meas_Ku-dbz_meas_Ka
+          ; set missing values to Z_MISSING
+          DFRmeasured[ind_bad_meas]  = Z_MISSING
+
+; DFRmeasured=ZFactorMeasured[KuBand_index,ind]-ZFactorMeasured[KaBand_index,ind]
+; DFRfinal=ZFactorFinal[KuBand_index,*]-ZFactorFinal[KaBand_index,*]
+; Average DFR using min_val=-10 dB
+; Put average value into the two DFR netcdf variables and write to matchup file
+; Units are decibels (dB)
+; Missing value same as that used ZFactor (e.g., -999.99 or -888)
+	      
    	  endif else begin
 	      dbz_corr = (*ptr_swath.PTR_SLV).ZFACTORCORRECTED
 	      piaFinal = (*ptr_swath.PTR_SLV).piaFinal
@@ -562,6 +595,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
          binHIPB = reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*]) - 1
          binHIPT = reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*]) - 1
+         nHIP = reform((*ptr_swath.PTR_CSF).nHeavyIcePrecip[indexKuKaDPR,*,*])
          
 ;		 tempHIP_btm = height_dpr[binHIPB]
 ;		 tempHIP_top = height_dpr[binHIPT]
@@ -584,15 +618,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
          ; fix missing values (negative bin indices)
          mixedPhaseTop[where(binMixedPhaseTop lt 0, /NULL)] = -9999 ; missing 
-         
-;         height_dpr = (*ptr_swath.PTR_PRE).Height[*,*,*] ; values in meters
-;         
-;		 tempHIP_btm = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipBottom[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
-;		 tempHIP_top = reform(height_dpr[reform((*ptr_swath.PTR_CSF).binHeavyIcePrecipTop[indexKuKaDPR,*,*])]) ; in FS indexed by frequency (0->Ku;1->Ka;2->DPR)
-;         
-;         binMixedPhaseTop = (*ptr_swath.PTR_Experimental).binMixedPhaseTop[*,*]
-;         mixedPhaseTop = height_dpr[binMixedPhaseTop,*,*] ;cross-reference height with bin number
-         
+                  
       endif
       
       surfRain_corr = (*ptr_swath.PTR_SLV).PRECIPRATEESURFACE
@@ -851,9 +877,17 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                                   VALUE=INT_RANGE_EDGE)
       tocdf_flagGraupelHail = MAKE_ARRAY(numDPRrays, /int, $
                                   VALUE=INT_RANGE_EDGE)
+      tocdf_airTemperature = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                  VALUE=FLOAT_RANGE_EDGE)
+ ; new DFR variables
+       tocdf_meas_dfr = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                  VALUE=FLOAT_RANGE_EDGE)
+       tocdf_final_dfr = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                  VALUE=FLOAT_RANGE_EDGE)
                                   
       tocdf_mixedPhaseTop = MAKE_ARRAY(numDPRrays, /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_flagHeavyIcePrecip = MAKE_ARRAY(numDPRrays, num_elevations_out, /int, VALUE=INT_RANGE_EDGE)
+      tocdf_nHeavyIcePrecip = MAKE_ARRAY(numDPRrays, /int, VALUE=INT_RANGE_EDGE)
 
       tocdf_epsilon = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                  VALUE=FLOAT_RANGE_EDGE)
@@ -886,7 +920,10 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_swemrms_rejected = data_GR2DPR.N_GR_SWEMRMS_REJECTED
       tocdf_meas_z_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_z_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_meas_dfr_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_final_dfr_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_precipWater_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_airTemperature_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_corr_r_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_epsilon_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_dpr_dm_rejected = UINTARR(numDPRrays, num_elevations_out)
@@ -927,6 +964,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
             tocdf_flagHail[prgoodidx] = flagHail[pr_idx_2get]
             tocdf_flagGraupelHail[prgoodidx] = flagGraupelHail[pr_idx_2get]
             tocdf_mixedPhaseTop[prgoodidx] = mixedPhaseTop[pr_idx_2get]
+            tocdf_nHeavyIcePrecip[prgoodidx] = nHIP[pr_idx_2get]
          endif 
 
      ENDIF ELSE BEGIN
@@ -1010,6 +1048,9 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          dpr_gates_expected = 0UL      ; # DPR gates within the sweep vert. bounds
          n_meas_zgates_rejected = 0UL  ; # of above that are below DPR dBZ cutoff
          n_corr_zgates_rejected = 0UL  ; ditto, for corrected DPR Z
+         n_meas_dfr_zgates_rejected = 0UL  ; # of above that are below DPR dBZ cutoff
+         n_final_dfr_zgates_rejected = 0UL  ; ditto, for corrected DPR Z
+         n_airTemperature_rejected = 0UL  ; ditto, for corrected airTemperature
          n_corr_precipWater_rejected = 0UL  ; ditto, for corrected DPR Z
          n_corr_rgates_rejected = 0UL  ; # gates below DPR rainrate cutoff
          n_epsilon_gates_rejected = 0UL  ; # gates with missing epsilon
@@ -1116,41 +1157,50 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                                      numDPRgates, binClutterFreeBottom, $
                                      CLUTTERFLAG=clutterFlag )
                   n_dpr_nw_gates_rejected = dpr_gates_expected - numDPRgates
-                  
+                                                            
+               ENDIF
                   ; new logic for flagHeavyIcePrecip
                   ; need to index binHIPB and binHIPT by raydpr, scandpr not jpr
               		;raydpr = data_GR2DPR.RAYNUM[jpr]
               		;scandpr = data_GR2DPR.SCANNUM[jpr]-scan_offset ; TAB 2/22/22
               		; make upper section match with indexing logic, need single values indexed by ray,scan
 
-                  if IS_DPR_FS then begin
+               numDPRgates = 0
+               airTemperature_avg = get_dpr_layer_average( topCorrGate, botmCorrGate, $
+                                                    scandpr, raydpr, airTemperature, $
+                                                    1.0, 0.0,  numDPRgates, $
+                                                    binClutterFreeBottom )
+               n_airTemperature_gates_rejected = dpr_gates_expected - numDPRgates
+
+              if IS_DPR_FS then begin
+	              ; do layer averaging for 3-D DPR DFR fields
+	               numDPRgates = 0
+	               meas_dfr_avg = get_dpr_layer_average(           $
+	                                    topMeasGate, botmMeasGate, $
+	                                    scandpr, raydpr, DFRmeasured, $
+	                                    DBZSCALEMEAS, -10, $
+	                                    numDPRgates, binClutterFreeBottom, $
+	                                    CLUTTERFLAG=clutterFlag, /LOGAVG )
+	               n_meas_dfr_zgates_rejected = dpr_gates_expected - numDPRgates
+	
+	               numDPRgates = 0
+	               clutterStatus = 0  ; get once for all 3 fields, same value applies
+	               final_dfr_avg = get_dpr_layer_average(           $
+	                                    topCorrGate, botmCorrGate, $
+	                                    scandpr, raydpr, DFRfinal, $
+	                                    DBZSCALECORR, -10, $
+	                                    numDPRgates, binClutterFreeBottom, $
+	                                    CLUTTERFLAG=clutterFlag, clutterStatus, $
+	                                    /LOGAVG )
+	               n_final_dfr_zgates_rejected = dpr_gates_expected - numDPRgates
+                   
                     if (binHIPB[raydpr,scandpr] GE 0) and (binHIPT[raydpr,scandpr] GE 0) AND $
                          (meantopMSL*1e3 GE height_dpr[binHIPB[raydpr,scandpr],raydpr,scandpr]) AND $
                          (meanbotmMSL*1e3 LE height_dpr[binHIPT[raydpr,scandpr],raydpr,scandpr]) THEN BEGIN
                             tocdf_flagHeavyIcePrecip[jpr,ielev] = 1
                     ENDIF ELSE tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
-                  endif
-                  
-                  ; next attempt
-;                  if IS_DPR_FS then begin
-;					    if((tempHIP_btm[jpr] GT 0) AND (meantopMSL*1000.0 GE tempHIP_btm[jpr]) AND $
-;						(tempHIP_top[jpr] GT 0) AND (meanbotmMSL*1000.0 LE tempHIP_top[jpr])) then begin
-;							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ; heavy ice precip is a footprint based height
-;						endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
-;				  endif
-				  
-				  ; original logic, I think this was erroneously based on assumption heavyIcePrecip top and bottom was indexed by dpr bin, not footprint based
-;                  if IS_DPR_FS then begin
-;	                  xin=where(tempHIP_btm GT 0 AND tempHIP_top GT 0,xcount) ;make sure only valid values
-;					  if(xcount GT 0) then begin
-;						 if(data_GR2DPR.TOPHEIGHT[jpr,ielev] GE min(tempHIP_btm[xin]) AND $
-;						 data_GR2DPR.BOTTOMHEIGHT[jpr,ielev] LE max(tempHIP_top[xin])) then begin
-;							tocdf_flagHeavyIcePrecip[jpr,ielev] = 1 ;at least one bin in volume has heavyIcePrecip detected by DPR
-;						 endif else tocdf_flagHeavyIcePrecip[jpr,ielev] = 0
-;					  endif
-;				  endif
-                        
-               ENDIF
+                   
+              endif
          ENDIF ELSE BEGIN          ; dpr_index GE 0 AND dpr_echoes[jpr] NE 0B
            ; case where no corr DPR gates in the ray are above dBZ threshold,
            ; or sample heights are undefined due to no valid GR bins, set
@@ -1159,9 +1209,12 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                writeMissing = 0
                dbz_meas_avg = Z_BELOW_THRESH
                dbz_corr_avg = Z_BELOW_THRESH
+               meas_dfr_avg = Z_BELOW_THRESH
+               final_dfr_avg = Z_BELOW_THRESH
                rain_corr_avg = SRAIN_BELOW_THRESH
                epsilon_avg = Z_BELOW_THRESH
                precipWater_avg = Z_BELOW_THRESH
+               airTemperature_avg = Z_BELOW_THRESH
                IF ( have_paramdsd ) THEN BEGIN
                   dpr_dm_avg = Z_BELOW_THRESH
                   dpr_nw_avg = Z_BELOW_THRESH
@@ -1178,8 +1231,13 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          ; normal rainy footprint, write computed science variables
                   tocdf_meas_dbz[jpr,ielev] = dbz_meas_avg
                   tocdf_corr_dbz[jpr,ielev] = dbz_corr_avg
+                  if IS_DPR_FS then begin
+                  	tocdf_meas_dfr[jpr,ielev] = meas_dfr_avg
+                  	tocdf_final_dfr[jpr,ielev] = final_dfr_avg
+                  endif
                   tocdf_corr_rain[jpr,ielev] = rain_corr_avg
                   tocdf_precipWater[jpr,ielev] = precipWater_avg
+                  tocdf_airTemperature = airTemperature_avg                 
                   tocdf_epsilon[jpr,ielev] = epsilon_avg
                   IF ( have_paramdsd ) THEN BEGIN
                      tocdf_dm[jpr,ielev] = dpr_dm_avg
@@ -1196,6 +1254,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                           tocdf_corr_dbz[jpr,ielev] = FLOAT_OFF_EDGE
                           tocdf_corr_rain[jpr,ielev] = FLOAT_OFF_EDGE
                   		  tocdf_precipWater[jpr,ielev] = FLOAT_OFF_EDGE
+                  		  tocdf_airTemperature[jpr,ielev] = FLOAT_OFF_EDGE
                   		  if IS_DPR_FS then begin 
                   		      tocdf_flagHeavyIcePrecip[jpr,ielev] = INT_OFF_EDGE
                   		  endif
@@ -1209,6 +1268,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                           tocdf_corr_dbz[jpr,ielev] = Z_MISSING
                           tocdf_corr_rain[jpr,ielev] = Z_MISSING
                           tocdf_precipWater[jpr,ielev] = Z_MISSING
+                          tocdf_airTemperature[jpr,ielev] = Z_MISSING
                   		  if IS_DPR_FS then begin
                   		      tocdf_flagHeavyIcePrecip[jpr,ielev] = LONG(Z_MISSING)
                   		  endif
@@ -1222,6 +1282,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
         ; assign the computed meta values to the output array slots
          tocdf_meas_z_rejected[jpr,ielev] = UINT(n_meas_zgates_rejected)
          tocdf_corr_z_rejected[jpr,ielev] = UINT(n_corr_zgates_rejected)
+         tocdf_meas_dfr_rejected[jpr,ielev] = UINT(n_meas_dfr_zgates_rejected)
+         tocdf_final_dfr_rejected[jpr,ielev] = UINT(n_final_dfr_zgates_rejected)
          tocdf_precipWater_rejected[jpr,ielev] = UINT(n_precipWater_gates_rejected)
          tocdf_corr_r_rejected[jpr,ielev] = UINT(n_corr_rgates_rejected)
          tocdf_epsilon_rejected[jpr,ielev] = UINT(n_epsilon_gates_rejected)
@@ -1229,6 +1291,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
             tocdf_dpr_dm_rejected[jpr,ielev] = UINT(n_dpr_dm_gates_rejected)
             tocdf_dpr_nw_rejected[jpr,ielev] = UINT(n_dpr_nw_gates_rejected)
          ENDIF
+         tocdf_airTemperature_rejected[jpr,ielev] = UINT(n_airTemperature_gates_rejected)
          tocdf_dpr_expected[jpr,ielev] = UINT(dpr_gates_expected)
          tocdf_clutterStatus[jpr,ielev] = UINT(clutterStatus)
 
@@ -1502,6 +1565,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
     NCDF_VARPUT, ncid, 'have_precipWater', DATA_PRESENT
    NCDF_VARPUT, ncid, 'flagInversion', tocdf_flagInversion
     NCDF_VARPUT, ncid, 'have_flagInversion', DATA_PRESENT
+   NCDF_VARPUT, ncid, 'airTemperature', tocdf_airTemperature
+    NCDF_VARPUT, ncid, 'have_airTemperature', DATA_PRESENT
     
    ; only present in DPR FS, check data present flag
    NCDF_VARPUT, ncid, 'flagHail', tocdf_flagHail
@@ -1512,6 +1577,14 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
     NCDF_VARPUT, ncid, 'have_mixedPhaseTop', IS_DPR_FS ; This is present only for DPR FS swaths (Ku and Ka)
    NCDF_VARPUT, ncid, 'flagHeavyIcePrecip', tocdf_flagHeavyIcePrecip
     NCDF_VARPUT, ncid, 'have_flagHeavyIcePrecip', IS_DPR_FS ; This is present only for DPR FS swaths (Ku and Ka)
+   NCDF_VARPUT, ncid, 'nHeavyIcePrecip', tocdf_nHeavyIcePrecip
+    NCDF_VARPUT, ncid, 'have_nHeavyIcePrecip', IS_DPR_FS ; This is present only for DPR FS swaths (Ku and Ka)
+
+   ; new DFR variables
+   NCDF_VARPUT, ncid, 'measuredDFR', tocdf_meas_dfr
+    NCDF_VARPUT, ncid, 'have_measuredDFR', IS_DPR_FS ; This is present only for DPR FS swaths (Ku and Ka)
+   NCDF_VARPUT, ncid, 'finalDFR', tocdf_final_dfr
+    NCDF_VARPUT, ncid, 'have_finalDFR', IS_DPR_FS ; This is present only for DPR FS swaths (Ku and Ka) 
 
    NCDF_VARPUT, ncid, 'Epsilon', tocdf_Epsilon                  ; data
     NCDF_VARPUT, ncid, 'have_Epsilon', DATA_PRESENT             ; data presence flag
@@ -1549,9 +1622,13 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected', tocdf_gr_swemrms_rejected
    NCDF_VARPUT, ncid, 'n_dpr_meas_z_rejected', tocdf_meas_z_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_z_rejected', tocdf_corr_z_rejected
+   NCDF_VARPUT, ncid, 'n_dpr_meas_dfr_rejected', tocdf_meas_dfr_rejected
+   NCDF_VARPUT, ncid, 'n_dpr_final_dfr_rejected', tocdf_final_dfr_rejected
+   NCDF_VARPUT, ncid, 'n_dpr_airTemperature_rejected', tocdf_airTemperature_rejected
    NCDF_VARPUT, ncid, 'n_dpr_precipWater_rejected', tocdf_precipWater_rejected
    NCDF_VARPUT, ncid, 'n_dpr_epsilon_rejected', tocdf_epsilon_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_r_rejected', tocdf_corr_r_rejected
+   NCDF_VARPUT, ncid, 'n_airTemperature_rejected', tocdf_airTemperature_rejected
    IF ( have_paramdsd ) THEN BEGIN
       NCDF_VARPUT, ncid, 'n_dpr_dm_rejected', tocdf_dpr_dm_rejected
       NCDF_VARPUT, ncid, 'n_dpr_nw_rejected', tocdf_dpr_nw_rejected

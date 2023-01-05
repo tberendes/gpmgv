@@ -101,6 +101,10 @@
 ;       flagHail, 0 Hail not detected 1 Hail detected
 ;       flagHeavyIcePrecip, Flag for heavyIcePrecip
 ;       mixedPhaseTop, DPR detected top of mixed phase, meters
+; 1/4/23 Todd Berendes UAH/ITSC
+;  -  Added measuredDFR, finalDFR, nHeavyIcePrecip
+;  -  Added airTemperature to all types
+;  -  Changed to version 2.3
 
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -130,6 +134,8 @@ FUNCTION gen_dpr_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, $
 ;GEO_MATCH_FILE_VERSION=2.1
 ; TAB 6/8/22 changed version to 2.2 from 2.1 for additional freezing level variable
 GEO_MATCH_FILE_VERSION=2.2
+; TAB 6/8/22 changed version to 2.3 from 2.2 for additional version 7 and DFR variables
+GEO_MATCH_FILE_VERSION=2.3
 
 ; TAB 6/7/22 
 freezing_level_height=-9999. ; defaults to missing height
@@ -503,6 +509,11 @@ ncdf_attput, cdfid, havedbzvarid, 'long_name', $
              'data exists flag for ZFactorFinal'
 ncdf_attput, cdfid, havedbzvarid, '_FillValue', NO_DATA_PRESENT
 
+haveairtempvarid = ncdf_vardef(cdfid, 'have_airTemperature', /short)
+ncdf_attput, cdfid, haveairtempvarid, 'long_name', $
+             'data exists flag for airTemperature'
+ncdf_attput, cdfid, haveairtempvarid, '_FillValue', NO_DATA_PRESENT
+
 ; V07 new variables
 have_precipWater_varid = ncdf_vardef(cdfid, 'have_precipWater', /short)
 ncdf_attput, cdfid, have_precipWater_varid, 'long_name', $
@@ -533,10 +544,28 @@ ncdf_attput, cdfid, have_flagHeavyIcePrecip_varid, 'long_name', $
 ncdf_attput, cdfid, have_flagHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
+have_nHeavyIcePrecip_varid = ncdf_vardef(cdfid, 'have_nHeavyIcePrecip', /short)
+ncdf_attput, cdfid, have_nHeavyIcePrecip_varid, 'long_name', $
+             'data exists flag for nHeavyIcePrecip'
+ncdf_attput, cdfid, have_nHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
 have_mixedPhaseTop_varid = ncdf_vardef(cdfid, 'have_mixedPhaseTop', /short)
 ncdf_attput, cdfid, have_mixedPhaseTop_varid, 'long_name', $
              'data exists flag for mixedPhaseTop'
 ncdf_attput, cdfid, have_mixedPhaseTop_varid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+have_measuredDFR_varid = ncdf_vardef(cdfid, 'have_measuredDFR', /short)
+ncdf_attput, cdfid, have_measuredDFR_varid, 'long_name', $
+             'data exists flag for measuredDFR'
+ncdf_attput, cdfid, have_measuredDFR_varid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
+have_finalDFR_varid = ncdf_vardef(cdfid, 'have_finalDFR', /short)
+ncdf_attput, cdfid, have_finalDFR_varid, 'long_name', $
+             'data exists flag for finalDFR'
+ncdf_attput, cdfid, have_finalDFR_varid, '_FillValue', NO_DATA_PRESENT
 
 havepiavarid = ncdf_vardef(cdfid, 'have_piaFinal', /short)
 ncdf_attput, cdfid, havepiavarid, 'long_name', $
@@ -1020,6 +1049,12 @@ ncdf_attput, cdfid, dbzvarid, 'long_name', $
 ncdf_attput, cdfid, dbzvarid, 'units', 'dBZ'
 ncdf_attput, cdfid, dbzvarid, '_FillValue', FLOAT_RANGE_EDGE
 
+airtempvarid = ncdf_vardef(cdfid, 'airTemperature', [fpdimid,eldimid])
+ncdf_attput, cdfid, airtempvarid, 'long_name', $
+             'DPR Average Air Temperature'
+ncdf_attput, cdfid, airtempvarid, 'units', 'K'
+ncdf_attput, cdfid, airtempvarid, '_FillValue', FLOAT_RANGE_EDGE
+
 ; new V07 variables
 precipWater_varid = ncdf_vardef(cdfid, 'precipWater', [fpdimid,eldimid], /float)
 ncdf_attput, cdfid, precipWater_varid, 'long_name', $
@@ -1051,11 +1086,31 @@ ncdf_attput, cdfid, flagHeavyIcePrecip_varid, 'long_name', $
 ncdf_attput, cdfid, flagHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
 
 ; only available for DPR FS scan
+nHeavyIcePrecip_varid = ncdf_vardef(cdfid, 'nHeavyIcePrecip', [fpdimid], /short)
+ncdf_attput, cdfid, nHeavyIcePrecip_varid, 'long_name', $
+             'number of heavyIcePrecip bins, only available for DPR FS scan'
+ncdf_attput, cdfid, nHeavyIcePrecip_varid, '_FillValue', NO_DATA_PRESENT
+
+; only available for DPR FS scan
 mixedPhaseTop_varid = ncdf_vardef(cdfid, 'mixedPhaseTop', [fpdimid], /float)
 ncdf_attput, cdfid, mixedPhaseTop_varid, 'long_name', $
              'DPR detected top of mixed phase, only available for DPR FS scan (MSL)'
 ncdf_attput, cdfid, mixedPhaseTop_varid, 'units', 'm'
 ncdf_attput, cdfid, mixedPhaseTop_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+; only available for DPR FS scan
+measuredDFR_varid = ncdf_vardef(cdfid, 'measuredDFR', [fpdimid], /float)
+ncdf_attput, cdfid, measuredDFR_varid, 'long_name', $
+             'DPR Measured Dual Frequency Ratio (DFR), only available for DPR FS scan'
+ncdf_attput, cdfid, measuredDFR_varid, 'units', 'db'
+ncdf_attput, cdfid, measuredDFR_varid, '_FillValue', FLOAT_RANGE_EDGE
+
+; only available for DPR FS scan
+finalDFR_varid = ncdf_vardef(cdfid, 'finalDFR', [fpdimid], /float)
+ncdf_attput, cdfid, finalDFR_varid, 'long_name', $
+             'DPR Final Dual Frequency Ratio (DFR), only available for DPR FS scan'
+ncdf_attput, cdfid, finalDFR_varid, 'units', 'db'
+ncdf_attput, cdfid, finalDFR_varid, '_FillValue', FLOAT_RANGE_EDGE
 
 rainvarid = ncdf_vardef(cdfid, 'PrecipRate', [fpdimid,eldimid])
 ncdf_attput, cdfid, rainvarid, 'long_name', 'DPR Estimated Rain Rate Profile'

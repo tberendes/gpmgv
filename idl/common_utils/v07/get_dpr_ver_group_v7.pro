@@ -74,6 +74,7 @@ FUNCTION get_dpr_ver_group_v7, group_id, prodgroup, READ_ALL=read_all
             'sigmaZeroNPCorrected' : IF all THEN sigmaZeroNPCorrected = $
                                      h5d_read(dtID)
                    'flagInversion' : flagInversion = h5d_read(dtID)
+                   'airTemperature' : airTemperature = h5d_read(dtID)
             ELSE : BEGIN
                       message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
@@ -107,6 +108,9 @@ FUNCTION get_dpr_ver_group_v7, group_id, prodgroup, READ_ALL=read_all
   ; append new V7 variables
   IF N_ELEMENTS(flagInversion) NE 0 THEN $
      VER_struc = CREATE_STRUCT(VER_struc, 'flagInversion', flagInversion)
+
+  IF N_ELEMENTS(airTemperature) NE 0 THEN $
+     VER_struc = CREATE_STRUCT(VER_struc, 'airTemperature', airTemperature)
 
 return, VER_struc
 end

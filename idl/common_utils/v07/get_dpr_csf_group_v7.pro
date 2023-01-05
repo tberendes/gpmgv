@@ -41,6 +41,9 @@
 ;   V05x file in READ_ALL case.
 ; 7/6/22 Berendes, UAH ITSC
 ; - Added new GPM V7 Variables flagHail, binHeavyIcePrecipTop, binHeavyIcePrecipBottom
+; 1/4/23 Todd Berendes UAH/ITSC
+;  -  Added nHeavyIcePrecip
+
 ;
 ; EMAIL QUESTIONS OR COMMENTS AT:
 ;       https://pmm.nasa.gov/contact
@@ -95,6 +98,7 @@ FUNCTION get_dpr_csf_group_v7, group_id, prodgroup, READ_ALL=read_all
            			 'flagHail' : flagHail=h5d_read(dtID)
          'binHeavyIcePrecipTop' : binHeavyIcePrecipTop=h5d_read(dtID)
       'binHeavyIcePrecipBottom' : binHeavyIcePrecipBottom=h5d_read(dtID)
+              'nHeavyIcePrecip' : nHeavyIcePrecip=h5d_read(dtID)
             ELSE : BEGIN
                       message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
@@ -160,6 +164,9 @@ FUNCTION get_dpr_csf_group_v7, group_id, prodgroup, READ_ALL=read_all
   IF N_ELEMENTS(binHeavyIcePrecipBottom) NE 0 THEN $
      CSF_struc = CREATE_STRUCT(CSF_struc, 'binHeavyIcePrecipBottom', $
                                   binHeavyIcePrecipBottom)                                    
+  IF N_ELEMENTS(nHeavyIcePrecip) NE 0 THEN $
+     CSF_struc = CREATE_STRUCT(CSF_struc, 'nHeavyIcePrecip', $
+                                  nHeavyIcePrecip)                                    
                                   
 return, CSF_struc
 end
