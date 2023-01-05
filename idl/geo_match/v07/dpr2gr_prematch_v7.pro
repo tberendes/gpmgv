@@ -1050,7 +1050,6 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
          n_corr_zgates_rejected = 0UL  ; ditto, for corrected DPR Z
          n_meas_dfr_zgates_rejected = 0UL  ; # of above that are below DPR dBZ cutoff
          n_final_dfr_zgates_rejected = 0UL  ; ditto, for corrected DPR Z
-         n_airTemperature_rejected = 0UL  ; ditto, for corrected airTemperature
          n_corr_precipWater_rejected = 0UL  ; ditto, for corrected DPR Z
          n_corr_rgates_rejected = 0UL  ; # gates below DPR rainrate cutoff
          n_epsilon_gates_rejected = 0UL  ; # gates with missing epsilon
@@ -1239,7 +1238,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
                   endif
                   tocdf_corr_rain[jpr,ielev] = rain_corr_avg
                   tocdf_precipWater[jpr,ielev] = precipWater_avg
-                  tocdf_airTemperature = airTemperature_avg                 
+                  tocdf_airTemperature[jpr,ielev] = airTemperature_avg                 
                   tocdf_epsilon[jpr,ielev] = epsilon_avg
                   IF ( have_paramdsd ) THEN BEGIN
                      tocdf_dm[jpr,ielev] = dpr_dm_avg
