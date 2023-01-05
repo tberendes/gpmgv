@@ -653,7 +653,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 
    ; debug, remove *****************
    
-   help, localZenithAngle
+   ; help, localZenithAngle
    
    ; precompute the reuseable ray angle trig variables for parallax -- in GPM,
    ; we have the local zenith angle for every ray/scan (i.e., footprint)
