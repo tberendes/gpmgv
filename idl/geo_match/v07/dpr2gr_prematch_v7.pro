@@ -1630,7 +1630,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_dpr_precipWater_rejected', tocdf_precipWater_rejected
    NCDF_VARPUT, ncid, 'n_dpr_epsilon_rejected', tocdf_epsilon_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_r_rejected', tocdf_corr_r_rejected
-   NCDF_VARPUT, ncid, 'n_airTemperature_rejected', tocdf_airTemperature_rejected
+
    IF ( have_paramdsd ) THEN BEGIN
       NCDF_VARPUT, ncid, 'n_dpr_dm_rejected', tocdf_dpr_dm_rejected
       NCDF_VARPUT, ncid, 'n_dpr_nw_rejected', tocdf_dpr_nw_rejected
