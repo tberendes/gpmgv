@@ -89,7 +89,10 @@ FUNCTION gen_dprgmi_geo_match_netcdf_v7, geo_match_nc_file, numpts_FS, numpts_NS
 ;GEO_MATCH_FILE_VERSION=2.1   ; hard code inside function now, not from "Include"
 
 ; TAB 6/7/22 version 2.2 added freezing_level_height variable
-GEO_MATCH_FILE_VERSION=2.2
+;GEO_MATCH_FILE_VERSION=2.2
+
+; TAB 2/2/23 version 2.3 Jason fixed issue causing GR values to have integer values
+GEO_MATCH_FILE_VERSION=2.3
 
 ; TAB 6/7/22 
 freezing_level_height=-9999. ; defaults to missing height

@@ -1693,7 +1693,8 @@ DPR_version = '0'
 ;IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '1_0' ELSE BEGIN
 ; 8/30/18 TAB changed default version of grverstr to 1_1
 ;IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '2_1' ELSE BEGIN
-IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '2_2' ELSE BEGIN
+;IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '2_2' ELSE BEGIN
+IF N_ELEMENTS(gr_nc_version) EQ 0 THEN grverstr = '2_3' ELSE BEGIN
   ; check whether we have '.' or '_' between the units and decimal places
    IF STRPOS(gr_nc_version, '.') NE -1 THEN BEGIN
      ; substitute an underscore for the decimal point
