@@ -128,7 +128,7 @@ if [ "$USER_ID" = "morris" ]
     GV_BASE_DIR=/home/morris/swdev
   elif [ "$USER_ID" = "gvoper" ]
       then
-        GV_BASE_DIR=/home/gvoper
+        GV_BASE_DIR=/home/gvoper/v7_geomatch
   elif [ "$USER_ID" = "tberendes" ]
       then
         GV_BASE_DIR=/home/tberendes/v7_geomatch

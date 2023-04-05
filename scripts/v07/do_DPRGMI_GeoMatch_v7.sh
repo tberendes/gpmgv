@@ -136,7 +136,7 @@ USER_ID=`whoami`
 #  else
 #    if [ "$USER_ID" = "gvoper" ]
 #      then
-#        GV_BASE_DIR=/home/gvoper
+#        GV_BASE_DIR=/home/gvoper/v7_geomatch
 #      else
 #        echo "User unknown, can't set GV_BASE_DIR!"
 #        exit 1
