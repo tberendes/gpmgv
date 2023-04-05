@@ -135,7 +135,9 @@ FUNCTION gen_dpr_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, $
 ; TAB 6/8/22 changed version to 2.2 from 2.1 for additional freezing level variable
 GEO_MATCH_FILE_VERSION=2.2
 ; TAB 6/8/22 changed version to 2.3 from 2.2 for additional version 7 and DFR variables
-GEO_MATCH_FILE_VERSION=2.3
+;GEO_MATCH_FILE_VERSION=2.3
+; TAB 4/5/23 changed version to 2.4 from 2.3 for reprocessed GR files 
+GEO_MATCH_FILE_VERSION=2.4
 
 ; TAB 6/7/22 
 freezing_level_height=-9999. ; defaults to missing height
