@@ -65,7 +65,7 @@ FUNCTION gen_gprof_geo_match_netcdf_v7, geo_match_nc_file, numpts, elev_angles, 
 ;GEO_MATCH_NC_FILE_VERSION=2.3
 
 ; TAB 4/5/23 changed version to 2.4 from 2.3 for reprocessed GR files 
-GEO_MATCH_FILE_VERSION=2.4
+GEO_MATCH_NC_FILE_VERSION=2.4
 
 
 ; TAB 6/7/22 
