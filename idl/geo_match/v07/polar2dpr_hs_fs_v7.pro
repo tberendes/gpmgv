@@ -975,8 +975,14 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       ENDFOR
 
       IF ( nscans2do EQ 0 ) THEN BEGIN
-         print, "No footprints in range of GR by lat/lon difference check, bailing."
-         GOTO, nextGRfile
+;         print, "No footprints in range of GR by lat/lon difference check, bailing."
+;         GOTO, nextGRfile
+         
+          IF DPR_scantype EQ 'FS' THEN BEGIN
+             print, "Check 1: No ", DPR_scantype, " swath footprints in range of GR", $
+                " by lat/lon difference check, bailing."
+             GOTO, nextGRfile
+          ENDIF 
       ENDIF
 
      ; arrays holding 'exact' DPR at-surface X and Y and range values for
@@ -1238,7 +1244,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    ENDFOR
 
    IF ( nscans2do EQ 0 ) THEN BEGIN
-      print, "No ", DPR_scantype, " swath footprints in range of GR", $
+      print, "Check 2: No ", DPR_scantype, " swath footprints in range of GR", $
              " by lat/lon difference check, bailing."
       IF DPR_scantype NE 'FS' THEN GOTO, skippedSwath ELSE GOTO, emptyFile
    ENDIF

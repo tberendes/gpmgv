@@ -640,7 +640,13 @@ while read thisdate
     			   
     			   fi    			   
     			# format the matching sounding's file pathname
-    			sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    			if [ "$site" = "NPOL_WA" -o "$site" = "NPOL_MD" ] # round to current day at zero Z
+    			   then
+    			   sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/NPOL/NPOL_${year}_${mmdd}_${hh}UTC.txt
+    			else 
+    			   sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
+    			fi    			
+    			#sndfile=${SOUNDINGS_TOP_DIR}/${year}/${mmdd}/${site}/${site}_${year}_${mmdd}_${hh}UTC.txt
     			ls -al $sndfile > /dev/null 2>&1
     			if [ $? -eq 0 ]
 			      then
