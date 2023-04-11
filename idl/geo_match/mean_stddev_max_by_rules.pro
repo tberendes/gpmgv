@@ -30,6 +30,11 @@
 ; - Added BAD_TO_ZERO parameter to explicitly control how below-badthresh values
 ;   are handled in the averaging, and replaced exception specific to Z field
 ;   with a check of this parameter's setting.
+; 2/23/23 Berendes, UAH ITSC
+; - Added WITH_ZEROS parameter to explicitly use zero values (i.e. zero precip
+;   not non-zero precip below goodthresh) in the averaging
+;   even when they would be cut off with goodthresh
+; - now return new n_gr_precip field in struct for precip variables (zero for others)
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -39,24 +44,35 @@
 
 FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
                                    no_data_value, WEIGHTS=weights, $
-                                   LOG_AVG=log_avg, BAD_TO_ZERO=badToZero
+                                   LOG_AVG=log_avg, BAD_TO_ZERO=badToZero, $
+                                   WITH_ZEROS=withZeros
 
+; note goodthresh is dpr_rain_min=0.01 for rain rates, badthresh = 0, Patrick says may need variable to return count of "unknown"
+; rates not factored into average?  check this with Daniel
    doLog = KEYWORD_SET(log_avg)
    doZero = KEYWORD_SET(badToZero)
+   wZero = KEYWORD_SET(withZeros)
 
    IF N_ELEMENTS(weights) EQ 0 THEN $
       weights = MAKE_ARRAY(N_ELEMENTS(data), /FLOAT, VALUE=1.0) $
    ELSE IF N_ELEMENTS(weights) NE N_ELEMENTS(data) THEN message, $
            "Mismatched data and weights array sizes."
-
+   n_GR_precip = 0
    SWITCH field OF
-        'MW' :
-        'MI' :
          'Z' :
        'ZDR' :
        'KDP' :
+              BEGIN
+                 good_idx = WHERE( data GE goodthresh, countGVgood ) $
+                 bad_idx = WHERE( data LT badthresh, countGVbad )
+                 break
+              END
+        'MW' :
+        'MI' :
         'RR' : BEGIN
-                 good_idx = WHERE( data GE goodthresh, countGVgood )
+                 if wZero then good_idx = WHERE( data GE goodthresh or data EQ 0, countGVgood ) $
+                 else good_idx = WHERE( data GE goodthresh, countGVgood )
+                 temp=where(abs(data) gt 0 and abs(data) lt 888.0, n_GR_precip)
                  bad_idx = WHERE( data LT badthresh, countGVbad )
                  break
                END
@@ -69,7 +85,9 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
         'NW' : BEGIN
         		 ; added sanity check to filter out very large values
         		 ; 9.9e36 and Inf found in DARW CPOL data files
-                 good_idx = WHERE( data GT goodthresh and data LT 32000, countGVgood )
+                 if wZero then good_idx = WHERE( (data GT goodthresh and data LT 32000) or data EQ 0, countGVgood ) $
+                 else good_idx = WHERE( data GT goodthresh and data LT 32000, countGVgood )
+                 temp=where(abs(data) gt 0 and abs(data) lt 888.0, n_GR_precip)
                  bad_idx = WHERE( data LE badthresh or data GE 32000, countGVbad )
                  break
                END
@@ -79,6 +97,8 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
    n_gv_points_rejected = N_ELEMENTS(data) - countGVgood
 
    IF ( countGVgood GT 0 ) THEN BEGIN
+      if doLog then $
+          data = 10.0^(data*0.1)
       IF ( countGVbad GT 0 and doZero ) THEN BEGIN
         ; set "bad" dBZ, etc. values to 0.0 for averaging and include them all
          data2avg=data
@@ -90,17 +110,20 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
          wgts2avg = weights[good_idx]
       ENDELSE
 
-      IF doLog THEN BEGIN
-        ; compute volume-weighted GV reflectivity average in Z space,
-        ;   then convert back to dBZ
-         z_avg_gv = TOTAL(10.^(0.1*data2avg) * wgts2avg) / TOTAL(wgts2avg)
-         avg_gv = 10.*ALOG10(z_avg_gv)
-      ENDIF ELSE BEGIN
+;      IF doLog THEN BEGIN
+;        ; compute volume-weighted GV reflectivity average in Z space,
+;        ;   then convert back to dBZ
+;         z_avg_gv = TOTAL(10.^(0.1*data2avg) * wgts2avg) / TOTAL(wgts2avg)
+;         avg_gv = 10.*ALOG10(z_avg_gv)
+;      ENDIF ELSE BEGIN
 ; Disable automatic printing of subsequent math errors:
 ;!EXCEPT=0
 
         ; compute volume-weighted average in data space
          avg_gv = TOTAL(data2avg * wgts2avg) / TOTAL(wgts2avg)
+         IF doLog THEN $
+             ;avg_gv = 10.*ALOG10(z_avg_gv)
+             avg_gv = 10.*ALOG10(avg_gv)
 ;		IF CHECK_MATH() NE 0 THEN BEGIN
 ;			PRINT, 'Math error mean_stddev_max_by_rules'
 ;			print, 'field ', field, ' goodthresh ', goodthresh, ' badthresh ', badthresh, $
@@ -111,7 +134,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 ; Enable automatic printing of subsequent math errors:
 ;!EXCEPT=2
 ;		ENDIF
-      ENDELSE
+;      ENDELSE
      ; compute max and standard deviation of good GR gates in data space
       max_gv = MAX(data2avg)
       IF N_ELEMENTS(data2avg) LT 2 THEN stddev_gv = 0.0 $
@@ -127,10 +150,12 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
       max_gv = no_data_value
    ENDELSE
 
+   ; note n_GR_precip is only set for "RR" variables
    struct = { rejects : n_gv_points_rejected, $
                  mean : avg_gv, $
                stddev : stddev_gv, $
-                  max : max_gv }
+                  max : max_gv, $
+          n_GR_precip : n_GR_precip }
 
 return, struct
 end

@@ -569,31 +569,34 @@
                IF have_gv_rc THEN BEGIN
                   gvrcvals = rc_bscan[thisPRsGRindices]
                   altstats=mean_stddev_max_by_rules(gvrcvals,'RR', dpr_rain_min, $
-                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
+                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols,WITH_ZEROS=1)
                   n_gr_rc_points_rejected = altstats.rejects
                   rc_avg_gv = altstats.mean
                   rc_stddev_gv = altstats.stddev
                   rc_max_gv = altstats.max
+                  rc_n_precip = altstats.n_GR_precip
                ENDIF
 
                IF have_gv_rp THEN BEGIN
                   gvrpvals = rp_bscan[thisPRsGRindices]
                   altstats=mean_stddev_max_by_rules(gvrpvals,'RR', dpr_rain_min, $
-                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
+                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols,WITH_ZEROS=1)
                   n_gr_rp_points_rejected = altstats.rejects
                   rp_avg_gv = altstats.mean
                   rp_stddev_gv = altstats.stddev
                   rp_max_gv = altstats.max
+                  rp_n_precip = altstats.n_GR_precip
                ENDIF
 
                IF have_gv_rr THEN BEGIN
                   gvrrvals = rr_bscan[thisPRsGRindices]
                   altstats=mean_stddev_max_by_rules(gvrrvals,'RR', dpr_rain_min, $
-                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols)
+                              0.0, SRAIN_BELOW_THRESH, WEIGHTS=binvols,WITH_ZEROS=1)
                   n_gr_rr_points_rejected = altstats.rejects
                   rr_avg_gv = altstats.mean
                   rr_stddev_gv = altstats.stddev
                   rr_max_gv = altstats.max
+                  rr_n_precip = altstats.n_GR_precip
                ENDIF
 
                IF have_gv_hid THEN BEGIN
@@ -658,7 +661,7 @@
                      ; hid_hist[0] = countGVhidbad  ;tally number of MISSING gates
                   ENDELSE
                ENDIF
-
+				; remove &&&&&&*******************************
                IF have_gv_dzero THEN BEGIN
                   gvdzerovals = dzero_bscan[thisPRsGRindices]
                   altstats=mean_stddev_max_by_rules(gvdzerovals,'DZERO', 0.0, $
@@ -672,42 +675,47 @@
                IF have_gv_nw THEN BEGIN
                   gvnwvals = nw_bscan[thisPRsGRindices]
                   altstats=mean_stddev_max_by_rules(gvnwvals,'NW', 0.0, $
-                              0.0, SRAIN_BELOW_THRESH)
+                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1)
                   n_gr_nw_points_rejected = altstats.rejects
                   nw_avg_gv = altstats.mean
                   nw_stddev_gv = altstats.stddev
                   nw_max_gv = altstats.max
+                  nw_n_precip = altstats.n_GR_precip
                ENDIF
 
                IF have_gv_mw THEN BEGIN
                   gvmwvals = mw_bscan[thisPRsGRindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
                   altstats=mean_stddev_max_by_rules(gvmwvals,'MW', 0.0, $
-                              0.0, SRAIN_BELOW_THRESH)
+                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1)
                   n_gr_mw_points_rejected = altstats.rejects
                   mw_avg_gv = altstats.mean
                   mw_stddev_gv = altstats.stddev
                   mw_max_gv = altstats.max
+                  mw_n_precip = altstats.n_GR_precip
                ENDIF
                IF have_gv_mi THEN BEGIN
                   gvmivals = mi_bscan[thisPRsGRindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
                   altstats=mean_stddev_max_by_rules(gvmivals,'MI', 0.0, $
-                              0.0, SRAIN_BELOW_THRESH)
+                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1)
                   n_gr_mi_points_rejected = altstats.rejects
                   mi_avg_gv = altstats.mean
                   mi_stddev_gv = altstats.stddev
                   mi_max_gv = altstats.max
+                  mi_n_precip = altstats.n_GR_precip
                ENDIF
 
                IF have_gv_dm THEN BEGIN
                   gvdmvals = dm_bscan[thisPRsGRindices]
                   altstats=mean_stddev_max_by_rules(gvdmvals,'DZERO', 0.0, $
-                              0.0, SRAIN_BELOW_THRESH)
+                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1)
                   n_gr_dm_points_rejected = altstats.rejects
                   dm_avg_gv = altstats.mean
                   dm_stddev_gv = altstats.stddev
                   dm_max_gv = altstats.max
+                  dm_n_precip = altstats.n_GR_precip
                ENDIF
 
+				; remove &&&&&&*******************************
                IF have_gv_n2 THEN BEGIN
                   gvn2vals = n2_bscan[thisPRsGRindices]
                   altstats=mean_stddev_max_by_rules(gvn2vals,'NW', 0.0, $
@@ -1209,12 +1217,15 @@
                rc_avg_gv = SRAIN_BELOW_THRESH
                rc_stddev_gv = SRAIN_BELOW_THRESH
                rc_max_gv = SRAIN_BELOW_THRESH
+               rc_n_precip = SRAIN_BELOW_THRESH
                rp_avg_gv = SRAIN_BELOW_THRESH
                rp_stddev_gv = SRAIN_BELOW_THRESH
                rp_max_gv = SRAIN_BELOW_THRESH
+               rp_n_precip = SRAIN_BELOW_THRESH
                rr_avg_gv = SRAIN_BELOW_THRESH
                rr_stddev_gv = SRAIN_BELOW_THRESH
                rr_max_gv = SRAIN_BELOW_THRESH
+               rr_n_precip = SRAIN_BELOW_THRESH
                swedp_avg_gv = SRAIN_BELOW_THRESH
                swedp_stddev_gv = SRAIN_BELOW_THRESH
                swedp_max_gv = SRAIN_BELOW_THRESH
@@ -1240,15 +1251,19 @@
                nw_avg_gv = SRAIN_BELOW_THRESH
                nw_stddev_gv = SRAIN_BELOW_THRESH
                nw_max_gv = SRAIN_BELOW_THRESH
+               nw_n_precip = SRAIN_BELOW_THRESH
                mw_avg_gv = SRAIN_BELOW_THRESH
                mw_stddev_gv = SRAIN_BELOW_THRESH
                mw_max_gv = SRAIN_BELOW_THRESH
+               mw_n_precip = SRAIN_BELOW_THRESH
                mi_avg_gv = SRAIN_BELOW_THRESH
                mi_stddev_gv = SRAIN_BELOW_THRESH
                mi_max_gv = SRAIN_BELOW_THRESH
+               mi_n_precip = SRAIN_BELOW_THRESH
                dm_avg_gv = SRAIN_BELOW_THRESH
                dm_stddev_gv = SRAIN_BELOW_THRESH
                dm_max_gv = SRAIN_BELOW_THRESH
+               dm_n_precip = SRAIN_BELOW_THRESH
                n2_avg_gv = SRAIN_BELOW_THRESH
                n2_stddev_gv = SRAIN_BELOW_THRESH
                n2_max_gv = SRAIN_BELOW_THRESH
@@ -1284,16 +1299,19 @@
                      tocdf_gr_rc[jpr,ielev] = rc_avg_gv
                      tocdf_gr_rc_stddev[jpr,ielev] = rc_stddev_gv
                      tocdf_gr_rc_max[jpr,ielev] = rc_max_gv
+                     tocdf_gr_rc_n_precip[jpr,ielev] = rc_n_precip
                   ENDIF
                   IF have_gv_rp THEN BEGIN
                      tocdf_gr_rp[jpr,ielev] = rp_avg_gv
                      tocdf_gr_rp_stddev[jpr,ielev] = rp_stddev_gv
                      tocdf_gr_rp_max[jpr,ielev] = rp_max_gv
+                     tocdf_gr_rp_n_precip[jpr,ielev] = rp_n_precip
                   ENDIF
                   IF have_gv_rr THEN BEGIN
                      tocdf_gr_rr[jpr,ielev] = rr_avg_gv
                      tocdf_gr_rr_stddev[jpr,ielev] = rr_stddev_gv
                      tocdf_gr_rr_max[jpr,ielev] = rr_max_gv
+                     tocdf_gr_rr_n_precip[jpr,ielev] = rr_n_precip
                   ENDIF
                   IF have_gv_swe THEN BEGIN
                      tocdf_gr_swedp[jpr,ielev] = swedp_avg_gv
@@ -1328,21 +1346,25 @@
                      tocdf_gr_nw[jpr,ielev] = nw_avg_gv
                      tocdf_gr_nw_stddev[jpr,ielev] = nw_stddev_gv
                      tocdf_gr_nw_max[jpr,ielev] = nw_max_gv
+                     tocdf_gr_nw_n_precip[jpr,ielev] = nw_n_precip
                   ENDIF
                   IF have_gv_mw THEN BEGIN
                      tocdf_gr_mw[jpr,ielev] = mw_avg_gv
                      tocdf_gr_mw_stddev[jpr,ielev] = mw_stddev_gv
                      tocdf_gr_mw_max[jpr,ielev] = mw_max_gv
+                     tocdf_gr_mw_n_precip[jpr,ielev] = mw_n_precip
                   ENDIF
                   IF have_gv_mi THEN BEGIN
                      tocdf_gr_mi[jpr,ielev] = mi_avg_gv
                      tocdf_gr_mi_stddev[jpr,ielev] = mi_stddev_gv
                      tocdf_gr_mi_max[jpr,ielev] = mi_max_gv
+                     tocdf_gr_mi_n_precip[jpr,ielev] = mi_n_precip
                   ENDIF
                   IF have_gv_dm THEN BEGIN
                      tocdf_gr_dm[jpr,ielev] = dm_avg_gv
                      tocdf_gr_dm_stddev[jpr,ielev] = dm_stddev_gv
                      tocdf_gr_dm_max[jpr,ielev] = dm_max_gv
+                     tocdf_gr_dm_n_precip[jpr,ielev] = dm_n_precip
                   ENDIF
                   IF have_gv_n2 THEN BEGIN
                      tocdf_gr_n2[jpr,ielev] = n2_avg_gv
@@ -1382,16 +1404,19 @@
                              tocdf_gr_rc[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rc_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rc_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_rc_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_rp THEN BEGIN
                              tocdf_gr_rp[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rp_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rp_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_rp_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_rr THEN BEGIN
                              tocdf_gr_rr[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rr_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rr_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_rr_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_swe THEN BEGIN
                              tocdf_gr_swedp[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1422,21 +1447,25 @@
                              tocdf_gr_Nw[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Nw_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
-                          IF have_gv_mw THEN BEGIN
+                          IF have_gv_Mw THEN BEGIN
                              tocdf_gr_Mw[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mw_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mw_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mw_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
-                          IF have_gv_mi THEN BEGIN
+                          IF have_gv_Mi THEN BEGIN
                              tocdf_gr_Mi[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mi_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mi_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_Mi_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_dm THEN BEGIN
                              tocdf_gr_dm[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_max[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_dm_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_n2 THEN BEGIN
                              tocdf_gr_N2[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1474,16 +1503,19 @@
                              tocdf_gr_rc[jpr,ielev] = Z_MISSING
                              tocdf_gr_rc_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_rc_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_rc_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_rp THEN BEGIN
                              tocdf_gr_rp[jpr,ielev] = Z_MISSING
                              tocdf_gr_rp_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_rp_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_rp_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_rr THEN BEGIN
                              tocdf_gr_rr[jpr,ielev] = Z_MISSING
                              tocdf_gr_rr_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_rr_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_rr_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_swe THEN BEGIN
                              tocdf_gr_swedp[jpr,ielev] = Z_MISSING
@@ -1514,21 +1546,25 @@
                              tocdf_gr_Nw[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Nw_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_mw THEN BEGIN
                              tocdf_gr_Mw[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mw_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mw_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mw_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_mi THEN BEGIN
                              tocdf_gr_Mi[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mi_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mi_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_Mi_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_dm THEN BEGIN
                              tocdf_gr_dm[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_max[jpr,ielev] = Z_MISSING
+                             tocdf_gr_dm_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_n2 THEN BEGIN
                              tocdf_gr_N2[jpr,ielev] = Z_MISSING

@@ -930,6 +930,14 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_dpr_nw_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_dpr_expected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_clutterStatus = UINTARR(numDPRrays, num_elevations_out)
+      
+      tocdf_n_gr_nw_precip = data_GR2DPR.n_gr_nw_precip
+      tocdf_n_gr_mw_precip = data_GR2DPR.n_gr_mw_precip
+      tocdf_n_gr_mi_precip = data_GR2DPR.n_gr_mi_precip
+      tocdf_n_gr_dm_precip = data_GR2DPR.n_gr_dm_precip
+      tocdf_n_gr_rr_precip = data_GR2DPR.n_gr_rr_precip
+      tocdf_n_gr_rc_precip = data_GR2DPR.n_gr_rc_precip
+      tocdf_n_gr_rp_precip = data_GR2DPR.n_gr_rp_precip
 
      ; get the indices of actual DPR footprints and load the 2D element subarrays
      ;   (no more averaging/processing needed) with data from the product arrays
@@ -1629,6 +1637,14 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_dpr_precipWater_rejected', tocdf_precipWater_rejected
    NCDF_VARPUT, ncid, 'n_dpr_epsilon_rejected', tocdf_epsilon_rejected
    NCDF_VARPUT, ncid, 'n_dpr_corr_r_rejected', tocdf_corr_r_rejected
+
+   NCDF_VARPUT, ncid, 'n_gr_nw_precip', tocdf_n_gr_nw_precip
+   NCDF_VARPUT, ncid, 'n_gr_mw_precip', tocdf_n_gr_mw_precip
+   NCDF_VARPUT, ncid, 'n_gr_mi_precip', tocdf_n_gr_mi_precip
+   NCDF_VARPUT, ncid, 'n_gr_dm_precip', tocdf_n_gr_dm_precip
+   NCDF_VARPUT, ncid, 'n_gr_rr_precip', tocdf_n_gr_rr_precip
+   NCDF_VARPUT, ncid, 'n_gr_rc_precip', tocdf_n_gr_rc_precip
+   NCDF_VARPUT, ncid, 'n_gr_rp_precip', tocdf_n_gr_rp_precip
 
    IF ( have_paramdsd ) THEN BEGIN
       NCDF_VARPUT, ncid, 'n_dpr_dm_rejected', tocdf_dpr_dm_rejected

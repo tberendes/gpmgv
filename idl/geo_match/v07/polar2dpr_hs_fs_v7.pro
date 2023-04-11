@@ -96,6 +96,8 @@
 ;  - Write new GR_ROI_km global variable value to netCDF file.
 ; 4/20/22 by Todd Berendes UAH/ITSC
 ;  - Added new GR liquid and frozen water content fields
+; 4/11/23 Todd Berendes UAH/ITSC
+;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -1596,6 +1598,13 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_swe75_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swemqt_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swemrms_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_nw_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_mw_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_mi_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_dm_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_rr_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_rc_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_rp_n_precip = UINTARR(numDPRrays, num_elevations_out)
 
      ; get the indices of actual DPR footprints and create and load the 2D element
      ;   subarrays (no averaging/processing needed) with data from the product arrays
@@ -1802,6 +1811,13 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_swemqt_rejected_'+scan_instrument, tocdf_gr_swemqt_rejected
    NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected_'+scan_instrument, tocdf_gr_swemrms_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected_'+scan_instrument, tocdf_gr_expected
+   NCDF_VARPUT, ncid, 'n_gr_nw_n_precip_'+scan_instrument, tocdf_gr_nw_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_mw_n_precip_'+scan_instrument, tocdf_gr_mw_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_mi_n_precip_'+scan_instrument, tocdf_gr_mi_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_dm_n_precip_'+scan_instrument, tocdf_gr_dm_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_rr_n_precip_'+scan_instrument, tocdf_gr_rr_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_rc_n_precip_'+scan_instrument, tocdf_gr_rc_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_rp_n_precip_'+scan_instrument, tocdf_gr_rp_n_precip
 
    skippedSwath:
 

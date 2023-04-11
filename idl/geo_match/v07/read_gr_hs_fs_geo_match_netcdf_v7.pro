@@ -408,6 +408,14 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'GR_SWEMRMS_Max_'+swath[iswa], GR_SWEMRMS_Max
    NCDF_VARGET, ncid1, 'n_gr_swemrms_rejected_'+swath[iswa], n_gr_swemrms_rejected
 
+   NCDF_VARGET, ncid1, 'n_gr_nw_precip_'+swath[iswa], n_gr_nw_precip
+   NCDF_VARGET, ncid1, 'n_gr_mw_precip_'+swath[iswa], n_gr_mw_precip
+   NCDF_VARGET, ncid1, 'n_gr_mi_precip_'+swath[iswa], n_gr_mi_precip
+   NCDF_VARGET, ncid1, 'n_gr_dm_precip_'+swath[iswa], n_gr_dm_precip
+   NCDF_VARGET, ncid1, 'n_gr_rr_precip_'+swath[iswa], n_rr_nw_precip
+   NCDF_VARGET, ncid1, 'n_gr_rc_precip_'+swath[iswa], n_gr_rc_precip
+   NCDF_VARGET, ncid1, 'n_gr_rp_precip_'+swath[iswa], n_gr_rp_precip
+
   ; copy the swath-specific data variables into anonymous structure, use
   ; TEMPORARY to avoid making a copy of the variable when loading to struct
    tempstruc = { Year : TEMPORARY(Year), $
@@ -506,6 +514,13 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  n_gr_swemqt_rejected : TEMPORARY(n_gr_swemqt_rejected), $
                  n_gr_swemrms_rejected : TEMPORARY(n_gr_swemrms_rejected), $
                  n_gr_expected : TEMPORARY(n_gr_expected), $
+                 n_gr_nw_precip : TEMPORARY(n_gr_nw_precip), $
+                 n_gr_mw_precip : TEMPORARY(n_gr_mw_precip), $
+                 n_gr_mi_precip : TEMPORARY(n_gr_mi_precip), $
+                 n_gr_dm_precip : TEMPORARY(n_gr_dm_precip), $
+                 n_gr_rr_precip : TEMPORARY(n_gr_rr_precip), $
+                 n_gr_rc_precip : TEMPORARY(n_gr_rc_precip), $
+                 n_gr_rp_precip : TEMPORARY(n_gr_rp_precip), $
                  DPRlatitude : TEMPORARY(DPRlatitude), $
                  DPRlongitude : TEMPORARY(DPRlongitude), $
                  scanNum : TEMPORARY(scanNum), $
