@@ -412,7 +412,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'n_gr_mw_precip_'+swath[iswa], n_gr_mw_precip
    NCDF_VARGET, ncid1, 'n_gr_mi_precip_'+swath[iswa], n_gr_mi_precip
    NCDF_VARGET, ncid1, 'n_gr_dm_precip_'+swath[iswa], n_gr_dm_precip
-   NCDF_VARGET, ncid1, 'n_gr_rr_precip_'+swath[iswa], n_rr_nw_precip
+   NCDF_VARGET, ncid1, 'n_gr_rr_precip_'+swath[iswa], n_gr_rr_precip
    NCDF_VARGET, ncid1, 'n_gr_rc_precip_'+swath[iswa], n_gr_rc_precip
    NCDF_VARGET, ncid1, 'n_gr_rp_precip_'+swath[iswa], n_gr_rp_precip
 
