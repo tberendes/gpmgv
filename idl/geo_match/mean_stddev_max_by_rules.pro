@@ -63,7 +63,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
        'ZDR' :
        'KDP' :
               BEGIN
-                 good_idx = WHERE( data GE goodthresh, countGVgood ) $
+                 good_idx = WHERE( data GE goodthresh, countGVgood )
                  bad_idx = WHERE( data LT badthresh, countGVbad )
                  break
               END
