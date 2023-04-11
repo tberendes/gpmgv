@@ -1811,13 +1811,13 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_swemqt_rejected_'+scan_instrument, tocdf_gr_swemqt_rejected
    NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected_'+scan_instrument, tocdf_gr_swemrms_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected_'+scan_instrument, tocdf_gr_expected
-   NCDF_VARPUT, ncid, 'n_gr_nw_n_precip_'+scan_instrument, tocdf_gr_nw_n_precip
-   NCDF_VARPUT, ncid, 'n_gr_mw_n_precip_'+scan_instrument, tocdf_gr_mw_n_precip
-   NCDF_VARPUT, ncid, 'n_gr_mi_n_precip_'+scan_instrument, tocdf_gr_mi_n_precip
-   NCDF_VARPUT, ncid, 'n_gr_dm_n_precip_'+scan_instrument, tocdf_gr_dm_n_precip
-   NCDF_VARPUT, ncid, 'n_gr_rr_n_precip_'+scan_instrument, tocdf_gr_rr_n_precip
-   NCDF_VARPUT, ncid, 'n_gr_rc_n_precip_'+scan_instrument, tocdf_gr_rc_n_precip
-   NCDF_VARPUT, ncid, 'n_gr_rp_n_precip_'+scan_instrument, tocdf_gr_rp_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_nw_precip_'+scan_instrument, tocdf_gr_nw_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_mw_precip_'+scan_instrument, tocdf_gr_mw_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_mi_precip_'+scan_instrument, tocdf_gr_mi_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_dm_precip_'+scan_instrument, tocdf_gr_dm_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_rr_precip_'+scan_instrument, tocdf_gr_rr_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_rc_precip_'+scan_instrument, tocdf_gr_rc_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_rp_precip_'+scan_instrument, tocdf_gr_rp_n_precip
 
    skippedSwath:
 
