@@ -53,6 +53,9 @@
 ;  - Added mods for SWE variables
 ; 4/6/22 by Todd Berendes UAH/ITSC
 ;  - Added new GR liquid and frozen water content fields
+; 4/11/23 Todd Berendes UAH/ITSC
+;  - removed Ground Radar DZERO and N2
+;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -197,8 +200,6 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.GV_UF_MI_field = STRING(gv_UF_field_byte)
      ncdf_attget, ncid1, 'GV_UF_DM_field', gv_UF_field_byte, /global
      matchupmeta.GV_UF_DM_field = STRING(gv_UF_field_byte)
-     ncdf_attget, ncid1, 'GV_UF_N2_field', gv_UF_field_byte, /global
-     matchupmeta.GV_UF_N2_field = STRING(gv_UF_field_byte)
      NCDF_VARGET, ncid1, 'rangeThreshold', rngthresh
      matchupmeta.rangeThreshold = rngthresh
      NCDF_VARGET, ncid1, 'GR_dBZ_min', grzmin
@@ -281,8 +282,6 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      fieldFlags.have_GR_RHOhv = have_GR_RHOhv
      NCDF_VARGET, ncid1, 'have_GR_HID', have_GR_HID
      fieldFlags.have_GR_HID = have_GR_HID
-     NCDF_VARGET, ncid1, 'have_GR_Dzero', have_GR_Dzero
-     fieldFlags.have_GR_Dzero = have_GR_Dzero
      NCDF_VARGET, ncid1, 'have_GR_Nw', have_GR_Nw
      fieldFlags.have_GR_Nw = have_GR_Nw
      NCDF_VARGET, ncid1, 'have_GR_liquidWaterContent', have_GR_liquidWaterContent
@@ -291,8 +290,6 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      fieldFlags.have_GR_frozenWaterContent = have_GR_frozenWaterContent
      NCDF_VARGET, ncid1, 'have_GR_Dm', have_GR_Dm
      fieldFlags.have_GR_Dm = have_GR_Dm
-     NCDF_VARGET, ncid1, 'have_GR_N2', have_GR_N2
-     fieldFlags.have_GR_N2 = have_GR_N2
      NCDF_VARGET, ncid1, 'have_GR_blockage', have_blockage
      fieldFlags.have_GR_blockage = have_blockage
      NCDF_VARGET, ncid1, 'have_GR_SWE', have_GR_SWE
@@ -345,9 +342,6 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'GR_RR_rainrate_StdDev_'+swath[iswa], GR_RR_rainrate_StdDev
    NCDF_VARGET, ncid1, 'GR_RR_rainrate_Max_'+swath[iswa], GR_RR_rainrate_Max
    NCDF_VARGET, ncid1, 'GR_HID_'+swath[iswa], GR_HID
-   NCDF_VARGET, ncid1, 'GR_Dzero_'+swath[iswa], GR_Dzero
-   NCDF_VARGET, ncid1, 'GR_Dzero_StdDev_'+swath[iswa], GR_Dzero_StdDev
-   NCDF_VARGET, ncid1, 'GR_Dzero_Max_'+swath[iswa], GR_Dzero_Max
    NCDF_VARGET, ncid1, 'GR_Nw_'+swath[iswa], GR_Nw
    NCDF_VARGET, ncid1, 'GR_Nw_StdDev_'+swath[iswa], GR_Nw_StdDev
    NCDF_VARGET, ncid1, 'GR_Nw_Max_'+swath[iswa], GR_Nw_Max
@@ -360,9 +354,6 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'GR_Dm_'+swath[iswa], GR_Dm
    NCDF_VARGET, ncid1, 'GR_Dm_StdDev_'+swath[iswa], GR_Dm_StdDev
    NCDF_VARGET, ncid1, 'GR_Dm_Max_'+swath[iswa], GR_Dm_Max
-   NCDF_VARGET, ncid1, 'GR_N2_'+swath[iswa], GR_N2
-   NCDF_VARGET, ncid1, 'GR_N2_StdDev_'+swath[iswa], GR_N2_StdDev
-   NCDF_VARGET, ncid1, 'GR_N2_Max_'+swath[iswa], GR_N2_Max
    NCDF_VARGET, ncid1, 'GR_blockage_'+swath[iswa], GR_blockage
    NCDF_VARGET, ncid1, 'n_gr_expected_'+swath[iswa], n_gr_expected
    NCDF_VARGET, ncid1, 'n_gr_z_rejected_'+swath[iswa], n_gr_z_rejected
@@ -373,12 +364,10 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'n_gr_rp_rejected_'+swath[iswa], n_gr_rp_rejected
    NCDF_VARGET, ncid1, 'n_gr_rr_rejected_'+swath[iswa], n_gr_rr_rejected
    NCDF_VARGET, ncid1, 'n_gr_hid_rejected_'+swath[iswa], n_gr_hid_rejected
-   NCDF_VARGET, ncid1, 'n_gr_dzero_rejected_'+swath[iswa], n_gr_dzero_rejected
    NCDF_VARGET, ncid1, 'n_gr_nw_rejected_'+swath[iswa], n_gr_nw_rejected
    NCDF_VARGET, ncid1, 'n_gr_liquidWaterContent_rejected_'+swath[iswa], n_gr_liquidWaterContent_rejected
    NCDF_VARGET, ncid1, 'n_gr_frozenWaterContent_rejected_'+swath[iswa], n_gr_frozenWaterContent_rejected
    NCDF_VARGET, ncid1, 'n_gr_dm_rejected_'+swath[iswa], n_gr_dm_rejected
-   NCDF_VARGET, ncid1, 'n_gr_n2_rejected_'+swath[iswa], n_gr_n2_rejected
    NCDF_VARGET, ncid1, 'DPRlatitude_'+swath[iswa], DPRlatitude
    NCDF_VARGET, ncid1, 'DPRlongitude_'+swath[iswa], DPRlongitude
    NCDF_VARGET, ncid1, 'scanNum_'+swath[iswa], scanNum
@@ -474,9 +463,6 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  GR_SWEMRMS_StdDev : TEMPORARY(GR_SWEMRMS_StdDev), $
                  GR_SWEMRMS_Max : TEMPORARY(GR_SWEMRMS_Max), $
                  GR_HID : TEMPORARY(GR_HID), $
-                 GR_Dzero : TEMPORARY(GR_Dzero), $
-                 GR_Dzero_StdDev : TEMPORARY(GR_Dzero_StdDev), $
-                 GR_Dzero_Max : TEMPORARY(GR_Dzero_Max), $
                  GR_Nw : TEMPORARY(GR_Nw), $
                  GR_Nw_StdDev : TEMPORARY(GR_Nw_StdDev), $
                  GR_Nw_Max : TEMPORARY(GR_Nw_Max), $
@@ -489,9 +475,6 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  GR_Dm : TEMPORARY(GR_Dm), $
                  GR_Dm_StdDev : TEMPORARY(GR_Dm_StdDev), $
                  GR_Dm_Max : TEMPORARY(GR_Dm_Max), $
-                 GR_N2 : TEMPORARY(GR_N2), $
-                 GR_N2_StdDev : TEMPORARY(GR_N2_StdDev), $
-                 GR_N2_Max : TEMPORARY(GR_N2_Max), $
                  GR_blockage : TEMPORARY(GR_blockage), $
                  n_gr_z_rejected : TEMPORARY(n_gr_z_rejected), $
                  n_gr_zdr_rejected : TEMPORARY(n_gr_zdr_rejected), $
@@ -501,12 +484,10 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  n_gr_rp_rejected : TEMPORARY(n_gr_rp_rejected), $
                  n_gr_rr_rejected : TEMPORARY(n_gr_rr_rejected), $
                  n_gr_hid_rejected : TEMPORARY(n_gr_hid_rejected), $
-                 n_gr_dzero_rejected : TEMPORARY(n_gr_dzero_rejected), $
                  n_gr_nw_rejected : TEMPORARY(n_gr_nw_rejected), $
                  n_gr_liquidWaterContent_rejected : TEMPORARY(n_gr_liquidWaterContent_rejected), $
                  n_gr_frozenWaterContent_rejected : TEMPORARY(n_gr_frozenWaterContent_rejected), $
                  n_gr_dm_rejected : TEMPORARY(n_gr_dm_rejected), $
-                 n_gr_n2_rejected : TEMPORARY(n_gr_n2_rejected), $
                  n_gr_swedp_rejected : TEMPORARY(n_gr_swedp_rejected), $
                  n_gr_swe25_rejected : TEMPORARY(n_gr_swe25_rejected), $
                  n_gr_swe50_rejected : TEMPORARY(n_gr_swe50_rejected), $

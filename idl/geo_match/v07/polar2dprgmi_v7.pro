@@ -142,6 +142,9 @@
 ;   added precipTotDm, precipTotLogNw, precipTotMu
 ; 4/6/22 by Todd Berendes UAH/ITSC
 ;  - Added new GR liquid and frozen water content fields
+; 4/11/23 Todd Berendes UAH/ITSC
+;  - removed Ground Radar DZERO and N2
+;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -560,12 +563,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
               RP_ID:    'Unspecified', $
               RR_ID:    'Unspecified', $
               HID_ID:   'Unspecified', $
-              D0_ID:    'Unspecified', $
               NW_ID:    'Unspecified', $
               MW_ID:    'Unspecified', $
               MI_ID:    'Unspecified', $
-              DM_ID:    'Unspecified', $
-              N2_ID:    'Unspecified' }
+              DM_ID:    'Unspecified'}
 
   ; check existence of blockage files for this siteID if dir_block is specified
    have_gv_blockage = 0
@@ -720,22 +721,6 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   	  have_gv_swe = 0  
   endelse
 
-
-  ; find the volume with the D0 field for the GV site/source
-   gv_dzero_field = ''
-   dzero_field2get = 'D0'
-   dzero_vol_num = get_site_specific_z_volume( siteID, radar, gv_dzero_field, $
-                                               UF_FIELD=dzero_field2get )
-   IF ( dzero_vol_num LT 0 )  THEN BEGIN
-      PRINT, ""
-      PRINT, "No 'D0' volume in radar structure from file: ", file_1CUF
-      PRINT, ""
-      have_gv_dzero = 0
-   ENDIF ELSE BEGIN
-      have_gv_dzero = 1
-      ufstruct.D0_ID = gv_dzero_field
-   ENDELSE
-
   ; find the volume with the Nw field for the GV site/source
    gv_nw_field = ''
    nw_field2get = 'NW'
@@ -797,21 +782,6 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       ufstruct.DM_ID = gv_dm_field
    ENDELSE
 
-  ; find the volume with the N2 field for the GV site/source
-   gv_n2_field = ''
-   n2_field2get = 'N2'
-   n2_vol_num = get_site_specific_z_volume( siteID, radar, gv_n2_field, $
-                                            UF_FIELD=n2_field2get )
-   IF ( n2_vol_num LT 0 )  THEN BEGIN
-      PRINT, ""
-      PRINT, "No 'N2' volume in radar structure from file: ", file_1CUF
-      PRINT, ""
-      have_gv_n2 = 0
-   ENDIF ELSE BEGIN
-      have_gv_n2 = 1
-      ufstruct.N2_ID = gv_n2_field
-   ENDELSE
-
  ; Retrieve the desired radar volumes from the radar structure
    zvolume = rsl_get_volume( radar, z_vol_num )
    IF have_gv_zdr THEN zdrvolume = rsl_get_volume( radar, zdr_vol_num )
@@ -821,12 +791,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    IF have_gv_rp THEN rpvolume = rsl_get_volume( radar, rp_vol_num )
    IF have_gv_rr THEN rrvolume = rsl_get_volume( radar, rr_vol_num )
    IF have_gv_hid THEN hidvolume = rsl_get_volume( radar, hid_vol_num )
-   IF have_gv_dzero THEN dzerovolume = rsl_get_volume( radar, dzero_vol_num )
    IF have_gv_nw THEN nwvolume = rsl_get_volume( radar, nw_vol_num )
    IF have_gv_mw THEN mwvolume = rsl_get_volume( radar, mw_vol_num )
    IF have_gv_mi THEN mivolume = rsl_get_volume( radar, mi_vol_num )
    IF have_gv_dm THEN dmvolume = rsl_get_volume( radar, dm_vol_num )
-   IF have_gv_n2 THEN n2volume = rsl_get_volume( radar, n2_vol_num )
 
   ; get the number of elevation sweeps in the vol, and the array of elev angles
    num_elevations = get_sweep_elevs( z_vol_num, radar, elev_angle )
@@ -1621,12 +1589,6 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       IF ( have_gv_hid ) THEN $  ; don't have n_hid_cats unless have_gv_hid set
          tocdf_gr_HID = MAKE_ARRAY(n_hid_cats, numDPRrays, num_elevations_out, $
                                    /int, VALUE=INT_RANGE_EDGE)
-      tocdf_gr_Dzero = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
-                                  VALUE=FLOAT_RANGE_EDGE)
-      tocdf_gr_Dzero_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, $
-                                         /float, VALUE=FLOAT_RANGE_EDGE)
-      tocdf_gr_Dzero_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
-                                      VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Nw = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Nw_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -1651,12 +1613,6 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                       VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Dm_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
-      tocdf_gr_N2 = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
-                               VALUE=FLOAT_RANGE_EDGE)
-      tocdf_gr_N2_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
-                                      VALUE=FLOAT_RANGE_EDGE)
-      tocdf_gr_N2_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
-                                   VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_blockage = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                      VALUE=FLOAT_RANGE_EDGE)
       tocdf_meas_dbz = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -1677,12 +1633,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_kdp_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rhohv_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_hid_rejected = UINTARR(numDPRrays, num_elevations_out)
-      tocdf_gr_dzero_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_nw_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_mw_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_mi_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_dm_rejected = UINTARR(numDPRrays, num_elevations_out)
-      tocdf_gr_n2_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_expected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swedp_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swe25_rejected = UINTARR(numDPRrays, num_elevations_out)
@@ -1690,6 +1644,16 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_swe75_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swemqt_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swemrms_rejected = UINTARR(numDPRrays, num_elevations_out)
+
+      tocdf_gr_nw_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_mw_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_mi_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_dm_n_precip = UINTARR(numDPRrays, num_elevations_out)
+;      tocdf_gr_rr_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_rr_n_precip = MAKE_ARRAY(numDPRrays, num_elevations_out, /UINT, $
+                                 VALUE=INT_RANGE_EDGE)      
+      tocdf_gr_rc_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_rp_n_precip = UINTARR(numDPRrays, num_elevations_out)
 
      ; DPRGMI 3-D variables:
       tocdf_precipTotDm = $
@@ -1909,42 +1873,30 @@ WHILE NOT (EOF(lun0)) DO BEGIN
          NCDF_VARPUT, ncid, 'GR_HID_'+DPR_scantype, tocdf_gr_hid            ; data
       ENDIF
       NCDF_VARPUT, ncid, 'have_GR_HID', have_gv_hid      ; data presence flag
-      IF ( have_gv_dzero ) THEN BEGIN
-         NCDF_VARPUT, ncid, 'GR_Dzero_'+DPR_scantype, tocdf_gr_dzero            ; data
-         NCDF_VARPUT, ncid, 'GR_Dzero_StdDev_'+DPR_scantype, tocdf_gr_dzero_stddev     ; data
-         NCDF_VARPUT, ncid, 'GR_Dzero_Max_'+DPR_scantype, tocdf_gr_dzero_max            ; data
-      ENDIF
-      NCDF_VARPUT, ncid, 'have_GR_Dzero', have_gv_dzero      ; data presence flag
       IF ( have_gv_nw ) THEN BEGIN
          NCDF_VARPUT, ncid, 'GR_Nw_'+DPR_scantype, tocdf_gr_nw            ; data
          NCDF_VARPUT, ncid, 'GR_Nw_StdDev_'+DPR_scantype, tocdf_gr_nw_stddev     ; data
          NCDF_VARPUT, ncid, 'GR_Nw_Max_'+DPR_scantype, tocdf_gr_nw_max            ; data
       ENDIF
       NCDF_VARPUT, ncid, 'have_GR_Nw', have_gv_nw      ; data presence flag
-   IF ( have_gv_mw ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_'+DPR_scantype, tocdf_gr_mw            ; data
-      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_StdDev_'+DPR_scantype, tocdf_gr_mw_stddev     ; data
-      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_Max_'+DPR_scantype, tocdf_gr_mw_max            ; data
-   ENDIF
-   NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent', have_gv_mw      ; data presence flag
-   IF ( have_gv_mi ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_'+DPR_scantype, tocdf_gr_mi            ; data
-      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_StdDev_'+DPR_scantype, tocdf_gr_mi_stddev     ; data
-      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_Max_'+DPR_scantype, tocdf_gr_mi_max            ; data
-   ENDIF
-   NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent', have_gv_mi      ; data presence flag
-   IF ( have_gv_dm ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_Dm_'+DPR_scantype, tocdf_gr_dm             ; data
-      NCDF_VARPUT, ncid, 'GR_Dm_StdDev_'+DPR_scantype, tocdf_gr_dm_stddev      ; data
-      NCDF_VARPUT, ncid, 'GR_Dm_Max_'+DPR_scantype, tocdf_gr_dm_max            ; data
-   ENDIF
-   NCDF_VARPUT, ncid, 'have_GR_Dm', have_gv_dm      ; data presence flag
-   IF ( have_gv_n2 ) THEN BEGIN
-      NCDF_VARPUT, ncid, 'GR_N2_'+DPR_scantype, tocdf_gr_n2             ; data
-      NCDF_VARPUT, ncid, 'GR_N2_StdDev_'+DPR_scantype, tocdf_gr_n2_stddev      ; data
-      NCDF_VARPUT, ncid, 'GR_N2_Max_'+DPR_scantype, tocdf_gr_n2_max            ; data
-   ENDIF
-   NCDF_VARPUT, ncid, 'have_GR_N2', have_gv_n2      ; data presence flag
+	  IF ( have_gv_mw ) THEN BEGIN
+	      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_'+DPR_scantype, tocdf_gr_mw            ; data
+	      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_StdDev_'+DPR_scantype, tocdf_gr_mw_stddev     ; data
+	      NCDF_VARPUT, ncid, 'GR_liquidWaterContent_Max_'+DPR_scantype, tocdf_gr_mw_max            ; data
+	  ENDIF
+	  NCDF_VARPUT, ncid, 'have_GR_liquidWaterContent', have_gv_mw      ; data presence flag
+	  IF ( have_gv_mi ) THEN BEGIN
+	      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_'+DPR_scantype, tocdf_gr_mi            ; data
+	      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_StdDev_'+DPR_scantype, tocdf_gr_mi_stddev     ; data
+	      NCDF_VARPUT, ncid, 'GR_frozenWaterContent_Max_'+DPR_scantype, tocdf_gr_mi_max            ; data
+	  ENDIF
+	  NCDF_VARPUT, ncid, 'have_GR_frozenWaterContent', have_gv_mi      ; data presence flag
+	  IF ( have_gv_dm ) THEN BEGIN
+	      NCDF_VARPUT, ncid, 'GR_Dm_'+DPR_scantype, tocdf_gr_dm             ; data
+	      NCDF_VARPUT, ncid, 'GR_Dm_StdDev_'+DPR_scantype, tocdf_gr_dm_stddev      ; data
+	      NCDF_VARPUT, ncid, 'GR_Dm_Max_'+DPR_scantype, tocdf_gr_dm_max            ; data
+	  ENDIF
+	  NCDF_VARPUT, ncid, 'have_GR_Dm', have_gv_dm      ; data presence flag
       IF ( have_gv_blockage ) THEN BEGIN
          NCDF_VARPUT, ncid, 'GR_blockage_'+DPR_scantype, tocdf_gr_blockage      ; data
       ENDIF
@@ -1986,12 +1938,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'n_gr_kdp_rejected_'+DPR_scantype, tocdf_gr_kdp_rejected
       NCDF_VARPUT, ncid, 'n_gr_rhohv_rejected_'+DPR_scantype, tocdf_gr_rhohv_rejected
       NCDF_VARPUT, ncid, 'n_gr_hid_rejected_'+DPR_scantype, tocdf_gr_hid_rejected
-      NCDF_VARPUT, ncid, 'n_gr_dzero_rejected_'+DPR_scantype, tocdf_gr_dzero_rejected
       NCDF_VARPUT, ncid, 'n_gr_nw_rejected_'+DPR_scantype, tocdf_gr_nw_rejected
       NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_rejected_'+DPR_scantype, tocdf_gr_mw_rejected
       NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_rejected_'+DPR_scantype, tocdf_gr_mi_rejected
       NCDF_VARPUT, ncid, 'n_gr_dm_rejected_'+DPR_scantype, tocdf_gr_dm_rejected
-      NCDF_VARPUT, ncid, 'n_gr_n2_rejected_'+DPR_scantype, tocdf_gr_n2_rejected
    	  NCDF_VARPUT, ncid, 'n_gr_swedp_rejected_'+DPR_scantype, tocdf_gr_swedp_rejected
       NCDF_VARPUT, ncid, 'n_gr_swe25_rejected_'+DPR_scantype, tocdf_gr_swe25_rejected
       NCDF_VARPUT, ncid, 'n_gr_swe50_rejected_'+DPR_scantype, tocdf_gr_swe50_rejected
@@ -1999,6 +1949,14 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'n_gr_swemqt_rejected_'+DPR_scantype, tocdf_gr_swemqt_rejected
       NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected_'+DPR_scantype, tocdf_gr_swemrms_rejected
       NCDF_VARPUT, ncid, 'n_gr_expected_'+DPR_scantype, tocdf_gr_expected
+
+   	  NCDF_VARPUT, ncid, 'n_gr_nw_precip', tocdf_gr_nw_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_mw_precip', tocdf_gr_mw_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_mi_precip', tocdf_gr_mi_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_dm_precip', tocdf_gr_dm_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_rr_precip', tocdf_gr_rr_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_rc_precip', tocdf_gr_rc_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_rp_precip', tocdf_gr_rp_n_precip
 
      ; DPRGMI variables last
       NCDF_VARPUT, ncid, 'precipTotDm_'+DPR_scantype, tocdf_precipTotDm

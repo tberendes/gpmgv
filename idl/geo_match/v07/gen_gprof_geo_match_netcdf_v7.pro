@@ -45,8 +45,9 @@
 ;    from 1C-R-XCAL file for version 1.2 file.
 ;  - Extracting 1C-R-XCAL filename from the gprofgrfiles array and writing it to
 ;    the 1CRXCAL global variable when its value is present.
-; 4/6/22 by Todd Berendes UAH/ITSC
-;  - Added new GR liquid and frozen water content fields
+; 4/11/23 Todd Berendes UAH/ITSC
+;  - removed Ground Radar DZERO and added DM
+;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
 ;
 ;-------------------------------------------------------------------------------
 ;-
@@ -130,7 +131,7 @@ rcuf = 'Unspecified'
 rpuf = 'Unspecified'
 rruf = 'Unspecified'
 hiduf = 'Unspecified'
-dzerouf = 'Unspecified'
+dmuf = 'Unspecified'
 nwuf = 'Unspecified'
 mwuf = 'Unspecified'
 miuf = 'Unspecified'
@@ -159,7 +160,7 @@ CASE s OF
                  'RP_ID'  : rpuf = gv_UF_field.RP_ID
                  'RR_ID'  : rruf = gv_UF_field.RR_ID
                  'HID_ID' : hiduf = gv_UF_field.HID_ID
-                 'D0_ID'  : dzerouf = gv_UF_field.D0_ID
+                 'DM_ID'  : dmuf = gv_UF_field.DM_ID
                  'NW_ID'  : nwuf = gv_UF_field.NW_ID
                  'MW_ID'  : mwuf = gv_UF_field.MW_ID
                  'MI_ID'  : miuf = gv_UF_field.MI_ID
@@ -178,7 +179,7 @@ ncdf_attput, cdfid, 'GV_UF_RC_field', rcuf, /global
 ncdf_attput, cdfid, 'GV_UF_RP_field', rpuf, /global
 ncdf_attput, cdfid, 'GV_UF_RR_field', rruf, /global
 ncdf_attput, cdfid, 'GV_UF_HID_field', hiduf, /global
-ncdf_attput, cdfid, 'GV_UF_D0_field', dzerouf, /global
+ncdf_attput, cdfid, 'GV_UF_DM_field', dmuf, /global
 ncdf_attput, cdfid, 'GV_UF_NW_field', nwuf, /global
 ncdf_attput, cdfid, 'GV_UF_MW_field', mwuf, /global
 ncdf_attput, cdfid, 'GV_UF_MI_field', miuf, /global
@@ -320,10 +321,10 @@ ncdf_attput, cdfid, havegvHIDvarid, 'long_name', $
              'data exists flag for GR_HID_slantPath'
 ncdf_attput, cdfid, havegvHIDvarid, '_FillValue', NO_DATA_PRESENT
 
-havegvDzerovarid = ncdf_vardef(cdfid, 'have_GR_Dzero_slantPath', /short)
-ncdf_attput, cdfid, havegvDzerovarid, 'long_name', $
-             'data exists flag for GR_Dzero_slantPath'
-ncdf_attput, cdfid, havegvDzerovarid, '_FillValue', NO_DATA_PRESENT
+havegvDmvarid = ncdf_vardef(cdfid, 'have_GR_Dm_slantPath', /short)
+ncdf_attput, cdfid, havegvDmvarid, 'long_name', $
+             'data exists flag for GR_Dm_slantPath'
+ncdf_attput, cdfid, havegvDmvarid, '_FillValue', NO_DATA_PRESENT
 
 havegvNWvarid = ncdf_vardef(cdfid, 'have_GR_Nw_slantPath', /short)
 ncdf_attput, cdfid, havegvNWvarid, 'long_name', $
@@ -385,10 +386,10 @@ ncdf_attput, cdfid, havegvHIDvarid_vpr, 'long_name', $
              'data exists flag for GR_HID_VPR'
 ncdf_attput, cdfid, havegvHIDvarid_vpr, '_FillValue', NO_DATA_PRESENT
 
-havegvDzerovarid_vpr = ncdf_vardef(cdfid, 'have_GR_Dzero_VPR', /short)
-ncdf_attput, cdfid, havegvDzerovarid_vpr, 'long_name', $
-             'data exists flag for GR_Dzero_VPR'
-ncdf_attput, cdfid, havegvDzerovarid_vpr, '_FillValue', NO_DATA_PRESENT
+havegvDmvarid_vpr = ncdf_vardef(cdfid, 'have_GR_Dm_VPR', /short)
+ncdf_attput, cdfid, havegvDmvarid_vpr, 'long_name', $
+             'data exists flag for GR_Dm_VPR'
+ncdf_attput, cdfid, havegvDmvarid_vpr, '_FillValue', NO_DATA_PRESENT
 
 havegvNWvarid_vpr = ncdf_vardef(cdfid, 'have_GR_Nw_VPR', /short)
 ncdf_attput, cdfid, havegvNWvarid_vpr, 'long_name', $
@@ -670,22 +671,22 @@ ncdf_attput, cdfid, gvHIDvarid, 'long_name', 'DP Hydrometeor Identification'
 ncdf_attput, cdfid, gvHIDvarid, 'units', 'Categorical'
 ncdf_attput, cdfid, gvHIDvarid, '_FillValue', INT_RANGE_EDGE
 
-gvDzerovarid = ncdf_vardef(cdfid, 'GR_Dzero_slantPath', [fpdimid,eldimid])
-ncdf_attput, cdfid, gvDzerovarid, 'long_name', 'DP Median Volume Diameter'
-ncdf_attput, cdfid, gvDzerovarid, 'units', 'mm'
-ncdf_attput, cdfid, gvDzerovarid, '_FillValue', FLOAT_RANGE_EDGE
+gvDmvarid = ncdf_vardef(cdfid, 'GR_Dm_slantPath', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvDmvarid, 'long_name', 'DP Median Volume Diameter'
+ncdf_attput, cdfid, gvDmvarid, 'units', 'mm'
+ncdf_attput, cdfid, gvDmvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-gvDzeroStdDevvarid = ncdf_vardef(cdfid, 'GR_Dzero_StdDev_slantPath', [fpdimid,eldimid])
-ncdf_attput, cdfid, gvDzeroStdDevvarid, 'long_name', $
+gvDmStdDevvarid = ncdf_vardef(cdfid, 'GR_Dm_StdDev_slantPath', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvDmStdDevvarid, 'long_name', $
    'Standard Deviation of DP Median Volume Diameter'
-ncdf_attput, cdfid, gvDzeroStdDevvarid, 'units', 'mm'
-ncdf_attput, cdfid, gvDzeroStdDevvarid, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, gvDmStdDevvarid, 'units', 'mm'
+ncdf_attput, cdfid, gvDmStdDevvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-gvDzeroMaxvarid = ncdf_vardef(cdfid, 'GR_Dzero_Max_slantPath', [fpdimid,eldimid])
-ncdf_attput, cdfid, gvDzeroMaxvarid, 'long_name', $
+gvDmMaxvarid = ncdf_vardef(cdfid, 'GR_Dm_Max_slantPath', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvDmMaxvarid, 'long_name', $
    'Sample Maximum DP Median Volume Diameter'
-ncdf_attput, cdfid, gvDzeroMaxvarid, 'units', 'mm'
-ncdf_attput, cdfid, gvDzeroMaxvarid, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, gvDmMaxvarid, 'units', 'mm'
+ncdf_attput, cdfid, gvDmMaxvarid, '_FillValue', FLOAT_RANGE_EDGE
 
 gvNWvarid = ncdf_vardef(cdfid, 'GR_Nw_slantPath', [fpdimid,eldimid])
 ncdf_attput, cdfid, gvNWvarid, 'long_name', $
@@ -792,10 +793,10 @@ ncdf_attput, cdfid, gv_hid_rejvarid, 'long_name', $
              'number of bins with undefined HID in GR_HID_slantPath histogram'
 ncdf_attput, cdfid, gv_hid_rejvarid, '_FillValue', INT_RANGE_EDGE
 
-gv_dzero_rejvarid = ncdf_vardef(cdfid, 'n_gr_dzero_rejected', [fpdimid,eldimid], /short)
-ncdf_attput, cdfid, gv_dzero_rejvarid, 'long_name', $
-             'number of bins with missing D0 in GR_Dzero_slantPath average'
-ncdf_attput, cdfid, gv_dzero_rejvarid, '_FillValue', INT_RANGE_EDGE
+gv_dm_rejvarid = ncdf_vardef(cdfid, 'n_gr_dm_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, gv_dm_rejvarid, 'long_name', $
+             'number of bins with missing D0 in GR_Dm_slantPath average'
+ncdf_attput, cdfid, gv_dm_rejvarid, '_FillValue', INT_RANGE_EDGE
 
 gv_nw_rejvarid = ncdf_vardef(cdfid, 'n_gr_nw_rejected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, gv_nw_rejvarid, 'long_name', $
@@ -812,6 +813,41 @@ gv_mi_rejvarid = ncdf_vardef(cdfid, 'n_gr_frozenWaterContent_rejected', [fpdimid
 ncdf_attput, cdfid, gv_mi_rejvarid, 'long_name', $
              'number of bins with missing frozen Water Content in GR_frozenWaterContent_slantPath average'
 ncdf_attput, cdfid, gv_mi_rejvarid, '_FillValue', INT_RANGE_EDGE
+
+   gv_nw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_nw_precip', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_nw_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_Nw average'
+   ncdf_attput, cdfid, gv_nw_n_precip_varid, '_FillValue', INT_RANGE_EDGE
+
+   gv_mw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_mw_precip', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_mw_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_Mw average'
+   ncdf_attput, cdfid, gv_mw_n_precip_varid, '_FillValue', INT_RANGE_EDGE
+
+   gv_mi_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_mi_precip', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_mi_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_Mi average'
+   ncdf_attput, cdfid, gv_mi_n_precip_varid, '_FillValue', INT_RANGE_EDGE
+
+   gv_dm_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_dm_precip', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_dm_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_Dm average'
+   ncdf_attput, cdfid, gv_dm_n_precip_varid, '_FillValue', INT_RANGE_EDGE
+
+   gv_rr_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rr_precip', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_rr_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_RR average'
+   ncdf_attput, cdfid, gv_rr_n_precip_varid, '_FillValue', INT_RANGE_EDGE
+
+   gv_rc_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rc_precip', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_rc_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_RC average'
+   ncdf_attput, cdfid, gv_rc_n_precip_varid, '_FillValue', INT_RANGE_EDGE
+
+   gv_rp_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rp_precip', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_rp_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_RP average'
+   ncdf_attput, cdfid, gv_rp_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
 dbzgvvarid_vpr = ncdf_vardef(cdfid, 'GR_Z_VPR', [fpdimid,eldimid])
 ncdf_attput, cdfid, dbzgvvarid_vpr, 'long_name', $
@@ -945,23 +981,23 @@ ncdf_attput, cdfid, gvHIDvarid_vpr, 'long_name', $
 ncdf_attput, cdfid, gvHIDvarid_vpr, 'units', 'Categorical'
 ncdf_attput, cdfid, gvHIDvarid_vpr, '_FillValue', INT_RANGE_EDGE
 
-gvDzerovarid_vpr = ncdf_vardef(cdfid, 'GR_Dzero_VPR', [fpdimid,eldimid])
-ncdf_attput, cdfid, gvDzerovarid_vpr, 'long_name', $
+gvDmvarid_vpr = ncdf_vardef(cdfid, 'GR_Dm_VPR', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvDmvarid_vpr, 'long_name', $
    'DP Median Volume Diameter along local vertical'
-ncdf_attput, cdfid, gvDzerovarid_vpr, 'units', 'mm'
-ncdf_attput, cdfid, gvDzerovarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, gvDmvarid_vpr, 'units', 'mm'
+ncdf_attput, cdfid, gvDmvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
 
-gvDzeroStdDevvarid_vpr = ncdf_vardef(cdfid, 'GR_Dzero_StdDev_VPR', [fpdimid,eldimid])
-ncdf_attput, cdfid, gvDzeroStdDevvarid_vpr, 'long_name', $
+gvDmStdDevvarid_vpr = ncdf_vardef(cdfid, 'GR_Dm_StdDev_VPR', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvDmStdDevvarid_vpr, 'long_name', $
    'Standard Deviation of DP Median Volume Diameter along local vertical'
-ncdf_attput, cdfid, gvDzeroStdDevvarid_vpr, 'units', 'mm'
-ncdf_attput, cdfid, gvDzeroStdDevvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, gvDmStdDevvarid_vpr, 'units', 'mm'
+ncdf_attput, cdfid, gvDmStdDevvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
 
-gvDzeroMaxvarid_vpr = ncdf_vardef(cdfid, 'GR_Dzero_Max_VPR', [fpdimid,eldimid])
-ncdf_attput, cdfid, gvDzeroMaxvarid_vpr, 'long_name', $
+gvDmMaxvarid_vpr = ncdf_vardef(cdfid, 'GR_Dm_Max_VPR', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvDmMaxvarid_vpr, 'long_name', $
    'Sample Maximum DP Median Volume Diameter along local vertical'
-ncdf_attput, cdfid, gvDzeroMaxvarid_vpr, 'units', 'mm'
-ncdf_attput, cdfid, gvDzeroMaxvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
+ncdf_attput, cdfid, gvDmMaxvarid_vpr, 'units', 'mm'
+ncdf_attput, cdfid, gvDmMaxvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
 
 gvNWvarid_vpr = ncdf_vardef(cdfid, 'GR_Nw_VPR', [fpdimid,eldimid])
 ncdf_attput, cdfid, gvNWvarid_vpr, 'long_name', $
@@ -1068,10 +1104,10 @@ ncdf_attput, cdfid, gv_hid_rejvarid_vpr, 'long_name', $
              'number of bins with undefined HID in GR_HID_VPR histogram'
 ncdf_attput, cdfid, gv_hid_rejvarid_vpr, '_FillValue', INT_RANGE_EDGE
 
-gv_dzero_rejvarid_vpr = ncdf_vardef(cdfid, 'n_gr_dzero_vpr_rejected', [fpdimid,eldimid], /short)
-ncdf_attput, cdfid, gv_dzero_rejvarid_vpr, 'long_name', $
-             'number of bins with missing D0 in GR_Dzero_VPR average'
-ncdf_attput, cdfid, gv_dzero_rejvarid_vpr, '_FillValue', INT_RANGE_EDGE
+gv_dm_rejvarid_vpr = ncdf_vardef(cdfid, 'n_gr_dm_vpr_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, gv_dm_rejvarid_vpr, 'long_name', $
+             'number of bins with missing D0 in GR_Dm_VPR average'
+ncdf_attput, cdfid, gv_dm_rejvarid_vpr, '_FillValue', INT_RANGE_EDGE
 
 gv_nw_rejvarid_vpr = ncdf_vardef(cdfid, 'n_gr_nw_vpr_rejected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, gv_nw_rejvarid_vpr, 'long_name', $
@@ -1088,6 +1124,42 @@ gv_mi_rejvarid_vpr = ncdf_vardef(cdfid, 'n_gr_frozenWaterContent_vpr_rejected', 
 ncdf_attput, cdfid, gv_mi_rejvarid_vpr, 'long_name', $
              'number of bins with missing frozen Water Content in GR_frozenWaterContent_VPR average'
 ncdf_attput, cdfid, gv_mi_rejvarid_vpr, '_FillValue', INT_RANGE_EDGE
+
+   gv_nw_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_nw_precip_vpr', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_nw_n_precip_varid_vpr, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_Nw_vpr average'
+   ncdf_attput, cdfid, gv_nw_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
+
+   gv_mw_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_mw_precip_vpr', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_mw_n_precip_varid_vpr, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_Mw_vpr average'
+   ncdf_attput, cdfid, gv_mw_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
+
+   gv_mi_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_mi_precip_vpr', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_mi_n_precip_varid_vpr, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_Mi_vpr average'
+   ncdf_attput, cdfid, gv_mi_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
+
+   gv_dm_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_dm_precip_vpr', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_dm_n_precip_varid_vpr, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_Dm_vpr average'
+   ncdf_attput, cdfid, gv_dm_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
+
+   gv_rr_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_rr_precip_vpr', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_rr_n_precip_varid_vpr, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_RR_vpr average'
+   ncdf_attput, cdfid, gv_rr_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
+
+   gv_rc_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_rc_precip_vpr', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_rc_n_precip_varid_vpr, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_RC_vpr average'
+   ncdf_attput, cdfid, gv_rc_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
+
+   gv_rp_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_rp_precip_vpr', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_rp_n_precip_varid_vpr, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_RP_vpr average'
+   ncdf_attput, cdfid, gv_rp_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
+
 
 ; single-level fields
 
