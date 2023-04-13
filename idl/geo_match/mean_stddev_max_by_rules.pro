@@ -116,7 +116,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 ;         avg_gv = 10.*ALOG10(z_avg_gv)
 ;      ENDIF ELSE BEGIN
 ; Disable automatic printing of subsequent math errors:
-!EXCEPT=0
+;!EXCEPT=0
 
         ; compute volume-weighted average in data space
          avg_gv = TOTAL(data2avg * wgts2avg) / TOTAL(wgts2avg)

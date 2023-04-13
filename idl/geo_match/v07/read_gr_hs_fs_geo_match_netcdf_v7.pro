@@ -190,8 +190,6 @@ IF N_Elements(matchupmeta) NE 0 THEN BEGIN
      matchupmeta.GV_UF_RHOHV_field = STRING(gv_UF_field_byte)
      ncdf_attget, ncid1, 'GV_UF_HID_field', gv_UF_field_byte, /global
      matchupmeta.GV_UF_HID_field = STRING(gv_UF_field_byte)
-     ncdf_attget, ncid1, 'GV_UF_D0_field', gv_UF_field_byte, /global
-     matchupmeta.GV_UF_D0_field = STRING(gv_UF_field_byte)
      ncdf_attget, ncid1, 'GV_UF_NW_field', gv_UF_field_byte, /global
      matchupmeta.GV_UF_NW_field = STRING(gv_UF_field_byte)
      ncdf_attget, ncid1, 'GV_UF_MW_field', gv_UF_field_byte, /global
