@@ -1950,13 +1950,13 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'n_gr_swemrms_rejected_'+DPR_scantype, tocdf_gr_swemrms_rejected
       NCDF_VARPUT, ncid, 'n_gr_expected_'+DPR_scantype, tocdf_gr_expected
 
-   	  NCDF_VARPUT, ncid, 'n_gr_nw_precip', tocdf_gr_nw_n_precip
-      NCDF_VARPUT, ncid, 'n_gr_mw_precip', tocdf_gr_mw_n_precip
-      NCDF_VARPUT, ncid, 'n_gr_mi_precip', tocdf_gr_mi_n_precip
-      NCDF_VARPUT, ncid, 'n_gr_dm_precip', tocdf_gr_dm_n_precip
-      NCDF_VARPUT, ncid, 'n_gr_rr_precip', tocdf_gr_rr_n_precip
-      NCDF_VARPUT, ncid, 'n_gr_rc_precip', tocdf_gr_rc_n_precip
-      NCDF_VARPUT, ncid, 'n_gr_rp_precip', tocdf_gr_rp_n_precip
+   	  NCDF_VARPUT, ncid, 'n_gr_nw_precip'+DPR_scantype, tocdf_gr_nw_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_mw_precip'+DPR_scantype, tocdf_gr_mw_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_mi_precip'+DPR_scantype, tocdf_gr_mi_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_dm_precip'+DPR_scantype, tocdf_gr_dm_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_rr_precip'+DPR_scantype, tocdf_gr_rr_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_rc_precip'+DPR_scantype, tocdf_gr_rc_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_rp_precip'+DPR_scantype, tocdf_gr_rp_n_precip
 
      ; DPRGMI variables last
       NCDF_VARPUT, ncid, 'precipTotDm_'+DPR_scantype, tocdf_precipTotDm
