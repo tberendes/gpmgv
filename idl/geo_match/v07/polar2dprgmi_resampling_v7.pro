@@ -74,8 +74,8 @@
 ;  >>>>>>>>>>>>>> BEGINNING OF DPR-GR VOLUME MATCHING, ALL SWEEPS <<<<<<<<<<<<<<<
 
    FOR ielev = 0, num_elevations_out - 1 DO BEGIN
-      print, ""
-      print, "Elevation: ", tocdf_elev_angle[ielev]
+;      print, ""
+;      print, "Elevation: ", tocdf_elev_angle[ielev]
 
      ; initialize the flags that control blockage calculation/assignment
       do_this_elev_blockage = 0
