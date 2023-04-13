@@ -76,8 +76,8 @@
 ;  >>>>>>>>>>>>>> BEGINNING OF GMI-GV VOLUME MATCHING, ALL SWEEPS <<<<<<<<<<<<<<<
 
    FOR ielev = 0, num_elevations_out - 1 DO BEGIN
-      print, ""
-      print, "Elevation: ", tocdf_elev_angle[ielev]
+;      print, ""
+;      print, "Elevation: ", tocdf_elev_angle[ielev]
 
      ; initialize the flags that control blockage calculation/assignment
       do_this_elev_blockage = 0
@@ -475,7 +475,7 @@
          ENDIF
       ENDFOR    ; GMI footprints
 
-      print, "# GMI footprints in LUT: ", gmi_footprints_in_lut
+;      print, "# GMI footprints in LUT: ", gmi_footprints_in_lut
 
      ; =========================================================================
      ; COMPUTE THE GV REFLECTIVITY AVERAGES
@@ -1010,7 +1010,7 @@
 
       ENDFOR  ; each GMI subarray point: jpr=0, numGMIrays-1
 
-      print, "# GMI footprints with GR echo: ", gmi_footprints_with_gr_echo
+;      print, "# GMI footprints with GR echo: ", gmi_footprints_with_gr_echo
 
      ; =========================================================================
 
@@ -1037,7 +1037,7 @@
                tocdf_x_poly, tocdf_y_poly, numGMIrays, ielev, TITLES=titles
 
          something = ""
-         print, ''
+;         print, ''
 ;         READ, something, PROMPT='Hit Return to proceed to next level: '
       ENDIF
 

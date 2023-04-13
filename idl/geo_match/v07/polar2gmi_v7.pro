@@ -754,7 +754,7 @@ FOR igv=0,nsites-1  DO BEGIN
       ENDIF ELSE BEGIN
          message,"No blockage files for "+siteID+", set blockage to missing.", $
                   /INFO
-         print, "Available blockage sites: ", blkSites
+;         print, "Available blockage sites: ", blkSites
       ENDELSE
    ENDIF
 
