@@ -596,6 +596,11 @@ ncdf_attput, cdfid, havestmtopvarid, 'long_name', $
              'data exists flag for heightStormTop'
 ncdf_attput, cdfid, havestmtopvarid, '_FillValue', NO_DATA_PRESENT
 
+haveheightZeroDegvarid = ncdf_vardef(cdfid, 'have_heightZeroDeg', /short)
+ncdf_attput, cdfid, haveheightZeroDegvarid, 'long_name', $
+             'data exists flag for heightZeroDeg'
+ncdf_attput, cdfid, haveheightZeroDegvarid, '_FillValue', NO_DATA_PRESENT
+
 havebbvarid = ncdf_vardef(cdfid, 'have_BBheight', /short)
 ncdf_attput, cdfid, havebbvarid, 'long_name', 'data exists flag for BBheight'
 ncdf_attput, cdfid, havebbvarid, '_FillValue', NO_DATA_PRESENT
