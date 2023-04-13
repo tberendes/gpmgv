@@ -75,7 +75,7 @@ FUNCTION get_dpr_flg_group, group_id, prodgroup, READ_ALL=read_all
              'qualityData' : qualityData = h5d_read(dtID)
              'qualityFlag' : qualityFlag = h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
                    END
          ENDCASE

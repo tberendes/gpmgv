@@ -76,7 +76,7 @@ FUNCTION get_dpr_ver_group_v7, group_id, prodgroup, READ_ALL=read_all
                    'flagInversion' : flagInversion = h5d_read(dtID)
                    'airTemperature' : airTemperature = h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
                    END
          ENDCASE

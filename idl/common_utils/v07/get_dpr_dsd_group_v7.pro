@@ -88,7 +88,7 @@ FUNCTION get_dpr_dsd_group_v7, group_id, prodgroup, READ_ALL=read_all
                         IF all THEN phase = h5d_read(dtID)
                         END
                  ELSE : BEGIN
-                        message, "Unknown group member: "+dtnames[immbr], /INFO
+;                        message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                        return, -1
                         END
          ENDCASE

@@ -100,7 +100,7 @@ FUNCTION get_dpr_csf_group_v7, group_id, prodgroup, READ_ALL=read_all
       'binHeavyIcePrecipBottom' : binHeavyIcePrecipBottom=h5d_read(dtID)
               'nHeavyIcePrecip' : nHeavyIcePrecip=h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
                    END
          ENDCASE

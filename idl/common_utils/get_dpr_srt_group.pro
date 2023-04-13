@@ -74,7 +74,7 @@ FUNCTION get_dpr_srt_group, group_id, prodgroup, READ_ALL=read_all
                'reliabFactor' : IF all THEN reliabFactor = h5d_read(dtID)
                  'reliabFlag' : IF all THEN reliabFlag = h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
                    END
          ENDCASE

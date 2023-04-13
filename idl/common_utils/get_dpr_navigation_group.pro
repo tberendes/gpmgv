@@ -80,7 +80,7 @@ FUNCTION get_dpr_navigation_group, group_id, prodgroup, READ_ALL=read_all
                      'timeMidScan' : timeMidScan = h5d_read(dtID)
                'timeMidScanOffset' : timeMidScanOffset = h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
                    END
          ENDCASE
