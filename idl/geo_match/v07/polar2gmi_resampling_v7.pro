@@ -1287,6 +1287,7 @@
                   dm_avg_gv_vpr = altstats.mean
                   dm_stddev_gv_vpr = altstats.stddev
                   dm_max_gv_vpr = altstats.max
+                  dm_n_precip_vpr = altstats.n_GR_precip
                ENDIF
 
                IF have_gv_nw THEN BEGIN
