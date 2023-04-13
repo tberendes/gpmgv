@@ -728,8 +728,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
 
   ; Determine how many DPR footprints fall inside the analysis area
    numDPRrays = data_GR2DPR.NUMRAYS
-
-  PRINT, "numDPRrays for ", siteID, " ", numDPRrays
+  print, ""
+;  PRINT, "numDPRrays for ", siteID, " ", numDPRrays
   print, "scan_type ", DPR_scantype
   
   ; Create temp array of DPR (ray, scan) 1-D index locators for in-range points.
@@ -1032,8 +1032,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
   ; intersect the elevation sweeps
 
    FOR ielev = 0, num_elevations_out - 1 DO BEGIN
-      print, ""
-      print, "Elevation: ", tocdf_elev_angle[ielev]
+;      print, ""
+;      print, "Elevation: ", tocdf_elev_angle[ielev]
 
      ; =========================================================================
      ; COMPUTE THE DPR AND GR REFLECTIVITY AND 3D RAIN RATE AVERAGES
