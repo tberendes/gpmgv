@@ -97,7 +97,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 
    IF ( countGVgood GT 0 ) THEN BEGIN
       if doLog then $
-          data = 10.0^(data*0.1)
+          data[good_idx] = 10.0^(data[good_idx]*0.1)
       IF ( countGVbad GT 0 and doZero ) THEN BEGIN
         ; set "bad" dBZ, etc. values to 0.0 for averaging and include them all
          data2avg=data
