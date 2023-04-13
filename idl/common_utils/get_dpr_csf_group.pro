@@ -91,7 +91,7 @@ FUNCTION get_dpr_csf_group, group_id, prodgroup, READ_ALL=read_all
                    'typePrecip' : typePrecip = h5d_read(dtID)
                       'widthBB' : IF all THEN widthBB = h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
                    END
          ENDCASE

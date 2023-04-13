@@ -94,7 +94,7 @@ FUNCTION get_dpr_pre_group, group_id, prodgroup, READ_ALL=read_all
                                      h5d_read(dtID)
                  'zFactorMeasured' : zFactorMeasured = h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
 ;                      return, -1
                    END
          ENDCASE
