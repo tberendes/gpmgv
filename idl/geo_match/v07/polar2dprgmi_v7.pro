@@ -237,7 +237,7 @@ ENDIF
 DPR_version = '0'
 
 ; for debugging
-;!EXCEPT=2
+!EXCEPT=2
 
 
 ; ***************************** Local configuration ****************************

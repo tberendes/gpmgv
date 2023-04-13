@@ -107,8 +107,8 @@ FUNCTION get_cmb_input_group, group_id, prodgroup, READ_ALL=read_all
                    'zeroDegAltitude' : zeroDegAltitude = h5d_read(dtID)
                         'zeroDegBin' : zeroDegBin = h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
-                      print, "No. Members = ", STRING(nmbrs, FORMAT='(I0)')
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      print, "No. Members = ", STRING(nmbrs, FORMAT='(I0)')
                    END
          ENDCASE
 ;         dtval = h5d_read(dtID)

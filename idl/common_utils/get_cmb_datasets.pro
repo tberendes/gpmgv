@@ -129,7 +129,7 @@ FUNCTION get_cmb_datasets, group_id, label, READ_ALL=read_all
                        'vaporDensity' : IF all THEN vaporDensity = $
                                         h5d_read(dtID)
             ELSE : BEGIN
-                      message, "Unknown group member: "+dtnames[immbr], /INFO
+;                      message, "Unknown group member: "+dtnames[immbr], /INFO
                    END
          ENDCASE
 ;         dtval = h5d_read(dtID)
