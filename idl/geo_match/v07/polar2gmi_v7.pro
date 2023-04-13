@@ -729,7 +729,7 @@ FOR igv=0,nsites-1  DO BEGIN
               RP_ID:    'Unspecified', $
               RR_ID:    'Unspecified', $
               HID_ID:   'Unspecified', $
-              D0_ID:    'Unspecified', $
+              DM_ID:    'Unspecified', $
               NW_ID:    'Unspecified', $
               MW_ID:    'Unspecified', $
               MI_ID:    'Unspecified' }
