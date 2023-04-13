@@ -730,7 +730,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    numDPRrays = data_GR2DPR.NUMRAYS
   print, ""
 ;  PRINT, "numDPRrays for ", siteID, " ", numDPRrays
-  print, "scan_type ", DPR_scantype
+  print, "Matching scan ", DPR_scantype
   
   ; Create temp array of DPR (ray, scan) 1-D index locators for in-range points.
   ;   Use flag values of -1 for 'bogus' DPR points (out-of-range DPR footprints
