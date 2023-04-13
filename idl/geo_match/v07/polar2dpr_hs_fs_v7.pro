@@ -1243,8 +1243,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   ; ray's intersection of each sweep elevation.  Compute DPR footprint corner
   ; x,y's for the DPR points within the cutoff range.
 
- print, "RAYSPERSCAN ", RAYSPERSCAN
- help, dpr_index_all
+ ;print, "RAYSPERSCAN ", RAYSPERSCAN
+ ;help, dpr_index_all
  
    FOR scan_num = start_scan,end_scan  DO BEGIN
       subset_scan_num = scan_num - start_scan
