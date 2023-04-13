@@ -136,11 +136,11 @@ IF ( countvols EQ 1 ) THEN BEGIN
    z_field = field1
    RETURN, volnum
 ENDIF ELSE BEGIN
-   print, ""
-   message, "Valid volume not found for site ID '" +siteID+ "', field '" $
-            +field1+ "'", /INFO
-   print, "Available fields: ", fields
-   print, ""
+;   print, ""
+;   message, "Valid volume not found for site ID '" +siteID+ "', field '" $
+;            +field1+ "'", /INFO
+;   print, "Available fields: ", fields
+;   print, ""
    RETURN, -1
 ENDELSE
 

@@ -455,8 +455,8 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       IF s[0] EQ status.s1.SWATHHEADER.NUMBERPIXELS THEN NPIXEL_GMI = s[0] $
         ELSE message, 'Mismatch in data array dimension NUMBERPIXELS.'
       IF s[1] EQ status.s1.SWATHHEADER.MAXIMUMNUMBERSCANSTOTAL $
-        THEN NSCANS_GMI = s[1] $
-        ELSE message, 'Mismatch in data array dimension NUMBERSCANS.', /INFO
+        THEN NSCANS_GMI = s[1] ; $
+;        ELSE message, 'Mismatch in data array dimension NUMBERSCANS.', /INFO
 NSCANS_GMI = s[1]
    ENDIF ELSE message, "Don't have a 2-D array for Longitude, quitting."
 
