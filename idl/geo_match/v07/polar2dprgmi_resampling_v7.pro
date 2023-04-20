@@ -530,6 +530,14 @@
          n_cloudIceWaterCont_rejected = 0UL
          clutterStatus = 0UL           ; result of clutter-free proximity for volume
 
+         rc_n_precip = 0UL
+         rp_n_precip = 0UL
+         rr_n_precip = 0UL
+         nw_n_precip = 0UL
+         mw_n_precip = 0UL
+         mi_n_precip = 0UL
+         dm_n_precip = 0UL
+
 ; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
 	     if skip_elev NE 1 then begin
          	dpr_index = dpr_master_idx[jpr]

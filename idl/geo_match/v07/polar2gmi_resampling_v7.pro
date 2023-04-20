@@ -503,6 +503,14 @@
          n_gr_mi_points_rejected = 0UL     ; # of above that are MISSING Mi
          GMI_gates_expected = 0UL       ; # GMI gates within the sweep vert. bounds
 
+         rc_n_precip = 0UL
+         rp_n_precip = 0UL
+         rr_n_precip = 0UL
+         nw_n_precip = 0UL
+         mw_n_precip = 0UL
+         mi_n_precip = 0UL
+         dm_n_precip = 0UL
+
          GMI_index = GMI_master_idx[jpr]
 
          IF ( GMI_index GE 0 AND GMI_echoes[jpr] NE 0B ) THEN BEGIN
@@ -1138,6 +1146,14 @@
          n_gr_mi_vpr_points_rejected = 0UL     ; # of above that are MISSING MI
          GMI_gates_expected = 0UL       ; # GMI gates within the sweep vert. bounds
 
+         rc_n_precip_vpr = 0UL
+         rp_n_precip_vpr = 0UL
+         rr_n_precip_vpr = 0UL
+         nw_n_precip_vpr = 0UL
+         mw_n_precip_vpr = 0UL
+         mi_n_precip_vpr = 0UL
+         dm_n_precip_vpr = 0UL
+         
          GMI_index = GMI_master_idx[jpr]
 
          IF ( GMI_index GE 0 AND GMI_echoes[jpr] NE 0B ) THEN BEGIN
