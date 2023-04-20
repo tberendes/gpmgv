@@ -542,7 +542,7 @@
                IF have_gv_zdr THEN BEGIN
                   gvzdrvals = zdr_bscan[thisGMIsGVindices]
                   altstats=mean_stddev_max_by_rules(gvzdrvals,'ZDR', -20.0, $
-                              -32760.0, SRAIN_BELOW_THRESH)
+                              -32760.0, SRAIN_BELOW_THRESH, /LOG)
                   n_gr_zdr_points_rejected = altstats.rejects
                   zdr_avg_gv = altstats.mean
                   zdr_stddev_gv = altstats.stddev
@@ -677,7 +677,7 @@
                IF have_gv_nw THEN BEGIN
                   gvnwvals = nw_bscan[thisGMIsGVindices]
                   altstats=mean_stddev_max_by_rules(gvnwvals,'NW', 0.0, $
-                              0.0, SRAIN_BELOW_THRESH,WITH_ZEROS=1)
+                              0.0, SRAIN_BELOW_THRESH,WITH_ZEROS=1, /LOG)
                   n_gr_nw_points_rejected = altstats.rejects
                   nw_avg_gv = altstats.mean
                   nw_stddev_gv = altstats.stddev
@@ -763,13 +763,6 @@
                mi_avg_gv = SRAIN_BELOW_THRESH
                mi_stddev_gv = SRAIN_BELOW_THRESH
                mi_max_gv = SRAIN_BELOW_THRESH
-               dm_n_precip = SRAIN_BELOW_THRESH
-               nw_n_precip = SRAIN_BELOW_THRESH
-               mw_n_precip = SRAIN_BELOW_THRESH
-               mi_n_precip = SRAIN_BELOW_THRESH
-               rr_n_precip = SRAIN_BELOW_THRESH
-               rc_n_precip = SRAIN_BELOW_THRESH
-               rp_n_precip = SRAIN_BELOW_THRESH
 	       meantop = 0.0    ; should calculate something for this
 	       meanbotm = 0.0   ; ditto
 	    ENDIF
@@ -876,43 +869,36 @@
                              tocdf_gr_rc[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rc_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rc_max[jpr,ielev] = FLOAT_OFF_EDGE
-                     		 tocdf_gr_rc_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_rp THEN BEGIN
                              tocdf_gr_rp[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rp_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rp_max[jpr,ielev] = FLOAT_OFF_EDGE
-                     		 tocdf_gr_rp_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_rr THEN BEGIN
                              tocdf_gr_rr[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rr_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rr_max[jpr,ielev] = FLOAT_OFF_EDGE
-                     		 tocdf_gr_rr_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_dm THEN BEGIN
                              tocdf_gr_dm[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_max[jpr,ielev] = FLOAT_OFF_EDGE
-                     		 tocdf_gr_dm_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_nw THEN BEGIN
                              tocdf_gr_Nw[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_max[jpr,ielev] = FLOAT_OFF_EDGE
-                     		 tocdf_gr_nw_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_mw THEN BEGIN
                              tocdf_gr_Mw[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mw_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mw_max[jpr,ielev] = FLOAT_OFF_EDGE
-                     		 tocdf_gr_mw_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_mi THEN BEGIN
                              tocdf_gr_Mi[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mi_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mi_max[jpr,ielev] = FLOAT_OFF_EDGE
-                     		 tocdf_gr_mi_n_precip[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage[jpr,ielev] = FLOAT_OFF_EDGE
@@ -945,43 +931,36 @@
                              tocdf_gr_rc[jpr,ielev] = Z_MISSING
                              tocdf_gr_rc_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_rc_max[jpr,ielev] = Z_MISSING
-                     		 tocdf_gr_rc_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_rp THEN BEGIN
                              tocdf_gr_rp[jpr,ielev] = Z_MISSING
                              tocdf_gr_rp_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_rp_max[jpr,ielev] = Z_MISSING
-                     		 tocdf_gr_rp_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_rr THEN BEGIN
                              tocdf_gr_rr[jpr,ielev] = Z_MISSING
                              tocdf_gr_rr_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_rr_max[jpr,ielev] = Z_MISSING
-                     		 tocdf_gr_rr_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_dm THEN BEGIN
                              tocdf_gr_dm[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_max[jpr,ielev] = Z_MISSING
-                     		 tocdf_gr_dm_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_nw THEN BEGIN
                              tocdf_gr_Nw[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_max[jpr,ielev] = Z_MISSING
-                     		 tocdf_gr_nw_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_mw THEN BEGIN
                              tocdf_gr_Mw[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mw_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mw_max[jpr,ielev] = Z_MISSING
-                     		 tocdf_gr_mw_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_mi THEN BEGIN
                              tocdf_gr_Mi[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mi_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mi_max[jpr,ielev] = Z_MISSING
-                     		 tocdf_gr_mi_n_precip[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage[jpr,ielev] = Z_MISSING
@@ -1380,13 +1359,6 @@
                mi_avg_gv_vpr = SRAIN_BELOW_THRESH
                mi_stddev_gv_vpr = SRAIN_BELOW_THRESH
                mi_max_gv_vpr = SRAIN_BELOW_THRESH
-               dm_n_precip_vpr = SRAIN_BELOW_THRESH
-               nw_n_precip_vpr = SRAIN_BELOW_THRESH
-               mw_n_precip_vpr = SRAIN_BELOW_THRESH
-               mi_n_precip_vpr = SRAIN_BELOW_THRESH
-               rr_n_precip_vpr = SRAIN_BELOW_THRESH
-               rc_n_precip_vpr = SRAIN_BELOW_THRESH
-               rp_n_precip_vpr = SRAIN_BELOW_THRESH
 	       meantop_vpr = 0.0    ; should calculate something for this
 	       meanbotm_vpr = 0.0   ; ditto
 	    ENDIF
@@ -1493,43 +1465,36 @@
                              tocdf_gr_rc_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rc_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rc_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
-                             tocdf_gr_rc_n_precip_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_rp THEN BEGIN
                              tocdf_gr_rp_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rp_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rp_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
-                             tocdf_gr_rp_n_precip_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_rr THEN BEGIN
                              tocdf_gr_rr_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rr_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_rr_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
-                             tocdf_gr_rr_n_precip_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_dm THEN BEGIN
                              tocdf_gr_dm_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
-                             tocdf_gr_dm_n_precip_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_nw THEN BEGIN
                              tocdf_gr_Nw_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
-                             tocdf_gr_nw_n_precip_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_mw THEN BEGIN
                              tocdf_gr_Mw_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mw_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mw_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
-                             tocdf_gr_mw_n_precip_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF have_gv_mi THEN BEGIN
                              tocdf_gr_Mi_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mi_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Mi_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
-                             tocdf_gr_mi_n_precip_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage_VPR[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1562,43 +1527,36 @@
                              tocdf_gr_rc_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_rc_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_rc_max_VPR[jpr,ielev] = Z_MISSING
-                             tocdf_gr_rc_n_precip_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_rp THEN BEGIN
                              tocdf_gr_rp_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_rp_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_rp_max_VPR[jpr,ielev] = Z_MISSING
-                             tocdf_gr_rp_n_precip_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_rr THEN BEGIN
                              tocdf_gr_rr_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_rr_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_rr_max_VPR[jpr,ielev] = Z_MISSING
-                             tocdf_gr_rr_n_precip_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_dm THEN BEGIN
                              tocdf_gr_dm_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_max_VPR[jpr,ielev] = Z_MISSING
-                             tocdf_gr_dm_n_precip_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_nw THEN BEGIN
                              tocdf_gr_Nw_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_max_VPR[jpr,ielev] = Z_MISSING
-                             tocdf_gr_nw_n_precip_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_mw THEN BEGIN
                              tocdf_gr_Mw_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mw_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mw_max_VPR[jpr,ielev] = Z_MISSING
-                             tocdf_gr_mw_n_precip_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF have_gv_mi THEN BEGIN
                              tocdf_gr_Mi_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mi_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_Mi_max_VPR[jpr,ielev] = Z_MISSING
-                             tocdf_gr_mi_n_precip_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage_VPR[jpr,ielev] = Z_MISSING

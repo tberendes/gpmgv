@@ -120,9 +120,9 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 
         ; compute volume-weighted average in data space
          avg_gv = TOTAL(data2avg * wgts2avg) / TOTAL(wgts2avg)
-         IF doLog THEN $
-             ;avg_gv = 10.*ALOG10(z_avg_gv)
-             avg_gv = 10.*ALOG10(avg_gv)
+;         IF doLog THEN $
+;             ;avg_gv = 10.*ALOG10(z_avg_gv)
+;             avg_gv = 10.*ALOG10(avg_gv)
 ;		IF CHECK_MATH() NE 0 THEN BEGIN
 ;			PRINT, 'Math error mean_stddev_max_by_rules'
 ;			print, 'field ', field, ' goodthresh ', goodthresh, ' badthresh ', badthresh, $
@@ -142,6 +142,15 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 ;      print, "GV dBZs:"
 ;      print, data[good_idx]
 ;      print, weights[good_idx]
+	   IF doLog THEN begin 
+	     ;avg_gv = 10.*ALOG10(z_avg_gv)
+	     if avg_gv GT 0.0 then $
+	     	avg_gv = 10.*ALOG10(avg_gv)
+	     if max_gv GT 0.0 then $
+	     	max_gv = 10.*ALOG10(max_gv)
+	     if stddev_gv GT 0.0 then $
+	     	stddev_gv = 10.*ALOG10(stddev_gv)
+	   ENDIF
    ENDIF ELSE BEGIN
      ; handle where no field values meet criteria
       avg_gv = no_data_value

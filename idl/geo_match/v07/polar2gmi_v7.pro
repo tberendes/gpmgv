@@ -1533,9 +1533,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_gr_mw_n_precip = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_mi_n_precip = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_dm_n_precip = UINTARR(numGMIrays, num_elevations_out)
-;      tocdf_gr_rr_n_precip = UINTARR(numGMIrays, num_elevations_out)
-      tocdf_gr_rr_n_precip = MAKE_ARRAY(numGMIrays, num_elevations_out, /UINT, $
-                                 VALUE=INT_RANGE_EDGE)      
+      tocdf_gr_rr_n_precip = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rc_n_precip = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rp_n_precip = UINTARR(numGMIrays, num_elevations_out)
 
@@ -1634,9 +1632,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_gr_mw_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_mi_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_dm_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
-;      tocdf_gr_rr_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
-      tocdf_gr_rr_n_precip_vpr = MAKE_ARRAY(numGMIrays, num_elevations_out, /UINT, $
-                                 VALUE=INT_RANGE_EDGE)      
+      tocdf_gr_rr_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rc_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rp_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
 

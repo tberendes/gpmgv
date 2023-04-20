@@ -1649,9 +1649,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_mw_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_mi_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_dm_n_precip = UINTARR(numDPRrays, num_elevations_out)
-;      tocdf_gr_rr_n_precip = UINTARR(numDPRrays, num_elevations_out)
-      tocdf_gr_rr_n_precip = MAKE_ARRAY(numDPRrays, num_elevations_out, /UINT, $
-                                 VALUE=INT_RANGE_EDGE)      
+      tocdf_gr_rr_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rc_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rp_n_precip = UINTARR(numDPRrays, num_elevations_out)
 
