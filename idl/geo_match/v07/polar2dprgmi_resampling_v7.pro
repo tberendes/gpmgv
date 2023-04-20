@@ -84,7 +84,7 @@
      ; restore and preprocess any matching blockage file for this site/sweep
      ; if we have the data to do blockages
       IF do_blockage THEN BEGIN
-         blkStruct = prep_blockage_parms( BlockFileBySweep, ielev, VERBOSE=1 )
+         blkStruct = prep_blockage_parms( BlockFileBySweep, ielev, VERBOSE=0 )
         ; we expected to find the blockage file for the first sweep, so check
         ; whether that is so by the state of the blkStruct parameter
          IF (ielev EQ 0) AND (blkStruct.do_this_elev_blockage EQ 0) THEN BEGIN
@@ -739,7 +739,7 @@
                IF do_this_elev_blockage EQ 1 THEN BEGIN
                   compute_mean_blockage, ielev, jpr, tocdf_gr_blockage, $
                      blockage4swp, max_sep, dpr_x_center, dpr_y_center,$
-                     blok_x, blok_y, ZERO_FILL=zero_fill, verbose=1
+                     blok_x, blok_y, ZERO_FILL=zero_fill
                ENDIF
 
               ; compute mean height above surface of GR beam top and beam bottom
