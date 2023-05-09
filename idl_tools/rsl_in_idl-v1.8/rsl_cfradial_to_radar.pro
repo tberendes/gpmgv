@@ -67,66 +67,73 @@ nfields = n_elements(cfrfields)
 rslfields = strarr(nfields)
 
 for i = 0, nfields-1 do begin
-    thisfield = strupcase(cfrfields[i])
-    case thisfield of
-        'DBZ':    rslfields[i] = 'DZ'
-        'REF':    rslfields[i] = 'DZ'
-        'VEL':    rslfields[i] = 'VR'
-        'VEL2':   rslfields[i] = 'V2'
-        'VEL3':   rslfields[i] = 'V3'
-        'WIDTH':  rslfields[i] = 'SW'
-        'WIDTH2': rslfields[i] = 'S2'
-        'WIDTH3': rslfields[i] = 'S3'
-        'ZDR':    rslfields[i] = 'DR'
-        'KDP':    rslfields[i] = 'KD'
-        'PHIDP':  rslfields[i] = 'PH'
-        'PHI':    rslfields[i] = 'PH'
-        'UPHIDP': rslfields[i] = 'UP'
-        'RHOHV':  rslfields[i] = 'RH'
-        'RHO':    rslfields[i] = 'RH'
-        'DBZTOT': rslfields[i] = 'ZT'
-        'DBZ_TOT':rslfields[i] = 'ZT'
-        'HCLASS': rslfields[i] = 'HC'
-        'SQI':    rslfields[i] = 'SQ'
-        ; Some variations.
-; TAB 5/14/19, changes in CPOL format make this unnecessary
-;        'REFLECTIVITY': begin
-;            ; Todd Berendes, UAH, 11/6/18
-;            ;  DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
-;            if site_name eq 'Gunn_Pt' then rslfields[i] = 'CZ' else rslfields[i] = 'DZ'
-;         end
 
-        'REFLECTIVITY': rslfields[i] = 'DZ'
-        'CORRECTED_REFLECTIVITY': rslfields[i] = 'CZ'
-        'VELOCITY': rslfields[i] = 'VR'
-        'CORRECTED_VELOCITY': rslfields[i] = 'VE'
-        'SPECTRUM_WIDTH': rslfields[i] = 'SW'
-        'DIFFERENTIAL_REFLECTIVITY': rslfields[i] = 'DR'
-        'DIFFERENTIALREFLECTIVITY':  rslfields[i] = 'DR'
-        'DIFFERENTIAL_PHASE': begin
-            ; Todd Berendes, UAH, 5/14/19
-            ;  DARW Gunn_Pt site has both uncorrected and corrected PH
-            if site_name eq 'Gunn_Pt' then rslfields[i] = 'UP' else rslfields[i] = 'PH'
-         end
-;        'DIFFERENTIAL_PHASE': rslfields[i] = 'PH'
-        'CROSS_CORRELATION_RATIO': rslfields[i] = 'RH'
-        'SPECIFIC_DIFFERENTIAL_PHASE': rslfields[i] = 'KD'
-        'HYDROCLASS': rslfields[i] = 'HC'
-        ; new values for DARW CPOL data
-        'RADAR_ECHO_CLASSIFICATION' : rslfields[i] = 'FH'
-        'CORRECTED_DIFFERENTIAL_REFLECTIVITY' : rslfields[i] = 'DR'
-        'CORRECTED_DIFFERENTIAL_PHASE' : rslfields[i] = 'PH'
-        ; TAB 12/06/18 
-        ; for CPOL, don't use their KDP, use the one Jason computed with DROPS2 and added as "KDP" to the file
-        ; 5/14/19 changed to use CPOL KPD
-        'CORRECTED_SPECIFIC_DIFFERENTIAL_PHASE' : rslfields[i] = 'KD'
-        'RADAR_ESTIMATED_RAIN_RATE'  : rslfields[i] = 'RR'
-        'TOTAL_POWER': rslfields[i] = 'DZ'
-        
-        else: begin
-            rslfields[i] = cfrfields[i]
-        end
-    endcase
+; 5/3/23  - Berendes/UAH ITSC: After May 2023 update to radar files, assume all
+;           radar files conform to Nexrad field names, we don't do site specific
+;           remapping anymore, so just return original field names
+
+    rslfields[i] = cfrfields[i]
+
+;    thisfield = strupcase(cfrfields[i])
+;    case thisfield of
+;        'DBZ':    rslfields[i] = 'DZ'
+;        'REF':    rslfields[i] = 'DZ'
+;        'VEL':    rslfields[i] = 'VR'
+;        'VEL2':   rslfields[i] = 'V2'
+;        'VEL3':   rslfields[i] = 'V3'
+;        'WIDTH':  rslfields[i] = 'SW'
+;        'WIDTH2': rslfields[i] = 'S2'
+;        'WIDTH3': rslfields[i] = 'S3'
+;        'ZDR':    rslfields[i] = 'DR'
+;        'KDP':    rslfields[i] = 'KD'
+;        'PHIDP':  rslfields[i] = 'PH'
+;        'PHI':    rslfields[i] = 'PH'
+;        'UPHIDP': rslfields[i] = 'UP'
+;        'RHOHV':  rslfields[i] = 'RH'
+;        'RHO':    rslfields[i] = 'RH'
+;        'DBZTOT': rslfields[i] = 'ZT'
+;        'DBZ_TOT':rslfields[i] = 'ZT'
+;        'HCLASS': rslfields[i] = 'HC'
+;        'SQI':    rslfields[i] = 'SQ'
+;        ; Some variations.
+;; TAB 5/14/19, changes in CPOL format make this unnecessary
+;;        'REFLECTIVITY': begin
+;;            ; Todd Berendes, UAH, 11/6/18
+;;            ;  DARW Gunn_Pt site, Reflectivity field is corrected, but called "reflectivity"
+;;            if site_name eq 'Gunn_Pt' then rslfields[i] = 'CZ' else rslfields[i] = 'DZ'
+;;         end
+;
+;        'REFLECTIVITY': rslfields[i] = 'DZ'
+;        'CORRECTED_REFLECTIVITY': rslfields[i] = 'CZ'
+;        'VELOCITY': rslfields[i] = 'VR'
+;        'CORRECTED_VELOCITY': rslfields[i] = 'VE'
+;        'SPECTRUM_WIDTH': rslfields[i] = 'SW'
+;        'DIFFERENTIAL_REFLECTIVITY': rslfields[i] = 'DR'
+;        'DIFFERENTIALREFLECTIVITY':  rslfields[i] = 'DR'
+;        'DIFFERENTIAL_PHASE': begin
+;            ; Todd Berendes, UAH, 5/14/19
+;            ;  DARW Gunn_Pt site has both uncorrected and corrected PH
+;            if site_name eq 'Gunn_Pt' then rslfields[i] = 'UP' else rslfields[i] = 'PH'
+;         end
+;;        'DIFFERENTIAL_PHASE': rslfields[i] = 'PH'
+;        'CROSS_CORRELATION_RATIO': rslfields[i] = 'RH'
+;        'SPECIFIC_DIFFERENTIAL_PHASE': rslfields[i] = 'KD'
+;        'HYDROCLASS': rslfields[i] = 'HC'
+;        ; new values for DARW CPOL data
+;        'RADAR_ECHO_CLASSIFICATION' : rslfields[i] = 'FH'
+;        'CORRECTED_DIFFERENTIAL_REFLECTIVITY' : rslfields[i] = 'DR'
+;        'CORRECTED_DIFFERENTIAL_PHASE' : rslfields[i] = 'PH'
+;        ; TAB 12/06/18 
+;        ; for CPOL, don't use their KDP, use the one Jason computed with DROPS2 and added as "KDP" to the file
+;        ; 5/14/19 changed to use CPOL KPD
+;        'CORRECTED_SPECIFIC_DIFFERENTIAL_PHASE' : rslfields[i] = 'KD'
+;        'RADAR_ESTIMATED_RAIN_RATE'  : rslfields[i] = 'RR'
+;        'TOTAL_POWER': rslfields[i] = 'DZ'
+;        
+;        else: begin
+;            rslfields[i] = cfrfields[i]
+;        end
+;    endcase
 endfor
 
 return, rslfields

@@ -48,6 +48,9 @@
 ;            those used at DARW/CPOL.
 ; 5/10/16 - Morris/NASA/GSFC (SAIC), GPM GV:  Added Argentina radar IDs (INTA_*
 ;            and their actual names) to Z field CASE switch.
+; 5/3/23  - Berendes/UAH ITSC: After May 2023 update to radar files, assume all
+;           radar files conform to Nexrad field names, we don't do site specific
+;           remapping anymore, so just return volume number for passed in field
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -59,75 +62,82 @@
 FUNCTION get_site_specific_z_volume, siteID, radar, z_field, UF_FIELD=uf_field
 
 IF ( N_ELEMENTS(uf_field) EQ 0 ) THEN BEGIN
+
+   ; hardcode to return 'CZ'
+   field1 = 'CZ'
+   
    ; get the volume for the site-specific Z field by default
-    CASE siteID of
-       'CPOL' : BEGIN
-       			  field1 = 'CZ' 
-                END
-       'DARW' : BEGIN
-                  field1 = 'CZ' 
-                END
-       'RMOR' : BEGIN
-                  field1 = 'CZ' & mnem1 = 'PROPOG_COR'
-                  field2 = 'DZ' & mnem2 = 'NO_PROPOG_COR'
-                END
-       'RGSN' : BEGIN
-                  field1 = 'CZ'
-                END
-        'NCU' : BEGIN
-                  field1 = 'ZH'
-                END
-        'CP2' : BEGIN
-                  field1 = 'ZC'
-                END
-      'CHILL' : BEGIN
-                  field1 = 'DZ'
-                END
-        'Anguil' :  field1 = 'DZ'
-   'INTA_Anguil' :  BEGIN
-                      field1 = 'DZ'
-                    END
-     'Bariloche' :  field1 = 'DZ'
-'INTA_Bariloche' :  field1 = 'DZ'
-       'Cordoba' :  field1 = 'DZ'
-  'INTA_Cordoba' :  field1 = 'DZ'
-        'Parana' :  field1 = 'DZ'
-   'INTA_Parana' :  field1 = 'DZ'
-     'Pergamino' :  field1 = 'DZ'
-'INTA_Pergamino' :  field1 = 'DZ'
-            ELSE : BEGIN
-                      field1 = 'CZ'
-                    END
-    ENDCASE
+;    CASE siteID of
+;       'CPOL' : BEGIN
+;       			  field1 = 'CZ' 
+;                END
+;       'DARW' : BEGIN
+;                  field1 = 'CZ' 
+;                END
+;       'RMOR' : BEGIN
+;                  field1 = 'CZ' & mnem1 = 'PROPOG_COR'
+;                  field2 = 'DZ' & mnem2 = 'NO_PROPOG_COR'
+;                END
+;       'RGSN' : BEGIN
+;                  field1 = 'CZ'
+;                END
+;        'NCU' : BEGIN
+;                  field1 = 'ZH'
+;                END
+;        'CP2' : BEGIN
+;                  field1 = 'ZC'
+;                END
+;      'CHILL' : BEGIN
+;                  field1 = 'DZ'
+;                END
+;        'Anguil' :  field1 = 'DZ'
+;   'INTA_Anguil' :  BEGIN
+;                      field1 = 'DZ'
+;                    END
+;     'Bariloche' :  field1 = 'DZ'
+;'INTA_Bariloche' :  field1 = 'DZ'
+;       'Cordoba' :  field1 = 'DZ'
+;  'INTA_Cordoba' :  field1 = 'DZ'
+;        'Parana' :  field1 = 'DZ'
+;   'INTA_Parana' :  field1 = 'DZ'
+;     'Pergamino' :  field1 = 'DZ'
+;'INTA_Pergamino' :  field1 = 'DZ'
+;            ELSE : BEGIN
+;                      field1 = 'CZ'
+;                    END
+;    ENDCASE
 ENDIF ELSE BEGIN
-   ; get the volume for the caller-specified field
-    IF ( N_ELEMENTS(uf_field) EQ 1 AND uf_field NE '' ) THEN BEGIN
-      ; translate to the alternate UF IDs for DARW/CPOL and CP2
-;       IF siteID EQ 'DARW' OR siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
-       IF siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
-          CASE uf_field OF
-             'FH' : field1 = 'HC'
-             'DR' : field1 = 'ZD'
-             'D0' : field1 = 'DO'
-             'RP' : field1 = 'RR'         ; CPOL/CP2 RR maps to RP in matchups
-             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP
-             ELSE : field1 = uf_field
-          ENDCASE
-;       ENDIF ELSE field1 = uf_field
-       ENDIF ELSE IF siteID EQ 'DARW' THEN BEGIN
-           CASE uf_field OF
-; TAB 7/18/19 new CPOL, use fields as they are in the files and remapped in RSL in IDL
+   ; use passed in field name
+   field1 = uf_field
+   
+;   ; get the volume for the caller-specified field
+;    IF ( N_ELEMENTS(uf_field) EQ 1 AND uf_field NE '' ) THEN BEGIN
+;      ; translate to the alternate UF IDs for DARW/CPOL and CP2
+;;       IF siteID EQ 'DARW' OR siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
+;       IF siteID EQ 'CPOL' OR siteID EQ 'CP2' THEN BEGIN
+;          CASE uf_field OF
+;             'FH' : field1 = 'HC'
+;             'DR' : field1 = 'ZD'
+;             'D0' : field1 = 'DO'
 ;             'RP' : field1 = 'RR'         ; CPOL/CP2 RR maps to RP in matchups
-;             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP       
-             ELSE : field1 = uf_field
-           ENDCASE
-       ENDIF ELSE field1 = uf_field
-    ENDIF ELSE BEGIN
-       message, 'UF_FIELD must be single, non-empty value!', /INFO
-       print, "UF_FIELD as requested: '", uf_field, "'"
-       print, ""
-       RETURN, -1
-    ENDELSE
+;             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP
+;             ELSE : field1 = uf_field
+;          ENDCASE
+;;       ENDIF ELSE field1 = uf_field
+;       ENDIF ELSE IF siteID EQ 'DARW' THEN BEGIN
+;           CASE uf_field OF
+;; TAB 7/18/19 new CPOL, use fields as they are in the files and remapped in RSL in IDL
+;;             'RP' : field1 = 'RR'         ; CPOL/CP2 RR maps to RP in matchups
+;;             'RR' : field1 = 'RR_is_RP'   ; disable RR retrieval, CPOL RR is RP       
+;             ELSE : field1 = uf_field
+;           ENDCASE
+;       ENDIF ELSE field1 = uf_field
+;    ENDIF ELSE BEGIN
+;       message, 'UF_FIELD must be single, non-empty value!', /INFO
+;       print, "UF_FIELD as requested: '", uf_field, "'"
+;       print, ""
+;       RETURN, -1
+;    ENDELSE
 ENDELSE
 
 fields = radar.volume.h.field_type
