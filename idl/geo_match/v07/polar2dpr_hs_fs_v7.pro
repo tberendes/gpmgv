@@ -792,12 +792,14 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    IF do_blockage THEN BEGIN
      ; define the list of elevations that have blockage files available
      ; according to their fixed strings in filename convention
+     ; TAB 5/9/23 added some larger elevations for CPOL/DARW to avoid 'difference too large' errors
       blkgElev_str = [ '00.50', '00.90', '01.30', '01.45', '01.50', '01.80', $
                        '02.40', '02.50', '03.10', '03.35', '03.50', '04.00', $
                        '04.30', '04.50', '05.10', '05.25', '06.00', '06.20', $
                        '06.40', '07.50', '08.00', '08.70', '09.90', '10.00', $
-                       '12.00', '12.50', '14.00', '14.60', '15.60', '16.70', $
-                       '19.50' ]
+                       '12.00', '12.50', '13.30', '14.00', '14.60', '15.60', $
+                       '16.70', '17.90', '19.50', '23.90', '32.00', '43.10' ]
+
      ; numerical version of the above elevations
       blockageElevs = FLOAT(blkgElev_str)
 
