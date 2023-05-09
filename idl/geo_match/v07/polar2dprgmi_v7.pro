@@ -655,7 +655,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                             UF_FIELD=rc_field2get )
    IF ( rc_vol_num LT 0 )  THEN BEGIN
       PRINT, ""
-      PRINT, "Error finding 'RC' volume in radar structure from file: ", file_1CUF
+      PRINT, "No 'RC' volume in radar structure from file: ", file_1CUF
       PRINT, ""
       have_gv_rc = 0
    ENDIF ELSE BEGIN
@@ -670,7 +670,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                             UF_FIELD=rp_field2get )
    IF ( rp_vol_num LT 0 )  THEN BEGIN
       PRINT, ""
-      PRINT, "Error finding 'RP' volume in radar structure from file: ", file_1CUF
+      PRINT, "No 'RP' volume in radar structure from file: ", file_1CUF
       PRINT, ""
       have_gv_rp = 0
    ENDIF ELSE BEGIN
@@ -716,7 +716,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
   	  have_gv_swe = 1
   endif else begin
       PRINT, ""
-      PRINT, "Missing KDP or HID fields for SWE in file ", file_1CUF
+      PRINT, "No KDP or HID fields for SWE in file ", file_1CUF
       PRINT, ""
   	  have_gv_swe = 0  
   endelse
