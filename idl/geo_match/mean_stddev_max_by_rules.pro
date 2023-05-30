@@ -64,7 +64,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
    ;Need to find limits if not known
     good_data=where(data GT -888.,count) ;-888. is the highest bad value in the GR files
     IF(count GT 0) THEN BEGIN       
-       ind_unkown=where(data[good_data] LT 0,ucount) ;unknown values are between -888 and 0.
+       ind_unknown=where(data[good_data] LT 0,ucount) ;unknown values are between -888 and 0.
        IF(ucount GT 0) THEN BEGIN
            unknown_data=ABS(data[good_data[ind_unknown]]) ;convert to positive values
            binsize=0.5 ;resolution of limits
