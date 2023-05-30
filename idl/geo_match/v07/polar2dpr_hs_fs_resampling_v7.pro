@@ -26,6 +26,8 @@
 ; 4/20/22 by Todd Berendes UAH/ITSC
 ;  - removed Ground Radar DZERO and N2
 ;  - Added new GR liquid and frozen water content fields
+; 5/18/23 Todd Berendes UAH/ITSC
+;  - added GR_sigmaDm variables
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -478,6 +480,7 @@
          n_gr_mw_points_rejected = 0UL     ; # of above that are MISSING Mw
          n_gr_mi_points_rejected = 0UL     ; # of above that are MISSING Mi
          n_gr_dm_points_rejected = 0UL     ; # of above that are MISSING Dm
+         n_gr_sigmadm_points_rejected = 0UL     ; # of above that are MISSING Dm
          n_gr_swedp_points_rejected = 0UL     ; # of above that are missing swe
          n_gr_swe25_points_rejected = 0UL     ; # of above that are missing swe
          n_gr_swe50_points_rejected = 0UL     ; # of above that are missing swe
@@ -493,6 +496,7 @@
          mw_n_precip = 0UL
          mi_n_precip = 0UL
          dm_n_precip = 0UL
+         sigmadm_n_precip = 0UL
 
 ; TAB 11/27/18 added this logic to skip bad sweeps in DARW data
 	     if skip_elev NE 1 then begin
@@ -675,6 +679,34 @@
                   mw_stddev_gv = altstats.stddev
                   mw_max_gv = altstats.max
                   mw_n_precip = altstats.n_GR_precip
+	
+	               IF have_gv_dm THEN BEGIN
+	                  gvdmvals = dm_bscan[thisPRsGRindices]
+	                  altstats=mean_stddev_max_by_rules(gvdmvals,'DM', 0.0, $
+	                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1, weights=gvmwvals)
+	                  n_gr_dm_points_rejected = altstats.rejects
+	                  dm_avg_gv = altstats.mean
+	                  dm_stddev_gv = altstats.stddev
+	                  dm_max_gv = altstats.max
+	                  dm_n_precip = altstats.n_GR_precip
+	
+		               IF have_gv_sigmadm THEN BEGIN
+		                  gvsigmadmvals = dm_bscan[thisPRsGRindices]
+		                  posind = where(gvsigmadmvals ge 0, num_pos)
+		                  if num_pos gt 0 then $ 
+		                     gvsigmadmvals[posind] = 0.316 * gvsigmadmvals[posind]^1.6                     
+		                  ;  sigmaDm=0.316*(Dm^1.6) ref: Kamil Mroz, Parsival + 2DVD, 2023
+		                  
+		                  altstats=mean_stddev_max_by_rules(gvsigmadmvals,'SIGMADM', 0.0, $
+		                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1, weights=gvmwvals, $
+		                              dependent=gvdmvals)
+		                  n_gr_sigmadm_points_rejected = altstats.rejects
+		                  sigmadm_avg_gv = altstats.mean
+		                  sigmadm_stddev_gv = altstats.stddev
+		                  sigmadm_max_gv = altstats.max
+		                  sigmadm_n_precip = altstats.n_GR_precip
+		               ENDIF
+	               ENDIF
                ENDIF
                IF have_gv_mi THEN BEGIN
                   gvmivals = mi_bscan[thisPRsGRindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
@@ -685,17 +717,6 @@
                   mi_stddev_gv = altstats.stddev
                   mi_max_gv = altstats.max
                   mi_n_precip = altstats.n_GR_precip
-               ENDIF
-
-               IF have_gv_dm THEN BEGIN
-                  gvdmvals = dm_bscan[thisPRsGRindices]
-                  altstats=mean_stddev_max_by_rules(gvdmvals,'DZERO', 0.0, $
-                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1)
-                  n_gr_dm_points_rejected = altstats.rejects
-                  dm_avg_gv = altstats.mean
-                  dm_stddev_gv = altstats.stddev
-                  dm_max_gv = altstats.max
-                  dm_n_precip = altstats.n_GR_precip
                ENDIF
 
                IF do_this_elev_blockage EQ 1 THEN BEGIN
@@ -1226,6 +1247,9 @@
                dm_avg_gv = SRAIN_BELOW_THRESH
                dm_stddev_gv = SRAIN_BELOW_THRESH
                dm_max_gv = SRAIN_BELOW_THRESH
+               sigmadm_avg_gv = SRAIN_BELOW_THRESH
+               sigmadm_stddev_gv = SRAIN_BELOW_THRESH
+               sigmadm_max_gv = SRAIN_BELOW_THRESH
                meantop = 0.0    ; should calculate something for this
                meanbotm = 0.0   ; ditto
             ENDIF
@@ -1320,6 +1344,12 @@
                      tocdf_gr_dm_max[jpr,ielev] = dm_max_gv
                      tocdf_gr_dm_n_precip[jpr,ielev] = dm_n_precip
                   ENDIF
+                  IF have_gv_sigmadm THEN BEGIN
+                     tocdf_gr_sigmadm[jpr,ielev] = sigmadm_avg_gv
+                     tocdf_gr_sigmadm_stddev[jpr,ielev] = sigmadm_stddev_gv
+                     tocdf_gr_sigmadm_max[jpr,ielev] = sigmadm_max_gv
+                     tocdf_gr_sigmadm_n_precip[jpr,ielev] = sigmadm_n_precip
+                  ENDIF
                  ; NOTE: No need to write tocdf_gr_blockage, its valid values
                  ; get assigned in COMPUTE_MEAN_BLOCKAGE()
                   tocdf_top_hgt[jpr,ielev] = meantop
@@ -1404,6 +1434,11 @@
                              tocdf_gr_dm_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_max[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
+                          IF have_gv_sigmadm THEN BEGIN
+                             tocdf_gr_sigmadm[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_sigmadm_stddev[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_sigmadm_max[jpr,ielev] = FLOAT_OFF_EDGE
+                          ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
@@ -1486,6 +1521,11 @@
                              tocdf_gr_dm_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_max[jpr,ielev] = Z_MISSING
                           ENDIF
+                          IF have_gv_sigmadm THEN BEGIN
+                             tocdf_gr_sigmadm[jpr,ielev] = Z_MISSING
+                             tocdf_gr_sigmadm_stddev[jpr,ielev] = Z_MISSING
+                             tocdf_gr_sigmadm_max[jpr,ielev] = Z_MISSING
+                          ENDIF
                           IF do_this_elev_blockage EQ 1 THEN BEGIN
                              tocdf_gr_blockage[jpr,ielev] = Z_MISSING
                           ENDIF
@@ -1519,6 +1559,8 @@
                                UINT(n_gr_mi_points_rejected)
          IF have_gv_dm THEN tocdf_gr_dm_rejected[jpr,ielev] = $
                                UINT(n_gr_dm_points_rejected)
+         IF have_gv_sigmadm THEN tocdf_gr_sigmadm_rejected[jpr,ielev] = $
+                               UINT(n_gr_sigmadm_points_rejected)
          IF have_gv_swe THEN tocdf_gr_swedp_rejected[jpr,ielev] = $
                                UINT(n_gr_swedp_points_rejected)
          IF have_gv_swe THEN tocdf_gr_swe25_rejected[jpr,ielev] = $

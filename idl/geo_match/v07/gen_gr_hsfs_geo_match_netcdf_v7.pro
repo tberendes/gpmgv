@@ -42,6 +42,8 @@
 ; 4/11/23 Todd Berendes UAH/ITSC
 ;  - removed Ground Radar DZERO and N2
 ;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
+; 5/18/23 Todd Berendes UAH/ITSC
+;  - added GR_sigmaDm variables
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -391,6 +393,12 @@ ncdf_attput, cdfid, havegvDMvarid, 'long_name', $
              'data exists flag for GR_Dm'
 ncdf_attput, cdfid, havegvDMvarid, '_FillValue', NO_DATA_PRESENT
 
+; TAB 5/18/23 added GR_sigmaDm variables
+havegvsigmaDMvarid = ncdf_vardef(cdfid, 'have_GR_sigmaDm', /short)
+ncdf_attput, cdfid, havegvsigmaDMvarid, 'long_name', $
+             'data exists flag for GR_sigmaDm'
+ncdf_attput, cdfid, havegvsigmaDMvarid, '_FillValue', NO_DATA_PRESENT
+
 haveBLKvarid = ncdf_vardef(cdfid, 'have_GR_blockage', /short)
 ncdf_attput, cdfid, haveBLKvarid, 'long_name', $
              'data exists flag for ground radar blockage fraction'
@@ -632,6 +640,24 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    ncdf_attput, cdfid, gvDMmaxvarid, 'units', 'mm'
    ncdf_attput, cdfid, gvDMmaxvarid, '_FillValue', FLOAT_RANGE_EDGE
 
+   ; TAB 5/18/23 added GR_sigmaDm variables
+   gvsigmaDMvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvsigmaDMvarid, 'long_name', 'GR-based DSD mass spectrum standard deviation (Protat et al. 2019)'
+   ncdf_attput, cdfid, gvsigmaDMvarid, 'units', 'mm'
+   ncdf_attput, cdfid, gvsigmaDMvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvDMstddevvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvsigmaDMstddevvarid, 'long_name', $
+                'Standard Deviation of GR-based DSD mass spectrum standard deviation (Protat et al. 2019)'
+   ncdf_attput, cdfid, gvsigmaDMstddevvarid, 'units', 'mm'
+   ncdf_attput, cdfid, gvsigmaDMstddevvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+   gvDMmaxvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   ncdf_attput, cdfid, gvsigmaDMmaxvarid, 'long_name', $
+                'Sample Maximum of GR-based DSD mass spectrum standard deviation (Protat et al. 2019)'
+   ncdf_attput, cdfid, gvsigmaDMmaxvarid, 'units', 'mm'
+   ncdf_attput, cdfid, gvsigmaDMmaxvarid, '_FillValue', FLOAT_RANGE_EDGE
+
    BLKvarid = ncdf_vardef(cdfid, 'GR_blockage_'+swath[iswa], [fpdimid[iswa],eldimid])
    ncdf_attput, cdfid, BLKvarid, 'long_name', 'ground radar blockage fraction'
    ncdf_attput, cdfid, BLKvarid, '_FillValue', FLOAT_RANGE_EDGE
@@ -834,6 +860,11 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                 'number of bins with missing Dm in GR_Dm average'
    ncdf_attput, cdfid, gv_dm_rejvarid, '_FillValue', INT_RANGE_EDGE
 
+   gv_sigmadm_rejvarid = ncdf_vardef(cdfid, 'n_gr_sigmadm_rejected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_sigmadm_rejvarid, 'long_name', $
+                'number of bins with missing Dm in GR_sigmaDm average'
+   ncdf_attput, cdfid, gv_sigmadm_rejvarid, '_FillValue', INT_RANGE_EDGE
+
    gvexpvarid = ncdf_vardef(cdfid, 'n_gr_expected_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gvexpvarid, 'long_name', $
              'number of bins in GR_Z average'
@@ -858,6 +889,11 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    ncdf_attput, cdfid, gv_dm_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_Dm average'
    ncdf_attput, cdfid, gv_dm_n_precip_varid, '_FillValue', INT_RANGE_EDGE
+
+   gv_sigmadm_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_sigmadm_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   ncdf_attput, cdfid, gv_sigmadm_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_sigmaDm average'
+   ncdf_attput, cdfid, gv_sigmadm_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
    gv_rr_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rr_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_rr_n_precip_varid, 'long_name', $

@@ -99,6 +99,8 @@
 ; 4/11/23 Todd Berendes UAH/ITSC
 ;  - removed Ground Radar DZERO and N2
 ;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
+; 5/18/23 Todd Berendes UAH/ITSC
+;  - added GR_sigmaDm variables
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -734,8 +736,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       PRINT, "No 'DM' volume in radar structure from file: ", file_1CUF
       PRINT, ""
       have_gv_dm = 0
+      have_gv_sigmadm = 0
    ENDIF ELSE BEGIN
       have_gv_dm = 1
+      have_gv_sigmadm = 1
       ufstruct.DM_ID = gv_dm_field
    ENDELSE
 
@@ -1535,6 +1539,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                       VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Dm_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmaDm = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmaDm_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmaDm_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_blockage = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                      VALUE=FLOAT_RANGE_EDGE)
       tocdf_top_hgt = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -1553,6 +1563,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_mw_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_mi_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_dm_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_sigmadm_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_expected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swedp_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swe25_rejected = UINTARR(numDPRrays, num_elevations_out)
@@ -1564,6 +1575,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_mw_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_mi_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_dm_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_sigmadm_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rr_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rc_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rp_n_precip = UINTARR(numDPRrays, num_elevations_out)
@@ -1708,6 +1720,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'GR_Dm_StdDev_'+scan_instrument, tocdf_gr_dm_stddev      ; data
       NCDF_VARPUT, ncid, 'GR_Dm_Max_'+scan_instrument, tocdf_gr_dm_max            ; data
    ENDIF
+   IF ( have_gv_sigmadm ) THEN BEGIN
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_'+scan_instrument, tocdf_gr_sigmadm             ; data
+       NCDF_VARPUT, ncid, 'have_GR_sigmaDm', DATA_PRESENT      ; data presence flag
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_StdDev_'+scan_instrument, tocdf_gr_sigmadm_stddev      ; data
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_Max_'+scan_instrument, tocdf_gr_sigmadm_max            ; data
+   ENDIF
    IF ( have_gv_blockage ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_blockage_'+scan_instrument, tocdf_gr_blockage      ; data
        NCDF_VARPUT, ncid, 'have_GR_blockage', DATA_PRESENT      ; data presence flag
@@ -1752,6 +1770,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_rejected_'+scan_instrument, tocdf_gr_mw_rejected
    NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_rejected_'+scan_instrument, tocdf_gr_mi_rejected
    NCDF_VARPUT, ncid, 'n_gr_dm_rejected_'+scan_instrument, tocdf_gr_dm_rejected
+   NCDF_VARPUT, ncid, 'n_gr_sigmadm_rejected_'+scan_instrument, tocdf_gr_sigmadm_rejected
    NCDF_VARPUT, ncid, 'n_gr_swedp_rejected_'+scan_instrument, tocdf_gr_swedp_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe25_rejected_'+scan_instrument, tocdf_gr_swe25_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe50_rejected_'+scan_instrument, tocdf_gr_swe50_rejected
@@ -1763,6 +1782,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_mw_precip_'+scan_instrument, tocdf_gr_mw_n_precip
    NCDF_VARPUT, ncid, 'n_gr_mi_precip_'+scan_instrument, tocdf_gr_mi_n_precip
    NCDF_VARPUT, ncid, 'n_gr_dm_precip_'+scan_instrument, tocdf_gr_dm_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_sigmadm_precip_'+scan_instrument, tocdf_gr_sigmadm_n_precip
    NCDF_VARPUT, ncid, 'n_gr_rr_precip_'+scan_instrument, tocdf_gr_rr_n_precip
    NCDF_VARPUT, ncid, 'n_gr_rc_precip_'+scan_instrument, tocdf_gr_rc_n_precip
    NCDF_VARPUT, ncid, 'n_gr_rp_precip_'+scan_instrument, tocdf_gr_rp_n_precip

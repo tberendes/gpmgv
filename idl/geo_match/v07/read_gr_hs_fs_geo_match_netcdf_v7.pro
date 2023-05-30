@@ -56,6 +56,8 @@
 ; 4/11/23 Todd Berendes UAH/ITSC
 ;  - removed Ground Radar DZERO and N2
 ;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
+; 5/18/23 Todd Berendes UAH/ITSC
+;  - added GR_sigmaDm variables
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -288,6 +290,8 @@ IF N_Elements(fieldFlags) NE 0 THEN BEGIN
      fieldFlags.have_GR_frozenWaterContent = have_GR_frozenWaterContent
      NCDF_VARGET, ncid1, 'have_GR_Dm', have_GR_Dm
      fieldFlags.have_GR_Dm = have_GR_Dm
+     NCDF_VARGET, ncid1, 'have_GR_sigmaDm', have_GR_sigmaDm
+     fieldFlags.have_GR_sigmaDm = have_GR_sigmaDm
      NCDF_VARGET, ncid1, 'have_GR_blockage', have_blockage
      fieldFlags.have_GR_blockage = have_blockage
      NCDF_VARGET, ncid1, 'have_GR_SWE', have_GR_SWE
@@ -352,6 +356,9 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'GR_Dm_'+swath[iswa], GR_Dm
    NCDF_VARGET, ncid1, 'GR_Dm_StdDev_'+swath[iswa], GR_Dm_StdDev
    NCDF_VARGET, ncid1, 'GR_Dm_Max_'+swath[iswa], GR_Dm_Max
+   NCDF_VARGET, ncid1, 'GR_sigmaDm_'+swath[iswa], GR_sigmaDm
+   NCDF_VARGET, ncid1, 'GR_sigmaDm_StdDev_'+swath[iswa], GR_sigmaDm_StdDev
+   NCDF_VARGET, ncid1, 'GR_sigmaDm_Max_'+swath[iswa], GR_sigmaDm_Max
    NCDF_VARGET, ncid1, 'GR_blockage_'+swath[iswa], GR_blockage
    NCDF_VARGET, ncid1, 'n_gr_expected_'+swath[iswa], n_gr_expected
    NCDF_VARGET, ncid1, 'n_gr_z_rejected_'+swath[iswa], n_gr_z_rejected
@@ -366,6 +373,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'n_gr_liquidWaterContent_rejected_'+swath[iswa], n_gr_liquidWaterContent_rejected
    NCDF_VARGET, ncid1, 'n_gr_frozenWaterContent_rejected_'+swath[iswa], n_gr_frozenWaterContent_rejected
    NCDF_VARGET, ncid1, 'n_gr_dm_rejected_'+swath[iswa], n_gr_dm_rejected
+   NCDF_VARGET, ncid1, 'n_gr_sigmadm_rejected_'+swath[iswa], n_gr_sigmadm_rejected
    NCDF_VARGET, ncid1, 'DPRlatitude_'+swath[iswa], DPRlatitude
    NCDF_VARGET, ncid1, 'DPRlongitude_'+swath[iswa], DPRlongitude
    NCDF_VARGET, ncid1, 'scanNum_'+swath[iswa], scanNum
@@ -399,6 +407,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'n_gr_mw_precip_'+swath[iswa], n_gr_mw_precip
    NCDF_VARGET, ncid1, 'n_gr_mi_precip_'+swath[iswa], n_gr_mi_precip
    NCDF_VARGET, ncid1, 'n_gr_dm_precip_'+swath[iswa], n_gr_dm_precip
+   NCDF_VARGET, ncid1, 'n_gr_sigmadm_precip_'+swath[iswa], n_gr_sigmadm_precip
    NCDF_VARGET, ncid1, 'n_gr_rr_precip_'+swath[iswa], n_gr_rr_precip
    NCDF_VARGET, ncid1, 'n_gr_rc_precip_'+swath[iswa], n_gr_rc_precip
    NCDF_VARGET, ncid1, 'n_gr_rp_precip_'+swath[iswa], n_gr_rp_precip
@@ -473,6 +482,9 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  GR_Dm : TEMPORARY(GR_Dm), $
                  GR_Dm_StdDev : TEMPORARY(GR_Dm_StdDev), $
                  GR_Dm_Max : TEMPORARY(GR_Dm_Max), $
+                 GR_sigmaDm : TEMPORARY(GR_sigmaDm), $
+                 GR_sigmaDm_StdDev : TEMPORARY(GR_sigmaDm_StdDev), $
+                 GR_sigmaDm_Max : TEMPORARY(GR_sigmaDm_Max), $
                  GR_blockage : TEMPORARY(GR_blockage), $
                  n_gr_z_rejected : TEMPORARY(n_gr_z_rejected), $
                  n_gr_zdr_rejected : TEMPORARY(n_gr_zdr_rejected), $
@@ -486,6 +498,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  n_gr_liquidWaterContent_rejected : TEMPORARY(n_gr_liquidWaterContent_rejected), $
                  n_gr_frozenWaterContent_rejected : TEMPORARY(n_gr_frozenWaterContent_rejected), $
                  n_gr_dm_rejected : TEMPORARY(n_gr_dm_rejected), $
+                 n_gr_sigmadm_rejected : TEMPORARY(n_gr_sigmadm_rejected), $
                  n_gr_swedp_rejected : TEMPORARY(n_gr_swedp_rejected), $
                  n_gr_swe25_rejected : TEMPORARY(n_gr_swe25_rejected), $
                  n_gr_swe50_rejected : TEMPORARY(n_gr_swe50_rejected), $
@@ -497,6 +510,7 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  n_gr_mw_precip : TEMPORARY(n_gr_mw_precip), $
                  n_gr_mi_precip : TEMPORARY(n_gr_mi_precip), $
                  n_gr_dm_precip : TEMPORARY(n_gr_dm_precip), $
+                 n_gr_sigmadm_precip : TEMPORARY(n_gr_sigmadm_precip), $
                  n_gr_rr_precip : TEMPORARY(n_gr_rr_precip), $
                  n_gr_rc_precip : TEMPORARY(n_gr_rc_precip), $
                  n_gr_rp_precip : TEMPORARY(n_gr_rp_precip), $

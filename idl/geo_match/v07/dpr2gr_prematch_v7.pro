@@ -276,6 +276,8 @@
 ; 4/11/23 Todd Berendes UAH/ITSC
 ;  - removed Ground Radar DZERO and N2
 ;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
+; 5/18/23 Todd Berendes UAH/ITSC
+;  - added GR_sigmaDm variables
 ; 
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -839,6 +841,9 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_Dm = data_GR2DPR.GR_DM
       tocdf_gr_Dm_stddev = data_GR2DPR.GR_DM_STDDEV
       tocdf_gr_Dm_max = data_GR2DPR.GR_DM_MAX
+      tocdf_gr_sigmaDm = data_GR2DPR.GR_sigmaDM
+      tocdf_gr_sigmaDm_stddev = data_GR2DPR.GR_sigmaDM_STDDEV
+      tocdf_gr_sigmaDm_max = data_GR2DPR.GR_sigmaDM_MAX
       tocdf_gr_blockage = data_GR2DPR.GR_BLOCKAGE
       tocdf_gr_swedp = data_GR2DPR.GR_SWEDP
       tocdf_gr_swedp_stddev = data_GR2DPR.GR_SWEDP_STDDEV
@@ -904,6 +909,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_gr_mw_rejected = data_GR2DPR.N_GR_liquidWaterContent_REJECTED
       tocdf_gr_mi_rejected = data_GR2DPR.N_GR_frozenWaterContent_REJECTED
       tocdf_gr_dm_rejected = data_GR2DPR.N_GR_DM_REJECTED
+      tocdf_gr_sigmadm_rejected = data_GR2DPR.N_GR_sigmaDM_REJECTED
       tocdf_gr_expected = data_GR2DPR.N_GR_EXPECTED
       tocdf_gr_swedp_rejected = data_GR2DPR.N_GR_SWEDP_REJECTED
       tocdf_gr_swe25_rejected = data_GR2DPR.N_GR_SWE25_REJECTED
@@ -928,6 +934,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_n_gr_mw_precip = data_GR2DPR.n_gr_mw_precip
       tocdf_n_gr_mi_precip = data_GR2DPR.n_gr_mi_precip
       tocdf_n_gr_dm_precip = data_GR2DPR.n_gr_dm_precip
+      tocdf_n_gr_sigmadm_precip = data_GR2DPR.n_gr_sigmadm_precip
       tocdf_n_gr_rr_precip = data_GR2DPR.n_gr_rr_precip
       tocdf_n_gr_rc_precip = data_GR2DPR.n_gr_rc_precip
       tocdf_n_gr_rp_precip = data_GR2DPR.n_gr_rp_precip
@@ -1546,6 +1553,11 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'GR_Dm_StdDev', tocdf_gr_dm_stddev
    NCDF_VARPUT, ncid, 'GR_Dm_Max', tocdf_gr_dm_max
 
+   NCDF_VARPUT, ncid, 'GR_sigmaDm', tocdf_gr_sigmadm
+    NCDF_VARPUT, ncid, 'have_GR_sigmaDm', myflags.HAVE_GR_sigmaDM
+   NCDF_VARPUT, ncid, 'GR_sigmaDm_StdDev', tocdf_gr_sigmadm_stddev
+   NCDF_VARPUT, ncid, 'GR_sigmaDm_Max', tocdf_gr_sigmadm_max
+
    NCDF_VARPUT, ncid, 'GR_blockage', tocdf_gr_blockage
     NCDF_VARPUT, ncid, 'have_GR_blockage', myflags.HAVE_GR_BLOCKAGE
 
@@ -1603,6 +1615,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_rejected', tocdf_gr_mw_rejected
    NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_rejected', tocdf_gr_mi_rejected
    NCDF_VARPUT, ncid, 'n_gr_dm_rejected', tocdf_gr_dm_rejected
+   NCDF_VARPUT, ncid, 'n_gr_sigmadm_rejected', tocdf_gr_sigmadm_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected', tocdf_gr_expected
    NCDF_VARPUT, ncid, 'n_gr_swedp_rejected', tocdf_gr_swedp_rejected
    NCDF_VARPUT, ncid, 'n_gr_swe25_rejected', tocdf_gr_swe25_rejected
@@ -1623,6 +1636,7 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_gr_mw_precip', tocdf_n_gr_mw_precip
    NCDF_VARPUT, ncid, 'n_gr_mi_precip', tocdf_n_gr_mi_precip
    NCDF_VARPUT, ncid, 'n_gr_dm_precip', tocdf_n_gr_dm_precip
+   NCDF_VARPUT, ncid, 'n_gr_sigmadm_precip', tocdf_n_gr_sigmadm_precip
    NCDF_VARPUT, ncid, 'n_gr_rr_precip', tocdf_n_gr_rr_precip
    NCDF_VARPUT, ncid, 'n_gr_rc_precip', tocdf_n_gr_rc_precip
    NCDF_VARPUT, ncid, 'n_gr_rp_precip', tocdf_n_gr_rp_precip
