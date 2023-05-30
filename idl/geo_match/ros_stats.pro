@@ -67,7 +67,11 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     IF(count GT 0) THEN BEGIN
         y_uncensored=y_all[uncensored_ind] ;known data values (i.e., uncensored)
         weights_uncensored=weights[uncensored_ind]
-    ENDIF
+    ENDIF ELSE BEGIN 
+    	y_uncensored = []
+    	weights_uncensored = []
+    ENDELSE
+    
     IF(n_elements(thres) EQ 1) THEN BEGIN
        if(ncount gt 0) then begin
             y_uncensored=[y_all[trunc_ind]*0,y_uncensored] ;truncate to zero (i.e., non-detect)
