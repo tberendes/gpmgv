@@ -5,7 +5,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 ;Wrapper for ros_stats 
 ;May 2023-PG/MSFC
 
-print, 'field name: ', field
+;print, 'field name: ', field
     log_in=0B
     scale=1
     limits=[0]
