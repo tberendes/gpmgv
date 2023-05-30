@@ -93,7 +93,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         weights_censored=weights[censored_ind]
     ENDIF ELSE BEGIN
         y_censored=[]
-        weights_uncensored=[]
+        weights_censored=[]
     ENDELSE
     IF(size(thres,/n_elements) GT 2) THEN BEGIN ;include right censoring        
         uncensored_ind=where(y_uncensored LT thres[-1],count)
@@ -104,7 +104,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         censored_ind=where(y_all GT thres[-1],count)
         if(count GT 0) THEN BEGIN
             y_censored=[y_censored,y_all[censored_ind]] ;add right censored data    
-            weights_censored=[weights_censored,weights_censored[censored_ind]]
+            weights_censored=[weights_censored,weights[censored_ind]]
         ENDIF
     ENDIF    
     IF(size(y_censored,/n_elements) EQ 0) THEN BEGIN  ;no censored values so compute stats on input data and return
