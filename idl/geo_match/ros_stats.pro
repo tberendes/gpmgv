@@ -87,6 +87,10 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         
     ENDIF
     
+    IF (n_elements(y_uncensored) EQ 0) THEN BEGIN
+        RETURN,{rejects:rejects,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
+    ENDIF
+
     censored_ind=where((y_all GT thres[0]) AND (y_all LT thres[1]),count)
     IF(count GT 0) THEN BEGIN
         y_censored=y_all[censored_ind] ;unknown data values (i.e., left/interval censored data)      
@@ -116,11 +120,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
             RETURN,{rejects:rejects,n_GR_precip:n_detects,$
                     mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
     ENDIF
-    
-    IF (n_elements(y_uncensored) EQ 0) THEN BEGIN
-        RETURN,{rejects:rejects,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
-    ENDIF
-    
+        
     ;Probability Plotting: Hirsch and Stedinger (1987, doi: 10.1029/WR023i004p00715)
     ;Transformation bias avoided by imputing values for censored data 
     
