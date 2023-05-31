@@ -9,33 +9,32 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
     log_in=0B
     scale=1
     limits=[0]
-    ;Check for weights and make sure they are all >0
+    
+    ;Check for weights and make sure they are all >0    
     if keyword_set(weights) then begin
-        good_wts=where(weights ge 0,count,ncomplement=ncount,complement=bad_wts) ;make sure weights > 0        
-            if(count gt 0) then begin
-                weights=weights[good_wts]
-                data=data[good_wts]                
-            endif else begin
-                struct=ros_stats(data,limits=limits,log_in=log_in,scale=scale)
-                return,struct
-            endelse
-    endif else $
+        good_wts=where(weights ge 0,wts_count,ncomplement=ncount,complement=bad_wts) ;make sure weights > 0        
+        if(wts_count gt 0) then begin
+            weights=weights[good_wts]
+            data=data[good_wts]                
+        endif
+    endif else begin
         weights=make_array(n_elements(data))+1.0
+    endelse
 
    ;Assign censoring limits for each field to pass into ros_stats function       
  
     case field OF
          'Z' : BEGIN
-                 limits=[15] & log_in=1B & scale=0.1             
+                 limits=[0,15] & log_in=1B & scale=0.1             
                END
        'ZDR' : BEGIN
-                 limits=[-20] & log_in=1B
+                 limits=[-20] & log_in=1B & scale=0.1             
                END
        'KDP' : limits=[-20]
      'RHOHV' : limits=[0]
         'MW' : limits=[0] ;?
         'MI' : limits=[0] ;?
-        'RR' : limits=[0,300]     ;?
+        'RR' : limits=[0,0.01,9]     ;?
         'DM' : limits=[0,0.5,4.0] ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)                        
         'NW' : BEGIN
                 limits=[0,0.5,6.0]  & log_in=1B ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)
@@ -60,7 +59,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
                END
         ELSE : message, "Unknown field identifier: "+field
     ENDCASE   
-    
+
 
    ;Need to find limits if not known
 ;    good_data=where(data GT -888.,count) ;-888. is the highest bad value in the GR files

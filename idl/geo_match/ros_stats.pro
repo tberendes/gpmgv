@@ -15,6 +15,8 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ;History:
     ; May 2023-PG/MSFC
     
+    min_stat_count = 5 ;minimum number of good data points required to compute statistics
+    
     IF not keyword_set(no_precip_value) THEN no_precip_value=-32767.
     IF not keyword_set(scale) THEN scale=1.0
     IF not keyword_set(max_bad_data) THEN max_bad_data=-888.
@@ -33,85 +35,87 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         IF(count GT 0) THEN y_all[noprecip]=abs(y_all[noprecip]*0)
     ENDIF
     good_ind=where(y_all GT max_bad_data,count,ncomplement=rejects) ;good values and count of values excluded from statistics     
-    if(count GT 0) THEN BEGIN
+    if(count GE min_stat_count) THEN BEGIN
         y_all=y_all[good_ind] ;limit to good data values       
         weights=weights[good_ind]         
     ENDIF ELSE $ ;no good data values
-        RETURN,{rejects:rejects,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
+        RETURN,{rejects:rejects+count,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
     iunknown=where(y_all LT 0,count)    
     if(count GT 0) THEN y_all[iunknown]=-1.0*y_all[iunknown] ;handle unknown values (assume flagged as negative)
+    ;-->now y_all contains values used for statistics
     idetects=where(abs(y_all) GT 0,n_detects) ;number of non-zero values included in statistics
+    
+    if(log_in) THEN BEGIN ;convert data to linear
+        y_all[idetects]=10^(y_all[idetects]*scale)
+    ENDIF
+      
     IF not keyword_set(limits) THEN BEGIN     ;no censoring limits passed so just compute stats and return   
-        IF(log_in) THEN BEGIN        
-            stats_struct=summary_stats(10^(y_all*scale),y_all,weights=weights)
+        stats_struct=summary_stats(y_all,y_all,weights=weights)
+        IF(log_in) THEN BEGIN
             RETURN,{rejects:rejects,n_GR_precip:n_detects,$
                       mean:alog10(stats_struct.mean)/scale,stddev:alog10(stats_struct.std)/scale,max:stats_struct.max}
-        ENDIF ELSE BEGIN
-            stats_struct=summary_stats(y_all,y_all,weights=weights)
+        ENDIF ELSE BEGIN            
             RETURN,{rejects:rejects,n_GR_precip:n_detects,$
                     mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}           
         ENDELSE
-    ENDIF
-    thres=limits ;local var to hold limits      
-    if(log_in) THEN BEGIN ;convert data to linear
-        y_all[idetects]=10^(y_all[idetects]*scale)
-        ithres=where(thres GT 0,count)
-        IF(count GT 0) THEN thres[ithres]=10^(thres[ithres]*scale)    
-    ENDIF        
+    ENDIF ELSE BEGIN
+        thres=limits ;local var to hold limits      
+        if(log_in) THEN BEGIN ;convert thres data to linear
+            ithres=where(thres GT 0,count)
+            IF(count GT 0) THEN thres[ithres]=10^(thres[ithres]*scale)    
+        ENDIF
+    ENDELSE  
     
-    ;Determine censored and uncensored data
-    IF(n_elements(thres) EQ 1) THEN BEGIN
-        uncensored_ind=where(y_all GE thres[0],count,complement=trunc_ind,ncomplement=ncount) ;all values GE lower limit
-    ENDIF ELSE $
-        uncensored_ind=where((y_all EQ 0) OR (y_all GE thres[1]),count)
-    IF(count GT 0) THEN BEGIN
+    ;Determine Uncensored and Censored data
+    y_uncensored = []
+    weights_uncensored = []
+    y_censored=[]
+    weights_censored=[]    
+    uncensored_ind=where((y_all EQ 0) OR (y_all GE thres[0]),count,complement=censored_ind,ncomplement=ncount) ;all values GE lower limit
+    IF(count GT min_stat_count) THEN BEGIN
         y_uncensored=y_all[uncensored_ind] ;known data values (i.e., uncensored)
         weights_uncensored=weights[uncensored_ind]
-    ENDIF ELSE BEGIN 
-    	y_uncensored = []
-    	weights_uncensored = []
-    ENDELSE
-    
-    IF(n_elements(thres) EQ 1) THEN BEGIN
-       if(ncount gt 0) then begin
-            y_uncensored=[y_all[trunc_ind]*0,y_uncensored] ;truncate to zero (i.e., non-detect)
-            weights_uncensored=weights[*]
-        endif        
-        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored) 
+    ENDIF ELSE RETURN,{rejects:rejects+count,n_GR_precip:0,mean:-999,stddev:-999,max:-999}    
+    IF(n_elements(thres) GT 1) THEN BEGIN ;left-censored data if thres is two element censoring b/w thres[0] and thres[1]
+        uncensored_ind=where((y_all EQ 0) OR (y_all GE thres[1]),count,complement=censored_ind,ncomplement=ncount)        
+        IF(count GT 0) THEN BEGIN
+            y_uncensored=y_all[uncensored_ind] ;known data values (i.e., uncensored)
+            weights_uncensored=weights[uncensored_ind]
+        ENDIF
+        IF(ncount GT 0) THEN BEGIN
+            y_censored=y_all[censored_ind] ;unknown data values
+            weights_censored=weights[censored_ind]
+        ENDIF
+        IF(n_elements(thres) GT 2) THEN BEGIN ;right-censored data if thres is 3 elements
+            uncensored_ind=where((y_uncensored LE thres[-1]),count,complement=censored_ind,ncomplement=ncount)    
+            IF(ncount GT 0) THEN BEGIN            
+                y_censored=[y_censored,y_uncensored[censored_ind]] ;unknown data values
+                weights_censored=[weights_censored,weights_uncensored[censored_ind]]
+            ENDIF                        
+            IF(count GT 0) THEN BEGIN
+                y_uncensored=y_uncensored[uncensored_ind] ;known data values (i.e., uncensored)
+                weights_uncensored=weights_uncensored[uncensored_ind]
+            ENDIF            
+        ENDIF      
+    ENDIF ELSE BEGIN ;assume if only 1 thres given then truncate linear values b/w 0-thres to zero (i.e., non-detects)           
+        IF(ncount gt 0) THEN BEGIN ;censored data exists
+            y_uncensored=[y_all[censored_ind]*0,y_uncensored] ;truncate to zero (i.e., non-detect)
+            weights_uncensored=[weights[censored_ind],weights_uncensored]
+        ENDIF        
+        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored)      
         IF(log_in) THEN BEGIN                                  
             RETURN,{rejects:rejects,n_GR_precip:n_detects,$
                       mean:alog10(stats_struct.mean)/scale,stddev:alog10(stats_struct.std)/scale,max:alog10(stats_struct.max)/scale}
         ENDIF ELSE $
             RETURN,{rejects:rejects,n_GR_precip:n_detects,$
                     mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}       
-        
-    ENDIF
+    ENDELSE    
     
+    ;Check for presence of uncensored or censored data
     IF (n_elements(y_uncensored) EQ 0) THEN BEGIN
-        RETURN,{rejects:rejects,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
+        RETURN,{rejects:rejects+count,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
     ENDIF
-
-    censored_ind=where((y_all GT thres[0]) AND (y_all LT thres[1]),count)
-    IF(count GT 0) THEN BEGIN
-        y_censored=y_all[censored_ind] ;unknown data values (i.e., left/interval censored data)      
-        weights_censored=weights[censored_ind]
-    ENDIF ELSE BEGIN
-        y_censored=[]
-        weights_censored=[]
-    ENDELSE
-    IF(size(thres,/n_elements) GT 2) THEN BEGIN ;include right censoring        
-        uncensored_ind=where(y_uncensored LT thres[-1],count)
-        if(count GT 0) THEN BEGIN
-            y_uncensored=y_uncensored[uncensored_ind] ;remove data that are right-censored
-            weights_uncensored=weights[uncensored_ind]
-        ENDIF
-        censored_ind=where(y_all GT thres[-1],count)
-        if(count GT 0) THEN BEGIN
-            y_censored=[y_censored,y_all[censored_ind]] ;add right censored data    
-            weights_censored=[weights_censored,weights[censored_ind]]
-        ENDIF
-    ENDIF    
-    IF(size(y_censored,/n_elements) EQ 0) THEN BEGIN  ;no censored values so compute stats on input data and return
+    IF(n_elements(y_censored) EQ 0) THEN BEGIN  ;no censored values-->so compute stats on input data and return
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored)                    
         IF(log_in) THEN BEGIN                                  
             RETURN,{rejects:rejects,n_GR_precip:n_detects,$
@@ -119,7 +123,8 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         ENDIF ELSE $
             RETURN,{rejects:rejects,n_GR_precip:n_detects,$
                     mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
-    ENDIF
+    ENDIF        
+    
         
     ;Probability Plotting: Hirsch and Stedinger (1987, doi: 10.1029/WR023i004p00715)
     ;Transformation bias avoided by imputing values for censored data 
@@ -197,7 +202,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     IF(count GT 0) THEN BEGIN
         y_linear=[y_uncensored[ind_zeros],y_new] ;include zeros for calculating statistics
     ENDIF ELSE $
-        y_linear=y_new
+        y_linear=y_new    
     stats_struct=summary_stats(y_linear,y_uncensored,weights=[weights_uncensored,weights_censored])  
     if(log_in) THEN BEGIN        
         RETURN,{rejects:rejects,n_GR_precip:n_detects,$
