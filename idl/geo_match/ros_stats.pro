@@ -50,14 +50,9 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ENDIF
       
     IF not keyword_set(limits) THEN BEGIN     ;no censoring limits passed so just compute stats and return   
-        stats_struct=summary_stats(y_all,y_all,weights=weights)
-        IF(log_in) THEN BEGIN
-            RETURN,{rejects:rejects,n_GR_precip:n_detects,$
-                      mean:alog10(stats_struct.mean)/scale,stddev:alog10(stats_struct.std)/scale,max:stats_struct.max}
-        ENDIF ELSE BEGIN            
-            RETURN,{rejects:rejects,n_GR_precip:n_detects,$
-                    mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}           
-        ENDELSE
+        stats_struct=summary_stats(y_all,y_all,weights=weights,log_in=log_in,scale=scale)
+        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+                mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}           
     ENDIF ELSE BEGIN
         thres=limits ;local var to hold limits      
         if(log_in) THEN BEGIN ;convert thres data to linear
@@ -98,17 +93,13 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
             ENDIF            
         ENDIF      
     ENDIF ELSE BEGIN ;assume if only 1 thres given then truncate linear values b/w 0-thres to zero (i.e., non-detects)           
-        IF(ncount gt 0) THEN BEGIN ;censored data exists
+        IF(ncount gt 0) THEN BEGIN ;censored data exists        
             y_uncensored=[y_all[censored_ind]*0,y_uncensored] ;truncate to zero (i.e., non-detect)
             weights_uncensored=[weights[censored_ind],weights_uncensored]
         ENDIF        
-        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored)      
-        IF(log_in) THEN BEGIN                                  
-            RETURN,{rejects:rejects,n_GR_precip:n_detects,$
-                      mean:alog10(stats_struct.mean)/scale,stddev:alog10(stats_struct.std)/scale,max:alog10(stats_struct.max)/scale}
-        ENDIF ELSE $
-            RETURN,{rejects:rejects,n_GR_precip:n_detects,$
-                    mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}       
+        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)      
+        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+                mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}       
     ENDELSE    
     
     ;Check for presence of uncensored or censored data
@@ -116,13 +107,9 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         RETURN,{rejects:rejects+count,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
     ENDIF
     IF(n_elements(y_censored) EQ 0) THEN BEGIN  ;no censored values-->so compute stats on input data and return
-        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored)                    
-        IF(log_in) THEN BEGIN                                  
-            RETURN,{rejects:rejects,n_GR_precip:n_detects,$
-                      mean:alog10(stats_struct.mean)/scale,stddev:alog10(stats_struct.std)/scale,max:alog10(stats_struct.max)/scale}
-        ENDIF ELSE $
-            RETURN,{rejects:rejects,n_GR_precip:n_detects,$
-                    mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
+        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)                    
+        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+                mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
     ENDIF        
     
         
@@ -189,8 +176,13 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
   
     ;Fit line to uncensored data assuming normal distribution of y (i.e., LLSQ regression)      
     y=alog10(y_uncensored[where(y_uncensored GT 0)])    
-    x=zscore_uncensored[where(y_uncensored GT 0)] ;zscore is sorted     
-    n=n_elements(x)
+    x=zscore_uncensored[where(y_uncensored GT 0,count)] ;zscore is sorted
+    IF(count lt min_stat_count) THEN BEGIN ;make sure there are enough uncensored points to fit line
+        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)                    
+        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+                mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
+    ENDIF
+    n=count
     m=(n*total(x*y)-total(x)*total(y))/(n*total(x^2)-total(x)^2) ;slope of y=mx+b
     b=(total(y)-m*total(x))/n ;intercept of y=mx+b
 
@@ -203,11 +195,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         y_linear=[y_uncensored[ind_zeros],y_new] ;include zeros for calculating statistics
     ENDIF ELSE $
         y_linear=y_new    
-    stats_struct=summary_stats(y_linear,y_uncensored,weights=[weights_uncensored,weights_censored])  
-    if(log_in) THEN BEGIN        
-        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
-                      mean:alog10(stats_struct.mean)/scale,stddev:alog10(stats_struct.std)/scale,max:alog10(stats_struct.max)/scale}
-    ENDIF ELSE $
-        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
-            mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
+    stats_struct=summary_stats(y_linear,y_uncensored,weights=[weights_uncensored,weights_censored],log_in=log_in,scale=scale)  
+    RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+        mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
 END

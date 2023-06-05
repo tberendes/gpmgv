@@ -25,7 +25,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
  
     case field OF
          'Z' : BEGIN
-                 limits=[0,15] & log_in=1B & scale=0.1             
+                 limits=[5] & log_in=1B & scale=0.1             
                END
        'ZDR' : BEGIN
                  limits=[-20] & log_in=1B & scale=0.1             
@@ -34,7 +34,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
      'RHOHV' : limits=[0]
         'MW' : limits=[0] ;?
         'MI' : limits=[0] ;?
-        'RR' : limits=[0,0.01,9]     ;?
+        'RR' : limits=[0,300]     ;?
         'DM' : limits=[0,0.5,4.0] ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)                        
         'NW' : BEGIN
                 limits=[0,0.5,6.0]  & log_in=1B ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)
