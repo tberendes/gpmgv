@@ -41,7 +41,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
                END
    'SIGMADM' : BEGIN  
                 limits=[0] ;?
-                  good_ind=where(data ge 0,count,ncomplement=rejects)
+                  good_ind=where( (data ge 0) and (weights gt 0),count,ncomplement=rejects)
                   if(count gt 2) then begin
                       data=data[good_ind]
                       independent_data=independent_data[good_ind]
