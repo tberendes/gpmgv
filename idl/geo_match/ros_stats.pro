@@ -111,6 +111,10 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         RETURN,{rejects:rejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
     ENDIF        
+    ind=where(y_uncensored GT 0,cnt)
+    if (cnt EQ 0) then begin
+    	RETURN,{rejects:rejects+count,n_GR_precip:0,mean:0,stddev:0,max:0}
+    endif
     
         
     ;Probability Plotting: Hirsch and Stedinger (1987, doi: 10.1029/WR023i004p00715)
@@ -175,7 +179,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     FOREACH element,plot_pos_censored,i DO zscore_censored[i]=gauss_cvf(element)
   
     ;Fit line to uncensored data assuming normal distribution of y (i.e., LLSQ regression)      
-    y=alog10(y_uncensored[where(y_uncensored GT 0)])    
+    y=alog10(y_uncensored[where(y_uncensored GT 0)])  
     x=zscore_uncensored[where(y_uncensored GT 0,count)] ;zscore is sorted
     IF(count lt min_stat_count) THEN BEGIN ;make sure there are enough uncensored points to fit line
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)                    
