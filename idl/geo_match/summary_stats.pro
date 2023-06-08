@@ -20,7 +20,7 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
   endif
   avg=total(data_linear*weights)*1.0/total(weights)   
   if ( avg eq 0.0 ) then begin
-     return,{mean:avg,std:0.0.,max:0.0}
+     return,{mean:avg,std:0.0,max:0.0}
   endif
   ;sample variance (1-degree of freedom)         
   var=(total(weights*(data_linear-avg)^2))/total(weights)*1.0*n/(n-1)
