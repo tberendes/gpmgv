@@ -875,14 +875,14 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                 'number of bins with precip, including unknown and zero, in GR_Nw average'
    ncdf_attput, cdfid, gv_nw_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_mw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_mw_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_mw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_liquidWaterContent_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_mw_n_precip_varid, 'long_name', $
-                'number of bins with precip, including unknown and zero, in GR_Mw average'
+                'number of bins with precip, including unknown and zero, in GR_liquidWaterContent average'
    ncdf_attput, cdfid, gv_mw_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_mi_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_mi_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_mi_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_frozenWaterContent_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_mi_n_precip_varid, 'long_name', $
-                'number of bins with precip, including unknown and zero, in GR_Mi average'
+                'number of bins with precip, including unknown and zero, in GR_frozenWaterContent average'
    ncdf_attput, cdfid, gv_mi_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
    gv_dm_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_dm_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)

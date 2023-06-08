@@ -404,8 +404,8 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
    NCDF_VARGET, ncid1, 'n_gr_swemrms_rejected_'+swath[iswa], n_gr_swemrms_rejected
 
    NCDF_VARGET, ncid1, 'n_gr_nw_precip_'+swath[iswa], n_gr_nw_precip
-   NCDF_VARGET, ncid1, 'n_gr_mw_precip_'+swath[iswa], n_gr_mw_precip
-   NCDF_VARGET, ncid1, 'n_gr_mi_precip_'+swath[iswa], n_gr_mi_precip
+   NCDF_VARGET, ncid1, 'n_gr_liquidWaterContent_precip_'+swath[iswa], n_gr_mw_precip
+   NCDF_VARGET, ncid1, 'n_gr_frozenWaterContent_precip_'+swath[iswa], n_gr_mi_precip
    NCDF_VARGET, ncid1, 'n_gr_dm_precip_'+swath[iswa], n_gr_dm_precip
    NCDF_VARGET, ncid1, 'n_gr_sigmadm_precip_'+swath[iswa], n_gr_sigmadm_precip
    NCDF_VARGET, ncid1, 'n_gr_rr_precip_'+swath[iswa], n_gr_rr_precip
