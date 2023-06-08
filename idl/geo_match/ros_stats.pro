@@ -97,7 +97,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
             y_uncensored=[y_all[censored_ind]*0,y_uncensored] ;truncate to zero (i.e., non-detect)
             weights_uncensored=[weights[censored_ind],weights_uncensored]
         ENDIF        
-        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)      
+        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)
         RETURN,{rejects:rejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}       
     ENDELSE    
@@ -113,7 +113,10 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ENDIF        
     ind=where(y_uncensored GT 0,cnt)
     if (cnt EQ 0) then begin
-    	RETURN,{rejects:rejects+count,n_GR_precip:0,mean:0,stddev:0,max:0}
+	    if(log_in) THEN BEGIN
+	        RETURN,{rejects:rejects+count,n_GR_precip:0,mean:-999.,stddev:-999.,max:-999.}
+	    endif else $
+    		RETURN,{rejects:rejects+count,n_GR_precip:0,mean:0,stddev:0,max:0}
     endif
     
         
@@ -198,6 +201,11 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
 
     ;Estimate values of censored data using fitted line to extrapolate at plotting positions (i.e., impute values)
     y_imputed=(m*zscore_censored+b)  ;log scale    
+    
+    ind=where(y_imputed gt 0,cnt)
+    if (cnt gt 0) then begin
+    	y_imputed=y_imputed[ind]
+    endif else y_imputed=[]
     
     y_new=10^[y,y_imputed] ;y is uncensored non-zero and both are log scale since fit was done in log scale
     ind_zeros=where(y_uncensored EQ 0,count) ;check for zeros
