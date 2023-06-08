@@ -931,8 +931,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
       tocdf_clutterStatus = UINTARR(numDPRrays, num_elevations_out)
       
       tocdf_n_gr_nw_precip = data_GR2DPR.n_gr_nw_precip
-      tocdf_n_gr_mw_precip = data_GR2DPR.n_gr_mw_precip
-      tocdf_n_gr_mi_precip = data_GR2DPR.n_gr_mi_precip
+      tocdf_n_gr_mw_precip = data_GR2DPR.n_gr_liquidWaterContent_precip
+      tocdf_n_gr_mi_precip = data_GR2DPR.n_gr_frozenWaterContent_precip
       tocdf_n_gr_dm_precip = data_GR2DPR.n_gr_dm_precip
       tocdf_n_gr_sigmadm_precip = data_GR2DPR.n_gr_sigmadm_precip
       tocdf_n_gr_rr_precip = data_GR2DPR.n_gr_rr_precip
@@ -1633,8 +1633,8 @@ PRO dpr2gr_prematch_scan_v7, dpr_data, data_GR2DPR, dataGR, DPR_scantype, $
    NCDF_VARPUT, ncid, 'n_dpr_corr_r_rejected', tocdf_corr_r_rejected
 
    NCDF_VARPUT, ncid, 'n_gr_nw_precip', tocdf_n_gr_nw_precip
-   NCDF_VARPUT, ncid, 'n_gr_mw_precip', tocdf_n_gr_mw_precip
-   NCDF_VARPUT, ncid, 'n_gr_mi_precip', tocdf_n_gr_mi_precip
+   NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_precip', tocdf_n_gr_mw_precip
+   NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_precip', tocdf_n_gr_mi_precip
    NCDF_VARPUT, ncid, 'n_gr_dm_precip', tocdf_n_gr_dm_precip
    NCDF_VARPUT, ncid, 'n_gr_sigmadm_precip', tocdf_n_gr_sigmadm_precip
    NCDF_VARPUT, ncid, 'n_gr_rr_precip', tocdf_n_gr_rr_precip

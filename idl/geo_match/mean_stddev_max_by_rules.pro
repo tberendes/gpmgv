@@ -1,7 +1,7 @@
 FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
                                    no_data_value, WEIGHTS=weights, $
                                    LOG_AVG=log_avg, BAD_TO_ZERO=badToZero, $
-                                   WITH_ZEROS=withZeros,dependent=dependent_data
+                                   WITH_ZEROS=withZeros,independent=independent_data
 ;Wrapper for ros_stats 
 ;May 2023-PG/MSFC
 
@@ -42,13 +42,14 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
    'SIGMADM' : BEGIN  
                 limits=[0] ;?
                   good_ind=where(data ge 0,count,ncomplement=rejects)
-                  dm_stats=summary_stats(dependent_data,dependent_data,weights=weights)
                   if(count gt 2) then begin
                       data=data[good_ind]
-                      dependent_data=data[good_ind]
+                      independent_data=independent_data[good_ind]
+                      weights=weights[good_ind]
+                      dm_stats=summary_stats(independent_data,independent_data,weights=weights)
                       n=count*1.0
                       temp=where(data gt 0,n_detects)                      
-                      mean=total((data+dependent_data^2)*weights)*1.0/total(weights)-dm_stats.mean^2
+                      mean=total((data+independent_data^2)*weights)*1.0/total(weights)-dm_stats.mean^2
                       ;sample standard deviation (1-degree of freedom)         
                       std=sqrt((total(weights*(data-mean)^2))/total(weights)*1.0*n/(n-1))
                       max=max(data)  

@@ -507,8 +507,8 @@ for iswa=0,N_ELEMENTS(swath)-1 do begin
                  n_gr_swemrms_rejected : TEMPORARY(n_gr_swemrms_rejected), $
                  n_gr_expected : TEMPORARY(n_gr_expected), $
                  n_gr_nw_precip : TEMPORARY(n_gr_nw_precip), $
-                 n_gr_mw_precip : TEMPORARY(n_gr_mw_precip), $
-                 n_gr_mi_precip : TEMPORARY(n_gr_mi_precip), $
+                 n_gr_liquidWaterContent_precip : TEMPORARY(n_gr_mw_precip), $
+                 n_gr_frozenWaterContent_precip : TEMPORARY(n_gr_mi_precip), $
                  n_gr_dm_precip : TEMPORARY(n_gr_dm_precip), $
                  n_gr_sigmadm_precip : TEMPORARY(n_gr_sigmadm_precip), $
                  n_gr_rr_precip : TEMPORARY(n_gr_rr_precip), $

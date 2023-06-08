@@ -699,7 +699,7 @@
 		                  
 		                  altstats=mean_stddev_max_by_rules(gvsigmadmvals,'SIGMADM', 0.0, $
 		                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1, weights=gvmwvals, $
-		                              dependent=gvdmvals)
+		                              independent=gvdmvals)
 		                  n_gr_sigmadm_points_rejected = altstats.rejects
 		                  sigmadm_avg_gv = altstats.mean
 		                  sigmadm_stddev_gv = altstats.stddev
