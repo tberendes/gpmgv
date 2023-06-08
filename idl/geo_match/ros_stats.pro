@@ -187,7 +187,13 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}
     ENDIF
     n=count
-    m=(n*total(x*y)-total(x)*total(y))/(n*total(x^2)-total(x)^2) ;slope of y=mx+b
+    denom = n*total(x^2)-total(x)^2
+    if (denom eq 0.0) then begin
+        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)  
+		RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+                mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}    
+    endif
+    m=(n*total(x*y)-total(x)*total(y))/denom ;slope of y=mx+b
     b=(total(y)-m*total(x))/n ;intercept of y=mx+b
 
     ;Estimate values of censored data using fitted line to extrapolate at plotting positions (i.e., impute values)
