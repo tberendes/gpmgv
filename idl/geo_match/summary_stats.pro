@@ -11,6 +11,18 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
   IF not keyword_set(weights) THEN BEGIN ;check array existance
       weights=make_array(n,/float)+1.0 ;create array of weights=1.0    
   ENDIF
+  ind=where(weights gt 0,cnt)
+  if (cnt GT 0) then begin
+  	 data_linear=data_linear[ind]
+  	 weights=weights[ind]
+  endif else begin
+     max_uncensored=max(data_uncensored) 
+     IF(log_in) THEN BEGIN
+       max_uncensored=1.0/scale*alog10(max_uncensored)
+     endif 
+     return,{mean:-999.,std:-999.,max:max_uncensored}
+  endelse
+  
   avg=total(data_linear*weights)*1.0/total(weights)   
   ;sample variance (1-degree of freedom)         
   var=(total(weights*(data_linear-avg)^2))/total(weights)*1.0*n/(n-1)
