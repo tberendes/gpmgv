@@ -43,7 +43,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
                 limits=[0] ;?
                   good_ind=where(data ge 0,count,ncomplement=rejects)
                   dm_stats=summary_stats(dependent_data,dependent_data,weights=weights)
-                  if(count gt 0) then begin
+                  if(count gt 2) then begin
                       data=data[good_ind]
                       dependent_data=data[good_ind]
                       n=count*1.0
