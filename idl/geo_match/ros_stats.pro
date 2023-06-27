@@ -34,6 +34,9 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         noprecip=where(y_all EQ no_precip_value,count) ;log values have no precip flagged (linear=0)
         IF(count GT 0) THEN y_all[noprecip]=abs(y_all[noprecip]*0)
     ENDIF
+    IF(n_elements(y_all) eq 0) then begin
+        RETURN,{rejects:0,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
+    ENDIF
     good_ind=where(y_all GT max_bad_data,count,ncomplement=rejects) ;good values and count of values excluded from statistics     
     if(count GE min_stat_count) THEN BEGIN
         y_all=y_all[good_ind] ;limit to good data values       
