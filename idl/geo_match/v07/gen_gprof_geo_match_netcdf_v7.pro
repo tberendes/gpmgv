@@ -329,9 +329,9 @@ ncdf_attput, cdfid, havegvDmvarid, 'long_name', $
 ncdf_attput, cdfid, havegvDmvarid, '_FillValue', NO_DATA_PRESENT
 
 ; TAB 5/18/23 added GR_sigmaDm variables
-havegvsigmaDMvarid = ncdf_vardef(cdfid, 'have_GR_sigmaDm', /short)
+havegvsigmaDMvarid = ncdf_vardef(cdfid, 'have_GR_sigmaDm_slantPath', /short)
 ncdf_attput, cdfid, havegvsigmaDMvarid, 'long_name', $
-             'data exists flag for GR_sigmaDm'
+             'data exists flag for GR_sigmaDm_slantPath'
 ncdf_attput, cdfid, havegvsigmaDMvarid, '_FillValue', NO_DATA_PRESENT
 
 havegvNWvarid = ncdf_vardef(cdfid, 'have_GR_Nw_slantPath', /short)
@@ -398,6 +398,11 @@ havegvDmvarid_vpr = ncdf_vardef(cdfid, 'have_GR_Dm_VPR', /short)
 ncdf_attput, cdfid, havegvDmvarid_vpr, 'long_name', $
              'data exists flag for GR_Dm_VPR'
 ncdf_attput, cdfid, havegvDmvarid_vpr, '_FillValue', NO_DATA_PRESENT
+
+havegvsigmaDmvarid_vpr = ncdf_vardef(cdfid, 'have_GR_sigmaDm_VPR', /short)
+ncdf_attput, cdfid, havegvsigmaDmvarid_vpr, 'long_name', $
+             'data exists flag for GR_sigmaDm_VPR'
+ncdf_attput, cdfid, havegvsigmaDmvarid_vpr, '_FillValue', NO_DATA_PRESENT
 
 havegvNWvarid_vpr = ncdf_vardef(cdfid, 'have_GR_Nw_VPR', /short)
 ncdf_attput, cdfid, havegvNWvarid_vpr, 'long_name', $
