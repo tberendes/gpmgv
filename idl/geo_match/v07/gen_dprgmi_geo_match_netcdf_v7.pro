@@ -655,13 +655,13 @@ for iswa=0,1 do begin
    ncdf_attput, cdfid, gvsigmaDMvarid, 'units', 'mm'
    ncdf_attput, cdfid, gvsigmaDMvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-   gvDMstddevvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
+   gvsigmaDMstddevvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_StdDev_'+swath[iswa], [fpdimid[iswa],eldimid])
    ncdf_attput, cdfid, gvsigmaDMstddevvarid, 'long_name', $
                 'Standard Deviation of GR-based DSD mass spectrum standard deviation (Protat et al. 2019)'
    ncdf_attput, cdfid, gvsigmaDMstddevvarid, 'units', 'mm'
    ncdf_attput, cdfid, gvsigmaDMstddevvarid, '_FillValue', FLOAT_RANGE_EDGE
 
-   gvDMmaxvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
+   gvsigmaDMmaxvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_Max_'+swath[iswa], [fpdimid[iswa],eldimid])
    ncdf_attput, cdfid, gvsigmaDMmaxvarid, 'long_name', $
                 'Sample Maximum of GR-based DSD mass spectrum standard deviation (Protat et al. 2019)'
    ncdf_attput, cdfid, gvsigmaDMmaxvarid, 'units', 'mm'
