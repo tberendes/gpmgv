@@ -145,6 +145,8 @@
 ; 4/11/23 Todd Berendes UAH/ITSC
 ;  - removed Ground Radar DZERO and N2
 ;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
+; 5/18/23 Todd Berendes UAH/ITSC
+;  - added GR_sigmaDm variables
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
 ;       <Bob Morris> kenneth.r.morris@nasa.gov
@@ -777,8 +779,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       PRINT, "No 'DM' volume in radar structure from file: ", file_1CUF
       PRINT, ""
       have_gv_dm = 0
+      have_gv_sigmadm = 0
    ENDIF ELSE BEGIN
       have_gv_dm = 1
+      have_gv_sigmadm = 1
       ufstruct.DM_ID = gv_dm_field
    ENDELSE
 
@@ -1622,6 +1626,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                       VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Dm_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmaDm = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                               VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmaDm_stddev = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmaDm_max = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
+                                   VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_blockage = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
                                      VALUE=FLOAT_RANGE_EDGE)
       tocdf_meas_dbz = MAKE_ARRAY(numDPRrays, num_elevations_out, /float, $
@@ -1646,6 +1656,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_mw_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_mi_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_dm_rejected = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_sigmadm_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_expected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swedp_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_swe25_rejected = UINTARR(numDPRrays, num_elevations_out)
@@ -1658,6 +1669,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       tocdf_gr_mw_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_mi_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_dm_n_precip = UINTARR(numDPRrays, num_elevations_out)
+      tocdf_gr_sigmadm_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rr_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rc_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rp_n_precip = UINTARR(numDPRrays, num_elevations_out)
@@ -1904,6 +1916,12 @@ WHILE NOT (EOF(lun0)) DO BEGIN
 	      NCDF_VARPUT, ncid, 'GR_Dm_Max_'+DPR_scantype, tocdf_gr_dm_max            ; data
 	  ENDIF
 	  NCDF_VARPUT, ncid, 'have_GR_Dm', have_gv_dm      ; data presence flag
+	  IF ( have_gv_sigmadm ) THEN BEGIN
+	      NCDF_VARPUT, ncid, 'GR_sigmaDm_'+DPR_scantype, tocdf_gr_sigmadm             ; data
+	      NCDF_VARPUT, ncid, 'GR_sigmaDm_StdDev_'+DPR_scantype, tocdf_gr_sigmadm_stddev      ; data
+	      NCDF_VARPUT, ncid, 'GR_sigmaDm_Max_'+DPR_scantype, tocdf_gr_sigmadm_max            ; data
+	  ENDIF
+	  NCDF_VARPUT, ncid, 'have_GR_sigmaDm', have_gv_sigmadm      ; data presence flag
       IF ( have_gv_blockage ) THEN BEGIN
          NCDF_VARPUT, ncid, 'GR_blockage_'+DPR_scantype, tocdf_gr_blockage      ; data
       ENDIF
@@ -1949,6 +1967,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_rejected_'+DPR_scantype, tocdf_gr_mw_rejected
       NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_rejected_'+DPR_scantype, tocdf_gr_mi_rejected
       NCDF_VARPUT, ncid, 'n_gr_dm_rejected_'+DPR_scantype, tocdf_gr_dm_rejected
+      NCDF_VARPUT, ncid, 'n_gr_sigmadm_rejected_'+DPR_scantype, tocdf_gr_sigmadm_rejected
    	  NCDF_VARPUT, ncid, 'n_gr_swedp_rejected_'+DPR_scantype, tocdf_gr_swedp_rejected
       NCDF_VARPUT, ncid, 'n_gr_swe25_rejected_'+DPR_scantype, tocdf_gr_swe25_rejected
       NCDF_VARPUT, ncid, 'n_gr_swe50_rejected_'+DPR_scantype, tocdf_gr_swe50_rejected
@@ -1958,9 +1977,10 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       NCDF_VARPUT, ncid, 'n_gr_expected_'+DPR_scantype, tocdf_gr_expected
 
    	  NCDF_VARPUT, ncid, 'n_gr_nw_precip'+DPR_scantype, tocdf_gr_nw_n_precip
-      NCDF_VARPUT, ncid, 'n_gr_mw_precip'+DPR_scantype, tocdf_gr_mw_n_precip
-      NCDF_VARPUT, ncid, 'n_gr_mi_precip'+DPR_scantype, tocdf_gr_mi_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_precip'+DPR_scantype, tocdf_gr_mw_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_precip'+DPR_scantype, tocdf_gr_mi_n_precip
       NCDF_VARPUT, ncid, 'n_gr_dm_precip'+DPR_scantype, tocdf_gr_dm_n_precip
+      NCDF_VARPUT, ncid, 'n_gr_sigmadm_precip'+DPR_scantype, tocdf_gr_sigmadm_n_precip
       NCDF_VARPUT, ncid, 'n_gr_rr_precip'+DPR_scantype, tocdf_gr_rr_n_precip
       NCDF_VARPUT, ncid, 'n_gr_rc_precip'+DPR_scantype, tocdf_gr_rc_n_precip
       NCDF_VARPUT, ncid, 'n_gr_rp_precip'+DPR_scantype, tocdf_gr_rp_n_precip

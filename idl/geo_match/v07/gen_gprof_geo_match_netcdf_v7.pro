@@ -48,6 +48,8 @@
 ; 4/11/23 Todd Berendes UAH/ITSC
 ;  - removed Ground Radar DZERO and added DM
 ;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
+; 5/18/23 Todd Berendes UAH/ITSC
+;  - added GR_sigmaDm variables
 ;
 ;-------------------------------------------------------------------------------
 ;-
@@ -325,6 +327,12 @@ havegvDmvarid = ncdf_vardef(cdfid, 'have_GR_Dm_slantPath', /short)
 ncdf_attput, cdfid, havegvDmvarid, 'long_name', $
              'data exists flag for GR_Dm_slantPath'
 ncdf_attput, cdfid, havegvDmvarid, '_FillValue', NO_DATA_PRESENT
+
+; TAB 5/18/23 added GR_sigmaDm variables
+havegvsigmaDMvarid = ncdf_vardef(cdfid, 'have_GR_sigmaDm', /short)
+ncdf_attput, cdfid, havegvsigmaDMvarid, 'long_name', $
+             'data exists flag for GR_sigmaDm'
+ncdf_attput, cdfid, havegvsigmaDMvarid, '_FillValue', NO_DATA_PRESENT
 
 havegvNWvarid = ncdf_vardef(cdfid, 'have_GR_Nw_slantPath', /short)
 ncdf_attput, cdfid, havegvNWvarid, 'long_name', $
@@ -688,6 +696,24 @@ ncdf_attput, cdfid, gvDmMaxvarid, 'long_name', $
 ncdf_attput, cdfid, gvDmMaxvarid, 'units', 'mm'
 ncdf_attput, cdfid, gvDmMaxvarid, '_FillValue', FLOAT_RANGE_EDGE
 
+; TAB 5/18/23 added GR_sigmaDm variables
+gvsigmaDMvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_slantPath', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvsigmaDMvarid, 'long_name', 'GR-based DSD mass spectrum standard deviation (Protat et al. 2019)'
+ncdf_attput, cdfid, gvsigmaDMvarid, 'units', 'mm'
+ncdf_attput, cdfid, gvsigmaDMvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+gvsigmaDMstddevvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_StdDev_slantPath', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvsigmaDMstddevvarid, 'long_name', $
+             'Standard Deviation of GR-based DSD mass spectrum standard deviation (Protat et al. 2019)'
+ncdf_attput, cdfid, gvsigmaDMstddevvarid, 'units', 'mm'
+ncdf_attput, cdfid, gvsigmaDMstddevvarid, '_FillValue', FLOAT_RANGE_EDGE
+
+gvsigmaDMmaxvarid = ncdf_vardef(cdfid, 'GR_sigmaDm_Max_slantPath', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvsigmaDMmaxvarid, 'long_name', $
+             'Sample Maximum of GR-based DSD mass spectrum standard deviation (Protat et al. 2019)'
+ncdf_attput, cdfid, gvsigmaDMmaxvarid, 'units', 'mm'
+ncdf_attput, cdfid, gvsigmaDMmaxvarid, '_FillValue', FLOAT_RANGE_EDGE
+
 gvNWvarid = ncdf_vardef(cdfid, 'GR_Nw_slantPath', [fpdimid,eldimid])
 ncdf_attput, cdfid, gvNWvarid, 'long_name', $
    'DP Normalized Intercept Parameter'
@@ -798,6 +824,11 @@ ncdf_attput, cdfid, gv_dm_rejvarid, 'long_name', $
              'number of bins with missing D0 in GR_Dm_slantPath average'
 ncdf_attput, cdfid, gv_dm_rejvarid, '_FillValue', INT_RANGE_EDGE
 
+gv_sigmadm_rejvarid = ncdf_vardef(cdfid, 'n_gr_sigmadm_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, gv_sigmadm_rejvarid, 'long_name', $
+             'number of bins with missing Dm in GR_sigmaDm average_slantPath'
+ncdf_attput, cdfid, gv_sigmadm_rejvarid, '_FillValue', INT_RANGE_EDGE
+
 gv_nw_rejvarid = ncdf_vardef(cdfid, 'n_gr_nw_rejected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, gv_nw_rejvarid, 'long_name', $
              'number of bins with missing Nw in GR_Nw_slantPath average'
@@ -819,20 +850,25 @@ ncdf_attput, cdfid, gv_mi_rejvarid, '_FillValue', INT_RANGE_EDGE
                 'number of bins with precip, including unknown and zero, in GR_Nw average'
    ncdf_attput, cdfid, gv_nw_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_mw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_mw_precip', [fpdimid,eldimid], /short)
+   gv_mw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_liquidWaterContent_precip', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_mw_n_precip_varid, 'long_name', $
-                'number of bins with precip, including unknown and zero, in GR_Mw average'
+                'number of bins with precip, including unknown and zero, in GR_liquidWaterContent average'
    ncdf_attput, cdfid, gv_mw_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_mi_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_mi_precip', [fpdimid,eldimid], /short)
+   gv_mi_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_frozenWaterContent_precip', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_mi_n_precip_varid, 'long_name', $
-                'number of bins with precip, including unknown and zero, in GR_Mi average'
+                'number of bins with precip, including unknown and zero, in GR_frozenWaterContent average'
    ncdf_attput, cdfid, gv_mi_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
    gv_dm_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_dm_precip', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_dm_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_Dm average'
    ncdf_attput, cdfid, gv_dm_n_precip_varid, '_FillValue', INT_RANGE_EDGE
+
+   gv_sigmadm_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_sigmadm_precip', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_sigmadm_n_precip_varid, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_sigmaDm average'
+   ncdf_attput, cdfid, gv_sigmadm_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
    gv_rr_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rr_precip', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_rr_n_precip_varid, 'long_name', $
@@ -999,6 +1035,25 @@ ncdf_attput, cdfid, gvDmMaxvarid_vpr, 'long_name', $
 ncdf_attput, cdfid, gvDmMaxvarid_vpr, 'units', 'mm'
 ncdf_attput, cdfid, gvDmMaxvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
 
+; TAB 5/18/23 added GR_sigmaDm variables
+gvsigmaDMvarid_vpr = ncdf_vardef(cdfid, 'GR_sigmaDm_VPR', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvsigmaDMvarid_vpr, 'long_name', $
+   'GR-based DSD mass spectrum standard deviation along local vertical (Protat et al. 2019)'
+ncdf_attput, cdfid, gvsigmaDMvarid_vpr, 'units', 'mm'
+ncdf_attput, cdfid, gvsigmaDMvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
+
+gvsigmaDMstddevvarid_vpr = ncdf_vardef(cdfid, 'GR_sigmaDm_StdDev_VPR', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvsigmaDMstddevvarid_vpr, 'long_name', $
+   'Standard Deviation of GR-based DSD mass spectrum standard deviation along local vertical (Protat et al. 2019)'
+ncdf_attput, cdfid, gvsigmaDMstddevvarid_vpr, 'units', 'mm'
+ncdf_attput, cdfid, gvsigmaDMstddevvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
+
+gvsigmaDMmaxvarid_vpr = ncdf_vardef(cdfid, 'GR_sigmaDm_Max_VPR', [fpdimid,eldimid])
+ncdf_attput, cdfid, gvsigmaDMmaxvarid_vpr, 'long_name', $
+   'Sample Maximum of GR-based DSD mass spectrum standard deviation along local vertical (Protat et al. 2019)'
+ncdf_attput, cdfid, gvsigmaDMmaxvarid_vpr, 'units', 'mm'
+ncdf_attput, cdfid, gvsigmaDMmaxvarid_vpr, '_FillValue', FLOAT_RANGE_EDGE
+
 gvNWvarid_vpr = ncdf_vardef(cdfid, 'GR_Nw_VPR', [fpdimid,eldimid])
 ncdf_attput, cdfid, gvNWvarid_vpr, 'long_name', $
    'DP Normalized Intercept Parameter along local vertical'
@@ -1109,6 +1164,11 @@ ncdf_attput, cdfid, gv_dm_rejvarid_vpr, 'long_name', $
              'number of bins with missing D0 in GR_Dm_VPR average'
 ncdf_attput, cdfid, gv_dm_rejvarid_vpr, '_FillValue', INT_RANGE_EDGE
 
+gv_sigmadm_rejvarid_vpr = ncdf_vardef(cdfid, 'n_gr_sigmadm_vpr_rejected', [fpdimid,eldimid], /short)
+ncdf_attput, cdfid, gv_sigmadm_rejvarid_vpr, 'long_name', $
+             'number of bins with missing Dm in GR_sigmaDm_VPR average'
+ncdf_attput, cdfid, gv_sigmadm_rejvarid_vpr, '_FillValue', INT_RANGE_EDGE
+
 gv_nw_rejvarid_vpr = ncdf_vardef(cdfid, 'n_gr_nw_vpr_rejected', [fpdimid,eldimid], /short)
 ncdf_attput, cdfid, gv_nw_rejvarid_vpr, 'long_name', $
              'number of bins with missing Nw in GR_Nw_VPR average'
@@ -1130,20 +1190,25 @@ ncdf_attput, cdfid, gv_mi_rejvarid_vpr, '_FillValue', INT_RANGE_EDGE
                 'number of bins with precip, including unknown and zero, in GR_Nw_vpr average'
    ncdf_attput, cdfid, gv_nw_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
 
-   gv_mw_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_mw_precip_vpr', [fpdimid,eldimid], /short)
+   gv_mw_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_liquidWaterContent_precip_vpr', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_mw_n_precip_varid_vpr, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_Mw_vpr average'
    ncdf_attput, cdfid, gv_mw_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
 
-   gv_mi_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_mi_precip_vpr', [fpdimid,eldimid], /short)
+   gv_mi_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_frozenWaterContent_precip_vpr', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_mi_n_precip_varid_vpr, 'long_name', $
-                'number of bins with precip, including unknown and zero, in GR_Mi_vpr average'
+                'number of bins with precip, including unknown and zero, in GR_frozenWaterContent_vpr average'
    ncdf_attput, cdfid, gv_mi_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
 
    gv_dm_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_dm_precip_vpr', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_dm_n_precip_varid_vpr, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_Dm_vpr average'
    ncdf_attput, cdfid, gv_dm_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
+
+   gv_sigmadm_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_sigmadm_precip_vpr', [fpdimid,eldimid], /short)
+   ncdf_attput, cdfid, gv_sigmadm_n_precip_varid_vpr, 'long_name', $
+                'number of bins with precip, including unknown and zero, in GR_sigmaDm_vpr average'
+   ncdf_attput, cdfid, gv_sigmadm_n_precip_varid_vpr, '_FillValue', INT_RANGE_EDGE
 
    gv_rr_n_precip_varid_vpr = ncdf_vardef(cdfid, 'n_gr_rr_precip_vpr', [fpdimid,eldimid], /short)
    ncdf_attput, cdfid, gv_rr_n_precip_varid_vpr, 'long_name', $

@@ -41,6 +41,8 @@
 ; 4/11/23 Todd Berendes UAH/ITSC
 ;  - removed Ground Radar DZERO and added DM
 ;  - added n_gr_precip fields for Nw,Dm,RC,RR,RP,Mw,Mi
+; 5/18/23 Todd Berendes UAH/ITSC
+;  - added GR_sigmaDm variables
 ;
 ;
 ; EMAIL QUESTIONS OR COMMENTS TO:
@@ -498,6 +500,7 @@
          n_gr_rr_points_rejected = 0UL ; # of above that are below GV RR cutoff
          n_gr_hid_points_rejected = 0UL    ; # of above with undetermined HID
          n_gr_dm_points_rejected = 0UL  ; # of above that are MISSING D0
+         n_gr_sigmadm_points_rejected = 0UL  ; # of above that are MISSING D0
          n_gr_nw_points_rejected = 0UL     ; # of above that are MISSING Nw
          n_gr_mw_points_rejected = 0UL     ; # of above that are MISSING Mw
          n_gr_mi_points_rejected = 0UL     ; # of above that are MISSING Mi
@@ -671,16 +674,6 @@
                   ENDELSE
                ENDIF
 
-               IF have_gv_dm THEN BEGIN
-                  gvdmvals = dm_bscan[thisGMIsGVindices]
-                  altstats=mean_stddev_max_by_rules(gvdmvals,'DZERO', 0.0, $
-                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1)
-                  n_gr_dm_points_rejected = altstats.rejects
-                  dm_avg_gv = altstats.mean
-                  dm_stddev_gv = altstats.stddev
-                  dm_max_gv = altstats.max
-                  dm_n_precip = altstats.n_GR_precip
-               ENDIF
 
                IF have_gv_nw THEN BEGIN
                   gvnwvals = nw_bscan[thisGMIsGVindices]
@@ -702,7 +695,36 @@
                   mw_stddev_gv = altstats.stddev
                   mw_max_gv = altstats.max
                   mw_n_precip = altstats.n_GR_precip
+                  
+	               IF have_gv_dm THEN BEGIN
+	                  gvdmvals = dm_bscan[thisGMIsGVindices]
+	                  altstats=mean_stddev_max_by_rules(gvdmvals,'DM', 0.0, $
+	                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1, weights=gvmwvals)
+	                  n_gr_dm_points_rejected = altstats.rejects
+	                  dm_avg_gv = altstats.mean
+	                  dm_stddev_gv = altstats.stddev
+	                  dm_max_gv = altstats.max
+	                  dm_n_precip = altstats.n_GR_precip
+	
+		               IF have_gv_sigmadm THEN BEGIN
+		                  gvsigmadmvals = dm_bscan[thisGMIsGVindices]
+		                  posind = where(gvsigmadmvals ge 0, num_pos)
+		                  if num_pos gt 0 then $ 
+		                     gvsigmadmvals[posind] = 0.316 * gvsigmadmvals[posind]^1.6                     
+		                  ;  sigmaDm=0.316*(Dm^1.6) ref: Kamil Mroz, Parsival + 2DVD, 2023
+		                  
+		                  altstats=mean_stddev_max_by_rules(gvsigmadmvals,'SIGMADM', 0.0, $
+		                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1, weights=gvmwvals, $
+		                              independent=gvdmvals)
+		                  n_gr_sigmadm_points_rejected = altstats.rejects
+		                  sigmadm_avg_gv = altstats.mean
+		                  sigmadm_stddev_gv = altstats.stddev
+		                  sigmadm_max_gv = altstats.max
+		                  sigmadm_n_precip = altstats.n_GR_precip
+		               ENDIF
+	               ENDIF
                ENDIF
+               
                IF have_gv_mi THEN BEGIN
                   gvmivals = mi_bscan[thisGMIsGVindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
                   altstats=mean_stddev_max_by_rules(gvmivals,'MI', 0.0, $
@@ -826,6 +848,12 @@
                      tocdf_gr_dm_max[jpr,ielev] = dm_max_gv
                      tocdf_gr_dm_n_precip[jpr,ielev] = dm_n_precip
                   ENDIF
+                  IF have_gv_sigmadm THEN BEGIN
+                     tocdf_gr_sigmadm[jpr,ielev] = sigmadm_avg_gv
+                     tocdf_gr_sigmadm_stddev[jpr,ielev] = sigmadm_stddev_gv
+                     tocdf_gr_sigmadm_max[jpr,ielev] = sigmadm_max_gv
+                     tocdf_gr_sigmadm_n_precip[jpr,ielev] = sigmadm_n_precip
+                  ENDIF
                   IF have_gv_nw THEN BEGIN
                      tocdf_gr_nw[jpr,ielev] = nw_avg_gv
                      tocdf_gr_nw_stddev[jpr,ielev] = nw_stddev_gv
@@ -893,6 +921,11 @@
                              tocdf_gr_dm_stddev[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_max[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
+                          IF have_gv_sigmadm THEN BEGIN
+                             tocdf_gr_sigmadm[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_sigmadm_stddev[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_sigmadm_max[jpr,ielev] = FLOAT_OFF_EDGE
+                          ENDIF
                           IF have_gv_nw THEN BEGIN
                              tocdf_gr_Nw[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_stddev[jpr,ielev] = FLOAT_OFF_EDGE
@@ -955,6 +988,11 @@
                              tocdf_gr_dm_stddev[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_max[jpr,ielev] = Z_MISSING
                           ENDIF
+                          IF have_gv_sigmadm THEN BEGIN
+                             tocdf_gr_sigmadm[jpr,ielev] = Z_MISSING
+                             tocdf_gr_sigmadm_stddev[jpr,ielev] = Z_MISSING
+                             tocdf_gr_sigmadm_max[jpr,ielev] = Z_MISSING
+                          ENDIF
                           IF have_gv_nw THEN BEGIN
                              tocdf_gr_Nw[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_stddev[jpr,ielev] = Z_MISSING
@@ -990,6 +1028,7 @@
          IF have_gv_rr THEN tocdf_gr_rr_rejected[jpr,ielev] = UINT(n_gr_rr_points_rejected)
          IF have_gv_hid THEN tocdf_gr_hid_rejected[jpr,ielev] = UINT(n_gr_hid_points_rejected)
          IF have_gv_dm THEN tocdf_gr_dm_rejected[jpr,ielev] = UINT(n_gr_dm_points_rejected)
+         IF have_gv_sigmadm THEN tocdf_gr_sigmadm_rejected[jpr,ielev] = UINT(n_gr_sigmadm_points_rejected)
          IF have_gv_nw THEN tocdf_gr_nw_rejected[jpr,ielev] = UINT(n_gr_nw_points_rejected)
          IF have_gv_mw THEN tocdf_gr_mw_rejected[jpr,ielev] = UINT(n_gr_mw_points_rejected)
          IF have_gv_mi THEN tocdf_gr_mi_rejected[jpr,ielev] = UINT(n_gr_mi_points_rejected)
@@ -1141,6 +1180,7 @@
          n_gr_rr_vpr_points_rejected = 0UL ; # of above that are below GV RR cutoff
          n_gr_hid_vpr_points_rejected = 0UL    ; # of above with undetermined HID
          n_gr_dm_vpr_points_rejected = 0UL  ; # of above that are MISSING D0
+         n_gr_sigmadm_vpr_points_rejected = 0UL  ; # of above that are MISSING D0
          n_gr_nw_vpr_points_rejected = 0UL     ; # of above that are MISSING Nw
          n_gr_mw_vpr_points_rejected = 0UL     ; # of above that are MISSING MW
          n_gr_mi_vpr_points_rejected = 0UL     ; # of above that are MISSING MI
@@ -1153,6 +1193,7 @@
          mw_n_precip_vpr = 0UL
          mi_n_precip_vpr = 0UL
          dm_n_precip_vpr = 0UL
+         sigmadm_n_precip_vpr = 0UL
          
          GMI_index = GMI_master_idx[jpr]
 
@@ -1274,17 +1315,6 @@
                   ENDELSE
                ENDIF
 
-               IF have_gv_dm THEN BEGIN
-                  gvdmvals = dm_bscan[thisGMIsGVindices]
-                  altstats=mean_stddev_max_by_rules(gvdmvals,'DZERO', 0.0, $
-                              0.0, SRAIN_BELOW_THRESH,WITH_ZEROS=1)
-                  n_gr_dm_vpr_points_rejected = altstats.rejects
-                  dm_avg_gv_vpr = altstats.mean
-                  dm_stddev_gv_vpr = altstats.stddev
-                  dm_max_gv_vpr = altstats.max
-                  dm_n_precip_vpr = altstats.n_GR_precip
-               ENDIF
-
                IF have_gv_nw THEN BEGIN
                   gvnwvals = nw_bscan[thisGMIsGVindices]
                   altstats=mean_stddev_max_by_rules(gvnwvals,'NW', 0.0, $
@@ -1305,6 +1335,34 @@
                   mw_stddev_gv_vpr = altstats.stddev
                   mw_max_gv_vpr = altstats.max
                   mw_n_precip_vpr = altstats.n_GR_precip
+
+	               IF have_gv_dm THEN BEGIN
+	                  gvdmvals = dm_bscan[thisGMIsGVindices]
+	                  altstats=mean_stddev_max_by_rules(gvdmvals,'DM', 0.0, $
+	                              0.0, SRAIN_BELOW_THRESH,WITH_ZEROS=1, weights=gvmwvals)
+	                  n_gr_dm_vpr_points_rejected = altstats.rejects
+	                  dm_avg_gv_vpr = altstats.mean
+	                  dm_stddev_gv_vpr = altstats.stddev
+	                  dm_max_gv_vpr = altstats.max
+	                  dm_n_precip_vpr = altstats.n_GR_precip
+
+		               IF have_gv_sigmadm THEN BEGIN
+		                  gvsigmadmvals = dm_bscan[thisGMIsGVindices]
+		                  posind = where(gvsigmadmvals ge 0, num_pos)
+		                  if num_pos gt 0 then $ 
+		                     gvsigmadmvals[posind] = 0.316 * gvsigmadmvals[posind]^1.6                     
+		                  ;  sigmaDm=0.316*(Dm^1.6) ref: Kamil Mroz, Parsival + 2DVD, 2023
+		                  
+		                  altstats=mean_stddev_max_by_rules(gvsigmadmvals,'SIGMADM', 0.0, $
+		                              0.0, SRAIN_BELOW_THRESH, WITH_ZEROS=1, weights=gvmwvals, $
+		                              independent=gvdmvals)
+		                  n_gr_sigmadm_vpr_points_rejected = altstats.rejects
+		                  sigmadm_avg_gv_vpr = altstats.mean
+		                  sigmadm_stddev_gv_vpr = altstats.stddev
+		                  sigmadm_max_gv_vpr = altstats.max
+		                  sigmadm_n_precip_vpr = altstats.n_GR_precip
+		               ENDIF
+	               ENDIF
                ENDIF
 
                IF have_gv_mi THEN BEGIN
@@ -1366,6 +1424,9 @@
                dm_avg_gv_vpr = SRAIN_BELOW_THRESH
                dm_stddev_gv_vpr = SRAIN_BELOW_THRESH
                dm_max_gv_vpr = SRAIN_BELOW_THRESH
+               sigmadm_avg_gv_vpr = SRAIN_BELOW_THRESH
+               sigmadm_stddev_gv_vpr = SRAIN_BELOW_THRESH
+               sigmadm_max_gv_vpr = SRAIN_BELOW_THRESH
                nw_avg_gv_vpr = SRAIN_BELOW_THRESH
                nw_stddev_gv_vpr = SRAIN_BELOW_THRESH
                nw_max_gv_vpr = SRAIN_BELOW_THRESH
@@ -1429,6 +1490,12 @@
                      tocdf_gr_dm_stddev_VPR[jpr,ielev] = dm_stddev_gv_vpr
                      tocdf_gr_dm_max_VPR[jpr,ielev] = dm_max_gv_vpr
                      tocdf_gr_dm_n_precip_vpr[jpr,ielev] = dm_n_precip_vpr
+                  ENDIF
+                  IF have_gv_sigmadm THEN BEGIN
+                     tocdf_gr_sigmadm_VPR[jpr,ielev] = sigmadm_avg_gv_vpr
+                     tocdf_gr_sigmadm_stddev_VPR[jpr,ielev] = sigmadm_stddev_gv_vpr
+                     tocdf_gr_sigmadm_max_VPR[jpr,ielev] = sigmadm_max_gv_vpr
+                     tocdf_gr_sigmadm_n_precip_vpr[jpr,ielev] = sigmadm_n_precip_vpr
                   ENDIF
                   IF have_gv_nw THEN BEGIN
                      tocdf_gr_nw_VPR[jpr,ielev] = nw_avg_gv_vpr
@@ -1497,6 +1564,11 @@
                              tocdf_gr_dm_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_dm_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                           ENDIF
+                          IF have_gv_sigmadm THEN BEGIN
+                             tocdf_gr_sigmadm_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_sigmadm_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                             tocdf_gr_sigmadm_max_VPR[jpr,ielev] = FLOAT_OFF_EDGE
+                          ENDIF
                           IF have_gv_nw THEN BEGIN
                              tocdf_gr_Nw_VPR[jpr,ielev] = FLOAT_OFF_EDGE
                              tocdf_gr_Nw_stddev_VPR[jpr,ielev] = FLOAT_OFF_EDGE
@@ -1559,6 +1631,11 @@
                              tocdf_gr_dm_stddev_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_dm_max_VPR[jpr,ielev] = Z_MISSING
                           ENDIF
+                          IF have_gv_sigmadm THEN BEGIN
+                             tocdf_gr_sigmadm_VPR[jpr,ielev] = Z_MISSING
+                             tocdf_gr_sigmadm_stddev_VPR[jpr,ielev] = Z_MISSING
+                             tocdf_gr_sigmadm_max_VPR[jpr,ielev] = Z_MISSING
+                          ENDIF
                           IF have_gv_nw THEN BEGIN
                              tocdf_gr_Nw_VPR[jpr,ielev] = Z_MISSING
                              tocdf_gr_Nw_stddev_VPR[jpr,ielev] = Z_MISSING
@@ -1602,6 +1679,8 @@
                              UINT(n_gr_hid_vpr_points_rejected)
          IF have_gv_dm THEN tocdf_gr_dm_VPR_rejected[jpr,ielev] = $
                              UINT(n_gr_dm_vpr_points_rejected)
+         IF have_gv_sigmadm THEN tocdf_gr_sigmadm_VPR_rejected[jpr,ielev] = $
+                             UINT(n_gr_sigmadm_vpr_points_rejected)
          IF have_gv_nw THEN tocdf_gr_nw_VPR_rejected[jpr,ielev] = $
                              UINT(n_gr_nw_vpr_points_rejected)
          IF have_gv_mw THEN tocdf_gr_mw_VPR_rejected[jpr,ielev] = $

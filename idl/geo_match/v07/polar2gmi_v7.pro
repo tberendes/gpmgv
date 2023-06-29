@@ -904,8 +904,10 @@ FOR igv=0,nsites-1  DO BEGIN
       PRINT, "No 'DM' volume in radar structure from file: ", file_1CUF
       PRINT, ""
       have_gv_dm = 0
+      have_gv_sigmadm = 0
    ENDIF ELSE BEGIN
       have_gv_dm = 1
+      have_gv_sigmadm = 1
       ufstruct.DM_ID = gv_dm_field
    ENDELSE
 
@@ -1500,6 +1502,12 @@ FOR igv=0,nsites-1  DO BEGIN
                                          /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_dm_max = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
                                       VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmadm = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                  VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmadm_stddev = MAKE_ARRAY(numGMIrays, num_elevations_out, $
+                                         /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmadm_max = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Nw = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
                                VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Nw_stddev = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
@@ -1533,6 +1541,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_gr_rhohv_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_hid_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_dm_rejected = UINTARR(numGMIrays, num_elevations_out)
+      tocdf_gr_sigmadm_rejected = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_nw_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_mw_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_mi_rejected = UINTARR(numGMIrays, num_elevations_out)
@@ -1542,6 +1551,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_gr_mw_n_precip = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_mi_n_precip = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_dm_n_precip = UINTARR(numGMIrays, num_elevations_out)
+      tocdf_gr_sigmadm_n_precip = UINTARR(numDPRrays, num_elevations_out)
       tocdf_gr_rr_n_precip = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rc_n_precip = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rp_n_precip = UINTARR(numGMIrays, num_elevations_out)
@@ -1599,6 +1609,12 @@ FOR igv=0,nsites-1  DO BEGIN
                                              /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_dm_max_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, $
                                           /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmadm_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
+                                      VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmadm_stddev_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, $
+                                             /float, VALUE=FLOAT_RANGE_EDGE)
+      tocdf_gr_sigmadm_max_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, $
+                                          /float, VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Nw_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, /float, $
                                    VALUE=FLOAT_RANGE_EDGE)
       tocdf_gr_Nw_stddev_VPR = MAKE_ARRAY(numGMIrays, num_elevations_out, $
@@ -1632,6 +1648,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_gr_rhohv_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_hid_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_dm_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
+      tocdf_gr_sigmadm_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_nw_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_mw_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_mi_VPR_rejected = UINTARR(numGMIrays, num_elevations_out)
@@ -1641,6 +1658,7 @@ FOR igv=0,nsites-1  DO BEGIN
       tocdf_gr_mw_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_mi_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_dm_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
+      tocdf_gr_sigmadm_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rr_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rc_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
       tocdf_gr_rp_n_precip_vpr = UINTARR(numGMIrays, num_elevations_out)
@@ -1863,6 +1881,11 @@ FOR igv=0,nsites-1  DO BEGIN
       NCDF_VARPUT, ncid, 'GR_Dm_StdDev_slantPath', tocdf_gr_dm_stddev     ; data
       NCDF_VARPUT, ncid, 'GR_Dm_Max_slantPath', tocdf_gr_dm_max            ; data
    ENDIF
+   IF ( have_gv_sigmadm ) THEN BEGIN
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_slantPath', tocdf_gr_sigmadm            ; data
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_StdDev_slantPath', tocdf_gr_sigmadm_stddev     ; data
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_Max_slantPath', tocdf_gr_sigmadm_max            ; data
+   ENDIF
    NCDF_VARPUT, ncid, 'have_GR_Dm_slantPath', have_gv_dm      ; data presence flag
    IF ( have_gv_nw ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Nw_slantPath', tocdf_gr_nw            ; data
@@ -1898,15 +1921,17 @@ FOR igv=0,nsites-1  DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_rhohv_rejected', tocdf_gr_rhohv_rejected
    NCDF_VARPUT, ncid, 'n_gr_hid_rejected', tocdf_gr_hid_rejected
    NCDF_VARPUT, ncid, 'n_gr_dm_rejected', tocdf_gr_dm_rejected
+   NCDF_VARPUT, ncid, 'n_gr_sigmadm_rejected', tocdf_gr_sigmadm_rejected
    NCDF_VARPUT, ncid, 'n_gr_nw_rejected', tocdf_gr_nw_rejected
    NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_rejected', tocdf_gr_mw_rejected
    NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_rejected', tocdf_gr_mi_rejected
    NCDF_VARPUT, ncid, 'n_gr_expected', tocdf_gr_expected
 
    NCDF_VARPUT, ncid, 'n_gr_nw_precip', tocdf_gr_nw_n_precip
-   NCDF_VARPUT, ncid, 'n_gr_mw_precip', tocdf_gr_mw_n_precip
-   NCDF_VARPUT, ncid, 'n_gr_mi_precip', tocdf_gr_mi_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_precip', tocdf_gr_mw_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_precip', tocdf_gr_mi_n_precip
    NCDF_VARPUT, ncid, 'n_gr_dm_precip', tocdf_gr_dm_n_precip
+   NCDF_VARPUT, ncid, 'n_gr_sigmadm_precip', tocdf_gr_sigmadm_n_precip
    NCDF_VARPUT, ncid, 'n_gr_rr_precip', tocdf_gr_rr_n_precip
    NCDF_VARPUT, ncid, 'n_gr_rc_precip', tocdf_gr_rc_n_precip
    NCDF_VARPUT, ncid, 'n_gr_rp_precip', tocdf_gr_rp_n_precip
@@ -1961,6 +1986,12 @@ FOR igv=0,nsites-1  DO BEGIN
       NCDF_VARPUT, ncid, 'GR_Dm_Max_VPR', tocdf_gr_dm_max_VPR            ; data
    ENDIF
    NCDF_VARPUT, ncid, 'have_GR_Dm_VPR', have_gv_dm      ; data presence flag
+   IF ( have_gv_sigmadm ) THEN BEGIN
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_VPR', tocdf_gr_sigmadm_VPR            ; data
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_StdDev_VPR', tocdf_gr_sigmadm_stddev_VPR     ; data
+      NCDF_VARPUT, ncid, 'GR_sigmaDm_Max_VPR', tocdf_gr_sigmadm_max_VPR            ; data
+   ENDIF
+   NCDF_VARPUT, ncid, 'have_GR_sigmaDm_VPR', have_gv_sigmadm      ; data presence flag
    IF ( have_gv_nw ) THEN BEGIN
       NCDF_VARPUT, ncid, 'GR_Nw_VPR', tocdf_gr_nw_VPR            ; data
       NCDF_VARPUT, ncid, 'GR_Nw_StdDev_VPR', tocdf_gr_nw_stddev_VPR     ; data
@@ -1995,15 +2026,17 @@ FOR igv=0,nsites-1  DO BEGIN
    NCDF_VARPUT, ncid, 'n_gr_rhohv_vpr_rejected', tocdf_gr_rhohv_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_hid_vpr_rejected', tocdf_gr_hid_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_dm_vpr_rejected', tocdf_gr_dm_vpr_rejected
+   NCDF_VARPUT, ncid, 'n_gr_sigmadm_vpr_rejected', tocdf_gr_sigmadm_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_nw_vpr_rejected', tocdf_gr_nw_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_vpr_rejected', tocdf_gr_mw_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_vpr_rejected', tocdf_gr_mi_vpr_rejected
    NCDF_VARPUT, ncid, 'n_gr_vpr_expected', tocdf_gr_VPR_expected
 
    NCDF_VARPUT, ncid, 'n_gr_nw_precip_vpr', tocdf_gr_nw_n_precip_vpr
-   NCDF_VARPUT, ncid, 'n_gr_mw_precip_vpr', tocdf_gr_mw_n_precip_vpr
-   NCDF_VARPUT, ncid, 'n_gr_mi_precip_vpr', tocdf_gr_mi_n_precip_vpr
+   NCDF_VARPUT, ncid, 'n_gr_liquidWaterContent_precip_vpr', tocdf_gr_mw_n_precip_vpr
+   NCDF_VARPUT, ncid, 'n_gr_frozenWaterContent_precip_vpr', tocdf_gr_mi_n_precip_vpr
    NCDF_VARPUT, ncid, 'n_gr_dm_precip_vpr', tocdf_gr_dm_n_precip_vpr
+   NCDF_VARPUT, ncid, 'n_gr_sigmadm_precip_vpr', tocdf_gr_sigmadm_n_precip_vpr
    NCDF_VARPUT, ncid, 'n_gr_rr_precip_vpr', tocdf_gr_rr_n_precip_vpr
    NCDF_VARPUT, ncid, 'n_gr_rc_precip_vpr', tocdf_gr_rc_n_precip_vpr
    NCDF_VARPUT, ncid, 'n_gr_rp_precip_vpr', tocdf_gr_rp_n_precip_vpr
