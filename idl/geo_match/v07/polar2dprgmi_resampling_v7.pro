@@ -1509,7 +1509,7 @@
                      tocdf_gr_dm_max[jpr,ielev] = dm_max_gv
                      tocdf_gr_dm_n_precip[jpr,ielev] = dm_n_precip
                   ENDIF
-                  IF have_sigmagv_dm THEN BEGIN
+                  IF have_gv_sigmadm THEN BEGIN
                      tocdf_gr_sigmadm[jpr,ielev] = sigmadm_avg_gv
                      tocdf_gr_sigmadm_stddev[jpr,ielev] = sigmadm_stddev_gv
                      tocdf_gr_sigmadm_max[jpr,ielev] = sigmadm_max_gv
