@@ -157,7 +157,7 @@ PRO polar2dpr_hs_fs_v7, control_file, range_threshold_km, GPM_ROOT=gpmroot, $
                   FLAT_NCPATH=flat_ncpath, DIR_BLOCK=dir_block, non_pps_files=non_pps_files
 
 ; for debugging
-EXCEPT=2
+!EXCEPT=2
 
 IF KEYWORD_SET(plot_bins) THEN BEGIN
    reply = plot_bins_bailout()
