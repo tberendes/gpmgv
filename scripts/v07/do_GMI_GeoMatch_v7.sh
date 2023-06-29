@@ -129,27 +129,11 @@ date
 echo '***************************************'
 echo ''
 
+GV_BASE_DIR=~/v7_geomatch
 
-
-USER_ID=`whoami`
-if [ "$USER_ID" = "morris" ]
-  then
-    GV_BASE_DIR=/home/morris/swdev
-  elif [ "$USER_ID" = "gvoper" ]
-      then
-        GV_BASE_DIR=/home/gvoper/v7_geomatch
-  elif [ "$USER_ID" = "tberendes" ]
-      then
-        GV_BASE_DIR=/home/tberendes/v7_geomatch
-  elif [ "$USER_ID" = "dberendes" ]
-      then
-        GV_BASE_DIR=/home/dberendes/v7_geomatch
-  else
-      echo "User unknown, can't set GV_BASE_DIR!"
-      exit 1
-fi
-
+echo "GV_BASE_DIR: $GV_BASE_DIR"
 export GV_BASE_DIR
+
 DATA_DIR=/data/gpmgv
 export DATA_DIR
 TMP_DIR=/data/tmp
