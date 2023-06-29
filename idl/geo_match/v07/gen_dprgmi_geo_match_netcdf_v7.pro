@@ -944,22 +944,22 @@ for iswa=0,1 do begin
    ncdf_attput, cdfid, this_varid, 'units', 'g/m^3'
    ncdf_attput, cdfid, this_varid, '_FillValue', FLOAT_RANGE_EDGE
 
-   gv_nw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_nw_precip'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_nw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_nw_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_nw_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_Nw average'
    ncdf_attput, cdfid, gv_nw_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_mw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_liquidWaterContent_precip'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_mw_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_liquidWaterContent_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_mw_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_liquidWaterContent average'
    ncdf_attput, cdfid, gv_mw_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_mi_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_frozenWaterContent_precip'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_mi_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_frozenWaterContent_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_mi_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_frozenWaterContent average'
    ncdf_attput, cdfid, gv_mi_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_dm_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_dm_precip'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_dm_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_dm_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_dm_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_Dm average'
    ncdf_attput, cdfid, gv_dm_n_precip_varid, '_FillValue', INT_RANGE_EDGE
@@ -969,17 +969,17 @@ for iswa=0,1 do begin
                 'number of bins with precip, including unknown and zero, in GR_sigmaDm average'
    ncdf_attput, cdfid, gv_sigmadm_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_rr_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rr_precip'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_rr_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rr_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_rr_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_RR average'
    ncdf_attput, cdfid, gv_rr_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_rc_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rc_precip'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_rc_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rc_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_rc_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_RC average'
    ncdf_attput, cdfid, gv_rc_n_precip_varid, '_FillValue', INT_RANGE_EDGE
 
-   gv_rp_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rp_precip'+swath[iswa], [fpdimid[iswa],eldimid], /short)
+   gv_rp_n_precip_varid = ncdf_vardef(cdfid, 'n_gr_rp_precip_'+swath[iswa], [fpdimid[iswa],eldimid], /short)
    ncdf_attput, cdfid, gv_rp_n_precip_varid, 'long_name', $
                 'number of bins with precip, including unknown and zero, in GR_RP average'
    ncdf_attput, cdfid, gv_rp_n_precip_varid, '_FillValue', INT_RANGE_EDGE
