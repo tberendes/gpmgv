@@ -37,7 +37,7 @@ ON_ERROR,1
   ;sample variance (1-degree of freedom)         
   var=(total(weights*(data_linear-avg)^2))/total(weights)*(n*1.0)/(n-1.0)
 
-   if (!finite(var)) then print 'var infinite...'
+   if (!finite(var)) then print, 'var infinite...'
    CATCH, Error_status
  
    ;This statement begins the error handler:
