@@ -35,7 +35,7 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
   
   ; clear any existing warnings
   !EXCEPT=0
-  check_math()
+  print, check_math()
 
   ;sample variance (1-degree of freedom)         
   var=(total(weights*(data_linear-avg)^2))/total(weights)*(n*1.0)/(n-1.0)
