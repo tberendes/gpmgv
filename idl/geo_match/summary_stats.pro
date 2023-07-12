@@ -33,6 +33,21 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
   endif  
   ;sample variance (1-degree of freedom)         
   var=(total(weights*(data_linear-avg)^2))/total(weights)*(n*1.0)/(n-1.0)
+
+   CATCH, Error_status
+ 
+   ;This statement begins the error handler:
+   IF Error_status NE 0 THEN BEGIN
+      PRINT, 'Error index: ', Error_status
+      PRINT, 'Error message: ', !ERROR_STATE.MSG
+      print,'n ',n
+      print, 'avg ', avg
+      print, 'total(weights) ', total(weights)
+      print, 'data_linear ', data(linear)
+
+   ENDIF
+
+
   ;Only known values can be used as estimators of individual data points
   max_uncensored=max(data_uncensored)   
   IF(log_in) THEN BEGIN
