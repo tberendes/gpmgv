@@ -45,6 +45,7 @@ ON_ERROR,1
       print, 'avg ', avg
       print, 'total(weights) ', total(weights)
       print, 'data_linear ', data(linear)
+      CATCH, /CANCEL
 
    ENDIF
 
