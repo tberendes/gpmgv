@@ -41,8 +41,7 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
       print,'n ',n
       print, 'avg ', avg
       print, 'total(weights) ', total(weights)
-      print, 'data_linear ', data(linear)
-      CATCH, /CANCEL
+      print, 'data_linear ', data_linear
 
    ENDIF
 
