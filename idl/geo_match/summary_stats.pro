@@ -24,7 +24,7 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
       n=gcount      
       IF(n lt 3) THEN return,{mean:-999.,std:-999.,max:max_uncensored} ;need at least 3 points to compute stats
   endif  
-  if (total(weights) eq 0.0) then return,{mean:-999.,std:-999.,max:max_uncensored}  
+  if (total(weights) lt 0.001) then return,{mean:-999.,std:-999.,max:max_uncensored}  
   avg=total(data_linear*weights)*1.0/total(weights)   
   if ( avg eq 0.0 ) then begin
      IF(log_in) then begin
