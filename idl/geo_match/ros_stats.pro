@@ -1,5 +1,5 @@
 FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
-        no_precip_value=no_precip_value,log_in=log_in,weights=weights
+        no_precip_value=no_precip_value,log_in=log_in,weights=weights,max_value=max_value
     ;Inputs:
     ; -x_data is input array of data
     ; -limits is boundaries of the censoring (e.g.,[0,left,[right]]), right is optional,default=[0]    
@@ -22,7 +22,8 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     IF not keyword_set(max_bad_data) THEN max_bad_data=-888.
     IF not keyword_set(log_in) THEN log_in=0B   
     IF not keyword_set(limits) THEN limits=[0]    
-    IF not keyword_set(weights) THEN weights=make_array(n_elements(x_data))+1 ;default=1        
+    IF not keyword_set(weights) THEN weights=make_array(n_elements(x_data))+1 ;default=1  
+    IF not keyword_set(max_value) THEN max_value=1e6
     
     ;Prep the input data
     y_all=make_array(n_elements(x_data),/float)        
@@ -32,7 +33,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     if(count GT 0) THEN y_all[negzeros]=0.0 ;handle any floating point instances where 0. is -0.    
     if(log_in) THEN BEGIN
         noprecip=where(y_all EQ no_precip_value,count) ;log values have no precip flagged (linear=0)
-        IF(count GT 0) THEN y_all[noprecip]=abs(y_all[noprecip]*0)
+        IF(count GT 0) THEN y_all[noprecip]=abs(y_all[noprecip]*0)        
     ENDIF
     IF(n_elements(y_all) eq 0) then begin
         RETURN,{rejects:0,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
@@ -45,11 +46,14 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         RETURN,{rejects:rejects+count,n_GR_precip:0,mean:-999,stddev:-999,max:-999}
     iunknown=where(y_all LT 0,count)    
     if(count GT 0) THEN y_all[iunknown]=-1.0*y_all[iunknown] ;handle unknown values (assume flagged as negative)
+    igood=where(y_all LT max_value,count)
+    if(count GT 0) THEN y_all=y_all[igood] ;handle unrealistic values
+    
     ;-->now y_all contains values used for statistics
     idetects=where(abs(y_all) GT 0,n_detects) ;number of non-zero values included in statistics
     
     if(log_in) THEN BEGIN ;convert data to linear
-        y_all[idetects]=10^(y_all[idetects]*scale)
+        y_all[idetects]=10^(y_all[idetects]*scale)        
     ENDIF
       
     IF not keyword_set(limits) THEN BEGIN     ;no censoring limits passed so just compute stats and return   
@@ -74,15 +78,15 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         y_uncensored=y_all[uncensored_ind] ;known data values (i.e., uncensored)
         weights_uncensored=weights[uncensored_ind]
     ENDIF ELSE RETURN,{rejects:rejects+count,n_GR_precip:0,mean:-999,stddev:-999,max:-999}    
-    IF(n_elements(thres) GT 1) THEN BEGIN ;left-censored data if thres is two element censoring b/w thres[0] and thres[1]
-        uncensored_ind=where((y_all EQ 0) OR (y_all GE thres[1]),count,complement=censored_ind,ncomplement=ncount)        
+    IF(n_elements(thres) GT 1) THEN BEGIN ;left-censored data if thres is two element censoring b/w thres[0] and thres[1]        
+        censored_ind=where((y_all LT thres[0]) OR (y_all GE thres[1]),ncount,complement=uncensored_ind,ncomplement=count)        
         IF(count GT 0) THEN BEGIN
             y_uncensored=y_all[uncensored_ind] ;known data values (i.e., uncensored)
             weights_uncensored=weights[uncensored_ind]
         ENDIF
         IF(ncount GT 0) THEN BEGIN
             y_censored=y_all[censored_ind] ;unknown data values
-            weights_censored=weights[censored_ind]
+            weights_censored=weights[censored_ind]            
         ENDIF
         IF(n_elements(thres) GT 2) THEN BEGIN ;right-censored data if thres is 3 elements
             uncensored_ind=where((y_uncensored LE thres[-1]),count,complement=censored_ind,ncomplement=ncount)    

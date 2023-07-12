@@ -5,7 +5,7 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 ;Wrapper for ros_stats 
 ;May 2023-PG/MSFC
 
-print, 'field name: ', field
+;print, 'field name: ', field
     log_in=0B
     scale=1
     limits=[0]
@@ -25,22 +25,34 @@ print, 'field name: ', field
  
     case field OF
          'Z' : BEGIN
-                 limits=[5] & log_in=1B & scale=0.1             
+                 limits=[5] & log_in=1B & scale=0.1 & max_value=100             
                END
        'ZDR' : BEGIN
-                 limits=[-20] & log_in=1B & scale=0.1             
+                 limits=[-20] & log_in=1B & scale=0.1 & max_value=10            
                END
-       'KDP' : limits=[-20]
-     'RHOHV' : limits=[0]
-        'MW' : limits=[0] ;?
-        'MI' : limits=[0] ;?
-        'RR' : limits=[0,300]     ;?
-        'DM' : limits=[0,0.5,4.0] ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)                        
+       'KDP' : BEGIN
+                 limits=[-20] & max_value=360
+               END
+     'RHOHV' : BEGIN
+                 limits=[0] & max_value=2
+               END
+        'MW' : BEGIN
+                limits=[0] & max_value=1e4 ;?
+               END
+        'MI' : BEGIN
+                limits=[0] & max_value=1e4 ;?
+               END
+        'RR' : BEGIN
+                limits=[0,300] & max_value=1e3 ;?
+               END
+        'DM' : BEGIN
+                limits=[0,0.5,4.0] & max_value=10 ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)                        
+               END
         'NW' : BEGIN
-                limits=[0,0.5,6.0]  & log_in=1B ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)
+                limits=[0,0.5,6.0] & max_value=10  & log_in=1B ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)
                END
    'SIGMADM' : BEGIN  
-                limits=[0] ;?
+                limits=[0] & max_value=10;?
                   good_ind=where( (data ge 0) and (weights gt 0),count,ncomplement=rejects)
                   if(count gt 2) then begin
                       data=data[good_ind]
@@ -75,6 +87,6 @@ print, 'field name: ', field
 ;       ENDIF
 ;    ENDIF         
 
-    struct=ros_stats(data,limits=limits,log_in=log_in,scale=scale,weights=weights)                                   
+    struct=ros_stats(data,limits=limits,log_in=log_in,scale=scale,weights=weights,max_value=max_value)                                   
     return,struct
 END
