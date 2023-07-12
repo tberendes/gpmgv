@@ -6,6 +6,9 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
 ;log_in=keyword to set for returning data in log10 units (assume lognormal distribution for mean,sdev)
 ;scale=scaling factor used for log variables (e.g., dBz)
 ;returns mean,stdev,max  
+
+ON_ERROR,1
+
   n=size(data_linear,/n_elements)
   IF not keyword_set(log_in) then log_in=0B
   IF not keyword_set(scale) then scale=1.0
