@@ -7,8 +7,6 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
 ;scale=scaling factor used for log variables (e.g., dBz)
 ;returns mean,stdev,max  
 
-!EXCEPT=0
-
   n=size(data_linear,/n_elements)
   IF not keyword_set(log_in) then log_in=0B
   IF not keyword_set(scale) then scale=1.0
@@ -35,6 +33,12 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
      endif else return,{mean:avg,std:0.0,max:0.0}
   endif  
   
+
+  ;sample variance (1-degree of freedom)         
+  var=(total(weights*(data_linear-avg)^2))/total(weights)*(n*1.0)/(n-1.0)
+
+; debugging section, except has to be zero for check_math to work
+!EXCEPT=0
    ;This statement begins the error handler:
    IF check_math() NE 0 THEN BEGIN
       print, 'math error:'
@@ -42,11 +46,10 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
       print, 'avg ', avg
       print, 'total(weights) ', total(weights)
       print, 'data_linear ', data_linear
-
+	  stop
    ENDIF
 
-  ;sample variance (1-degree of freedom)         
-  var=(total(weights*(data_linear-avg)^2))/total(weights)*(n*1.0)/(n-1.0)
+
   ;Only known values can be used as estimators of individual data points
   max_uncensored=max(data_uncensored)   
   IF(log_in) THEN BEGIN
