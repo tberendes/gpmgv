@@ -33,24 +33,23 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
      endif else return,{mean:avg,std:0.0,max:0.0}
   endif  
   
+  ; debugging only
   ; clear any existing warnings
-  !EXCEPT=0
+  ; !EXCEPT=0
   ;print, check_math()
 
   ;sample variance (1-degree of freedom)         
   var=(total(weights*(data_linear-avg)^2))/total(weights)*(n*1.0)/(n-1.0)
 
 ; debugging section, except has to be zero for check_math to work
-   ;This statement begins the error handler:
-   IF check_math() NE 0 THEN BEGIN
-      print, 'math error:'
-      print,'n ',n
-      print, 'avg ', avg
-      print, 'total(weights) ', total(weights)
-      print, 'data_linear ', data_linear
-	  stop
-   ENDIF
-
+;   IF check_math() NE 0 THEN BEGIN
+;      print, 'math error:'
+;      print,'n ',n
+;      print, 'avg ', avg
+;      print, 'total(weights) ', total(weights)
+;      print, 'data_linear ', data_linear
+;	  stop
+;   ENDIF
 
   ;Only known values can be used as estimators of individual data points
   max_uncensored=max(data_uncensored)   
