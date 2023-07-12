@@ -35,12 +35,8 @@ ON_ERROR,1
      endif else return,{mean:avg,std:0.0,max:0.0}
   endif  
   
-   CATCH, Error_status
- 
    ;This statement begins the error handler:
-   IF Error_status NE 0 THEN BEGIN
-      PRINT, 'Error index: ', Error_status
-      PRINT, 'Error message: ', !ERROR_STATE.MSG
+   IF check_math() NE 0 THEN BEGIN
       print,'n ',n
       print, 'avg ', avg
       print, 'total(weights) ', total(weights)
