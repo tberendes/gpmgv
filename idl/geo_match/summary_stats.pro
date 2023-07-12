@@ -34,10 +34,7 @@ ON_ERROR,1
        return,{mean:-999.,std:-999.,max:-999.}
      endif else return,{mean:avg,std:0.0,max:0.0}
   endif  
-  ;sample variance (1-degree of freedom)         
-  var=(total(weights*(data_linear-avg)^2))/total(weights)*(n*1.0)/(n-1.0)
-
-   if (!finite(var)) then print, 'var infinite...'
+  
    CATCH, Error_status
  
    ;This statement begins the error handler:
@@ -51,7 +48,8 @@ ON_ERROR,1
 
    ENDIF
 
-
+  ;sample variance (1-degree of freedom)         
+  var=(total(weights*(data_linear-avg)^2))/total(weights)*(n*1.0)/(n-1.0)
   ;Only known values can be used as estimators of individual data points
   max_uncensored=max(data_uncensored)   
   IF(log_in) THEN BEGIN
