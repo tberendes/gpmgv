@@ -7,7 +7,7 @@ FUNCTION SUMMARY_STATS,data_linear,data_uncensored,weights=weights,log_in=log_in
 ;scale=scaling factor used for log variables (e.g., dBz)
 ;returns mean,stdev,max  
 
-ON_ERROR,1
+!EXCEPT=0
 
   n=size(data_linear,/n_elements)
   IF not keyword_set(log_in) then log_in=0B
@@ -37,6 +37,7 @@ ON_ERROR,1
   
    ;This statement begins the error handler:
    IF check_math() NE 0 THEN BEGIN
+      print, 'math error:'
       print,'n ',n
       print, 'avg ', avg
       print, 'total(weights) ', total(weights)
