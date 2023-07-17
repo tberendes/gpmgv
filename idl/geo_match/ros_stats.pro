@@ -132,7 +132,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
             RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:no_precip_value,stddev:0.0,max:no_precip_value}
 	    endif else $
     		RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:0.,stddev:0.,max:0.}
-    ENDIF
+;    ENDIF
     IF(n_elements(y_censored) EQ 0) THEN BEGIN  ;no censored values-->so compute stats on input data and return
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)                    
         RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
