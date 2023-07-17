@@ -117,7 +117,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
                 weights_uncensored=weights_uncensored[uncensored_ind]
             ENDIF            
         ENDIF      
-    ENDIF ELSE BEGIN ;assume if only 1 thres given then truncate linear values b/w 0-thres to zero (i.e., non-detects)           
+    ENDIF ELSE BEGIN ;assume if only 1 thres given then truncate linear values b/w 0-thres to zero (i.e., non-detects)        
         IF(ncount gt 0) THEN BEGIN ;censored data exists        
             y_uncensored=[y_all[censored_ind]*0,y_uncensored] ;truncate to zero (i.e., non-detect)
             weights_uncensored=[weights[censored_ind],weights_uncensored]
@@ -129,10 +129,11 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     
     ;--Check for presence of uncensored or censored data
     IF (n_elements(y_uncensored) EQ 0) THEN BEGIN
+        if(log_in) then begin
             RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:no_precip_value,stddev:0.0,max:no_precip_value}
 	    endif else $
     		RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:0.,stddev:0.,max:0.}
-;    ENDIF
+    ENDIF
     IF(n_elements(y_censored) EQ 0) THEN BEGIN  ;no censored values-->so compute stats on input data and return
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)                    
         RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
