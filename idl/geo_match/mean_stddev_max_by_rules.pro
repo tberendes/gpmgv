@@ -25,31 +25,31 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
  
     case field OF
          'Z' : BEGIN
-                 limits=[5] & log_in=1B & scale=0.1 & max_value=100             
+                 limits=[5] & log_in=1B & scale=0.1 & max_value=100 & no_precip_value=-32767.             
                END
        'ZDR' : BEGIN
-                 limits=[-20] & log_in=1B & scale=0.1 & max_value=10            
+                 limits=[-20] & log_in=1B & scale=0.1 & max_value=10 & no_precip_value=-32767.            
                END
        'KDP' : BEGIN
-                 limits=[-20] & max_value=360
+                 limits=[-20] & max_value=360 & no_precip_value=-32767.
                END
      'RHOHV' : BEGIN
-                 limits=[0] & max_value=2
+                 limits=[0] & max_value=2 & no_precip_value=-32767.
                END
         'MW' : BEGIN
-                limits=[0] & max_value=1e4 ;?
+                limits=[0] & max_value=1e4 & no_precip_value=-32767. ;?
                END
         'MI' : BEGIN
-                limits=[0] & max_value=1e4 ;?
+                limits=[0] & max_value=1e4 & no_precip_value=-32767. ;?
                END
         'RR' : BEGIN
-                limits=[0,300] & max_value=1e3 ;?
+                limits=[0,300] & max_value=1e3 & no_precip_value=0. ;?
                END
         'DM' : BEGIN
-                limits=[0,0.5,4.0] & max_value=10 ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)                        
+                limits=[0,0.5,4.0] & max_value=10 & no_precip_value=0. ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)    
                END
         'NW' : BEGIN
-                limits=[0,0.5,6.0] & max_value=10  & log_in=1B ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)
+                limits=[0,0.5,6.0] & max_value=10  & log_in=1B & no_precip_value=0. ;Tokay et al. 2020 (doi: 10.1175/JTECH-D-18-0071.1)
                END
    'SIGMADM' : BEGIN  
                 limits=[0] & max_value=10;?
@@ -87,6 +87,6 @@ FUNCTION mean_stddev_max_by_rules, data, field, goodthresh, badthresh, $
 ;       ENDIF
 ;    ENDIF         
 
-    struct=ros_stats(data,limits=limits,log_in=log_in,scale=scale,weights=weights,max_value=max_value)                                   
+    struct=ros_stats(data,limits=limits,log_in=log_in,scale=scale,weights=weights,max_value=max_value,no_precip_value=no_precip_value)                                   
     return,struct
 END
