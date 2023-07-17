@@ -5,9 +5,10 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ; -limits is boundaries of the censoring (e.g.,[0,left,[right]]), right is optional,default=[0]    
     ; -max_bad_data is the greatest value of known bad data (e.g., censoring cannot be determined)
     ; -scale is the factor to multiply the data when transforming log-linear (default=1.0)
-    ; -no_precip_value is the fill value used to indicate zero for log data (default=-32767.0)
+    ; -no_precip_value is the fill value used to indicate zero for log data (default=-32767.0 for log, 0.0 for linear)
     ; -log_in is the boolean switch for indicating input data are in log units (e.g., decibels) (default=0B)
     ; -weights is an array of weights to apply to each x_data (default=1.0)
+    ; -max_value is maximum expected valid value of input data    
     ;Outputs:
     ; returns a dictionary containing the mean,stddev,max,rejects,n_GR_precip
     ; -rejects is the number of data not included in summary stats
@@ -17,13 +18,16 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     
     min_stat_count = 5 ;minimum number of good data points required to compute statistics
     
-    IF not keyword_set(no_precip_value) THEN no_precip_value=-32767.
     IF not keyword_set(scale) THEN scale=1.0
     IF not keyword_set(max_bad_data) THEN max_bad_data=-888.
     IF not keyword_set(log_in) THEN log_in=0B   
     IF not keyword_set(limits) THEN limits=[0]    
     IF not keyword_set(weights) THEN weights=make_array(n_elements(x_data))+1 ;default=1  
     IF not keyword_set(max_value) THEN max_value=1e6
+    IF not keyword_set(no_precip_value) THEN BEGIN
+     no_precip_value=0.0
+     if(log_in) then no_precip_value=-32767.
+    ENDIF
     
    ;Prep the input data
     y_all=make_array(n_elements(x_data),/float)        
@@ -33,20 +37,18 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     IF(count GT 0) THEN y_all[negzeros]=0.0 ;handle any floating point instances where 0. is -0. 
     ;--identify no precip and handle if all zeros
     noprecip=where(y_all EQ no_precip_value,nop_count,complement=pind,ncomplement=pcount) ;identify where flagged as no precip
-    IF(nop_count eq n_elements(y_all)) THEN BEGIN ;all values are zero
-        IF(log_in) THEN BEGIN
-            RETURN,{rejects:0,n_GR_precip:0,mean:no_precip_value,stddev:0.0,max:no_precip_value}        
-        ENDIF ELSE RETURN,{rejects:0,n_GR_precip:0,mean:0.0,stddev:0.0,max:0.0}
-    ENDIF
+    IF(nop_count EQ n_elements(y_all)) THEN BEGIN ;all values are zero
+        RETURN,{rejects:0,n_GR_precip:0,mean:no_precip_value,stddev:0.0,max:no_precip_value}        
+    ENDIF    
     ;--remove any bad values
-    good_ind=where(y_all[pind] GT max_bad_data,gcount,ncomplement=rejects) ;non-zero values used for stats
+    good_ind=where(y_all[pind] GT max_bad_data,gcount,ncomplement=nrejects) ;non-zero values used for stats
     IF(gcount GE min_stat_count) THEN BEGIN
         y_all=[y_all[noprecip],y_all[pind[good_ind]]] ;zeros and non-zero values for stats
         weights=[weights[noprecip],weights[pind[good_ind]]]         
     ENDIF ELSE BEGIN ;not enough good data values-->return        
         IF(log_in) THEN BEGIN
-            RETURN,{rejects:rejects,n_GR_precip:gcount,mean:-999.,stddev:-999.,max:max(y_all)}
-        ENDIF ELSE RETURN,{rejects:rejects,n_GR_precip:gcount,mean:-999.,stddev:-999.,max:max(y_all)}
+            RETURN,{rejects:nrejects,n_GR_precip:gcount,mean:-999.,stddev:-999.,max:max(y_all)}
+        ENDIF ELSE RETURN,{rejects:nrejects,n_GR_precip:gcount,mean:-999.,stddev:-999.,max:max(y_all)}
     ENDELSE               
     ;--handle unknown values (assume flagged as negative) 
     maxval=max(y_all) ;store max value of data not flagged as unknown
@@ -65,15 +67,15 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     idetects=where(y_all NE no_precip_value,n_detects,complement=inull,ncomplement=null_count)
     if(log_in) THEN BEGIN ;convert data to linear
         y_all[idetects]=10^(y_all[idetects]*scale)
-        if(null_count gt 0) then y_all[inull]=0.0        
+        if(null_count gt 0) then y_all[inull]=0.0 ;convert log no-precip to linear zero       
     ENDIF
     
    ;Done preparing input data-->all data in y_all is linear units
    
-   ;Compute Statistics
+   ;Begin Computing Statistics
     IF not keyword_set(limits) THEN BEGIN     ;no censoring limits passed so just compute stats and return   
         stats_struct=summary_stats(y_all,y_all,weights=weights,log_in=log_in,scale=scale)
-        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+        RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}           
     ENDIF ELSE BEGIN
         thres=limits ;local var to hold limits      
@@ -83,7 +85,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         ENDIF
     ENDELSE  
     
-    ;Determine Uncensored and Censored data
+    ;-Determine Uncensored and Censored data
     y_uncensored = []
     weights_uncensored = []
     y_censored=[]
@@ -92,7 +94,8 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     IF(count GE min_stat_count) THEN BEGIN
         y_uncensored=y_all[uncensored_ind] ;known data values (i.e., uncensored)
         weights_uncensored=weights[uncensored_ind]
-    ENDIF ELSE RETURN,{rejects:rejects+count,n_GR_precip:n_detects,mean:-999.,stddev:-999.,max:maxval}    
+    ENDIF ELSE RETURN,{rejects:nrejects+count,n_GR_precip:n_detects,mean:-999.,stddev:-999.,max:maxval}
+    ;--Assign uncensored/censored based on number of left/right censoring
     IF(n_elements(thres) GT 1) THEN BEGIN ;left-censored data if thres is two element censoring b/w thres[0] and thres[1]        
         censored_ind=where((y_all LT thres[0]) OR (y_all GE thres[1]),ncount,complement=uncensored_ind,ncomplement=count)        
         IF(count GT 0) THEN BEGIN
@@ -120,28 +123,27 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
             weights_uncensored=[weights[censored_ind],weights_uncensored]
         ENDIF        
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)
-        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+        RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}       
     ENDELSE    
     
-    ;Check for presence of uncensored or censored data
+    ;--Check for presence of uncensored or censored data
     IF (n_elements(y_uncensored) EQ 0) THEN BEGIN
-	    if(log_in) THEN BEGIN	        
-            RETURN,{rejects:rejects+n_elements(y_censored),n_GR_precip:n_detects,mean:no_precip_value,stddev:0.0,max:no_precip_value}
+            RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:no_precip_value,stddev:0.0,max:no_precip_value}
 	    endif else $
-    		RETURN,{rejects:rejects+n_elements(y_censored),n_GR_precip:n_detects,mean:0.,stddev:0.,max:0.}
+    		RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:0.,stddev:0.,max:0.}
     ENDIF
     IF(n_elements(y_censored) EQ 0) THEN BEGIN  ;no censored values-->so compute stats on input data and return
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)                    
-        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+        RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
     ENDIF        
     ind=where(y_uncensored GT 0,cnt) 
     if (cnt EQ 0) then begin ;only zero values
 	    if(log_in) THEN BEGIN	        
-            RETURN,{rejects:rejects+n_elements(y_censored),n_GR_precip:n_detects,mean:no_precip_value,stddev:0.0,max:no_precip_value}
+            RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:no_precip_value,stddev:0.0,max:no_precip_value}
 	    endif else $
-    		RETURN,{rejects:rejects+n_elements(y_censored),n_GR_precip:n_detects,mean:0.,stddev:0.,max:0.}
+    		RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:0.,stddev:0.,max:0.}
     endif
     
         
@@ -211,14 +213,14 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     x=zscore_uncensored[where(y_uncensored GT 0,count)] ;zscore is sorted
     IF(count lt min_stat_count) THEN BEGIN ;make sure there are enough uncensored points to fit line
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)                    
-        RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+        RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
     ENDIF
     n=count
     denom = n*total(x^2)-total(x)^2
     if (denom eq 0.0) then begin
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)  
-		RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+		RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}    
     endif
     m=(n*total(x*y)-total(x)*total(y))/denom ;slope of y=mx+b
@@ -239,6 +241,6 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ENDIF ELSE $
         y_linear=y_new    
     stats_struct=summary_stats(y_linear,y_uncensored,weights=[weights_uncensored,weights_censored],log_in=log_in,scale=scale)  
-    RETURN,{rejects:rejects,n_GR_precip:n_detects,$
+    RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
         mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
 END
