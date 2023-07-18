@@ -83,7 +83,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
             ithres=where(thres GT 0,count)
             IF(count GT 0) THEN thres[ithres]=10^(thres[ithres]*scale)    
         ENDIF
-    ENDELSE  
+    ENDELSE      
     
     ;-Determine Uncensored and Censored data
     y_uncensored = []
@@ -122,7 +122,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
             y_uncensored=[y_all[censored_ind]*0,y_uncensored] ;truncate to zero (i.e., non-detect)
             weights_uncensored=[weights[censored_ind],weights_uncensored]
         ENDIF        
-        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)
+        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)        
         RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:stats_struct.max}       
     ENDELSE    
