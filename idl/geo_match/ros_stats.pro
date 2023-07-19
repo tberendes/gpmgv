@@ -23,12 +23,11 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     IF not keyword_set(log_in) THEN log_in=0B   
     IF not keyword_set(limits) THEN limits=[0]    
     IF not keyword_set(weights) THEN weights=make_array(n_elements(x_data))+1 ;default=1  
-    IF not keyword_set(max_value) THEN max_value=1e6
-    IF not keyword_set(no_precip_value) THEN BEGIN
+    IF not keyword_set(max_value) THEN max_value=1e6    
+    IF (n_elements(no_precip_value) EQ 0) THEN BEGIN
      no_precip_value=0.0
      if(log_in) then no_precip_value=-32767.
-    ENDIF
-    
+    ENDIF    
    ;Prep the input data
     y_all=make_array(n_elements(x_data),/float)        
     y_all[*]=x_data[sort(x_data)] ;copy input data and sort  
@@ -64,7 +63,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ;-->now y_all contains values used for statistics
     
     ;--Get precip and non-precip indices and counts
-    idetects=where(y_all NE no_precip_value,n_detects,complement=inull,ncomplement=null_count)
+    idetects=where(y_all NE no_precip_value,n_detects,complement=inull,ncomplement=null_count)    
     if(log_in) THEN BEGIN ;convert data to linear
         y_all[idetects]=10^(y_all[idetects]*scale)
         if(null_count gt 0) then y_all[inull]=0.0 ;convert log no-precip to linear zero       
@@ -105,17 +104,34 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         IF(ncount GT 0) THEN BEGIN
             y_censored=y_all[censored_ind] ;unknown data values
             weights_censored=weights[censored_ind]            
-        ENDIF
+        ENDIF             
         IF(n_elements(thres) GT 2) THEN BEGIN ;right-censored data if thres is 3 elements
-            uncensored_ind=where((y_uncensored LE thres[-1]),count,complement=censored_ind,ncomplement=ncount)    
-            IF(ncount GT 0) THEN BEGIN            
-                y_censored=[y_censored,y_uncensored[censored_ind]] ;unknown data values
-                weights_censored=[weights_censored,weights_uncensored[censored_ind]]
+            uncensored_ind=where((y_censored LE thres[-1]),count,complement=censored_ind,ncomplement=ncount)
+            ytemp=y_censored
+            wtemp=weights_censored
+            zeros=where((y_uncensored EQ 0.0),zcount,complement=nozeros,ncomplement=nzcount)
+            if(nzcount GT 0) THEN BEGIN
+                y_nozeros=y_uncensored[nozeros]
+                weights_nozeros=weights_uncensored[nozeros]
+            endif else begin
+                y_nozeros=[]
+                weights_nozeros=[]
+            endelse
+            if(zcount GT 0) THEN BEGIN
+                y_zeros=y_uncensored[zeros]
+                weights_zeros=weights_uncensored[zeros]
+            endif else begin
+                y_zeros=[]
+                weights_zeros=[]
+            endelse
+            IF(ncount GT 0) THEN BEGIN                            
+                y_censored=[y_nozeros,y_censored[censored_ind]] ;unknown data values
+                weights_censored=[weights_nozeros,weights_censored[censored_ind]]
             ENDIF                        
             IF(count GT 0) THEN BEGIN
-                y_uncensored=y_uncensored[uncensored_ind] ;known data values (i.e., uncensored)
-                weights_uncensored=weights_uncensored[uncensored_ind]
-            ENDIF            
+                y_uncensored=[y_zeros,ytemp[uncensored_ind]] ;known data values (i.e., uncensored)
+                weights_uncensored=[weights_zeros,wtemp[uncensored_ind]]
+            ENDIF              
         ENDIF      
     ENDIF ELSE BEGIN ;assume if only 1 thres given then truncate linear values b/w 0-thres to zero (i.e., non-detects)        
         IF(ncount gt 0) THEN BEGIN ;censored data exists        
@@ -145,8 +161,15 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
             RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:no_precip_value,stddev:0.0,max:no_precip_value}
 	    endif else $
     		RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,mean:0.,stddev:0.,max:0.}
-    endif
+    endif    
     
+    ;Don't impute censored data if those outnumber the uncensored points by 5%
+    ratio=n_elements(y_censored)*1.0/n_elements(y_uncensored)
+    if(ratio gt 0.05) then begin
+        stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)         
+        RETURN,{rejects:nrejects+n_elements(y_censored),n_GR_precip:n_detects,$
+                mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
+    endif   
         
     ;Probability Plotting: Hirsch and Stedinger (1987, doi: 10.1029/WR023i004p00715)
     ;Transformation bias avoided by imputing values for censored data 
@@ -230,18 +253,18 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ;Estimate values of censored data using fitted line to extrapolate at plotting positions (i.e., impute values)
     y_imputed=(m*zscore_censored+b)  ;log scale    
     
-    ind=where(y_imputed gt 0,cnt)
+    ind=where(y_imputed lt max_value,cnt,ncomplement=cnt_exceed)
     if (cnt gt 0) then begin
     	y_imputed=y_imputed[ind]
-    endif else y_imputed=[]
+    endif ;else y_imputed=[]
     
     y_new=10^[y,y_imputed] ;y is uncensored non-zero and both are log scale since fit was done in log scale
     ind_zeros=where(y_uncensored EQ 0,count) ;check for zeros
     IF(count GT 0) THEN BEGIN
         y_linear=[y_uncensored[ind_zeros],y_new] ;include zeros for calculating statistics
     ENDIF ELSE $
-        y_linear=y_new    
+        y_linear=y_new        
     stats_struct=summary_stats(y_linear,y_uncensored,weights=[weights_uncensored,weights_censored],log_in=log_in,scale=scale)  
-    RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
+    RETURN,{rejects:nrejects+cnt_exceed,n_GR_precip:n_detects,$
         mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
 END
