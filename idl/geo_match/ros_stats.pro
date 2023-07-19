@@ -8,7 +8,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ; -no_precip_value is the fill value used to indicate zero for log data (default=-32767.0 for log, 0.0 for linear)
     ; -log_in is the boolean switch for indicating input data are in log units (e.g., decibels) (default=0B)
     ; -weights is an array of weights to apply to each x_data (default=1.0)
-    ; -max_value is maximum expected valid value of input data    
+    ; -max_value is maximum expected valid value of input data (default=1e3)   
     ;Outputs:
     ; returns a dictionary containing the mean,stddev,max,rejects,n_GR_precip
     ; -rejects is the number of data not included in summary stats
@@ -23,7 +23,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     IF not keyword_set(log_in) THEN log_in=0B   
     IF not keyword_set(limits) THEN limits=[0]    
     IF not keyword_set(weights) THEN weights=make_array(n_elements(x_data))+1 ;default=1  
-    IF not keyword_set(max_value) THEN max_value=1e6    
+    IF not keyword_set(max_value) THEN max_value=1e3    
     IF (n_elements(no_precip_value) EQ 0) THEN BEGIN
      no_precip_value=0.0
      if(log_in) then no_precip_value=-32767.
@@ -232,14 +232,16 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     zscore_censored=make_array(n_elements(plot_pos_censored))
     FOREACH element,plot_pos_censored,i DO zscore_censored[i]=gauss_cvf(element)
   
-    ;Fit line to uncensored data assuming normal distribution of y (i.e., LLSQ regression)      
-    y=alog10(y_uncensored[where(y_uncensored GT 0)])  
-    x=zscore_uncensored[where(y_uncensored GT 0,count)] ;zscore is sorted
-    IF(count lt min_stat_count) THEN BEGIN ;make sure there are enough uncensored points to fit line
+    ;Fit line to uncensored data assuming normal distribution of y (i.e., LLSQ regression)    
+    yuind=where(y_uncensored GT 0,county)
+    if(county ge min_stat_count) then begin ;make sure there are enough uncensored points to fit line
+        y=alog10(y_uncensored[yuind])*1/scale  
+        x=zscore_uncensored[yuind] ;zscore is sorted
+    ENDIF ELSE BEGIN 
         stats_struct=summary_stats(y_uncensored,y_uncensored,weights=weights_uncensored,log_in=log_in,scale=scale)                    
         RETURN,{rejects:nrejects,n_GR_precip:n_detects,$
                 mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
-    ENDIF
+    ENDELSE
     n=count
     denom = n*total(x^2)-total(x)^2
     if (denom eq 0.0) then begin
@@ -253,20 +255,18 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     ;Estimate values of censored data using fitted line to extrapolate at plotting positions (i.e., impute values)
     y_imputed=(m*zscore_censored+b)  ;log scale    
     
-    ind=where(y_imputed lt max_value,cnt,ncomplement=cnt_exceed)
+    ind=where(abs(y_imputed) lt max_value,cnt,ncomplement=cnt_exceed)
     if (cnt gt 0) then begin
     	y_imputed=y_imputed[ind]
-    endif ;else y_imputed=[]
+    endif else y_imputed=[]
     
-    print, 'Y ', y
-    print, 'Y imp ', y_imputed
-    
-    y_new=10^[y,y_imputed] ;y is uncensored non-zero and both are log scale since fit was done in log scale
+    y_new=10d^[y,y_imputed*scale] ;y is uncensored non-zero and both are log scale since fit was done in log scale    
     ind_zeros=where(y_uncensored EQ 0,count) ;check for zeros
     IF(count GT 0) THEN BEGIN
-        y_linear=[y_uncensored[ind_zeros],y_new] ;include zeros for calculating statistics
+        y_linear=[y_uncensored[ind_zeros],y_new] ;include zeros for calculating statistics        
     ENDIF ELSE $
         y_linear=y_new        
+    stop
     stats_struct=summary_stats(y_linear,y_uncensored,weights=[weights_uncensored,weights_censored],log_in=log_in,scale=scale)  
     RETURN,{rejects:nrejects+cnt_exceed,n_GR_precip:n_detects,$
         mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
