@@ -258,6 +258,9 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     	y_imputed=y_imputed[ind]
     endif ;else y_imputed=[]
     
+    print, 'Y ', y
+    print, 'Y imp ', y_imputed
+    
     y_new=10^[y,y_imputed] ;y is uncensored non-zero and both are log scale since fit was done in log scale
     ind_zeros=where(y_uncensored EQ 0,count) ;check for zeros
     IF(count GT 0) THEN BEGIN
