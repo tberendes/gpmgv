@@ -266,7 +266,7 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         y_linear=[y_uncensored[ind_zeros],y_new] ;include zeros for calculating statistics        
     ENDIF ELSE $
         y_linear=y_new        
-    stop
+
     stats_struct=summary_stats(y_linear,y_uncensored,weights=[weights_uncensored,weights_censored],log_in=log_in,scale=scale)  
     RETURN,{rejects:nrejects+cnt_exceed,n_GR_precip:n_detects,$
         mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
