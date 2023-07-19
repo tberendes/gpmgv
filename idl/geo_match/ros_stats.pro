@@ -257,10 +257,10 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
     
     ind=where(abs(y_imputed) lt max_value,cnt,ncomplement=cnt_exceed)
     if (cnt gt 0) then begin
-    	y_imputed=y_imputed[ind]
+    	y_imputed=y_imputed[ind]*scale
     endif else y_imputed=[]
     
-    y_new=10d^[y,y_imputed*scale] ;y is uncensored non-zero and both are log scale since fit was done in log scale    
+    y_new=10d^[y,y_imputed] ;y is uncensored non-zero and both are log scale since fit was done in log scale    
     ind_zeros=where(y_uncensored EQ 0,count) ;check for zeros
     IF(count GT 0) THEN BEGIN
         y_linear=[y_uncensored[ind_zeros],y_new] ;include zeros for calculating statistics        
