@@ -103,35 +103,35 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         ENDIF
         IF(ncount GT 0) THEN BEGIN
             y_censored=y_all[censored_ind] ;unknown data values
-            weights_censored=weights[censored_ind]            
-        ENDIF             
-        IF(n_elements(thres) GT 2) THEN BEGIN ;right-censored data if thres is 3 elements
-            uncensored_ind=where((y_censored LE thres[-1]),count,complement=censored_ind,ncomplement=ncount)
-            ytemp=y_censored
-            wtemp=weights_censored
-            zeros=where((y_uncensored EQ 0.0),zcount,complement=nozeros,ncomplement=nzcount)
-            if(nzcount GT 0) THEN BEGIN
-                y_nozeros=y_uncensored[nozeros]
-                weights_nozeros=weights_uncensored[nozeros]
-            endif else begin
-                y_nozeros=[]
-                weights_nozeros=[]
-            endelse
-            if(zcount GT 0) THEN BEGIN
-                y_zeros=y_uncensored[zeros]
-                weights_zeros=weights_uncensored[zeros]
-            endif else begin
-                y_zeros=[]
-                weights_zeros=[]
-            endelse
-            IF(ncount GT 0) THEN BEGIN                            
-                y_censored=[y_nozeros,y_censored[censored_ind]] ;unknown data values
-                weights_censored=[weights_nozeros,weights_censored[censored_ind]]
-            ENDIF                        
-            IF(count GT 0) THEN BEGIN
-                y_uncensored=[y_zeros,ytemp[uncensored_ind]] ;known data values (i.e., uncensored)
-                weights_uncensored=[weights_zeros,wtemp[uncensored_ind]]
-            ENDIF              
+            weights_censored=weights[censored_ind]                
+            IF(n_elements(thres) GT 2) THEN BEGIN ;right-censored data if thres is 3 elements
+                uncensored_ind=where((y_censored LE thres[-1]),count,complement=censored_ind,ncomplement=ncount)
+                ytemp=y_censored
+                wtemp=weights_censored
+                zeros=where((y_uncensored EQ 0.0),zcount,complement=nozeros,ncomplement=nzcount)
+                if(nzcount GT 0) THEN BEGIN
+                    y_nozeros=y_uncensored[nozeros]
+                    weights_nozeros=weights_uncensored[nozeros]
+                endif else begin
+                    y_nozeros=[]
+                    weights_nozeros=[]
+                endelse
+                if(zcount GT 0) THEN BEGIN
+                    y_zeros=y_uncensored[zeros]
+                    weights_zeros=weights_uncensored[zeros]
+                endif else begin
+                    y_zeros=[]
+                    weights_zeros=[]
+                endelse
+                IF(ncount GT 0) THEN BEGIN                            
+                    y_censored=[y_nozeros,y_censored[censored_ind]] ;unknown data values
+                    weights_censored=[weights_nozeros,weights_censored[censored_ind]]
+                ENDIF                        
+                IF(count GT 0) THEN BEGIN
+                    y_uncensored=[y_zeros,ytemp[uncensored_ind]] ;known data values (i.e., uncensored)
+                    weights_uncensored=[weights_zeros,wtemp[uncensored_ind]]
+                ENDIF              
+           ENDIF
         ENDIF      
     ENDIF ELSE BEGIN ;assume if only 1 thres given then truncate linear values b/w 0-thres to zero (i.e., non-detects)        
         IF(ncount gt 0) THEN BEGIN ;censored data exists        
@@ -266,7 +266,6 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
         y_linear=[y_uncensored[ind_zeros],y_new] ;include zeros for calculating statistics        
     ENDIF ELSE $
         y_linear=y_new        
-
     stats_struct=summary_stats(y_linear,y_uncensored,weights=[weights_uncensored,weights_censored],log_in=log_in,scale=scale)  
     RETURN,{rejects:nrejects+cnt_exceed,n_GR_precip:n_detects,$
         mean:stats_struct.mean,stddev:stats_struct.std,max:maxval}
