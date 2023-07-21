@@ -784,6 +784,9 @@
                dm_avg_gv = SRAIN_BELOW_THRESH
                dm_stddev_gv = SRAIN_BELOW_THRESH
                dm_max_gv = SRAIN_BELOW_THRESH
+               sigmadm_avg_gv = SRAIN_BELOW_THRESH
+               sigmadm_stddev_gv = SRAIN_BELOW_THRESH
+               sigmadm_max_gv = SRAIN_BELOW_THRESH
                nw_avg_gv = SRAIN_BELOW_THRESH
                nw_stddev_gv = SRAIN_BELOW_THRESH
                nw_max_gv = SRAIN_BELOW_THRESH
