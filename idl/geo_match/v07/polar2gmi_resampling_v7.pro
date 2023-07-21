@@ -513,6 +513,7 @@
          mw_n_precip = 0UL
          mi_n_precip = 0UL
          dm_n_precip = 0UL
+         sigmadm_n_precip = 0UL
 
          GMI_index = GMI_master_idx[jpr]
 
