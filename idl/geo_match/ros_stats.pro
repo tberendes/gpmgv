@@ -29,6 +29,11 @@ FUNCTION ROS_STATS,x_data,limits=limits,max_bad_data=max_bad_data,scale=scale,$
      if(log_in) then no_precip_value=-32767.
     ENDIF    
    ;Prep the input data
+    find=where(finite(x_data),fcount,ncomplement=nfcount) ;check for non-finite values and remove
+    if(fcount gt 0) then begin
+        x_data=x_data[find]  
+        weights=weights[find]
+    endif else RETURN,{rejects:fcount,n_GR_precip:0,mean:-999.,stddev:-999.,max:-999.}
     y_all=make_array(n_elements(x_data),/float)        
     y_all[*]=x_data[sort(x_data)] ;copy input data and sort  
     weights[*]=weights[sort(x_data)] ;need to keep same indexing as y_all
