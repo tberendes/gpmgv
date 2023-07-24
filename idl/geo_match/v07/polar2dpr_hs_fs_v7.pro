@@ -980,22 +980,23 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       ; sure they match what we want in the reform dimensions
       size_x0 = size(dpr_x0)
       size_y0 = size(dpr_y0)
-      if size_x0[0] ne 3 then begin
+      if size_x0[0] ne 2 then begin
           print, "size_x0 ", size_x0
           print, "Dimension size error dpr_x0 in radar file, skipping file..."
           GOTO, nextGRfile     
       endif else begin
-          total_x0 = size_x0[2]*size_x0[3]
+          total_x0 = size_x0[1]*size_x0[2]
           if total_x0 ne RAYSPERSCAN*nscans2do then begin
           	 print, "Reform dimensions don't match for dpr_x0 in radar file, skipping file..."
           	 GOTO, nextGRfile     
           endif
       endelse
-      if size_y0[0] ne 3 then begin
+      if size_y0[0] ne 2 then begin
+          print, "size_y0 ", size_y0
           print, "Dimension size error dpr_y0 in radar file, skipping file..."
           GOTO, nextGRfile     
       endif else begin
-          total_y0 = size_y0[2]*size_y0[3]
+          total_y0 = size_y0[1]*size_y0[2]
           if total_y0 ne RAYSPERSCAN*nscans2do then begin
           	 print, "Reform dimensions don't match for dpr_y0 in radar file, skipping file..."
           	 GOTO, nextGRfile     
