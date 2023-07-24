@@ -1170,23 +1170,23 @@ FOR igv=0,nsites-1  DO BEGIN
       if size_x0[0] ne 2 then begin
           print, "size_x0 ", size_x0
           print, "Dimension size error gmi_x0 in radar file, skipping file..."
-          GOTO, nextGRfile     
+          GOTO, nextGVfile     
       endif else begin
           total_x0 = size_x0[1]*size_x0[2]
           if total_x0 ne NPIXEL_GMI*nscans2do then begin
           	 print, "Reform dimensions don't match for gmi_x0 in radar file, skipping file..."
-          	 GOTO, nextGRfile     
+          	 GOTO, nextGVfile     
           endif
       endelse
       if size_y0[0] ne 2 then begin
           print, "size_y0 ", size_y0
           print, "Dimension size error gmi_y0 in radar file, skipping file..."
-          GOTO, nextGRfile     
+          GOTO, nextGVfile     
       endif else begin
           total_y0 = size_y0[1]*size_y0[2]
           if total_y0 ne NPIXEL_GMI*nscans2do then begin
           	 print, "Reform dimensions don't match for gmi_y0 in radar file, skipping file..."
-          	 GOTO, nextGRfile     
+          	 GOTO, nextGVfile     
           endif
       endelse
    
