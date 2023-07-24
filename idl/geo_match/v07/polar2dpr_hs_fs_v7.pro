@@ -974,6 +974,33 @@ WHILE NOT (EOF(lun0)) DO BEGIN
                                 map_structure=smap ) / 1000.
       dpr_x0 = XY_km[0,*]
       dpr_y0 = XY_km[1,*]
+      
+      ; some bad radar files are causing this to crash.  
+      ; check combined size of remaining dimensions of dpy_y0 and make
+      ; sure they match what we want in the reform dimensions
+      size_x0 = size(dpr_x0)
+      size_y0 = size(dpr_y0)
+      if size_x0[0] ne 3 then begin
+          print, "Dimension size error dpr_x0 in radar file, skipping file..."
+          GOTO, nextGRfile     
+      endif else begin
+          total_x0 = size_x0[2]*size_x0[3]
+          if total_x0 ne RAYSPERSCAN*nscans2do then begin
+          	 print, "Reform dimensions don't match for dpr_x0 in radar file, skipping file..."
+          	 GOTO, nextGRfile     
+          endif
+      endelse
+      if size_y0[0] ne 3 then begin
+          print, "Dimension size error dpr_y0 in radar file, skipping file..."
+          GOTO, nextGRfile     
+      endif else begin
+          total_y0 = size_y0[2]*size_y0[3]
+          if total_y0 ne RAYSPERSCAN*nscans2do then begin
+          	 print, "Reform dimensions don't match for dpr_y0 in radar file, skipping file..."
+          	 GOTO, nextGRfile     
+          endif
+      endelse
+
       dpr_x0 = REFORM( dpr_x0, RAYSPERSCAN, nscans2do, /OVERWRITE )
       dpr_y0 = REFORM( dpr_y0, RAYSPERSCAN, nscans2do, /OVERWRITE )
       precise_range = SQRT( dpr_x0^2 + dpr_y0^2 )
