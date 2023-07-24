@@ -981,6 +981,7 @@ WHILE NOT (EOF(lun0)) DO BEGIN
       size_x0 = size(dpr_x0)
       size_y0 = size(dpr_y0)
       if size_x0[0] ne 3 then begin
+          print, "size_x0 ", size_x0
           print, "Dimension size error dpr_x0 in radar file, skipping file..."
           GOTO, nextGRfile     
       endif else begin
