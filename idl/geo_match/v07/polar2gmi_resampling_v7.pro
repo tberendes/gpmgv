@@ -687,6 +687,15 @@
                   nw_n_precip = altstats.n_GR_precip
                ENDIF
 
+              ; initialize these variables in case dm is not present since there is now a depencency
+              dm_avg_gv = Z_MISSING
+              dm_stddev_gv = Z_MISSING
+              dm_max_gv = Z_MISSING
+              dm_n_precip = Z_MISSING
+	          sigmadm_avg_gv = Z_MISSING
+	          sigmadm_stddev_gv = Z_MISSING
+	          sigmadm_max_gv = Z_MISSING
+	          sigmadm_n_precip = Z_MISSING
                IF have_gv_mw THEN BEGIN
                   gvmwvals = mw_bscan[thisGMIsGVindices]/1000.0 ; divide by 1000 to change g/m^3 to kg/m^3
                   altstats=mean_stddev_max_by_rules(gvmwvals,'MW', 0.0, $
